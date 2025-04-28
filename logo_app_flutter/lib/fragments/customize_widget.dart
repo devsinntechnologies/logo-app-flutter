@@ -2,6 +2,8 @@
 import 'package:flutter/material.dart';
 
 class CustomizeWidget extends StatelessWidget {
+  const CustomizeWidget({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Center(

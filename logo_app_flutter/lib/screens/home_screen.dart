@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:logo_app_flutter/components/auto_design_button.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -10,15 +10,43 @@ class HomeScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          const SizedBox(height: 50),
-          const Text(
-            'Auto Design Module',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          SafeArea(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Drawer(),
+                Text(
+                  'Logo Maker',
+                  style: GoogleFonts.poppins(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black87,
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {},
+                  icon: Icon(Icons.sim_card_download_rounded),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 80),
-          const AutoDesignButton(),
         ],
       ),
     );
   }
 }
+
+
+/*
+Text(
+            'Logo Maker',
+            style: GoogleFonts.poppins(
+              fontSize: 20,
+              fontWeight: FontWeight.w500,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 80),
+          const AutoDesignButton(),
+
+ */
