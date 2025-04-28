@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:logo_app_flutter/fragments/choose_fonts_widget.dart';
+import 'package:logo_app_flutter/fragments/customize_widget.dart';
+import 'package:logo_app_flutter/fragments/information_widget.dart';
+import 'package:logo_app_flutter/fragments/review_widget.dart';
 
 // Main StatefulWidget for the Design Input Screen
 class DesignInputScreen extends StatefulWidget {
@@ -22,7 +26,6 @@ class _DesignInputScreenState extends State<DesignInputScreen> {
     "Choose Fonts",
     "Review",
     "Customize",
-    "Download",
   ];
 
   @override
@@ -117,12 +120,28 @@ class _DesignInputScreenState extends State<DesignInputScreen> {
         // Connector line between steps
         if (index != stepTitles.length - 1)
           Container(
-            width: 80,
+            width: 50,
             height: 2,
             color: index < _currentStep ? Colors.orange : Colors.grey[300],
           ),
       ],
     );
+  }
+
+  // Returns custom widget for each step
+  Widget _buildStepContent(int index) {
+    switch (index) {
+      case 0:
+        return InformationWidget();
+      case 1:
+        return ChooseFontsWidget();
+      case 2:
+        return ReviewWidget();
+      case 3:
+        return CustomizeWidget();
+      default:
+        return Center(child: Text('Unknown Step'));
+    }
   }
 
   @override
@@ -153,23 +172,27 @@ class _DesignInputScreenState extends State<DesignInputScreen> {
               ),
             ),
           ),
-          const Divider(height: 1), // Divider below the step indicator
+          const Divider(height: 1),
+          // Divider below the step indicator
+          SizedBox(height: 10),
+          Text(
+            "CHOOSE INDUSTRY",
+            style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+          ), // Title for the step content
           // PageView for step content
           Expanded(
             child: PageView.builder(
               controller: _pageController,
-              physics: NeverScrollableScrollPhysics(), // Disables user swipe
+              physics: NeverScrollableScrollPhysics(),
               itemCount: stepTitles.length,
               itemBuilder: (context, index) {
-                return Center(
-                  child: Text(
-                    'Step ${index + 1}: ${stepTitles[index]}', // Displays step content
-                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-                  ),
-                );
+                return _buildStepContent(
+                  index,
+                ); // Call a method to get custom content
               },
             ),
           ),
+
           // Navigation buttons
           Padding(
             padding: const EdgeInsets.all(16.0),
