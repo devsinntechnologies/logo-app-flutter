@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// Main StatefulWidget for the Design Input Screen
 class DesignInputScreen extends StatefulWidget {
   const DesignInputScreen({super.key});
 
@@ -7,282 +8,194 @@ class DesignInputScreen extends StatefulWidget {
   State<DesignInputScreen> createState() => _DesignInputScreenState();
 }
 
+// State class for DesignInputScreen
 class _DesignInputScreenState extends State<DesignInputScreen> {
-  int _currentStep = 0;
+  int _currentStep = 0; // Tracks the current step
+  final PageController _pageController =
+      PageController(); // Controls the PageView
+  final ScrollController _scrollController =
+      ScrollController(); // Controls the horizontal scroll
+
+  // Titles for each step
+  List<String> stepTitles = [
+    "Information",
+    "Choose Fonts",
+    "Review",
+    "Customize",
+    "Download",
+  ];
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  // Moves to the next step
+  void _nextStep() {
+    if (_currentStep < stepTitles.length - 1) {
+      setState(() {
+        _currentStep++;
+      });
+      _pageController.nextPage(
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+
+      // Scrolls forward in the step indicator
+      _scrollController.animateTo(
+        (_currentStep * 120).toDouble(),
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  // Moves to the previous step
+  void _prevStep() {
+    if (_currentStep > 0) {
+      setState(() {
+        _currentStep--;
+      });
+      _pageController.previousPage(
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+
+      // Scrolls backward in the step indicator
+      _scrollController.animateTo(
+        (_currentStep * 120).toDouble(),
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    } else {
+      Navigator.pop(context); // Exits the screen if on the first step
+    }
+  }
+
+  // Builds a single step indicator
+  Widget _buildStep(int index) {
+    bool isCompleted = index < _currentStep; // Checks if the step is completed
+    bool isActive = index == _currentStep; // Checks if the step is active
+
+    return Row(
+      children: [
+        Row(
+          children: [
+            // Step circle
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color:
+                    isCompleted || isActive ? Colors.orange : Colors.grey[300],
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Text(
+                  '${index + 1}', // Step number
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            // Step title
+            Text(
+              stepTitles[index],
+              style: TextStyle(
+                fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                color: isActive ? Colors.black : Colors.grey,
+              ),
+            ),
+            SizedBox(width: 8),
+          ],
+        ),
+        // Connector line between steps
+        if (index != stepTitles.length - 1)
+          Container(
+            width: 80,
+            height: 2,
+            color: index < _currentStep ? Colors.orange : Colors.grey[300],
+          ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Auto Design'),
+        title: Text('Auto Design'), // AppBar title
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            if (_currentStep > 0) {
-              setState(() {
-                _currentStep--;
-              });
-            } else {
-              Navigator.pop(context);
-            }
-          },
-        ),
+          onPressed: _prevStep,
+        ), // Back button
       ),
       body: Column(
         children: [
-          Divider(height: 1),
+          const Divider(height: 1), // Divider above the step indicator
+          // Step indicator container
+          Container(
+            height: 100,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: List.generate(
+                  stepTitles.length,
+                  (index) => _buildStep(index), // Builds each step indicator
+                ),
+              ),
+            ),
+          ),
+          const Divider(height: 1), // Divider below the step indicator
+          // PageView for step content
+          Expanded(
+            child: PageView.builder(
+              controller: _pageController,
+              physics: NeverScrollableScrollPhysics(), // Disables user swipe
+              itemCount: stepTitles.length,
+              itemBuilder: (context, index) {
+                return Center(
+                  child: Text(
+                    'Step ${index + 1}: ${stepTitles[index]}', // Displays step content
+                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                  ),
+                );
+              },
+            ),
+          ),
+          // Navigation buttons
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Column(
-                  children: [
-                    Container(
-                      width: 30,
-                      height: 30,
-                      decoration: BoxDecoration(
-                        color:
-                            _currentStep >= 0
-                                ? Colors.yellow
-                                : Colors.grey[300],
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(child: Text('1')),
+                if (_currentStep < stepTitles.length - 1)
+                  ElevatedButton(
+                    onPressed: _nextStep, // Next button
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('Next'),
+                        const SizedBox(width: 8),
+                        Icon(Icons.arrow_forward),
+                      ],
                     ),
-                    SizedBox(height: 4),
-                    Text('Info', style: TextStyle(fontSize: 12)),
-                  ],
-                ),
-                Expanded(
-                  child: Container(
-                    height: 2,
-                    color: _currentStep >= 1 ? Colors.yellow : Colors.grey[300],
+                  )
+                else
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context); // Finish button
+                    },
+                    child: Text('Finish'),
                   ),
-                ),
-                Column(
-                  children: [
-                    Container(
-                      width: 30,
-                      height: 30,
-                      decoration: BoxDecoration(
-                        color:
-                            _currentStep >= 1
-                                ? Colors.yellow
-                                : Colors.grey[300],
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(child: Text('2')),
-                    ),
-                    SizedBox(height: 4),
-                    Text('Fonts', style: TextStyle(fontSize: 12)),
-                  ],
-                ),
-                Expanded(
-                  child: Container(
-                    height: 2,
-                    color: _currentStep >= 2 ? Colors.yellow : Colors.grey[300],
-                  ),
-                ),
-                Column(
-                  children: [
-                    Container(
-                      width: 30,
-                      height: 30,
-                      decoration: BoxDecoration(
-                        color:
-                            _currentStep >= 2
-                                ? Colors.yellow
-                                : Colors.grey[300],
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(child: Text('3')),
-                    ),
-                    SizedBox(height: 4),
-                    Text('Review', style: TextStyle(fontSize: 12)),
-                  ],
-                ),
               ],
-            ),
-          ),
-          Divider(height: 1),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child:
-                  _currentStep == 0
-                      ? Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Center(
-                            child: Text(
-                              'CHOOSE INDUSTRY',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 20),
-                          Container(
-                            padding: EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.blue),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text('Beauty & Massage'),
-                                Icon(Icons.check, color: Colors.blue),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 24),
-                          Center(
-                            child: Text(
-                              'YOUR COMPANY NAME',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 16),
-                          Text('Hm Beauty', style: TextStyle(fontSize: 18)),
-                          SizedBox(height: 8),
-                          Text(
-                            'SLOGAN',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            'Beauty for everyone',
-                            style: TextStyle(fontSize: 16),
-                          ),
-                          Spacer(),
-                          Align(
-                            alignment: Alignment.bottomRight,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                setState(() {
-                                  _currentStep = 1;
-                                });
-                              },
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text('NEXT'),
-                                  Icon(Icons.chevron_right),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      )
-                      : _currentStep == 1
-                      ? Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Center(
-                            child: Text(
-                              'CHOOSE FONT',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 24),
-                          Container(
-                            padding: EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.blue),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text('Elegant Font'),
-                          ),
-                          SizedBox(height: 16),
-                          Container(
-                            padding: EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text('Modern Font'),
-                          ),
-                          SizedBox(height: 16),
-                          Container(
-                            padding: EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text('Classic Font'),
-                          ),
-                          Spacer(),
-                          Align(
-                            alignment: Alignment.bottomRight,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                setState(() {
-                                  _currentStep = 2;
-                                });
-                              },
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text('NEXT'),
-                                  Icon(Icons.chevron_right),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      )
-                      : Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Center(
-                            child: Text(
-                              'REVIEW & FINISH',
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 24),
-                          Text(
-                            'Company: Hm Beauty',
-                            style: TextStyle(fontSize: 18),
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            'Slogan: Beauty for everyone',
-                            style: TextStyle(fontSize: 18),
-                          ),
-                          SizedBox(height: 24),
-                          Text(
-                            'Selected Industry: Beauty & Massage',
-                            style: TextStyle(fontSize: 16),
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            'Selected Font: Elegant Font',
-                            style: TextStyle(fontSize: 16),
-                          ),
-                          Spacer(),
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            child: Text('FINISH'),
-                          ),
-                        ],
-                      ),
             ),
           ),
         ],
