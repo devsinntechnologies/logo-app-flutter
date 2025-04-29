@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:logo_app_flutter/components/bottom_navigation_buttons.dart';
 import 'package:logo_app_flutter/components/step_trail_widget.dart';
 import 'package:logo_app_flutter/fragments/choose_fonts_widget.dart';
-import 'package:logo_app_flutter/fragments/customize_widget.dart';
 import 'package:logo_app_flutter/fragments/information_widget.dart';
-import 'package:logo_app_flutter/fragments/review_widget.dart';
+import 'package:logo_app_flutter/fragments/template_widget.dart';
 
 class DesignInputScreen extends StatefulWidget {
   const DesignInputScreen({super.key});
@@ -58,9 +57,36 @@ class _DesignInputScreenState extends State<DesignInputScreen> {
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
-    } else {
-      Navigator.pop(context);
     }
+  }
+
+  void _showExitConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Are you sure?'),
+          content: const Text(
+            'Do you really want to go back to the Home Screen?',
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+                Navigator.pop(context); // Go back to Home Screen
+              },
+              child: const Text('Yes'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Widget _buildStepContent(int index) {
@@ -70,9 +96,7 @@ class _DesignInputScreenState extends State<DesignInputScreen> {
       case 1:
         return ChooseFontsWidget();
       case 2:
-        return ReviewWidget();
-      case 3:
-        return CustomizeWidget();
+        return TemplateWidget();
       default:
         return const Center(child: Text('Unknown Step'));
     }
@@ -86,12 +110,14 @@ class _DesignInputScreenState extends State<DesignInputScreen> {
         totalSteps: stepTitles.length,
         onNext: _nextStep,
         onFinish: () => Navigator.pop(context),
+        onBack: _prevStep, // Call _prevStep to go back
       ),
       appBar: AppBar(
         title: const Text('Auto Design'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: _prevStep,
+          onPressed:
+              _showExitConfirmationDialog, // Show dialog when back button is pressed
         ),
       ),
       body: Column(
@@ -104,7 +130,6 @@ class _DesignInputScreenState extends State<DesignInputScreen> {
           ),
           const Divider(height: 1),
           const SizedBox(height: 10),
-
           Expanded(
             child: PageView.builder(
               controller: _pageController,

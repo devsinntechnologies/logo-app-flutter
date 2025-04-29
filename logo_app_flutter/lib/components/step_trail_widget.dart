@@ -45,13 +45,16 @@ class StepTrailWidget extends StatelessWidget {
             shape: BoxShape.circle,
           ),
           child: Center(
-            child: Text(
-              '${index + 1}',
-              style: const TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            child:
+                isCompleted
+                    ? const Icon(Icons.check, color: Colors.white)
+                    : Text(
+                      '${index + 1}',
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
           ),
         ),
         const SizedBox(width: 8),
