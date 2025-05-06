@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Auto Desing Module',
+      title: 'Auto Design Module',
       home: const HomeScreen(),
     );
   }
