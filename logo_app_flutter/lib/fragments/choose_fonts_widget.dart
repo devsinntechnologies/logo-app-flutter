@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ChooseFontsWidget extends StatefulWidget {
-  const ChooseFontsWidget({super.key});
+  final Function(int) onFontSelected;
+
+  const ChooseFontsWidget({super.key, required this.onFontSelected});
 
   @override
   State<ChooseFontsWidget> createState() => _ChooseFontsWidgetState();
@@ -87,6 +89,7 @@ class _ChooseFontsWidgetState extends State<ChooseFontsWidget> {
             setState(() {
               selectedIndex = index;
             });
+            widget.onFontSelected(index); // Pass the selected font index back
           },
           borderRadius: BorderRadius.circular(6),
           child: SizedBox(

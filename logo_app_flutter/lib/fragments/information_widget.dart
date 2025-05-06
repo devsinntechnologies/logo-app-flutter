@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 
 class InformationWidget extends StatefulWidget {
-  const InformationWidget({super.key});
+  final Function(String, String, String) onSave;
+
+  const InformationWidget({super.key, required this.onSave});
 
   @override
-  _InformationWidgetState createState() => _InformationWidgetState();
+  State<InformationWidget> createState() => _InformationWidgetState();
 }
 
 class _InformationWidgetState extends State<InformationWidget> {
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController sloganController = TextEditingController();
   String selectedCategory = 'Beauty & Massage';
 
   final List<String> categories = [
@@ -29,24 +33,28 @@ class _InformationWidgetState extends State<InformationWidget> {
   ];
 
   @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize:
-              MainAxisSize.max, // Use min size to avoid taking full height
-          children: [
-            Text(
-              "CHOOSE INDUSTRY",
-              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-            ),
+  void dispose() {
+    nameController.dispose();
+    sloganController.dispose();
+    super.dispose();
+  }
 
-            Align(
-              alignment: Alignment.topCenter, // keep it at top
-              child: Container(
-                height: 60, // Set fixed height
-                margin: EdgeInsets.all(16),
-                padding: EdgeInsets.symmetric(horizontal: 16),
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              const SizedBox(height: 16),
+              const Text(
+                "CHOOSE INDUSTRY",
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+              ),
+              Container(
+                height: 60,
+                margin: const EdgeInsets.all(16),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.black, width: 2),
                   borderRadius: BorderRadius.circular(15),
@@ -55,107 +63,59 @@ class _InformationWidgetState extends State<InformationWidget> {
                   child: DropdownButton<String>(
                     value: selectedCategory,
                     isExpanded: true,
-                    icon: Icon(
-                      Icons.keyboard_arrow_down_rounded,
-                      size: 35,
-                      color: Colors.black,
-                    ),
-                    style: TextStyle(color: Colors.black, fontSize: 16),
+                    icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 35),
+                    style: const TextStyle(color: Colors.black, fontSize: 16),
                     onChanged: (String? newValue) {
                       setState(() {
                         selectedCategory = newValue!;
                       });
+                      widget.onSave(nameController.text, sloganController.text, selectedCategory);
                     },
-                    items:
-                        categories.map<DropdownMenuItem<String>>((
-                          String value,
-                        ) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(
-                              value,
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
-                              ),
-                            ),
-                          );
-                        }).toList(),
+                    items: categories.map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
+                      );
+                    }).toList(),
                   ),
                 ),
               ),
-            ),
-
-            Text(
-              "YOUR COMPANY NAME",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 8), // Space between text and text field
-            SizedBox(
-              width: 330,
-              // height: 50,
-              child: TextField(
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16),
-                cursorColor: Colors.black,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.transparent,
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 20,
+              const Text("YOUR COMPANY NAME", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: 330,
+                child: TextField(
+                  controller: nameController,
+                  textAlign: TextAlign.center,
+                  decoration: InputDecoration(
+                    hintText: 'Enter your company name',
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
                   ),
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.black, width: 2),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.black, width: 2),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.black, width: 2),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  hintText: 'Enter your company name',
+                  onChanged: (text) {
+                    widget.onSave(text, sloganController.text, selectedCategory);
+                  },
                 ),
               ),
-            ),
-            SizedBox(height: 12), // Space between text field and next button
-            Text(
-              "SLOGAN",
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 8), // Space between text and text field
-            SizedBox(
-              width: 330,
-              // height: 50,
-              child: TextField(
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16),
-                cursorColor: Colors.black,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.transparent,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 20),
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.black, width: 2),
-                    borderRadius: BorderRadius.circular(15),
+              const SizedBox(height: 12),
+              const Text("SLOGAN", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: 330,
+                child: TextField(
+                  controller: sloganController,
+                  textAlign: TextAlign.center,
+                  decoration: InputDecoration(
+                    hintText: 'Enter your slogan',
+                    hintStyle: TextStyle(color: Colors.black),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.black, width: 2),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.black, width: 2),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  hintText: 'Enter your slogan',
+                  onChanged: (text) {
+                    widget.onSave(nameController.text, text, selectedCategory);
+                  },
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
