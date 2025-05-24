@@ -3,13 +3,7 @@ import 'package:logo_app_flutter/screens/home_screen.dart';
 import 'package:logo_app_flutter/services/internet_checker.dart';
 
 void main() {
-  runApp(
-    MaterialApp(
-      home: InternetChecker(
-        child: HomeScreen(), 
-      ),
-    ),
-  );
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -20,7 +14,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Auto Design Module',
-      home:  const HomeScreen(),
+      home: InternetChecker(child: const HomeScreen()),
     );
   }
 }
