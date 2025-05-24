@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
+
 class InternetChecker extends StatefulWidget {
   final Widget child;
   const InternetChecker({super.key, required this.child});
