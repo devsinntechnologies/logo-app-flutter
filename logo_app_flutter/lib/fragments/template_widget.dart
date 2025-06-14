@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:logo_app_flutter/screens/download_logo.dart';
 import 'package:logo_app_flutter/services/logo_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -28,7 +29,10 @@ class _TemplateWidgetState extends State<TemplateWidget> {
   @override
   void initState() {
     super.initState();
-    _futureSvgList = LogoService().fetchLogoSVGs(widget.companyName, widget.slogan);
+    _futureSvgList = LogoService().fetchLogoSVGs(
+      widget.companyName,
+      widget.slogan,
+    );
   }
 
   TextStyle _getFontStyle(int index, {double fontSize = 14}) {
@@ -86,58 +90,84 @@ class _TemplateWidgetState extends State<TemplateWidget> {
               itemCount: svgList.length,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                
                 crossAxisSpacing: 3,
                 mainAxisSpacing: 3,
                 childAspectRatio: 0.8,
               ),
               itemBuilder: (context, index) {
-                return Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.shade200),
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  child: Column(
-                    children: [
-                      SvgPicture.string(
-                        svgList[index],
-                        placeholderBuilder: (context) =>
-                            const Center(child: CircularProgressIndicator()),
-                        height: 80,
-                        width: 80,
+                return InkWell(
+                  onTap: () {
+                    final selectedSvg = svgList[index];
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (context) => DownloadLogo(
+                              svgLogo: selectedSvg,
+                              companyName: widget.companyName,
+                              sloganName: widget.slogan,
+                            ),
                       ),
-                      const SizedBox(height: 8),
-                      Flexible(
-                        child: Text(
-                          widget.companyName,
-                          textAlign: TextAlign.center,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: _getFontStyle(widget.selectedFontIndex, fontSize: 14),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade200),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: Column(
+                      children: [
+                        SvgPicture.string(
+                          svgList[index],
+                          placeholderBuilder:
+                              (context) => const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                          height: 80,
+                          width: 80,
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Flexible(
-                        child: Text(
-                          widget.slogan,
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: _getFontStyle(widget.selectedFontIndex, fontSize: 10),
+                        const SizedBox(height: 8),
+                        Flexible(
+                          child: Text(
+                            widget.companyName,
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: _getFontStyle(
+                              widget.selectedFontIndex,
+                              fontSize: 14,
+                            ),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Flexible(
-                        child: Text(
-                          widget.category,
-                          textAlign: TextAlign.center,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 11, color: Colors.grey),
+                        const SizedBox(height: 4),
+                        Flexible(
+                          child: Text(
+                            widget.slogan,
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: _getFontStyle(
+                              widget.selectedFontIndex,
+                              fontSize: 10,
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 4),
+                        Flexible(
+                          child: Text(
+                            widget.category,
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },

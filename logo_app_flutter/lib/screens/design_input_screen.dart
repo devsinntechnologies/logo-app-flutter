@@ -18,9 +18,8 @@ class _DesignInputScreenState extends State<DesignInputScreen> {
   final PageController _pageController = PageController();
   final ScrollController _scrollController = ScrollController();
 
-
   List<String> stepTitles = ["Information", "Choose Fonts", "Template"];
-  
+
   // Add these fields to store user input
   String companyName = '';
   String slogan = '';
@@ -109,40 +108,42 @@ class _DesignInputScreenState extends State<DesignInputScreen> {
           },
         );
       case 1:
-  return ChooseFontsWidget(
-    onFontSelected: (int index) {
-      setState(() {
-        selectedFontIndex = index;
-      });
-    },
-  );
+        return ChooseFontsWidget(
+          onFontSelected: (int index) {
+            setState(() {
+              selectedFontIndex = index;
+            });
+          },
+        );
 
       case 2:
-  return TemplateWidget(
-    companyName: companyName,
-    slogan: slogan,
-    category: category,
-    fontFamily: _getFontFamilyFromIndex(selectedFontIndex), selectedFontIndex: selectedFontIndex,
-  );
+        return TemplateWidget(
+          companyName: companyName,
+          slogan: slogan,
+          category: category,
+          fontFamily: _getFontFamilyFromIndex(selectedFontIndex),
+          selectedFontIndex: selectedFontIndex,
+        );
 
       default:
         return const Center(child: Text('Unknown Step'));
     }
   }
-String _getFontFamilyFromIndex(int index) {
-  switch (index) {
-    case 0:
-      return 'Roboto';
-    case 1:
-      return 'Pacifico';
-    case 2:
-      return 'Poppins';
-    case 3:
-      return 'DancingScript';
-    default:
-      return 'Roboto';
+
+  String _getFontFamilyFromIndex(int index) {
+    switch (index) {
+      case 0:
+        return 'Roboto';
+      case 1:
+        return 'Pacifico';
+      case 2:
+        return 'Poppins';
+      case 3:
+        return 'DancingScript';
+      default:
+        return 'Roboto';
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
