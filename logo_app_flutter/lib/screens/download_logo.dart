@@ -22,8 +22,10 @@ class _DownloadLogoState extends State<DownloadLogo> {
   late Offset companyNamePosition;
   late Offset sloganPosition;
 
+  // State variable for grid visibility
   bool _showGrid = false;
-
+  // NEW: State variable for layers ribbon extension
+  bool _isLayersRibbonExtended = false;
 
   @override
   void initState() {
@@ -57,7 +59,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
   void _deleteElement() {
     setState(() {
-
+      // In a real app, you would remove the element from a list here
       selectedElement = null; // Deselect
       ScaffoldMessenger.of(
         context,
@@ -189,6 +191,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
     );
   }
 
+  // scaffold
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -223,29 +226,30 @@ class _DownloadLogoState extends State<DownloadLogo> {
         ],
       ),
 
+      // Main content
       body: Stack(
         children: [
-
+          // This container provides the basic white background for the canvas area
           Container(height: 500, width: double.infinity, color: Colors.white),
           Column(
             children: [
               Expanded(
                 child: Stack(
                   children: [
-
+                    // Grid lines as the first child of the Stack
                     if (_showGrid)
                       CustomPaint(
                         painter: _GridPainter(
-
-                          gridColor: Colors.black,
+                          gridColor: Colors.black, // Adjust grid color
                         ),
-
+                        // Size.infinite will make it fill the parent Stack's bounds
                         size: Size.infinite,
                       ),
 
+                    // Floating Grid Toggle Button (ribbon style - top right)
                     Positioned(
-                      top: 20,
-                      right: 0,
+                      top: 20, // Adjust vertical position
+                      right: 0, // Flush with the right edge
                       child: GestureDetector(
                         onTap: () {
                           setState(() {
@@ -255,21 +259,21 @@ class _DownloadLogoState extends State<DownloadLogo> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           decoration: BoxDecoration(
-                            color: Colors.grey.shade700,
+                            color: Colors.grey.shade700, // Darker grey for the ribbon
                             borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(25.0),
-                              bottomLeft: Radius.circular(25.0),
+                              topLeft: Radius.circular(25.0),    // Curved top-left
+                              bottomLeft: Radius.circular(25.0), // Curved bottom-left
                             ),
                             boxShadow: const [
                               BoxShadow(
                                 color: Colors.black26,
                                 blurRadius: 8,
-                                offset: Offset(-2, 2),
+                                offset: Offset(-2, 2), // Shadow for bulging effect from right
                               ),
                             ],
                           ),
                           child: Icon(
-                            _showGrid ? Icons.grid_off : Icons.grid_on,
+                            _showGrid ? Icons.grid_off : Icons.grid_on, // Icon changes based on state
                             color: Colors.white,
                             size: 28,
                           ),
@@ -277,6 +281,68 @@ class _DownloadLogoState extends State<DownloadLogo> {
                       ),
                     ),
 
+                    // --- NEW: Floating Layers Ribbon Button (top left) ---
+                    Positioned(
+                      top: 20, // Adjust vertical position, same as grid button
+                      left: 0, // Flush with the left edge
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _isLayersRibbonExtended = !_isLayersRibbonExtended;
+                          });
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 300), // Smooth animation duration
+                          width: _isLayersRibbonExtended ? 180.0 : 60.0, // Expanded vs. retracted width
+                          height: 44.0, // Fixed height for the ribbon
+                          curve: Curves.easeInOut, // Smooth animation curve
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade700, // Darker grey for the ribbon
+                            borderRadius: const BorderRadius.only(
+                              topRight: Radius.circular(25.0),    // Curved top-right
+                              bottomRight: Radius.circular(25.0), // Curved bottom-right
+                            ),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Colors.black26,
+                                blurRadius: 8,
+                                offset: Offset(2, 2), // Shadow for bulging effect from left
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min, // Wrap content
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(left: 16.0), // Padding for the icon
+                                child: Icon(
+                                  _isLayersRibbonExtended
+                                      ? Icons.arrow_back_ios // Left arrow when extended
+                                      : Icons.layers, // Layers icon when retracted
+                                  color: Colors.white,
+                                  size: 28,
+                                ),
+                              ),
+                              if (_isLayersRibbonExtended) // Show text only when extended
+                                Expanded( // Allows text to fill remaining space
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(left: 8.0, right: 16.0),
+                                    child: Text(
+                                      'No Layers Found',
+                                      style: const TextStyle(color: Colors.white, fontSize: 14),
+                                      softWrap: false, // Prevent text from wrapping
+                                      overflow: TextOverflow.fade, // Fade if text is too long during animation
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    // --- END NEW ---
+
+                    // Company Name
                     Positioned(
                       left: companyNamePosition.dx,
                       top: companyNamePosition.dy,
@@ -372,6 +438,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
                       ),
                     ),
 
+                    // Slogan
                     Positioned(
                       left: sloganPosition.dx,
                       top: sloganPosition.dy,
@@ -467,6 +534,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
                       ),
                     ),
 
+                    // Logo
                     Positioned(
                       left: logoPosition.dx,
                       top: logoPosition.dy,
@@ -572,6 +640,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
         ],
       ),
 
+      //bottom bar
       bottomNavigationBar: BottomAppBar(
         color: Colors.black,
         child: Row(
@@ -664,32 +733,36 @@ class _DownloadLogoState extends State<DownloadLogo> {
   }
 }
 
+// CustomPainter for drawing the fixed 4x4 dotted grid
 class _GridPainter extends CustomPainter {
   final Color gridColor;
 
   _GridPainter({required this.gridColor});
 
-  final double _dashWidth = 4.0;
-  final double _dashSpace = 4.0;
-  final double _strokeWidth = 2.0;
+  // Define properties for dotted lines
+  final double _dashWidth = 4.0; // Length of each dash segment
+  final double _dashSpace = 4.0; // Length of space between dashes
+  final double _strokeWidth = 2.0; // Thickness of the dotted line
 
   @override
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint()
       ..color = gridColor
       ..strokeWidth = _strokeWidth
-      ..style = PaintingStyle.stroke;
+      ..style = PaintingStyle.stroke; // Ensure it draws lines
 
-
+    // Calculate fixed spacing for a 4x4 grid
+    // For 4 columns/rows, we need 5 lines (0, 1/4, 2/4, 3/4, 4/4)
     final double colStep = size.width / 4;
     final double rowStep = size.height / 4;
 
+    // Draw horizontal dotted lines (5 lines for 4 rows)
     for (int i = 0; i <= 4; i++) {
       final double y = i * rowStep;
       double currentX = 0;
       while (currentX < size.width) {
         double segmentEnd = currentX + _dashWidth;
-
+        // Ensure the last dash doesn't draw beyond the canvas width
         if (segmentEnd > size.width) {
           segmentEnd = size.width;
         }
@@ -698,12 +771,13 @@ class _GridPainter extends CustomPainter {
       }
     }
 
+    // Draw vertical dotted lines (5 lines for 4 columns)
     for (int i = 0; i <= 4; i++) {
       final double x = i * colStep;
       double currentY = 0;
       while (currentY < size.height) {
         double segmentEnd = currentY + _dashWidth;
-
+        // Ensure the last dash doesn't draw beyond the canvas height
         if (segmentEnd > size.height) {
           segmentEnd = size.height;
         }
@@ -715,8 +789,8 @@ class _GridPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _GridPainter oldDelegate) {
-
-
+    // Only repaint if the grid color changes.
+    // Dashing properties are fixed within the painter.
     return oldDelegate.gridColor != gridColor;
   }
 }
