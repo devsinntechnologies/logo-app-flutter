@@ -97,6 +97,7 @@ class _TemplateWidgetState extends State<TemplateWidget> {
               itemBuilder: (context, index) {
                 return InkWell(
                   onTap: () {
+
                     final selectedSvg = svgList[index];
                     Navigator.push(
                       context,

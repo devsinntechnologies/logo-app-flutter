@@ -22,6 +22,9 @@ class _DownloadLogoState extends State<DownloadLogo> {
   late Offset companyNamePosition;
   late Offset sloganPosition;
 
+  bool _showGrid = false;
+
+
   @override
   void initState() {
     super.initState();
@@ -54,7 +57,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
   void _deleteElement() {
     setState(() {
-      selectedElement = null;
+
+      selectedElement = null; // Deselect
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Element deleted!')));
@@ -95,61 +99,62 @@ class _DownloadLogoState extends State<DownloadLogo> {
       }
     });
   }
-void _showSaveOptions() {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text('Save Logo'),
-        content: const Text('Choose format to save:'),
-        actions: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              TextButton(
+
+  void _showSaveOptions() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Save Logo'),
+          content: const Text('Choose format to save:'),
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _saveAsSVG();
+                  },
+                  child: const Text('Save as SVG'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _saveAsPNG();
+                  },
+                  child: const Text('Save as PNG'),
+                ),
+              ],
+            ),
+            Center(
+              child: TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
-                  _saveAsSVG();
                 },
-                child: const Text('Save as SVG'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  _saveAsPNG();
-                },
-                child: const Text('Save as PNG'),
-              ),
-            ],
-          ),
-          Center(
-            child: TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text(
-                'Cancel',
-                style: TextStyle(color: Colors.redAccent),
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(color: Colors.redAccent),
+                ),
               ),
             ),
-          ),
-        ],
-      );
-    },
-  );
-}
+          ],
+        );
+      },
+    );
+  }
 
-void _saveAsSVG() {
-  ScaffoldMessenger.of(
-    context,
-  ).showSnackBar(const SnackBar(content: Text('Logo saved as SVG!')));
-}
+  void _saveAsSVG() {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Logo saved as SVG!')));
+  }
 
-void _saveAsPNG() {
-  ScaffoldMessenger.of(
-    context,
-  ).showSnackBar(const SnackBar(content: Text('Logo saved as PNG!')));
-}
+  void _saveAsPNG() {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Logo saved as PNG!')));
+  }
 
   Widget _buildCornerIcon({
     required IconData icon,
@@ -169,7 +174,7 @@ void _saveAsPNG() {
               color: Colors.white,
               shape: BoxShape.circle,
               border: Border.all(color: Colors.black, width: 2),
-              boxShadow: [
+              boxShadow: const [
                 BoxShadow(
                   color: Colors.black26,
                   blurRadius: 4,
@@ -184,13 +189,12 @@ void _saveAsPNG() {
     );
   }
 
-  // scaffold
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.grey.shade200,
-        title: Text(
+        title: const Text(
           'Logo Maker',
           style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
         ),
@@ -219,16 +223,60 @@ void _saveAsPNG() {
         ],
       ),
 
-      // Main content
       body: Stack(
         children: [
+
           Container(height: 500, width: double.infinity, color: Colors.white),
           Column(
             children: [
               Expanded(
                 child: Stack(
                   children: [
-                    // Company Name
+
+                    if (_showGrid)
+                      CustomPaint(
+                        painter: _GridPainter(
+
+                          gridColor: Colors.black,
+                        ),
+
+                        size: Size.infinite,
+                      ),
+
+                    Positioned(
+                      top: 20,
+                      right: 0,
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _showGrid = !_showGrid;
+                          });
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade700,
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(25.0),
+                              bottomLeft: Radius.circular(25.0),
+                            ),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Colors.black26,
+                                blurRadius: 8,
+                                offset: Offset(-2, 2),
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            _showGrid ? Icons.grid_off : Icons.grid_on,
+                            color: Colors.white,
+                            size: 28,
+                          ),
+                        ),
+                      ),
+                    ),
+
                     Positioned(
                       left: companyNamePosition.dx,
                       top: companyNamePosition.dy,
@@ -238,28 +286,26 @@ void _saveAsPNG() {
                             selectedElement = 1;
                           });
                         },
-                        onPanUpdate:
-                            isEditing && selectedElement == 1
-                                ? (details) {
-                                  setState(() {
-                                    companyNamePosition = _limitOffset(
-                                      companyNamePosition,
-                                      details.delta,
-                                    );
-                                  });
-                                }
-                                : null,
+                        onPanUpdate: isEditing && selectedElement == 1
+                            ? (details) {
+                          setState(() {
+                            companyNamePosition = _limitOffset(
+                              companyNamePosition,
+                              details.delta,
+                            );
+                          });
+                        }
+                            : null,
                         child: Container(
-                          decoration:
-                              selectedElement == 1
-                                  ? BoxDecoration(
-                                    border: Border.all(
-                                      color: Colors.black38,
-                                      width: 3,
-                                    ),
-                                    borderRadius: BorderRadius.circular(6),
-                                  )
-                                  : null,
+                          decoration: selectedElement == 1
+                              ? BoxDecoration(
+                            border: Border.all(
+                              color: Colors.black38,
+                              width: 3,
+                            ),
+                            borderRadius: BorderRadius.circular(6),
+                          )
+                              : null,
                           padding: const EdgeInsets.all(2),
                           child: Stack(
                             clipBehavior: Clip.none,
@@ -326,7 +372,6 @@ void _saveAsPNG() {
                       ),
                     ),
 
-                    // Slogan
                     Positioned(
                       left: sloganPosition.dx,
                       top: sloganPosition.dy,
@@ -336,28 +381,26 @@ void _saveAsPNG() {
                             selectedElement = 2;
                           });
                         },
-                        onPanUpdate:
-                            isEditing && selectedElement == 2
-                                ? (details) {
-                                  setState(() {
-                                    sloganPosition = _limitOffset(
-                                      sloganPosition,
-                                      details.delta,
-                                    );
-                                  });
-                                }
-                                : null,
+                        onPanUpdate: isEditing && selectedElement == 2
+                            ? (details) {
+                          setState(() {
+                            sloganPosition = _limitOffset(
+                              sloganPosition,
+                              details.delta,
+                            );
+                          });
+                        }
+                            : null,
                         child: Container(
-                          decoration:
-                              selectedElement == 2
-                                  ? BoxDecoration(
-                                    border: Border.all(
-                                      color: Colors.black38,
-                                      width: 3,
-                                    ),
-                                    borderRadius: BorderRadius.circular(6),
-                                  )
-                                  : null,
+                          decoration: selectedElement == 2
+                              ? BoxDecoration(
+                            border: Border.all(
+                              color: Colors.black38,
+                              width: 3,
+                            ),
+                            borderRadius: BorderRadius.circular(6),
+                          )
+                              : null,
                           padding: const EdgeInsets.all(2),
                           child: Stack(
                             clipBehavior: Clip.none,
@@ -424,7 +467,6 @@ void _saveAsPNG() {
                       ),
                     ),
 
-                    // Logo
                     Positioned(
                       left: logoPosition.dx,
                       top: logoPosition.dy,
@@ -434,28 +476,26 @@ void _saveAsPNG() {
                             selectedElement = 0;
                           });
                         },
-                        onPanUpdate:
-                            isEditing && selectedElement == 0
-                                ? (details) {
-                                  setState(() {
-                                    logoPosition = _limitOffset(
-                                      logoPosition,
-                                      details.delta,
-                                    );
-                                  });
-                                }
-                                : null,
+                        onPanUpdate: isEditing && selectedElement == 0
+                            ? (details) {
+                          setState(() {
+                            logoPosition = _limitOffset(
+                              logoPosition,
+                              details.delta,
+                            );
+                          });
+                        }
+                            : null,
                         child: Container(
-                          decoration:
-                              selectedElement == 0
-                                  ? BoxDecoration(
-                                    border: Border.all(
-                                      color: Colors.black38,
-                                      width: 3,
-                                    ),
-                                    borderRadius: BorderRadius.circular(6),
-                                  )
-                                  : null,
+                          decoration: selectedElement == 0
+                              ? BoxDecoration(
+                            border: Border.all(
+                              color: Colors.black38,
+                              width: 3,
+                            ),
+                            borderRadius: BorderRadius.circular(6),
+                          )
+                              : null,
                           padding: const EdgeInsets.all(2),
                           child: Stack(
                             clipBehavior: Clip.none,
@@ -523,14 +563,15 @@ void _saveAsPNG() {
                 ),
               ),
               Column(
-                children: [Container(height: 300, color: Colors.grey.shade200)],
+                children: [
+                  Container(height: 300, color: Colors.grey.shade200)
+                ],
               ),
             ],
           ),
         ],
       ),
 
-      //bottom bar
       bottomNavigationBar: BottomAppBar(
         color: Colors.black,
         child: Row(
@@ -566,7 +607,6 @@ void _saveAsPNG() {
                 onTap = () {
                   setState(() {
                     selectedIndex = 2;
-                    
                   });
                 };
                 break;
@@ -583,7 +623,7 @@ void _saveAsPNG() {
               default:
                 iconData = Icons.image;
                 label = 'Images';
-                onTap = () {   
+                onTap = () {
                   setState(() {
                     selectedIndex = 4;
                   });
@@ -621,5 +661,62 @@ void _saveAsPNG() {
         ),
       ),
     );
+  }
+}
+
+class _GridPainter extends CustomPainter {
+  final Color gridColor;
+
+  _GridPainter({required this.gridColor});
+
+  final double _dashWidth = 4.0;
+  final double _dashSpace = 4.0;
+  final double _strokeWidth = 2.0;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint()
+      ..color = gridColor
+      ..strokeWidth = _strokeWidth
+      ..style = PaintingStyle.stroke;
+
+
+    final double colStep = size.width / 4;
+    final double rowStep = size.height / 4;
+
+    for (int i = 0; i <= 4; i++) {
+      final double y = i * rowStep;
+      double currentX = 0;
+      while (currentX < size.width) {
+        double segmentEnd = currentX + _dashWidth;
+
+        if (segmentEnd > size.width) {
+          segmentEnd = size.width;
+        }
+        canvas.drawLine(Offset(currentX, y), Offset(segmentEnd, y), paint);
+        currentX += _dashWidth + _dashSpace;
+      }
+    }
+
+    for (int i = 0; i <= 4; i++) {
+      final double x = i * colStep;
+      double currentY = 0;
+      while (currentY < size.height) {
+        double segmentEnd = currentY + _dashWidth;
+
+        if (segmentEnd > size.height) {
+          segmentEnd = size.height;
+        }
+        canvas.drawLine(Offset(x, currentY), Offset(x, segmentEnd), paint);
+        currentY += _dashWidth + _dashSpace;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _GridPainter oldDelegate) {
+
+
+    return oldDelegate.gridColor != gridColor;
   }
 }
