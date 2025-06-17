@@ -1,128 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+
 import 'dart:math';
-class LogoStateData {
-  final Offset logoPosition;
-  final double logoSize;
-  final double logoRotation;
-  final bool isLogoVisible;
 
-  final Offset companyNamePosition;
-  final double companyNameSize;
-  final double companyNameRotation;
-  final bool isCompanyNameVisible;
+import 'package:logo_app_flutter/components/logo_bottom_nav_bar.dart';
+import 'package:logo_app_flutter/models/logo_state_data.dart';
 
-  final Offset sloganPosition;
-  final double sloganSize;
-  final double sloganRotation;
-  final bool isSloganVisible;
-  final Offset? logo2Position;
-  final double? logo2Size;
-  final double? logo2Rotation;
-  final bool isLogo2Visible;
-
-  final Offset? companyName2Position;
-  final double? companyName2Size;
-  final double? companyName2Rotation;
-  final bool isCompanyName2Visible;
-
-  final Offset? slogan2Position;
-  final double? slogan2Size;
-  final double? slogan2Rotation;
-  final bool isSlogan2Visible;
-
-  LogoStateData({
-    required this.logoPosition,
-    required this.logoSize,
-    required this.logoRotation,
-    required this.isLogoVisible,
-    required this.companyNamePosition,
-    required this.companyNameSize,
-    required this.companyNameRotation,
-    required this.isCompanyNameVisible,
-    required this.sloganPosition,
-    required this.sloganSize,
-    required this.sloganRotation,
-    required this.isSloganVisible,
-    this.logo2Position,
-    this.logo2Size,
-    this.logo2Rotation,
-    this.isLogo2Visible = false,
-    this.companyName2Position,
-    this.companyName2Size,
-    this.companyName2Rotation,
-    this.isCompanyName2Visible = false,
-    this.slogan2Position,
-    this.slogan2Size,
-    this.slogan2Rotation,
-    this.isSlogan2Visible = false,
-  });
-  LogoStateData copyWith({
-    Offset? logoPosition,
-    double? logoSize,
-    double? logoRotation,
-    bool? isLogoVisible,
-    Offset? companyNamePosition,
-    double? companyNameSize,
-    double? companyNameRotation,
-    bool? isCompanyNameVisible,
-    Offset? sloganPosition,
-    double? sloganSize,
-    double? sloganRotation,
-    bool? isSloganVisible,
-    Offset? logo2Position,
-    double? logo2Size,
-    double? logo2Rotation,
-    bool? isLogo2Visible,
-    Offset? companyName2Position,
-    double? companyName2Size,
-    double? companyName2Rotation,
-    bool? isCompanyName2Visible,
-    Offset? slogan2Position,
-    double? slogan2Size,
-    double? slogan2Rotation,
-    bool? isSlogan2Visible,
-  }) {
-    return LogoStateData(
-      logoPosition: logoPosition ?? this.logoPosition,
-      logoSize: logoSize ?? this.logoSize,
-      logoRotation: logoRotation ?? this.logoRotation,
-      isLogoVisible: isLogoVisible ?? this.isLogoVisible,
-      companyNamePosition: companyNamePosition ?? this.companyNamePosition,
-      companyNameSize: companyNameSize ?? this.companyNameSize,
-      companyNameRotation: companyNameRotation ?? this.companyNameRotation,
-      isCompanyNameVisible: isCompanyNameVisible ?? this.isCompanyNameVisible,
-      sloganPosition: sloganPosition ?? this.sloganPosition,
-      sloganSize: sloganSize ?? this.sloganSize,
-      sloganRotation: sloganRotation ?? this.sloganRotation,
-      isSloganVisible: isSloganVisible ?? this.isSloganVisible,
-      logo2Position: logo2Position ?? this.logo2Position,
-      logo2Size: logo2Size ?? this.logo2Size,
-      logo2Rotation: logo2Rotation ?? this.logo2Rotation,
-      isLogo2Visible: isLogo2Visible ?? this.isLogo2Visible,
-      companyName2Position: companyName2Position ?? this.companyName2Position,
-      companyName2Size: companyName2Size ?? this.companyName2Size,
-      companyName2Rotation: companyName2Rotation ?? this.companyName2Rotation,
-      isCompanyName2Visible:
-      isCompanyName2Visible ?? this.isCompanyName2Visible,
-      slogan2Position: slogan2Position ?? this.slogan2Position,
-      slogan2Size: slogan2Size ?? this.slogan2Size,
-      slogan2Rotation: slogan2Rotation ?? this.slogan2Rotation,
-      isSlogan2Visible: isSlogan2Visible ?? this.isSlogan2Visible,
-    );
-  }
-}
-class _TextSizeUtil {
-  static Size getTextSize(String text, TextStyle? style) {
-    if (text.isEmpty) return Size.zero;
-    final TextPainter textPainter = TextPainter(
-      text: TextSpan(text: text, style: style),
-      textDirection: TextDirection.ltr,
-      maxLines: 1,
-    )..layout();
-    return textPainter.size;
-  }
-}
+import '../components/logo_canvas.dart';
+import '../utils/text_size_util.dart';
 
 class DownloadLogo extends StatefulWidget {
   final String svgLogo;
@@ -133,7 +17,7 @@ class DownloadLogo extends StatefulWidget {
     super.key,
     required this.svgLogo,
     required this.companyName,
-    required  this.sloganName,
+    required this.sloganName,
   });
 
   @override
@@ -150,6 +34,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
   bool _isLayersRibbonExtended = false;
 
   bool isEditing = false;
+  int? id;
   int? selectedElement;
   int selectedIndex = 0;
 
@@ -190,6 +75,58 @@ class _DownloadLogoState extends State<DownloadLogo> {
     );
     _saveState();
   }
+
+  
+  Size _getElementRenderedSize(int elementId) {
+    switch (elementId) {
+      case 0:
+        return Size(_currentLogoState.logoSize, _currentLogoState.logoSize);
+      case 1:
+        return TextSizeUtil.getTextSize(
+          
+          widget.companyName,
+          TextStyle(
+            fontSize: _currentLogoState.companyNameSize,
+            fontWeight: FontWeight.bold,
+          ),
+        );
+      case 2:
+        return TextSizeUtil.getTextSize(
+          
+          widget.sloganName,
+          TextStyle(
+            fontSize: _currentLogoState.sloganSize,
+            fontStyle: FontStyle.italic,
+          ),
+        );
+      case 3:
+        return Size(
+          _currentLogoState.logo2Size ?? 0,
+          _currentLogoState.logo2Size ?? 0,
+        );
+      case 4:
+        return TextSizeUtil.getTextSize(
+          
+          widget.companyName,
+          TextStyle(
+            fontSize: _currentLogoState.companyName2Size ?? 0,
+            fontWeight: FontWeight.bold,
+          ),
+        );
+      case 5:
+        return TextSizeUtil.getTextSize(
+          
+          widget.sloganName,
+          TextStyle(
+            fontSize: _currentLogoState.slogan2Size ?? 0,
+            fontStyle: FontStyle.italic,
+          ),
+        );
+      default:
+        return Size.zero;
+    }
+  }
+
   void _saveState() {
     if (_undoStack.length >= _maxUndoHistory) {
       _undoStack.removeAt(0);
@@ -202,99 +139,124 @@ class _DownloadLogoState extends State<DownloadLogo> {
       setState(() {
         _undoStack.removeLast();
         _currentLogoState = _undoStack.last;
-        selectedElement = null;
+        id = null;
         _clearGridAlignment();
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Undo successful!')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Undo successful!')));
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Nothing to undo!')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Nothing to undo!')));
     }
   }
 
-  Offset _limitOffset(
-      Offset original, Offset delta, Size elementSize, Size canvasSize) {
+  
+  void _onPanStart(int id, DragStartDetails details) {
+    _saveState();
+    
+  }
+
+  
+  void _onPanUpdate(int id, Offset delta) {
+    final RenderBox? renderBox =
+        _canvasKey.currentContext?.findRenderObject() as RenderBox?;
+    final Size? canvasSize = renderBox?.size;
+
+    if (canvasSize == null) return; 
+
+    setState(() {
+      Offset newPosition = _limitOffset(
+        _getCurrentElementPosition(id),
+        delta,
+        _getElementRenderedSize(id),
+      ); 
+
+      if (id == 0) {
+        _currentLogoState = _currentLogoState.copyWith(
+          logoPosition: newPosition,
+        );
+      } else if (id == 1) {
+        _currentLogoState = _currentLogoState.copyWith(
+          companyNamePosition: newPosition,
+        );
+      } else if (id == 2) {
+        _currentLogoState = _currentLogoState.copyWith(
+          sloganPosition: newPosition,
+        );
+      } else if (id == 3) {
+        _currentLogoState = _currentLogoState.copyWith(
+          logo2Position: newPosition,
+        );
+      } else if (id == 4) {
+        _currentLogoState = _currentLogoState.copyWith(
+          companyName2Position: newPosition,
+        );
+      } else if (id == 5) {
+        _currentLogoState = _currentLogoState.copyWith(
+          slogan2Position: newPosition,
+        );
+      }
+      _checkGridAlignment(newPosition, _getElementRenderedSize(id));
+    });
+  }
+
+  
+  void _onPanEnd(int id) {
+    
+    _clearGridAlignment();
+    
+  }
+
+  Offset _limitOffset(Offset original, Offset delta, Size elementSize) {
+    
+    final RenderBox? renderBox =
+        _canvasKey.currentContext?.findRenderObject() as RenderBox?;
+    final Size? canvasSize = renderBox?.size; 
+    if (canvasSize == null)
+      return original + delta; 
+
     final newOffset = original + delta;
-    final clampedDx =
-    newOffset.dx.clamp(0.0, canvasSize.width - elementSize.width);
-    final clampedDy =
-    newOffset.dy.clamp(0.0, canvasSize.height - elementSize.height);
+    final clampedDx = newOffset.dx.clamp(
+      0.0,
+      canvasSize.width - elementSize.width,
+    );
+    final clampedDy = newOffset.dy.clamp(
+      0.0,
+      canvasSize.height - elementSize.height,
+    );
     return Offset(clampedDx, clampedDy);
   }
 
-  Size _getElementRenderedSize(int elementId) {
-    switch (elementId) {
-      case 0:
-        return Size(_currentLogoState.logoSize, _currentLogoState.logoSize);
-      case 1:
-        return _TextSizeUtil.getTextSize(
-          widget.companyName,
-          TextStyle(
-            fontSize: _currentLogoState.companyNameSize,
-            fontWeight: FontWeight.bold,
-          ),
-        );
-      case 2:
-        return _TextSizeUtil.getTextSize(
-          widget.sloganName,
-          TextStyle(
-            fontSize: _currentLogoState.sloganSize,
-            fontStyle: FontStyle.italic,
-          ),
-        );
-      case 3:
-        return Size(_currentLogoState.logo2Size ?? 0,
-            _currentLogoState.logo2Size ?? 0);
-      case 4:
-        return _TextSizeUtil.getTextSize(
-          widget.companyName,
-          TextStyle(
-            fontSize: _currentLogoState.companyName2Size ?? 0,
-            fontWeight: FontWeight.bold,
-          ),
-        );
-      case 5:
-        return _TextSizeUtil.getTextSize(
-          widget.sloganName,
-          TextStyle(
-            fontSize: _currentLogoState.slogan2Size ?? 0,
-            fontStyle: FontStyle.italic,
-          ),
-        );
-      default:
-        return Size.zero;
-    }
-  }
-
-  void _deleteElement() {
+  void _deleteElement(int id) {
     _saveState();
     setState(() {
       String message = 'Element deleted!';
-      if (selectedElement == 0) {
+      if (id == 0) {
         _currentLogoState = _currentLogoState.copyWith(isLogoVisible: false);
-      } else if (selectedElement == 1) {
-        _currentLogoState =
-            _currentLogoState.copyWith(isCompanyNameVisible: false);
-      } else if (selectedElement == 2) {
+      } else if (id == 1) {
+        _currentLogoState = _currentLogoState.copyWith(
+          isCompanyNameVisible: false,
+        );
+      } else if (id == 2) {
         _currentLogoState = _currentLogoState.copyWith(isSloganVisible: false);
-      } else if (selectedElement == 3) {
+      } else if (id == 3) {
         _currentLogoState = _currentLogoState.copyWith(
           isLogo2Visible: false,
           logo2Position: null,
           logo2Size: null,
           logo2Rotation: null,
         );
-      } else if (selectedElement == 4) {
+      } else if (id == 4) {
         _currentLogoState = _currentLogoState.copyWith(
+          
           isCompanyName2Visible: false,
           companyName2Position: null,
           companyName2Size: null,
           companyName2Rotation: null,
         );
-      } else if (selectedElement == 5) {
+      } else if (id == 5) {
         _currentLogoState = _currentLogoState.copyWith(
           isSlogan2Visible: false,
           slogan2Position: null,
@@ -304,23 +266,24 @@ class _DownloadLogoState extends State<DownloadLogo> {
       } else {
         message = 'No element selected to delete.';
       }
-      selectedElement = null;
+      selectedElement = null; 
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
     });
   }
 
-  void _splitElement() {
+  void _splitElement(int id) {
     _saveState();
     setState(() {
       String message = 'Element split!';
       Offset offset = const Offset(20, 20);
 
-      if (selectedElement == 0) {
+      if (id == 0) {
         if (_currentLogoState.isLogo2Visible == true) {
-          message = 'Logo duplicate already exists or cannot be duplicated further.';
+          message =
+              'Logo duplicate already exists or cannot be duplicated further.';
         } else {
           _currentLogoState = _currentLogoState.copyWith(
             logo2Position: _currentLogoState.logoPosition + offset,
@@ -329,20 +292,23 @@ class _DownloadLogoState extends State<DownloadLogo> {
             isLogo2Visible: true,
           );
         }
-      } else if (selectedElement == 1) {
+      } else if (id == 1) {
         if (_currentLogoState.isCompanyName2Visible == true) {
-          message = 'Company Name duplicate already exists or cannot be duplicated further.';
+          message =
+              'Company Name duplicate already exists or cannot be duplicated further.';
         } else {
           _currentLogoState = _currentLogoState.copyWith(
-            companyName2Position: _currentLogoState.companyNamePosition + offset,
+            companyName2Position:
+                _currentLogoState.companyNamePosition + offset,
             companyName2Size: _currentLogoState.companyNameSize,
             companyName2Rotation: _currentLogoState.companyNameRotation,
             isCompanyName2Visible: true,
           );
         }
-      } else if (selectedElement == 2) {
+      } else if (id == 2) {
         if (_currentLogoState.isSlogan2Visible == true) {
-          message = 'Slogan duplicate already exists or cannot be duplicated further.';
+          message =
+              'Slogan duplicate already exists or cannot be duplicated further.';
         } else {
           _currentLogoState = _currentLogoState.copyWith(
             slogan2Position: _currentLogoState.sloganPosition + offset,
@@ -351,43 +317,51 @@ class _DownloadLogoState extends State<DownloadLogo> {
             isSlogan2Visible: true,
           );
         }
-      } else if (selectedElement! >= 3 && selectedElement! <= 5) {
+      } else if (id >= 3 && id <= 5) {
         message = 'Cannot split a duplicate element further.';
       } else {
         message = 'No element selected for splitting.';
       }
       selectedElement = null;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
     });
   }
-  void _rotateElementByTap() {
+
+  void _rotateElementByTap(int id) {
     _saveState();
     setState(() {
       const double rotationStep = 45;
-      if (selectedElement == 0) {
+      if (id == 0) {
         _currentLogoState = _currentLogoState.copyWith(
-            logoRotation: (_currentLogoState.logoRotation + rotationStep) % 360);
-      } else if (selectedElement == 1) {
+          logoRotation: (_currentLogoState.logoRotation + rotationStep) % 360,
+        );
+      } else if (id == 1) {
         _currentLogoState = _currentLogoState.copyWith(
-            companyNameRotation:
-            (_currentLogoState.companyNameRotation + rotationStep) % 360);
-      } else if (selectedElement == 2) {
+          companyNameRotation:
+              (_currentLogoState.companyNameRotation + rotationStep) % 360,
+        );
+      } else if (id == 2) {
         _currentLogoState = _currentLogoState.copyWith(
-            sloganRotation:
-            (_currentLogoState.sloganRotation + rotationStep) % 360);
-      } else if (selectedElement == 3) {
+          sloganRotation:
+              (_currentLogoState.sloganRotation + rotationStep) % 360,
+        );
+      } else if (id == 3) {
         _currentLogoState = _currentLogoState.copyWith(
-            logo2Rotation: (_currentLogoState.logo2Rotation! + rotationStep) % 360);
-      } else if (selectedElement == 4) {
+          logo2Rotation:
+              (_currentLogoState.logo2Rotation! + rotationStep) % 360,
+        );
+      } else if (id == 4) {
         _currentLogoState = _currentLogoState.copyWith(
-            companyName2Rotation:
-            (_currentLogoState.companyName2Rotation! + rotationStep) % 360);
-      } else if (selectedElement == 5) {
+          companyName2Rotation:
+              (_currentLogoState.companyName2Rotation! + rotationStep) % 360,
+        );
+      } else if (id == 5) {
         _currentLogoState = _currentLogoState.copyWith(
-            slogan2Rotation:
-            (_currentLogoState.slogan2Rotation! + rotationStep) % 360);
+          slogan2Rotation:
+              (_currentLogoState.slogan2Rotation! + rotationStep) % 360,
+        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('No element selected to rotate.')),
@@ -395,29 +369,45 @@ class _DownloadLogoState extends State<DownloadLogo> {
       }
     });
   }
-  void _resizeElementByTap() {
+
+  void _resizeElementByTap(int id) {
     _saveState();
     setState(() {
       const double resizeStep = 20.0;
       const double minSize = 10.0;
-      if (selectedElement == 0) {
+      if (id == 0) {
         _currentLogoState = _currentLogoState.copyWith(
-            logoSize: max(minSize, _currentLogoState.logoSize + resizeStep));
-      } else if (selectedElement == 1) {
+          logoSize: max(minSize, _currentLogoState.logoSize + resizeStep),
+        );
+      } else if (id == 1) {
         _currentLogoState = _currentLogoState.copyWith(
-            companyNameSize: max(minSize, _currentLogoState.companyNameSize + resizeStep));
-      } else if (selectedElement == 2) {
+          companyNameSize: max(
+            minSize,
+            _currentLogoState.companyNameSize + resizeStep,
+          ),
+        );
+      } else if (id == 2) {
         _currentLogoState = _currentLogoState.copyWith(
-            sloganSize: max(minSize, _currentLogoState.sloganSize + resizeStep));
-      } else if (selectedElement == 3) {
+          sloganSize: max(minSize, _currentLogoState.sloganSize + resizeStep),
+        );
+      } else if (id == 3) {
         _currentLogoState = _currentLogoState.copyWith(
-            logo2Size: max(minSize, _currentLogoState.logo2Size! + resizeStep));
-      } else if (selectedElement == 4) {
+          logo2Size: max(minSize, _currentLogoState.logo2Size! + resizeStep),
+        );
+      } else if (id == 4) {
         _currentLogoState = _currentLogoState.copyWith(
-            companyName2Size: max(minSize, _currentLogoState.companyName2Size! + resizeStep));
-      } else if (selectedElement == 5) {
+          companyName2Size: max(
+            minSize,
+            _currentLogoState.companyName2Size! + resizeStep,
+          ),
+        );
+      } else if (id == 5) {
         _currentLogoState = _currentLogoState.copyWith(
-            slogan2Size: max(minSize, _currentLogoState.slogan2Size! + resizeStep));
+          slogan2Size: max(
+            minSize,
+            _currentLogoState.slogan2Size! + resizeStep,
+          ),
+        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('No element selected to resize.')),
@@ -482,46 +472,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
     ).showSnackBar(const SnackBar(content: Text('Logo saved as PNG!')));
   }
 
-  Widget _buildCornerIcon({
-    required IconData icon,
-    required VoidCallback onTap,
-    required Alignment alignment,
-    GestureDragStartCallback? onPanStart,
-    GestureDragUpdateCallback? onPanUpdate,
-    GestureDragEndCallback? onPanEnd,
-  }) {
-    return Align(
-      alignment: alignment,
-      child: Transform.translate(
-        offset: Offset(alignment.x * 15, alignment.y * 15),
-        child: GestureDetector(
-          onTap: onTap,
-          onPanStart: onPanStart,
-          onPanUpdate: onPanUpdate,
-          onPanEnd: onPanEnd,
-          child: Container(
-            width: 30,
-            height: 30,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.black, width: 2),
-              boxShadow: const [
-                BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 4,
-                  offset: Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Icon(icon, size: 20, color: Colors.black),
-          ),
-        ),
-      ),
-    );
-  }
-  void _checkGridAlignment(
-      Offset elementPosition, Size elementSize, Size canvasSize) {
+  void _checkGridAlignment(Offset elementPosition, Size elementSize) {
+    
     int? newHighlightedHorizontal;
     int? newHighlightedVertical;
 
@@ -529,6 +481,11 @@ class _DownloadLogoState extends State<DownloadLogo> {
       _clearGridAlignment();
       return;
     }
+
+    final RenderBox? renderBox =
+        _canvasKey.currentContext?.findRenderObject() as RenderBox?;
+    final Size? canvasSize = renderBox?.size; 
+    if (canvasSize == null) return; 
 
     const double tolerance = 10.0;
     final double centerX = elementPosition.dx + elementSize.width / 2;
@@ -559,6 +516,36 @@ class _DownloadLogoState extends State<DownloadLogo> {
         _highlightedHorizontalGridLineIndex = newHighlightedHorizontal;
         _highlightedVerticalGridLineIndex = newHighlightedVertical;
       });
+
+      const double tolerance = 10.0;
+      final double centerX = elementPosition.dx + elementSize.width / 2;
+      final double centerY = elementPosition.dy + elementSize.height / 2;
+
+      final double colStep = canvasSize.width / 4;
+      final double rowStep = canvasSize.height / 4;
+
+      for (int i = 0; i <= 4; i++) {
+        final double gridX = i * colStep;
+        if ((centerX - gridX).abs() < tolerance) {
+          newHighlightedVertical = i;
+          break;
+        }
+      }
+
+      for (int i = 0; i <= 4; i++) {
+        final double gridY = i * rowStep;
+        if ((centerY - gridY).abs() < tolerance) {
+          newHighlightedHorizontal = i;
+          break;
+        }
+      }
+    }
+    if (newHighlightedHorizontal != _highlightedHorizontalGridLineIndex ||
+        newHighlightedVertical != _highlightedVerticalGridLineIndex) {
+      setState(() {
+        _highlightedHorizontalGridLineIndex = newHighlightedHorizontal;
+        _highlightedVerticalGridLineIndex = newHighlightedVertical;
+      });
     }
   }
 
@@ -572,63 +559,91 @@ class _DownloadLogoState extends State<DownloadLogo> {
     }
   }
 
-  void _onResizePanStart(DragStartDetails details, int id) {
+  void _onResizePanStart(int id, DragStartDetails details) {
     _saveState();
     _initialDragPoint = details.globalPosition;
     _initialElementValue = _getCurrentElementSize(id);
   }
 
-  void _onResizePanUpdate(DragUpdateDetails details, int id, Size canvasSize) {
-    if (_initialDragPoint == null || _initialElementValue == null) return;
-    final RenderBox? renderBox = _canvasKey.currentContext?.findRenderObject() as RenderBox?;
-    final Offset? canvasOffset = renderBox?.localToGlobal(Offset.zero);
+  
+  
 
-    if (canvasOffset == null) return;
+  
+  void _onResizePanUpdate(int id, DragUpdateDetails details) {
+    if (_initialDragPoint == null || _initialElementValue == null) return;
+    final RenderBox? renderBox =
+        _canvasKey.currentContext?.findRenderObject() as RenderBox?;
+    final Offset? canvasOffset = renderBox?.localToGlobal(Offset.zero);
+    final Size? canvasSize = renderBox?.size; 
+
+    if (canvasOffset == null || canvasSize == null) return; 
+
     final Offset elementCurrentPosition = _getCurrentElementPosition(id);
     final Size elementCurrentSize = _getElementRenderedSize(id);
     final Offset elementCenterGlobal = Offset(
-      canvasOffset.dx + elementCurrentPosition.dx + elementCurrentSize.width / 2,
-      canvasOffset.dy + elementCurrentPosition.dy + elementCurrentSize.height / 2,
+      canvasOffset.dx +
+          elementCurrentPosition.dx +
+          elementCurrentSize.width / 2,
+      canvasOffset.dy +
+          elementCurrentPosition.dy +
+          elementCurrentSize.height / 2,
     );
-    final double initialDistance = (_initialDragPoint! - elementCenterGlobal).distance;
-    final double currentDistance = (details.globalPosition - elementCenterGlobal).distance;
+    final double initialDistance =
+        (_initialDragPoint! - elementCenterGlobal).distance;
+    final double currentDistance =
+        (details.globalPosition - elementCenterGlobal).distance;
     final double scaleFactor = currentDistance / initialDistance;
     const double sensitivity = 0.5;
     double newSize = _initialElementValue! * scaleFactor;
-    newSize = _initialElementValue! + (newSize - _initialElementValue!) * sensitivity;
+    newSize =
+        _initialElementValue! + (newSize - _initialElementValue!) * sensitivity;
     const double minSize = 10.0;
     const double maxSize = 300.0;
     newSize = newSize.clamp(minSize, maxSize);
 
     setState(() {
       _updateElementSize(id, newSize);
-      _checkGridAlignment(_getCurrentElementPosition(id), _getElementRenderedSize(id), canvasSize);
+      _checkGridAlignment(
+        _getCurrentElementPosition(id),
+        _getElementRenderedSize(id),
+      ); 
     });
   }
 
-  void _onResizePanEnd(DragEndDetails details) {
+  void _onResizePanEnd(int id) {
     _initialDragPoint = null;
     _initialElementValue = null;
     _clearGridAlignment();
   }
 
-  void _onRotatePanStart(DragStartDetails details, int id) {
+  void _onRotatePanStart(int id, DragStartDetails details) {
     _saveState();
     _initialDragPoint = details.globalPosition;
     _initialElementValue = _getCurrentElementRotation(id);
   }
 
-  void _onRotatePanUpdate(DragUpdateDetails details, int id, Size canvasSize) {
+  
+  
+
+  
+  void _onRotatePanUpdate(int id, DragUpdateDetails details) {
+    
     if (_initialDragPoint == null || _initialElementValue == null) return;
-    final RenderBox? renderBox = _canvasKey.currentContext?.findRenderObject() as RenderBox?;
+    final RenderBox? renderBox =
+        _canvasKey.currentContext?.findRenderObject() as RenderBox?;
     final Offset? canvasOffset = renderBox?.localToGlobal(Offset.zero);
 
-    if (canvasOffset == null) return;
+    if (canvasOffset == null) return; 
+
     final Offset elementCurrentPosition = _getCurrentElementPosition(id);
     final Size elementCurrentSize = _getElementRenderedSize(id);
     final Offset elementCenterGlobal = Offset(
-      canvasOffset.dx + elementCurrentPosition.dx + elementCurrentSize.width / 2,
-      canvasOffset.dy + elementCurrentPosition.dy + elementCurrentSize.height / 2,
+      canvasOffset.dx +
+          elementCurrentPosition.dx +
+          elementCurrentSize.width / 2,
+      canvasOffset.dy +
+          elementCurrentPosition.dy +
+          elementCurrentSize.height / 2,
     );
     final Offset v1 = _initialDragPoint! - elementCenterGlobal;
     final Offset v2 = details.globalPosition - elementCenterGlobal;
@@ -646,10 +661,11 @@ class _DownloadLogoState extends State<DownloadLogo> {
     });
   }
 
-  void _onRotatePanEnd(DragEndDetails details) {
+  void _onRotatePanEnd(int id) {
     _initialDragPoint = null;
     _initialElementValue = null;
   }
+
   double _getCurrentElementSize(int id) {
     switch (id) {
       case 0:
@@ -668,6 +684,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
         return 0;
     }
   }
+
   void _updateElementSize(int id, double newSize) {
     if (id == 0) {
       _currentLogoState = _currentLogoState.copyWith(logoSize: newSize);
@@ -683,6 +700,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
       _currentLogoState = _currentLogoState.copyWith(slogan2Size: newSize);
     }
   }
+
   double _getCurrentElementRotation(int id) {
     switch (id) {
       case 0:
@@ -701,23 +719,33 @@ class _DownloadLogoState extends State<DownloadLogo> {
         return 0;
     }
   }
+
   void _updateElementRotation(int id, double newRotation) {
     if (id == 0) {
       _currentLogoState = _currentLogoState.copyWith(logoRotation: newRotation);
     } else if (id == 1) {
-      _currentLogoState =
-          _currentLogoState.copyWith(companyNameRotation: newRotation);
+      _currentLogoState = _currentLogoState.copyWith(
+        companyNameRotation: newRotation,
+      );
     } else if (id == 2) {
-      _currentLogoState = _currentLogoState.copyWith(sloganRotation: newRotation);
+      _currentLogoState = _currentLogoState.copyWith(
+        sloganRotation: newRotation,
+      );
     } else if (id == 3) {
-      _currentLogoState = _currentLogoState.copyWith(logo2Rotation: newRotation);
+      _currentLogoState = _currentLogoState.copyWith(
+        logo2Rotation: newRotation,
+      );
     } else if (id == 4) {
-      _currentLogoState =
-          _currentLogoState.copyWith(companyName2Rotation: newRotation);
+      _currentLogoState = _currentLogoState.copyWith(
+        companyName2Rotation: newRotation,
+      );
     } else if (id == 5) {
-      _currentLogoState = _currentLogoState.copyWith(slogan2Rotation: newRotation);
+      _currentLogoState = _currentLogoState.copyWith(
+        slogan2Rotation: newRotation,
+      );
     }
   }
+
   Offset _getCurrentElementPosition(int id) {
     switch (id) {
       case 0:
@@ -762,7 +790,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
             onPressed: () {
               setState(() {
                 isEditing = !isEditing;
-                selectedElement = null;
+                id = null;
                 _clearGridAlignment();
               });
               ScaffoldMessenger.of(context).showSnackBar(
@@ -785,522 +813,74 @@ class _DownloadLogoState extends State<DownloadLogo> {
           Column(
             children: [
               Expanded(
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final Size canvasSize = constraints.biggest;
-                    return Stack(
-                      key: _canvasKey,
-                      children: [
-                        if (_showGrid)
-                          CustomPaint(
-                            painter: _GridPainter(
-                              gridColor: Colors.black,
-                              highlightedHorizontalLine:
-                              _highlightedHorizontalGridLineIndex,
-                              highlightedVerticalLine:
-                              _highlightedVerticalGridLineIndex,
-                            ),
-                            size: Size.infinite,
-                          ),
-                        Positioned(
-                          top: 20,
-                          right: 0,
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _showGrid = !_showGrid;
-                                if (!_showGrid) {
-                                  _clearGridAlignment();
-                                }
-                              });
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade700,
-                                borderRadius: const BorderRadius.only(
-                                  topLeft: Radius.circular(25.0),
-                                  bottomLeft: Radius.circular(25.0),
-                                ),
-                                boxShadow: const [
-                                  BoxShadow(
-                                    color: Colors.black26,
-                                    blurRadius: 8,
-                                    offset: Offset(-2, 2),
-                                  ),
-                                ],
-                              ),
-                              child: Icon(
-                                _showGrid ? Icons.grid_off : Icons.grid_on,
-                                color: Colors.white,
-                                size: 28,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          top: 20,
-                          left: 0,
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _isLayersRibbonExtended =
-                                !_isLayersRibbonExtended;
-                              });
-                            },
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 300),
-                              width: _isLayersRibbonExtended ? 180.0 : 60.0,
-                              height: 44.0,
-                              curve: Curves.easeInOut,
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade700,
-                                borderRadius: const BorderRadius.only(
-                                  topRight: Radius.circular(25.0),
-                                  bottomRight: Radius.circular(25.0),
-                                ),
-                                boxShadow: const [
-                                  BoxShadow(
-                                    color: Colors.black26,
-                                    blurRadius: 8,
-                                    offset: Offset(2, 2),
-                                  ),
-                                ],
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 16.0),
-                                    child: Icon(
-                                      _isLayersRibbonExtended
-                                          ? Icons.arrow_back_ios
-                                          : Icons.layers,
-                                      color: Colors.white,
-                                      size: 28,
-                                    ),
-                                  ),
-                                  if (_isLayersRibbonExtended)
-                                    Expanded(
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(
-                                            left: 8.0, right: 16.0),
-                                        child: Text(
-                                          'No Layers Found',
-                                          style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 14),
-                                          softWrap: false,
-                                          overflow: TextOverflow.fade,
-                                        ),
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        if (_currentLogoState.isLogoVisible)
-                          _buildEditableElement(
-                            id: 0,
-                            position: _currentLogoState.logoPosition,
-                            size: _currentLogoState.logoSize,
-                            rotation: _currentLogoState.logoRotation,
-                            canvasSize: canvasSize,
-                            child: SvgPicture.string(
-                              widget.svgLogo,
-                              height: _currentLogoState.logoSize,
-                              width: _currentLogoState.logoSize,
-                            ),
-                          ),
-                        if (_currentLogoState.isCompanyNameVisible)
-                          _buildEditableElement(
-                            id: 1,
-                            position: _currentLogoState.companyNamePosition,
-                            size: _currentLogoState.companyNameSize,
-                            rotation: _currentLogoState.companyNameRotation,
-                            canvasSize: canvasSize,
-                            child: Text(
-                              widget.companyName,
-                              style: TextStyle(
-                                fontSize: _currentLogoState.companyNameSize,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        if (_currentLogoState.isSloganVisible)
-                          _buildEditableElement(
-                            id: 2,
-                            position: _currentLogoState.sloganPosition,
-                            size: _currentLogoState.sloganSize,
-                            rotation: _currentLogoState.sloganRotation,
-                            canvasSize: canvasSize,
-                            child: Text(
-                              widget.sloganName,
-                              style: TextStyle(
-                                fontSize: _currentLogoState.sloganSize,
-                                fontStyle: FontStyle.italic,
-                              ),
-                            ),
-                          ),
-                        if (_currentLogoState.isLogo2Visible)
-                          _buildEditableElement(
-                            id: 3,
-                            position: _currentLogoState.logo2Position!,
-                            size: _currentLogoState.logo2Size!,
-                            rotation: _currentLogoState.logo2Rotation!,
-                            canvasSize: canvasSize,
-                            child: SvgPicture.string(
-                              widget.svgLogo,
-                              height: _currentLogoState.logo2Size!,
-                              width: _currentLogoState.logo2Size!,
-                            ),
-                          ),
-                        if (_currentLogoState.isCompanyName2Visible)
-                          _buildEditableElement(
-                            id: 4,
-                            position: _currentLogoState.companyName2Position!,
-                            size: _currentLogoState.companyName2Size!,
-                            rotation: _currentLogoState.companyName2Rotation!,
-                            canvasSize: canvasSize,
-                            child: Text(
-                              widget.companyName,
-                              style: TextStyle(
-                                fontSize: _currentLogoState.companyName2Size!,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        if (_currentLogoState.isSlogan2Visible)
-                          _buildEditableElement(
-                            id: 5,
-                            position: _currentLogoState.slogan2Position!,
-                            size: _currentLogoState.slogan2Size!,
-                            rotation: _currentLogoState.slogan2Rotation!,
-                            canvasSize: canvasSize,
-                            child: Text(
-                              widget.sloganName,
-                              style: TextStyle(
-                                fontSize: _currentLogoState.slogan2Size!,
-                                fontStyle: FontStyle.italic,
-                              ),
-                            ),
-                          ),
-                      ],
-                    );
+                child: LogoCanvas(
+                  canvasKey: _canvasKey,
+                  logoState: _currentLogoState,
+                  svgLogo: widget.svgLogo,
+                  companyName: widget.companyName,
+                  sloganName: widget.sloganName,
+                  showGrid: _showGrid,
+                  isEditingMode: isEditing,
+                  selectedElementId: selectedElement,
+                  highlightedHorizontalGridLineIndex:
+                      _highlightedHorizontalGridLineIndex,
+                  highlightedVerticalGridLineIndex:
+                      _highlightedVerticalGridLineIndex,
+                  isLayersRibbonExtended: _isLayersRibbonExtended,
+                  onToggleGrid: () {
+                    setState(() {
+                      _showGrid = !_showGrid;
+                      if (!_showGrid) {
+                        _clearGridAlignment();
+                      }
+                    });
                   },
+                  onToggleLayersRibbon: () {
+                    setState(() {
+                      _isLayersRibbonExtended = !_isLayersRibbonExtended;
+                    });
+                  },
+                  onElementTap: (id) {
+                    setState(() {
+                      selectedElement = id;
+                      _clearGridAlignment();
+                    });
+                  },
+                  
+                  onElementPanStart: _onPanStart,
+                  onElementPanUpdate: _onPanUpdate,
+                  onElementPanEnd: _onPanEnd,
+                  onElementDelete: _deleteElement,
+                  onElementSplit: _splitElement,
+                  onElementRotateTap: _rotateElementByTap,
+                  onElementRotatePanStart: _onRotatePanStart,
+                  onElementRotatePanUpdate: _onRotatePanUpdate,
+                  onElementRotatePanEnd: _onRotatePanEnd,
+                  onElementResizeTap: _resizeElementByTap,
+                  onElementResizePanStart: _onResizePanStart,
+                  onElementResizePanUpdate: _onResizePanUpdate,
+                  onElementResizePanEnd: _onResizePanEnd,
                 ),
               ),
               Column(
-                children: [
-                  Container(height: 300, color: Colors.grey.shade200)
-                ],
+                children: [Container(height: 300, color: Colors.grey.shade200)],
               ),
             ],
           ),
         ],
       ),
-      bottomNavigationBar: SizedBox(
-        height: 100,
-        child: BottomAppBar(
-          color: Colors.black,
-          child: Row(
-            children: List.generate(5, (index) {
-              IconData iconData;
-              String label;
-              VoidCallback onTap;
-
-              switch (index) {
-                case 0:
-                  iconData = Icons.layers;
-                  label = 'Background';
-                  onTap = () {
-                    setState(() {
-                      isEditing = false;
-                      selectedIndex = 0;
-                      selectedElement = null;
-                    });
-                  };
-                  break;
-                case 1:
-                  iconData = Icons.article_rounded;
-                  label = 'Art';
-                  onTap = () {
-                    setState(() {
-                      selectedIndex = 1;
-                    });
-                  };
-                  break;
-                case 2:
-                  iconData = Icons.text_fields_outlined;
-                  label = 'Text';
-                  onTap = () {
-                    setState(() {
-                      selectedIndex = 2;
-                    });
-                  };
-                  break;
-                case 3:
-                  iconData = Icons.edit;
-                  label = 'Effects';
-                  onTap = () {
-                    setState(() {
-                      selectedIndex = 3;
-                    });
-                  };
-                  break;
-                case 4:
-                default:
-                  iconData = Icons.image;
-                  label = 'Images';
-                  onTap = () {
-                    setState(() {
-                      selectedIndex = 4;
-                    });
-                  };
-                  break;
-              }
-
-              final isSelected = selectedIndex == index;
-
-              return Expanded(
-                child: GestureDetector(
-                  onTap: onTap,
-                  child: SizedBox.expand(
-                    child: Container(
-                      color: isSelected ? Colors.white : Colors.transparent,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            iconData,
-                            color: isSelected ? Colors.black : Colors.white,
-                            size: 20,
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            label,
-                            style: TextStyle(
-                              color: isSelected ? Colors.black : Colors.white,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }),
-          ),
-        ),
-      ),
-    );
-  }
-  Widget _buildEditableElement({
-    required int id,
-    required Offset position,
-    required double size,
-    required double rotation,
-    required Widget child,
-    required Size canvasSize,
-  }) {
-    Size elementSize = _getElementRenderedSize(id);
-
-    return Positioned(
-      left: position.dx,
-      top: position.dy,
-      child: GestureDetector(
-        onTap: () {
+      bottomNavigationBar: LogoBottomNavBar(
+        selectedIndex: selectedIndex,
+        onItemSelected: (index) {
           setState(() {
-            selectedElement = id;
-            _clearGridAlignment();
+            isEditing = false;
+            selectedIndex = index;
+            selectedElement =
+                null; 
           });
         },
-        onPanStart: (details) {
-          _saveState();
-        },
-        onPanUpdate: isEditing && selectedElement == id
-            ? (details) {
-          setState(() {
-            Offset newPosition = _limitOffset(
-                position, details.delta, elementSize, canvasSize);
-
-            if (id == 0) {
-              _currentLogoState =
-                  _currentLogoState.copyWith(logoPosition: newPosition);
-            } else if (id == 1) {
-              _currentLogoState = _currentLogoState.copyWith(
-                  companyNamePosition: newPosition);
-            } else if (id == 2) {
-              _currentLogoState =
-                  _currentLogoState.copyWith(sloganPosition: newPosition);
-            } else if (id == 3) {
-              _currentLogoState =
-                  _currentLogoState.copyWith(logo2Position: newPosition);
-            } else if (id == 4) {
-              _currentLogoState = _currentLogoState.copyWith(
-                  companyName2Position: newPosition);
-            } else if (id == 5) {
-              _currentLogoState = _currentLogoState.copyWith(
-                  slogan2Position: newPosition);
-            }
-            _checkGridAlignment(newPosition, elementSize, canvasSize);
-          });
-        }
-            : null,
-        onPanEnd: (details) {
-          _clearGridAlignment();
-        },
-        child: Container(
-          decoration: selectedElement == id && isEditing
-              ? BoxDecoration(
-            border: Border.all(
-              color: Colors.black38,
-              width: 3,
-            ),
-            borderRadius: BorderRadius.circular(6),
-          )
-              : null,
-          padding: const EdgeInsets.all(2),
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Transform.rotate(
-                angle: rotation * pi / 180,
-                child: child,
-              ),
-              if (selectedElement == id && isEditing) ...[
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  top: 0,
-                  left: 0,
-                  child: _buildCornerIcon(
-                    icon: Icons.close,
-                    onTap: _deleteElement,
-                    alignment: Alignment.topLeft,
-                  ),
-                ),
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  top: 0,
-                  left: 0,
-                  child: _buildCornerIcon(
-                    icon: Icons.call_split,
-                    onTap: _splitElement,
-                    alignment: Alignment.topRight,
-                  ),
-                ),
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  top: 0,
-                  left: 0,
-                  child: _buildCornerIcon(
-                    icon: Icons.rotate_right,
-                    onTap: _rotateElementByTap,
-                    onPanStart: (details) => _onRotatePanStart(details, id),
-                    onPanUpdate: (details) =>
-                        _onRotatePanUpdate(details, id, canvasSize),
-                    onPanEnd: _onRotatePanEnd,
-                    alignment: Alignment.bottomLeft,
-                  ),
-                ),
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  top: 0,
-                  left: 0,
-                  child: _buildCornerIcon(
-                    icon: Icons.open_in_full,
-                    onTap: _resizeElementByTap,
-                    onPanStart: (details) => _onResizePanStart(details, id),
-                    onPanUpdate: (details) =>
-                        _onResizePanUpdate(details, id, canvasSize),
-                    onPanEnd: _onResizePanEnd,
-                    alignment: Alignment.bottomRight,
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
       ),
     );
   }
 }
-class _GridPainter extends CustomPainter {
-  final Color gridColor;
-  final int? highlightedHorizontalLine;
-  final int? highlightedVerticalLine;
 
-  _GridPainter({
-    required this.gridColor,
-    this.highlightedHorizontalLine,
-    this.highlightedVerticalLine,
-  });
-
-  final double _dashWidth = 4.0;
-  final double _dashSpace = 4.0;
-  final double _strokeWidth = 2.0;
-  final double _highlightStrokeWidth = 3.0;
-  final Color _highlightColor = Colors.redAccent;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()
-      ..color = gridColor
-      ..strokeWidth = _strokeWidth
-      ..style = PaintingStyle.stroke;
-
-    final Paint highlightPaint = Paint()
-      ..color = _highlightColor
-      ..strokeWidth = _highlightStrokeWidth
-      ..style = PaintingStyle.stroke;
-
-    final double colStep = size.width / 4;
-    final double rowStep = size.height / 4;
-
-    for (int i = 0; i <= 4; i++) {
-      final double y = i * rowStep;
-      double currentX = 0;
-      final Paint currentPaint =
-      i == highlightedHorizontalLine ? highlightPaint : paint;
-      while (currentX < size.width) {
-        double segmentEnd = currentX + _dashWidth;
-        if (segmentEnd > size.width) {
-          segmentEnd = size.width;
-        }
-        canvas.drawLine(
-            Offset(currentX, y), Offset(segmentEnd, y), currentPaint);
-        currentX += _dashWidth + _dashSpace;
-      }
-    }
-
-    for (int i = 0; i <= 4; i++) {
-      final double x = i * colStep;
-      double currentY = 0;
-      final Paint currentPaint =
-      i == highlightedVerticalLine ? highlightPaint : paint;
-      while (currentY < size.height) {
-        double segmentEnd = currentY + _dashWidth;
-        if (segmentEnd > size.height) {
-          segmentEnd = size.height;
-        }
-        canvas.drawLine(
-            Offset(x, currentY), Offset(x, segmentEnd), currentPaint);
-        currentY += _dashWidth + _dashSpace;
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _GridPainter oldDelegate) {
-    return oldDelegate.gridColor != gridColor ||
-        oldDelegate.highlightedHorizontalLine != highlightedHorizontalLine ||
-        oldDelegate.highlightedVerticalLine != highlightedVerticalLine;
-  }
-}
