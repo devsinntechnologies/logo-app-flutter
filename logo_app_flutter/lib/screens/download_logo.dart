@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/gestures.dart'; // Add this line
 import 'package:flutter_svg/svg.dart';
-import 'dart:math'; // For pi, atan2, max
-
-// Helper class to store the full state of all logo elements
+import 'dart:math';
 class LogoStateData {
-  // Original elements
   final Offset logoPosition;
   final double logoSize;
   final double logoRotation;
@@ -20,8 +16,6 @@ class LogoStateData {
   final double sloganSize;
   final double sloganRotation;
   final bool isSloganVisible;
-
-  // Duplicated elements (for 'split' functionality)
   final Offset? logo2Position;
   final double? logo2Size;
   final double? logo2Rotation;
@@ -63,8 +57,6 @@ class LogoStateData {
     this.slogan2Rotation,
     this.isSlogan2Visible = false,
   });
-
-  // Helper to copy and update state
   LogoStateData copyWith({
     Offset? logoPosition,
     double? logoSize,
@@ -120,11 +112,9 @@ class LogoStateData {
     );
   }
 }
-
-// Utility to measure text size dynamically
 class _TextSizeUtil {
   static Size getTextSize(String text, TextStyle? style) {
-    if (text.isEmpty) return Size.zero; // Handle empty text
+    if (text.isEmpty) return Size.zero;
     final TextPainter textPainter = TextPainter(
       text: TextSpan(text: text, style: style),
       textDirection: TextDirection.ltr,
@@ -160,20 +150,14 @@ class _DownloadLogoState extends State<DownloadLogo> {
   bool _isLayersRibbonExtended = false;
 
   bool isEditing = false;
-  // Element IDs: 0: Logo, 1: Company Name, 2: Slogan,
-  // 3: Logo2 (duplicate), 4: CompanyName2 (duplicate), 5: Slogan2 (duplicate)
   int? selectedElement;
-  int selectedIndex = 0; // For bottom navigation bar
+  int selectedIndex = 0;
 
   int? _highlightedHorizontalGridLineIndex;
   int? _highlightedVerticalGridLineIndex;
-
-  // Global key to get the renderbox of the canvas for global coordinates
   final GlobalKey _canvasKey = GlobalKey();
-
-  // Variables for drag-to-resize/rotate functionality
-  Offset? _initialDragPoint; // Initial touch point for resize/rotate
-  double? _initialElementValue; // Initial size/rotation value
+  Offset? _initialDragPoint;
+  double? _initialElementValue;
 
   @override
   void initState() {
@@ -204,10 +188,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
       slogan2Rotation: 0,
       isSlogan2Visible: false,
     );
-    _saveState(); // Save initial state for undo
+    _saveState();
   }
-
-  // --- Undo/Redo Logic ---
   void _saveState() {
     if (_undoStack.length >= _maxUndoHistory) {
       _undoStack.removeAt(0);
@@ -233,8 +215,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
     }
   }
 
-  // --- Helper Methods for Element Manipulation ---
-
   Offset _limitOffset(
       Offset original, Offset delta, Size elementSize, Size canvasSize) {
     final newOffset = original + delta;
@@ -247,9 +227,9 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
   Size _getElementRenderedSize(int elementId) {
     switch (elementId) {
-      case 0: // Original Logo
+      case 0:
         return Size(_currentLogoState.logoSize, _currentLogoState.logoSize);
-      case 1: // Original Company Name
+      case 1:
         return _TextSizeUtil.getTextSize(
           widget.companyName,
           TextStyle(
@@ -257,7 +237,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
             fontWeight: FontWeight.bold,
           ),
         );
-      case 2: // Original Slogan
+      case 2:
         return _TextSizeUtil.getTextSize(
           widget.sloganName,
           TextStyle(
@@ -265,10 +245,10 @@ class _DownloadLogoState extends State<DownloadLogo> {
             fontStyle: FontStyle.italic,
           ),
         );
-      case 3: // Duplicated Logo
+      case 3:
         return Size(_currentLogoState.logo2Size ?? 0,
             _currentLogoState.logo2Size ?? 0);
-      case 4: // Duplicated Company Name
+      case 4:
         return _TextSizeUtil.getTextSize(
           widget.companyName,
           TextStyle(
@@ -276,7 +256,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
             fontWeight: FontWeight.bold,
           ),
         );
-      case 5: // Duplicated Slogan
+      case 5:
         return _TextSizeUtil.getTextSize(
           widget.sloganName,
           TextStyle(
@@ -382,12 +362,9 @@ class _DownloadLogoState extends State<DownloadLogo> {
       );
     });
   }
-
-  // Changed to _rotateElementByTap to differentiate from drag
   void _rotateElementByTap() {
     _saveState();
     setState(() {
-      // Increased rotation step for more noticeable tap changes
       const double rotationStep = 45;
       if (selectedElement == 0) {
         _currentLogoState = _currentLogoState.copyWith(
@@ -418,12 +395,9 @@ class _DownloadLogoState extends State<DownloadLogo> {
       }
     });
   }
-
-  // Changed to _resizeElementByTap to differentiate from drag
   void _resizeElementByTap() {
     _saveState();
     setState(() {
-      // Increased resize step for more noticeable tap changes
       const double resizeStep = 20.0;
       const double minSize = 10.0;
       if (selectedElement == 0) {
@@ -510,7 +484,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
   Widget _buildCornerIcon({
     required IconData icon,
-    required VoidCallback onTap, // For simple tap actions
+    required VoidCallback onTap,
     required Alignment alignment,
     GestureDragStartCallback? onPanStart,
     GestureDragUpdateCallback? onPanUpdate,
@@ -546,8 +520,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
       ),
     );
   }
-
-  // --- Grid Alignment Logic ---
   void _checkGridAlignment(
       Offset elementPosition, Size elementSize, Size canvasSize) {
     int? newHighlightedHorizontal;
@@ -600,55 +572,36 @@ class _DownloadLogoState extends State<DownloadLogo> {
     }
   }
 
-  // --- Pan gesture handlers for Resize and Rotate icons ---
-
   void _onResizePanStart(DragStartDetails details, int id) {
-    _saveState(); // Save state at the beginning of the drag
+    _saveState();
     _initialDragPoint = details.globalPosition;
     _initialElementValue = _getCurrentElementSize(id);
   }
 
   void _onResizePanUpdate(DragUpdateDetails details, int id, Size canvasSize) {
     if (_initialDragPoint == null || _initialElementValue == null) return;
-
-    // Get the global position of the element's top-left corner
     final RenderBox? renderBox = _canvasKey.currentContext?.findRenderObject() as RenderBox?;
     final Offset? canvasOffset = renderBox?.localToGlobal(Offset.zero);
 
     if (canvasOffset == null) return;
-
-    // Calculate the element's center in global coordinates
     final Offset elementCurrentPosition = _getCurrentElementPosition(id);
     final Size elementCurrentSize = _getElementRenderedSize(id);
     final Offset elementCenterGlobal = Offset(
       canvasOffset.dx + elementCurrentPosition.dx + elementCurrentSize.width / 2,
       canvasOffset.dy + elementCurrentPosition.dy + elementCurrentSize.height / 2,
     );
-
-    // Calculate initial distance from center to drag point
     final double initialDistance = (_initialDragPoint! - elementCenterGlobal).distance;
-
-    // Calculate current distance from center to drag point
     final double currentDistance = (details.globalPosition - elementCenterGlobal).distance;
-
-    // Calculate the scale factor based on distance change
     final double scaleFactor = currentDistance / initialDistance;
-
-    // Apply sensitivity to make resizing more or less aggressive
-    const double sensitivity = 0.5; // Adjust this value to control responsiveness
+    const double sensitivity = 0.5;
     double newSize = _initialElementValue! * scaleFactor;
     newSize = _initialElementValue! + (newSize - _initialElementValue!) * sensitivity;
-
-
-    // Clamp the new size
     const double minSize = 10.0;
-    const double maxSize = 300.0; // Prevent elements from becoming too large
+    const double maxSize = 300.0;
     newSize = newSize.clamp(minSize, maxSize);
 
     setState(() {
-      // Update the size for the selected element
       _updateElementSize(id, newSize);
-      // Recalculate and update grid alignment (optional, but good for real-time feedback)
       _checkGridAlignment(_getCurrentElementPosition(id), _getElementRenderedSize(id), canvasSize);
     });
   }
@@ -660,41 +613,28 @@ class _DownloadLogoState extends State<DownloadLogo> {
   }
 
   void _onRotatePanStart(DragStartDetails details, int id) {
-    _saveState(); // Save state at the beginning of the drag
+    _saveState();
     _initialDragPoint = details.globalPosition;
     _initialElementValue = _getCurrentElementRotation(id);
   }
 
   void _onRotatePanUpdate(DragUpdateDetails details, int id, Size canvasSize) {
     if (_initialDragPoint == null || _initialElementValue == null) return;
-
-    // Get the global position of the element's top-left corner
     final RenderBox? renderBox = _canvasKey.currentContext?.findRenderObject() as RenderBox?;
     final Offset? canvasOffset = renderBox?.localToGlobal(Offset.zero);
 
     if (canvasOffset == null) return;
-
-    // Calculate the element's center in global coordinates
     final Offset elementCurrentPosition = _getCurrentElementPosition(id);
     final Size elementCurrentSize = _getElementRenderedSize(id);
     final Offset elementCenterGlobal = Offset(
       canvasOffset.dx + elementCurrentPosition.dx + elementCurrentSize.width / 2,
       canvasOffset.dy + elementCurrentPosition.dy + elementCurrentSize.height / 2,
     );
-
-    // Vector from center to initial drag point
     final Offset v1 = _initialDragPoint! - elementCenterGlobal;
-    // Vector from center to current drag point
     final Offset v2 = details.globalPosition - elementCenterGlobal;
-
-    // Calculate angle between the two vectors using atan2
     double angle1 = atan2(v1.dy, v1.dx);
     double angle2 = atan2(v2.dy, v2.dx);
-
-    // Calculate the difference in angles (in radians)
     double angleDeltaRadians = angle2 - angle1;
-
-    // Convert to degrees and normalize to 0-360
     double angleDeltaDegrees = angleDeltaRadians * 180 / pi;
     double newRotation = (_initialElementValue! + angleDeltaDegrees) % 360;
     if (newRotation < 0) {
@@ -710,8 +650,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
     _initialDragPoint = null;
     _initialElementValue = null;
   }
-
-  // Helper to get current size by ID for resize pan
   double _getCurrentElementSize(int id) {
     switch (id) {
       case 0:
@@ -730,8 +668,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
         return 0;
     }
   }
-
-  // Helper to update size by ID
   void _updateElementSize(int id, double newSize) {
     if (id == 0) {
       _currentLogoState = _currentLogoState.copyWith(logoSize: newSize);
@@ -747,8 +683,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
       _currentLogoState = _currentLogoState.copyWith(slogan2Size: newSize);
     }
   }
-
-  // Helper to get current rotation by ID for rotate pan
   double _getCurrentElementRotation(int id) {
     switch (id) {
       case 0:
@@ -767,8 +701,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
         return 0;
     }
   }
-
-  // Helper to update rotation by ID
   void _updateElementRotation(int id, double newRotation) {
     if (id == 0) {
       _currentLogoState = _currentLogoState.copyWith(logoRotation: newRotation);
@@ -786,8 +718,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
       _currentLogoState = _currentLogoState.copyWith(slogan2Rotation: newRotation);
     }
   }
-
-  // Helper to get current position by ID (needed for center calculation)
   Offset _getCurrentElementPosition(int id) {
     switch (id) {
       case 0:
@@ -833,7 +763,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
               setState(() {
                 isEditing = !isEditing;
                 selectedElement = null;
-                _clearGridAlignment(); // Clear highlights when toggling edit mode
+                _clearGridAlignment();
               });
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -859,7 +789,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
                   builder: (context, constraints) {
                     final Size canvasSize = constraints.biggest;
                     return Stack(
-                      key: _canvasKey, // Assign GlobalKey to the canvas Stack
+                      key: _canvasKey,
                       children: [
                         if (_showGrid)
                           CustomPaint(
@@ -971,8 +901,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
                             ),
                           ),
                         ),
-
-                        // Logo (Original)
                         if (_currentLogoState.isLogoVisible)
                           _buildEditableElement(
                             id: 0,
@@ -986,8 +914,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
                               width: _currentLogoState.logoSize,
                             ),
                           ),
-
-                        // Company Name (Original)
                         if (_currentLogoState.isCompanyNameVisible)
                           _buildEditableElement(
                             id: 1,
@@ -1003,8 +929,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
                               ),
                             ),
                           ),
-
-                        // Slogan (Original)
                         if (_currentLogoState.isSloganVisible)
                           _buildEditableElement(
                             id: 2,
@@ -1020,8 +944,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
                               ),
                             ),
                           ),
-
-                        // Logo (Duplicate)
                         if (_currentLogoState.isLogo2Visible)
                           _buildEditableElement(
                             id: 3,
@@ -1035,8 +957,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
                               width: _currentLogoState.logo2Size!,
                             ),
                           ),
-
-                        // Company Name (Duplicate)
                         if (_currentLogoState.isCompanyName2Visible)
                           _buildEditableElement(
                             id: 4,
@@ -1052,8 +972,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
                               ),
                             ),
                           ),
-
-                        // Slogan (Duplicate)
                         if (_currentLogoState.isSlogan2Visible)
                           _buildEditableElement(
                             id: 5,
@@ -1180,8 +1098,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
       ),
     );
   }
-
-  // --- Widget Builder for Editable Elements ---
   Widget _buildEditableElement({
     required int id,
     required Offset position,
@@ -1285,7 +1201,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
                   left: 0,
                   child: _buildCornerIcon(
                     icon: Icons.rotate_right,
-                    onTap: _rotateElementByTap, // Tap to rotate
+                    onTap: _rotateElementByTap,
                     onPanStart: (details) => _onRotatePanStart(details, id),
                     onPanUpdate: (details) =>
                         _onRotatePanUpdate(details, id, canvasSize),
@@ -1300,7 +1216,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
                   left: 0,
                   child: _buildCornerIcon(
                     icon: Icons.open_in_full,
-                    onTap: _resizeElementByTap, // Tap to resize
+                    onTap: _resizeElementByTap,
                     onPanStart: (details) => _onResizePanStart(details, id),
                     onPanUpdate: (details) =>
                         _onResizePanUpdate(details, id, canvasSize),
@@ -1316,8 +1232,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
     );
   }
 }
-
-// CustomPainter for drawing the fixed 4x4 dotted grid
 class _GridPainter extends CustomPainter {
   final Color gridColor;
   final int? highlightedHorizontalLine;
