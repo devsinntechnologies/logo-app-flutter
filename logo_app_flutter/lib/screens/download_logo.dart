@@ -564,11 +564,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
     _initialDragPoint = details.globalPosition;
     _initialElementValue = _getCurrentElementSize(id);
   }
-
-  
-  
-
-  
   void _onResizePanUpdate(int id, DragUpdateDetails details) {
     if (_initialDragPoint == null || _initialElementValue == null) return;
     final RenderBox? renderBox =
@@ -878,7 +873,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
             selectedElement =
                 null; 
           });
-        },
+        }, hasTapped: true, // Assuming this is a flag to indicate if the user has tapped on the nav bar
       ),
     );
   }

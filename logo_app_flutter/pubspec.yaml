@@ -41,6 +41,9 @@ dependencies:
   connectivity_plus: ^6.1.4
   screenshot: ^1.0.0
   path_provider: ^2.0.0 
+  fluttericon: ^2.0.0
+  font_awesome_flutter: ^10.8.0
+  iconsax: ^0.0.8
   
   
 

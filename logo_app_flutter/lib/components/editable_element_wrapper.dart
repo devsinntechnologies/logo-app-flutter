@@ -111,7 +111,7 @@ class EditableElementWrapper extends StatelessWidget {
                 ),
               ),
 
-              // Now add Positioned Corner Icons based on alignment
+              // Now add Positioned Corner Icons based on //
               if (isSelected && isEditingMode) ...[
                 Positioned(
                   top: -15,
@@ -119,7 +119,7 @@ class EditableElementWrapper extends StatelessWidget {
                   child: CornerActionIcon(
                     icon: Icons.close,
                     onTap: () => onDelete(id),
-                    alignment: Alignment.topLeft,
+                    //: //.topLeft,
                   ),
                 ),
                 Positioned(
@@ -128,7 +128,7 @@ class EditableElementWrapper extends StatelessWidget {
                   child: CornerActionIcon(
                     icon: Icons.call_split,
                     onTap: () => onSplit(id),
-                    alignment: Alignment.topRight,
+                    //: //.topRight,
                   ),
                 ),
                 Positioned(
@@ -140,7 +140,7 @@ class EditableElementWrapper extends StatelessWidget {
                     onPanStart: (details) => onRotatePanStart(id, details),
                     onPanUpdate: (details) => onRotatePanUpdate(id, details),
                     onPanEnd: (details) => onRotatePanEnd(id),
-                    alignment: Alignment.bottomLeft,
+                    //: //.bottomLeft,
                   ),
                 ),
                 Positioned(
@@ -152,7 +152,7 @@ class EditableElementWrapper extends StatelessWidget {
                     onPanStart: (details) => onResizePanStart(id, details),
                     onPanUpdate: (details) => onResizePanUpdate(id, details),
                     onPanEnd: (details) => onResizePanEnd(id),
-                    alignment: Alignment.bottomRight,
+                    //: //.bottomRight,
                   ),
                 ),
               ],
