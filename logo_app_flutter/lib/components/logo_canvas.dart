@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart'; // Needed for SvgPicture.string
 import 'dart:math'; // Needed for math.pi
 
-
-
 import '../models/logo_state_data.dart';
 import '../utils/text_size_util.dart';
 import 'editable_element_wrapper.dart';
@@ -43,7 +41,6 @@ class LogoCanvas extends StatelessWidget {
   final ElementDragUpdateCallback onElementResizePanUpdate;
   final ElementPanEndCallback onElementResizePanEnd;
 
-
   const LogoCanvas({
     super.key,
     required this.canvasKey,
@@ -75,7 +72,6 @@ class LogoCanvas extends StatelessWidget {
     required this.onElementResizePanEnd,
   });
 
-
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -86,21 +82,25 @@ class LogoCanvas extends StatelessWidget {
           children: [
             if (showGrid)
               CustomPaint(
-                painter: GridPainter( // Use the extracted GridPainter
+                painter: GridPainter(
+                  // Use the extracted GridPainter
                   gridColor: Colors.black,
                   highlightedHorizontalLine: highlightedHorizontalGridLineIndex,
                   highlightedVerticalLine: highlightedVerticalGridLineIndex,
                 ),
                 size: Size.infinite,
               ),
-            Positioned( // Grid Toggle button
+            Positioned(
+              // Grid Toggle button
               top: 20,
               right: 0,
               child: GestureDetector(
                 onTap: onToggleGrid, // Use callback
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 8),
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.grey.shade700,
                     borderRadius: const BorderRadius.only(
@@ -123,7 +123,8 @@ class LogoCanvas extends StatelessWidget {
                 ),
               ),
             ),
-            Positioned( // Layers Ribbon Toggle button
+            Positioned(
+              // Layers Ribbon Toggle button
               top: 20,
               left: 0,
               child: GestureDetector(
@@ -161,15 +162,16 @@ class LogoCanvas extends StatelessWidget {
                         ),
                       ),
                       if (isLayersRibbonExtended)
-                        const Expanded( // Changed to const for optimization
+                        const Expanded(
+                          // Changed to const for optimization
                           child: Padding(
-                            padding: EdgeInsets.only(
-                                left: 8.0, right: 16.0),
+                            padding: EdgeInsets.only(left: 8.0, right: 16.0),
                             child: Text(
                               'No Layers Found',
                               style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14),
+                                color: Colors.white,
+                                fontSize: 14,
+                              ),
                               softWrap: false,
                               overflow: TextOverflow.fade,
                             ),

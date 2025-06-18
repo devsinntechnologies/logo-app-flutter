@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class LogoStateData {
@@ -106,7 +105,7 @@ class LogoStateData {
       companyName2Size: companyName2Size ?? this.companyName2Size,
       companyName2Rotation: companyName2Rotation ?? this.companyName2Rotation,
       isCompanyName2Visible:
-      isCompanyName2Visible ?? this.isCompanyName2Visible,
+          isCompanyName2Visible ?? this.isCompanyName2Visible,
       slogan2Position: slogan2Position ?? this.slogan2Position,
       slogan2Size: slogan2Size ?? this.slogan2Size,
       slogan2Rotation: slogan2Rotation ?? this.slogan2Rotation,
