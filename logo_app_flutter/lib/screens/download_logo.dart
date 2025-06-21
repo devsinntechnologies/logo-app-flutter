@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:logo_app_flutter/components/logo_bottom_nav_bar.dart';
 import 'package:logo_app_flutter/models/logo_state_data.dart';
 
+import '../components/logoBottomNavbarItems/drop_up_panel.dart';
 import '../components/logo_canvas.dart';
 import '../utils/text_size_util.dart';
 
@@ -32,6 +33,11 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
   bool _showGrid = false;
   bool _isLayersRibbonExtended = false;
+  bool showDropUp = false;
+
+  bool isCheckerboardActive = false;
+  bool isCheckerboardVisible = false;
+  double checkerboardOpacity = 1.0;
 
   bool isEditing = false;
   int? id;
@@ -76,14 +82,12 @@ class _DownloadLogoState extends State<DownloadLogo> {
     _saveState();
   }
 
-  
   Size _getElementRenderedSize(int elementId) {
     switch (elementId) {
       case 0:
         return Size(_currentLogoState.logoSize, _currentLogoState.logoSize);
       case 1:
         return TextSizeUtil.getTextSize(
-          
           widget.companyName,
           TextStyle(
             fontSize: _currentLogoState.companyNameSize,
@@ -92,7 +96,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
         );
       case 2:
         return TextSizeUtil.getTextSize(
-          
           widget.sloganName,
           TextStyle(
             fontSize: _currentLogoState.sloganSize,
@@ -106,7 +109,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
         );
       case 4:
         return TextSizeUtil.getTextSize(
-          
           widget.companyName,
           TextStyle(
             fontSize: _currentLogoState.companyName2Size ?? 0,
@@ -115,7 +117,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
         );
       case 5:
         return TextSizeUtil.getTextSize(
-          
           widget.sloganName,
           TextStyle(
             fontSize: _currentLogoState.slogan2Size ?? 0,
@@ -152,26 +153,23 @@ class _DownloadLogoState extends State<DownloadLogo> {
     }
   }
 
-  
   void _onPanStart(int id, DragStartDetails details) {
     _saveState();
-    
   }
 
-  
   void _onPanUpdate(int id, Offset delta) {
     final RenderBox? renderBox =
         _canvasKey.currentContext?.findRenderObject() as RenderBox?;
     final Size? canvasSize = renderBox?.size;
 
-    if (canvasSize == null) return; 
+    if (canvasSize == null) return;
 
     setState(() {
       Offset newPosition = _limitOffset(
         _getCurrentElementPosition(id),
         delta,
         _getElementRenderedSize(id),
-      ); 
+      );
 
       if (id == 0) {
         _currentLogoState = _currentLogoState.copyWith(
@@ -202,20 +200,15 @@ class _DownloadLogoState extends State<DownloadLogo> {
     });
   }
 
-  
   void _onPanEnd(int id) {
-    
     _clearGridAlignment();
-    
   }
 
   Offset _limitOffset(Offset original, Offset delta, Size elementSize) {
-    
     final RenderBox? renderBox =
         _canvasKey.currentContext?.findRenderObject() as RenderBox?;
-    final Size? canvasSize = renderBox?.size; 
-    if (canvasSize == null)
-      return original + delta; 
+    final Size? canvasSize = renderBox?.size;
+    if (canvasSize == null) return original + delta;
 
     final newOffset = original + delta;
     final clampedDx = newOffset.dx.clamp(
@@ -250,7 +243,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
         );
       } else if (id == 4) {
         _currentLogoState = _currentLogoState.copyWith(
-          
           isCompanyName2Visible: false,
           companyName2Position: null,
           companyName2Size: null,
@@ -266,7 +258,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
       } else {
         message = 'No element selected to delete.';
       }
-      selectedElement = null; 
+      selectedElement = null;
 
       ScaffoldMessenger.of(
         context,
@@ -460,6 +452,18 @@ class _DownloadLogoState extends State<DownloadLogo> {
     );
   }
 
+  void _handleToggleCheckerboard(bool value) {
+    setState(() {
+      isCheckerboardVisible = value;
+    });
+  }
+
+  void _toggleCheckerboard(bool on) {
+    setState(() {
+      isCheckerboardActive = on;
+    });
+  }
+
   void _saveAsSVG() {
     ScaffoldMessenger.of(
       context,
@@ -473,7 +477,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
   }
 
   void _checkGridAlignment(Offset elementPosition, Size elementSize) {
-    
     int? newHighlightedHorizontal;
     int? newHighlightedVertical;
 
@@ -484,8 +487,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
     final RenderBox? renderBox =
         _canvasKey.currentContext?.findRenderObject() as RenderBox?;
-    final Size? canvasSize = renderBox?.size; 
-    if (canvasSize == null) return; 
+    final Size? canvasSize = renderBox?.size;
+    if (canvasSize == null) return;
 
     const double tolerance = 10.0;
     final double centerX = elementPosition.dx + elementSize.width / 2;
@@ -564,14 +567,15 @@ class _DownloadLogoState extends State<DownloadLogo> {
     _initialDragPoint = details.globalPosition;
     _initialElementValue = _getCurrentElementSize(id);
   }
+
   void _onResizePanUpdate(int id, DragUpdateDetails details) {
     if (_initialDragPoint == null || _initialElementValue == null) return;
     final RenderBox? renderBox =
         _canvasKey.currentContext?.findRenderObject() as RenderBox?;
     final Offset? canvasOffset = renderBox?.localToGlobal(Offset.zero);
-    final Size? canvasSize = renderBox?.size; 
+    final Size? canvasSize = renderBox?.size;
 
-    if (canvasOffset == null || canvasSize == null) return; 
+    if (canvasOffset == null || canvasSize == null) return;
 
     final Offset elementCurrentPosition = _getCurrentElementPosition(id);
     final Size elementCurrentSize = _getElementRenderedSize(id);
@@ -601,7 +605,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
       _checkGridAlignment(
         _getCurrentElementPosition(id),
         _getElementRenderedSize(id),
-      ); 
+      );
     });
   }
 
@@ -617,18 +621,13 @@ class _DownloadLogoState extends State<DownloadLogo> {
     _initialElementValue = _getCurrentElementRotation(id);
   }
 
-  
-  
-
-  
   void _onRotatePanUpdate(int id, DragUpdateDetails details) {
-    
     if (_initialDragPoint == null || _initialElementValue == null) return;
     final RenderBox? renderBox =
         _canvasKey.currentContext?.findRenderObject() as RenderBox?;
     final Offset? canvasOffset = renderBox?.localToGlobal(Offset.zero);
 
-    if (canvasOffset == null) return; 
+    if (canvasOffset == null) return;
 
     final Offset elementCurrentPosition = _getCurrentElementPosition(id);
     final Size elementCurrentSize = _getElementRenderedSize(id);
@@ -761,6 +760,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -841,7 +841,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
                       _clearGridAlignment();
                     });
                   },
-                  
                   onElementPanStart: _onPanStart,
                   onElementPanUpdate: _onPanUpdate,
                   onElementPanEnd: _onPanEnd,
@@ -855,6 +854,9 @@ class _DownloadLogoState extends State<DownloadLogo> {
                   onElementResizePanStart: _onResizePanStart,
                   onElementResizePanUpdate: _onResizePanUpdate,
                   onElementResizePanEnd: _onResizePanEnd,
+                  isCheckerboardActive: isCheckerboardActive,
+                  checkerboardOpacity: checkerboardOpacity,
+                  isCheckerboardVisible: isCheckerboardVisible,
                 ),
               ),
               Column(
@@ -862,20 +864,40 @@ class _DownloadLogoState extends State<DownloadLogo> {
               ),
             ],
           ),
+
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: AnimatedSlide(
+              duration: const Duration(milliseconds: 300),
+              offset: showDropUp ? Offset(0, 0) : Offset(0, 1),
+              curve: Curves.easeInOut,
+              child: DropUpPanel(
+                onClose: () => setState(() => showDropUp = false),
+                onToggleCheckerboard: _handleToggleCheckerboard,
+                onOpacityChanged: (val) {
+                  setState(() => checkerboardOpacity = val);
+                },
+              ),
+            ),
+          ),
         ],
       ),
       bottomNavigationBar: LogoBottomNavBar(
         selectedIndex: selectedIndex,
         onItemSelected: (index) {
           setState(() {
-            isEditing = false;
             selectedIndex = index;
-            selectedElement =
-                null; 
+            if (index == 0) {
+              // Toggle DropUpPanel
+              showDropUp = !showDropUp;
+            } else {
+              // Hide DropUpPanel if any other tab is selected
+              showDropUp = false;
+            }
           });
-        }, hasTapped: true, // Assuming this is a flag to indicate if the user has tapped on the nav bar
+        },
+        hasTapped: true,
       ),
     );
   }
 }
-

@@ -21,6 +21,9 @@ class LogoCanvas extends StatelessWidget {
   final int? highlightedVerticalGridLineIndex;
   final bool isLayersRibbonExtended;
 
+  final bool isCheckerboardActive;
+  final bool isCheckerboardVisible;
+  final double checkerboardOpacity;
   // Callbacks for toggling UI elements
   final VoidCallback onToggleGrid;
   final VoidCallback onToggleLayersRibbon;
@@ -70,6 +73,9 @@ class LogoCanvas extends StatelessWidget {
     required this.onElementResizePanStart,
     required this.onElementResizePanUpdate,
     required this.onElementResizePanEnd,
+    required this.isCheckerboardActive,
+    required this.checkerboardOpacity,
+    required this.isCheckerboardVisible,
   });
 
   @override
@@ -79,6 +85,7 @@ class LogoCanvas extends StatelessWidget {
         final Size canvasSize = constraints.biggest;
         return Stack(
           key: canvasKey, // Use the passed-in canvasKey
+
           children: [
             if (showGrid)
               CustomPaint(
@@ -89,6 +96,16 @@ class LogoCanvas extends StatelessWidget {
                   highlightedVerticalLine: highlightedVerticalGridLineIndex,
                 ),
                 size: Size.infinite,
+              ),
+            if (isCheckerboardVisible)
+              Opacity(
+                opacity: checkerboardOpacity,
+                child: Image.asset(
+                  'lib/assets/icons/checkerboard.png',
+                  width: double.infinity,
+                  height: double.infinity,
+                  fit: BoxFit.cover,
+                ),
               ),
             Positioned(
               // Grid Toggle button
