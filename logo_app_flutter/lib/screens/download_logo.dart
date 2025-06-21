@@ -1,5 +1,7 @@
-import 'package:flutter/material.dart';
+// ** PASTE THIS ENTIRE CODE BLOCK INTO YOUR FILE **
 
+import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'dart:math';
 
 import 'package:logo_app_flutter/components/logo_bottom_nav_bar.dart';
@@ -8,6 +10,7 @@ import 'package:logo_app_flutter/models/logo_state_data.dart';
 import '../components/logoBottomNavbarItems/drop_up_panel.dart';
 import '../components/logo_canvas.dart';
 import '../utils/text_size_util.dart';
+import 'text_screen.dart';
 
 class DownloadLogo extends StatefulWidget {
   final String svgLogo;
@@ -25,28 +28,35 @@ class DownloadLogo extends StatefulWidget {
   State<DownloadLogo> createState() => _DownloadLogoState();
 }
 
-class _DownloadLogoState extends State<DownloadLogo> {
-  late LogoStateData _currentLogoState;
+// ** PASTE THIS ENTIRE CLASS **
 
+class _DownloadLogoState extends State<DownloadLogo> {
+  // --- State Management ---
+  late LogoStateData _currentLogoState;
   final List<LogoStateData> _undoStack = [];
   final int _maxUndoHistory = 10;
 
+  // --- UI Toggles ---
   bool _showGrid = false;
   bool _isLayersRibbonExtended = false;
   bool showDropUp = false;
 
+  // --- Background Toggles ---
   bool isCheckerboardActive = false;
   bool isCheckerboardVisible = false;
   double checkerboardOpacity = 1.0;
 
+  // --- Editing State ---
   bool isEditing = false;
-  int? id;
   int? selectedElement;
   int selectedIndex = 0;
 
+  // --- Grid & Canvas Keys for Coordinates ---
   int? _highlightedHorizontalGridLineIndex;
   int? _highlightedVerticalGridLineIndex;
   final GlobalKey _canvasKey = GlobalKey();
+
+  // --- Drag State ---
   Offset? _initialDragPoint;
   double? _initialElementValue;
 
@@ -66,73 +76,49 @@ class _DownloadLogoState extends State<DownloadLogo> {
       sloganSize: 18,
       sloganRotation: 0,
       isSloganVisible: true,
-      logo2Position: const Offset(150, 100),
-      logo2Size: 100,
-      logo2Rotation: 0,
       isLogo2Visible: false,
-      companyName2Position: const Offset(160, 200),
-      companyName2Size: 20,
-      companyName2Rotation: 0,
       isCompanyName2Visible: false,
-      slogan2Position: const Offset(150, 240),
-      slogan2Size: 18,
-      slogan2Rotation: 0,
       isSlogan2Visible: false,
     );
     _saveState();
   }
 
-  Size _getElementRenderedSize(int elementId) {
-    switch (elementId) {
-      case 0:
-        return Size(_currentLogoState.logoSize, _currentLogoState.logoSize);
-      case 1:
-        return TextSizeUtil.getTextSize(
-          widget.companyName,
-          TextStyle(
-            fontSize: _currentLogoState.companyNameSize,
-            fontWeight: FontWeight.bold,
-          ),
-        );
-      case 2:
-        return TextSizeUtil.getTextSize(
-          widget.sloganName,
-          TextStyle(
-            fontSize: _currentLogoState.sloganSize,
-            fontStyle: FontStyle.italic,
-          ),
-        );
-      case 3:
-        return Size(
-          _currentLogoState.logo2Size ?? 0,
-          _currentLogoState.logo2Size ?? 0,
-        );
-      case 4:
-        return TextSizeUtil.getTextSize(
-          widget.companyName,
-          TextStyle(
-            fontSize: _currentLogoState.companyName2Size ?? 0,
-            fontWeight: FontWeight.bold,
-          ),
-        );
-      case 5:
-        return TextSizeUtil.getTextSize(
-          widget.sloganName,
-          TextStyle(
-            fontSize: _currentLogoState.slogan2Size ?? 0,
-            fontStyle: FontStyle.italic,
-          ),
-        );
-      default:
-        return Size.zero;
+  void _handleBottomNavTap(int index) {
+    setState(() {
+      selectedIndex = index;
+      if (index == 0) {
+        showDropUp = !showDropUp;
+      } else {
+        showDropUp = false;
+      }
+    });
+
+    if (index == 2) {
+      Navigator.of(context).push(_createSlideRoute());
     }
   }
+
+  Route _createSlideRoute() {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => const TextScreen(),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        const begin = Offset(1.0, 0.0);
+        const end = Offset.zero;
+        const curve = Curves.ease;
+        final tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+        return SlideTransition(position: animation.drive(tween), child: child);
+      },
+    );
+  }
+
+  // --- CORE LOGIC ---
 
   void _saveState() {
     if (_undoStack.length >= _maxUndoHistory) {
       _undoStack.removeAt(0);
     }
     _undoStack.add(_currentLogoState);
+    if (mounted) setState(() {});
   }
 
   void _undo() {
@@ -140,86 +126,20 @@ class _DownloadLogoState extends State<DownloadLogo> {
       setState(() {
         _undoStack.removeLast();
         _currentLogoState = _undoStack.last;
-        id = null;
+        selectedElement = null;
         _clearGridAlignment();
       });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Undo successful!')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Undo successful!')));
     } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Nothing to undo!')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Nothing to undo!')));
     }
   }
 
-  void _onPanStart(int id, DragStartDetails details) {
-    _saveState();
-  }
-
-  void _onPanUpdate(int id, Offset delta) {
-    final RenderBox? renderBox =
-        _canvasKey.currentContext?.findRenderObject() as RenderBox?;
-    final Size? canvasSize = renderBox?.size;
-
-    if (canvasSize == null) return;
-
+  void _elementSelect(int id) {
     setState(() {
-      Offset newPosition = _limitOffset(
-        _getCurrentElementPosition(id),
-        delta,
-        _getElementRenderedSize(id),
-      );
-
-      if (id == 0) {
-        _currentLogoState = _currentLogoState.copyWith(
-          logoPosition: newPosition,
-        );
-      } else if (id == 1) {
-        _currentLogoState = _currentLogoState.copyWith(
-          companyNamePosition: newPosition,
-        );
-      } else if (id == 2) {
-        _currentLogoState = _currentLogoState.copyWith(
-          sloganPosition: newPosition,
-        );
-      } else if (id == 3) {
-        _currentLogoState = _currentLogoState.copyWith(
-          logo2Position: newPosition,
-        );
-      } else if (id == 4) {
-        _currentLogoState = _currentLogoState.copyWith(
-          companyName2Position: newPosition,
-        );
-      } else if (id == 5) {
-        _currentLogoState = _currentLogoState.copyWith(
-          slogan2Position: newPosition,
-        );
-      }
-      _checkGridAlignment(newPosition, _getElementRenderedSize(id));
+      selectedElement = id;
+      _clearGridAlignment();
     });
-  }
-
-  void _onPanEnd(int id) {
-    _clearGridAlignment();
-  }
-
-  Offset _limitOffset(Offset original, Offset delta, Size elementSize) {
-    final RenderBox? renderBox =
-        _canvasKey.currentContext?.findRenderObject() as RenderBox?;
-    final Size? canvasSize = renderBox?.size;
-    if (canvasSize == null) return original + delta;
-
-    final newOffset = original + delta;
-    final clampedDx = newOffset.dx.clamp(
-      0.0,
-      canvasSize.width - elementSize.width,
-    );
-    final clampedDy = newOffset.dy.clamp(
-      0.0,
-      canvasSize.height - elementSize.height,
-    );
-    return Offset(clampedDx, clampedDy);
   }
 
   void _deleteElement(int id) {
@@ -228,41 +148,15 @@ class _DownloadLogoState extends State<DownloadLogo> {
       String message = 'Element deleted!';
       if (id == 0) {
         _currentLogoState = _currentLogoState.copyWith(isLogoVisible: false);
-      } else if (id == 1) {
-        _currentLogoState = _currentLogoState.copyWith(
-          isCompanyNameVisible: false,
-        );
-      } else if (id == 2) {
-        _currentLogoState = _currentLogoState.copyWith(isSloganVisible: false);
-      } else if (id == 3) {
-        _currentLogoState = _currentLogoState.copyWith(
-          isLogo2Visible: false,
-          logo2Position: null,
-          logo2Size: null,
-          logo2Rotation: null,
-        );
-      } else if (id == 4) {
-        _currentLogoState = _currentLogoState.copyWith(
-          isCompanyName2Visible: false,
-          companyName2Position: null,
-          companyName2Size: null,
-          companyName2Rotation: null,
-        );
-      } else if (id == 5) {
-        _currentLogoState = _currentLogoState.copyWith(
-          isSlogan2Visible: false,
-          slogan2Position: null,
-          slogan2Size: null,
-          slogan2Rotation: null,
-        );
-      } else {
-        message = 'No element selected to delete.';
-      }
-      selectedElement = null;
+      } else if (id == 1) _currentLogoState = _currentLogoState.copyWith(isCompanyNameVisible: false);
+      else if (id == 2) _currentLogoState = _currentLogoState.copyWith(isSloganVisible: false);
+      else if (id == 3) _currentLogoState = _currentLogoState.copyWith(isLogo2Visible: false);
+      else if (id == 4) _currentLogoState = _currentLogoState.copyWith(isCompanyName2Visible: false);
+      else if (id == 5) _currentLogoState = _currentLogoState.copyWith(isSlogan2Visible: false);
+      else message = 'No element selected to delete.';
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(message)));
+      selectedElement = null;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
     });
   }
 
@@ -273,92 +167,28 @@ class _DownloadLogoState extends State<DownloadLogo> {
       Offset offset = const Offset(20, 20);
 
       if (id == 0) {
-        if (_currentLogoState.isLogo2Visible == true) {
-          message =
-              'Logo duplicate already exists or cannot be duplicated further.';
-        } else {
-          _currentLogoState = _currentLogoState.copyWith(
-            logo2Position: _currentLogoState.logoPosition + offset,
-            logo2Size: _currentLogoState.logoSize,
-            logo2Rotation: _currentLogoState.logoRotation,
-            isLogo2Visible: true,
-          );
-        }
+        _currentLogoState = _currentLogoState.copyWith(logo2Position: _currentLogoState.logoPosition + offset, logo2Size: _currentLogoState.logoSize, logo2Rotation: _currentLogoState.logoRotation, isLogo2Visible: true);
       } else if (id == 1) {
-        if (_currentLogoState.isCompanyName2Visible == true) {
-          message =
-              'Company Name duplicate already exists or cannot be duplicated further.';
-        } else {
-          _currentLogoState = _currentLogoState.copyWith(
-            companyName2Position:
-                _currentLogoState.companyNamePosition + offset,
-            companyName2Size: _currentLogoState.companyNameSize,
-            companyName2Rotation: _currentLogoState.companyNameRotation,
-            isCompanyName2Visible: true,
-          );
-        }
+        _currentLogoState = _currentLogoState.copyWith(companyName2Position: _currentLogoState.companyNamePosition + offset, companyName2Size: _currentLogoState.companyNameSize, companyName2Rotation: _currentLogoState.companyNameRotation, isCompanyName2Visible: true);
       } else if (id == 2) {
-        if (_currentLogoState.isSlogan2Visible == true) {
-          message =
-              'Slogan duplicate already exists or cannot be duplicated further.';
-        } else {
-          _currentLogoState = _currentLogoState.copyWith(
-            slogan2Position: _currentLogoState.sloganPosition + offset,
-            slogan2Size: _currentLogoState.sloganSize,
-            slogan2Rotation: _currentLogoState.sloganRotation,
-            isSlogan2Visible: true,
-          );
-        }
-      } else if (id >= 3 && id <= 5) {
-        message = 'Cannot split a duplicate element further.';
+        _currentLogoState = _currentLogoState.copyWith(slogan2Position: _currentLogoState.sloganPosition + offset, slogan2Size: _currentLogoState.sloganSize, slogan2Rotation: _currentLogoState.sloganRotation, isSlogan2Visible: true);
       } else {
-        message = 'No element selected for splitting.';
+        message = 'Cannot split this element.';
       }
-      selectedElement = null;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(message)));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
     });
   }
 
   void _rotateElementByTap(int id) {
     _saveState();
     setState(() {
-      const double rotationStep = 45;
-      if (id == 0) {
-        _currentLogoState = _currentLogoState.copyWith(
-          logoRotation: (_currentLogoState.logoRotation + rotationStep) % 360,
-        );
-      } else if (id == 1) {
-        _currentLogoState = _currentLogoState.copyWith(
-          companyNameRotation:
-              (_currentLogoState.companyNameRotation + rotationStep) % 360,
-        );
-      } else if (id == 2) {
-        _currentLogoState = _currentLogoState.copyWith(
-          sloganRotation:
-              (_currentLogoState.sloganRotation + rotationStep) % 360,
-        );
-      } else if (id == 3) {
-        _currentLogoState = _currentLogoState.copyWith(
-          logo2Rotation:
-              (_currentLogoState.logo2Rotation! + rotationStep) % 360,
-        );
-      } else if (id == 4) {
-        _currentLogoState = _currentLogoState.copyWith(
-          companyName2Rotation:
-              (_currentLogoState.companyName2Rotation! + rotationStep) % 360,
-        );
-      } else if (id == 5) {
-        _currentLogoState = _currentLogoState.copyWith(
-          slogan2Rotation:
-              (_currentLogoState.slogan2Rotation! + rotationStep) % 360,
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No element selected to rotate.')),
-        );
-      }
+      const double rotationStep = 45.0;
+      if (id == 0) _currentLogoState = _currentLogoState.copyWith(logoRotation: (_currentLogoState.logoRotation + rotationStep) % 360);
+      else if (id == 1) _currentLogoState = _currentLogoState.copyWith(companyNameRotation: (_currentLogoState.companyNameRotation + rotationStep) % 360);
+      else if (id == 2) _currentLogoState = _currentLogoState.copyWith(sloganRotation: (_currentLogoState.sloganRotation + rotationStep) % 360);
+      else if (id == 3) _currentLogoState = _currentLogoState.copyWith(logo2Rotation: ((_currentLogoState.logo2Rotation ?? 0) + rotationStep) % 360);
+      else if (id == 4) _currentLogoState = _currentLogoState.copyWith(companyName2Rotation: ((_currentLogoState.companyName2Rotation ?? 0) + rotationStep) % 360);
+      else if (id == 5) _currentLogoState = _currentLogoState.copyWith(slogan2Rotation: ((_currentLogoState.slogan2Rotation ?? 0) + rotationStep) % 360);
     });
   }
 
@@ -367,194 +197,97 @@ class _DownloadLogoState extends State<DownloadLogo> {
     setState(() {
       const double resizeStep = 20.0;
       const double minSize = 10.0;
-      if (id == 0) {
-        _currentLogoState = _currentLogoState.copyWith(
-          logoSize: max(minSize, _currentLogoState.logoSize + resizeStep),
-        );
-      } else if (id == 1) {
-        _currentLogoState = _currentLogoState.copyWith(
-          companyNameSize: max(
-            minSize,
-            _currentLogoState.companyNameSize + resizeStep,
-          ),
-        );
-      } else if (id == 2) {
-        _currentLogoState = _currentLogoState.copyWith(
-          sloganSize: max(minSize, _currentLogoState.sloganSize + resizeStep),
-        );
-      } else if (id == 3) {
-        _currentLogoState = _currentLogoState.copyWith(
-          logo2Size: max(minSize, _currentLogoState.logo2Size! + resizeStep),
-        );
-      } else if (id == 4) {
-        _currentLogoState = _currentLogoState.copyWith(
-          companyName2Size: max(
-            minSize,
-            _currentLogoState.companyName2Size! + resizeStep,
-          ),
-        );
-      } else if (id == 5) {
-        _currentLogoState = _currentLogoState.copyWith(
-          slogan2Size: max(
-            minSize,
-            _currentLogoState.slogan2Size! + resizeStep,
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No element selected to resize.')),
-        );
-      }
+      if (id == 0) _currentLogoState = _currentLogoState.copyWith(logoSize: max(minSize, _currentLogoState.logoSize + resizeStep));
+      else if (id == 1) _currentLogoState = _currentLogoState.copyWith(companyNameSize: max(minSize, _currentLogoState.companyNameSize + resizeStep));
+      else if (id == 2) _currentLogoState = _currentLogoState.copyWith(sloganSize: max(minSize, _currentLogoState.sloganSize + resizeStep));
+      else if (id == 3) _currentLogoState = _currentLogoState.copyWith(logo2Size: max(minSize, (_currentLogoState.logo2Size ?? minSize) + resizeStep));
+      else if (id == 4) _currentLogoState = _currentLogoState.copyWith(companyName2Size: max(minSize, (_currentLogoState.companyName2Size ?? minSize) + resizeStep));
+      else if (id == 5) _currentLogoState = _currentLogoState.copyWith(slogan2Size: max(minSize, (_currentLogoState.slogan2Size ?? minSize) + resizeStep));
     });
   }
 
-  void _showSaveOptions() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Save Logo'),
-          content: const Text('Choose format to save:'),
-          actions: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    _saveAsSVG();
-                  },
-                  child: const Text('Save as SVG'),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    _saveAsPNG();
-                  },
-                  child: const Text('Save as PNG'),
-                ),
-              ],
-            ),
-            Center(
-              child: TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text(
-                  'Cancel',
-                  style: TextStyle(color: Colors.redAccent),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  void _updateElementPosition(int id, Offset delta) {
+    final RenderBox? renderBox = _canvasKey.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox == null) return;
+    final canvasSize = renderBox.size;
 
-  void _handleToggleCheckerboard(bool value) {
+    final originalPosition = _getElementPosition(id);
+    final elementSize = _getElementRenderedSize(id);
+    final newPosition = _limitOffset(originalPosition, delta, elementSize, canvasSize);
+
     setState(() {
-      isCheckerboardVisible = value;
+      if (id == 0) _currentLogoState = _currentLogoState.copyWith(logoPosition: newPosition);
+      else if (id == 1) _currentLogoState = _currentLogoState.copyWith(companyNamePosition: newPosition);
+      else if (id == 2) _currentLogoState = _currentLogoState.copyWith(sloganPosition: newPosition);
+      else if (id == 3) _currentLogoState = _currentLogoState.copyWith(logo2Position: newPosition);
+      else if (id == 4) _currentLogoState = _currentLogoState.copyWith(companyName2Position: newPosition);
+      else if (id == 5) _currentLogoState = _currentLogoState.copyWith(slogan2Position: newPosition);
+
+      _checkGridAlignment(newPosition, elementSize, canvasSize);
     });
   }
 
-  void _toggleCheckerboard(bool on) {
-    setState(() {
-      isCheckerboardActive = on;
-    });
+  // --- Pan Handlers for Resize/Rotate ---
+
+  void _onResizePanStart(int id, DragStartDetails details) {
+    _saveState();
+    _initialDragPoint = details.globalPosition;
+    _initialElementValue = _getElementSize(id);
   }
 
-  void _saveAsSVG() {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Logo saved as SVG!')));
+  void _onResizePanUpdate(int id, DragUpdateDetails details) {
+    if (_initialDragPoint == null || _initialElementValue == null) return;
+    final RenderBox? renderBox = _canvasKey.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox == null) return;
+    final Offset canvasOffset = renderBox.localToGlobal(Offset.zero);
+    final elementPosition = _getElementPosition(id);
+    final elementSize = _getElementRenderedSize(id);
+    final elementCenterGlobal = canvasOffset + elementPosition + Offset(elementSize.width / 2, elementSize.height / 2);
+    final initialDistance = (_initialDragPoint! - elementCenterGlobal).distance;
+    final currentDistance = (details.globalPosition - elementCenterGlobal).distance;
+    if (initialDistance == 0) return;
+    final scaleFactor = currentDistance / initialDistance;
+    double newSize = (_initialElementValue! * scaleFactor).clamp(10.0, 300.0);
+    setState(() => _updateElementSize(id, newSize));
   }
 
-  void _saveAsPNG() {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Logo saved as PNG!')));
+  void _onRotatePanStart(int id, DragStartDetails details) {
+    _saveState();
+    _initialDragPoint = details.globalPosition;
+    _initialElementValue = _getElementRotation(id);
   }
 
-  void _checkGridAlignment(Offset elementPosition, Size elementSize) {
-    int? newHighlightedHorizontal;
-    int? newHighlightedVertical;
+  void _onRotatePanUpdate(int id, DragUpdateDetails details) {
+    if (_initialDragPoint == null || _initialElementValue == null) return;
+    final RenderBox? renderBox = _canvasKey.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox == null) return;
+    final Offset canvasOffset = renderBox.localToGlobal(Offset.zero);
+    final elementPosition = _getElementPosition(id);
+    final elementSize = _getElementRenderedSize(id);
+    final elementCenterGlobal = canvasOffset + elementPosition + Offset(elementSize.width / 2, elementSize.height / 2);
+    final v1 = _initialDragPoint! - elementCenterGlobal;
+    final v2 = details.globalPosition - elementCenterGlobal;
+    double angleDelta = atan2(v2.dy, v2.dx) - atan2(v1.dy, v1.dx);
+    double newRotation = (_initialElementValue! + (angleDelta * 180 / pi));
+    setState(() => _updateElementRotation(id, newRotation));
+  }
 
-    if (!_showGrid) {
-      _clearGridAlignment();
-      return;
-    }
+  void _onPanEnd(int id) {
+    _initialDragPoint = null;
+    _initialElementValue = null;
+    _clearGridAlignment();
+  }
 
-    final RenderBox? renderBox =
-        _canvasKey.currentContext?.findRenderObject() as RenderBox?;
-    final Size? canvasSize = renderBox?.size;
-    if (canvasSize == null) return;
-
-    const double tolerance = 10.0;
-    final double centerX = elementPosition.dx + elementSize.width / 2;
-    final double centerY = elementPosition.dy + elementSize.height / 2;
-
-    final double colStep = canvasSize.width / 4;
-    final double rowStep = canvasSize.height / 4;
-
-    for (int i = 0; i <= 4; i++) {
-      final double gridX = i * colStep;
-      if ((centerX - gridX).abs() < tolerance) {
-        newHighlightedVertical = i;
-        break;
-      }
-    }
-
-    for (int i = 0; i <= 4; i++) {
-      final double gridY = i * rowStep;
-      if ((centerY - gridY).abs() < tolerance) {
-        newHighlightedHorizontal = i;
-        break;
-      }
-    }
-
-    if (newHighlightedHorizontal != _highlightedHorizontalGridLineIndex ||
-        newHighlightedVertical != _highlightedVerticalGridLineIndex) {
-      setState(() {
-        _highlightedHorizontalGridLineIndex = newHighlightedHorizontal;
-        _highlightedVerticalGridLineIndex = newHighlightedVertical;
-      });
-
-      const double tolerance = 10.0;
-      final double centerX = elementPosition.dx + elementSize.width / 2;
-      final double centerY = elementPosition.dy + elementSize.height / 2;
-
-      final double colStep = canvasSize.width / 4;
-      final double rowStep = canvasSize.height / 4;
-
-      for (int i = 0; i <= 4; i++) {
-        final double gridX = i * colStep;
-        if ((centerX - gridX).abs() < tolerance) {
-          newHighlightedVertical = i;
-          break;
-        }
-      }
-
-      for (int i = 0; i <= 4; i++) {
-        final double gridY = i * rowStep;
-        if ((centerY - gridY).abs() < tolerance) {
-          newHighlightedHorizontal = i;
-          break;
-        }
-      }
-    }
-    if (newHighlightedHorizontal != _highlightedHorizontalGridLineIndex ||
-        newHighlightedVertical != _highlightedVerticalGridLineIndex) {
-      setState(() {
-        _highlightedHorizontalGridLineIndex = newHighlightedHorizontal;
-        _highlightedVerticalGridLineIndex = newHighlightedVertical;
-      });
-    }
+  // --- Helper Methods ---
+  Offset _limitOffset(Offset original, Offset delta, Size elementSize, Size canvasSize) {
+    final newOffset = original + delta;
+    final clampedDx = newOffset.dx.clamp(0.0, canvasSize.width - elementSize.width);
+    final clampedDy = newOffset.dy.clamp(0.0, canvasSize.height - elementSize.height);
+    return Offset(clampedDx, clampedDy);
   }
 
   void _clearGridAlignment() {
-    if (_highlightedHorizontalGridLineIndex != null ||
-        _highlightedVerticalGridLineIndex != null) {
+    if (_highlightedHorizontalGridLineIndex != null || _highlightedVerticalGridLineIndex != null) {
       setState(() {
         _highlightedHorizontalGridLineIndex = null;
         _highlightedVerticalGridLineIndex = null;
@@ -562,242 +295,107 @@ class _DownloadLogoState extends State<DownloadLogo> {
     }
   }
 
-  void _onResizePanStart(int id, DragStartDetails details) {
-    _saveState();
-    _initialDragPoint = details.globalPosition;
-    _initialElementValue = _getCurrentElementSize(id);
-  }
-
-  void _onResizePanUpdate(int id, DragUpdateDetails details) {
-    if (_initialDragPoint == null || _initialElementValue == null) return;
-    final RenderBox? renderBox =
-        _canvasKey.currentContext?.findRenderObject() as RenderBox?;
-    final Offset? canvasOffset = renderBox?.localToGlobal(Offset.zero);
-    final Size? canvasSize = renderBox?.size;
-
-    if (canvasOffset == null || canvasSize == null) return;
-
-    final Offset elementCurrentPosition = _getCurrentElementPosition(id);
-    final Size elementCurrentSize = _getElementRenderedSize(id);
-    final Offset elementCenterGlobal = Offset(
-      canvasOffset.dx +
-          elementCurrentPosition.dx +
-          elementCurrentSize.width / 2,
-      canvasOffset.dy +
-          elementCurrentPosition.dy +
-          elementCurrentSize.height / 2,
-    );
-    final double initialDistance =
-        (_initialDragPoint! - elementCenterGlobal).distance;
-    final double currentDistance =
-        (details.globalPosition - elementCenterGlobal).distance;
-    final double scaleFactor = currentDistance / initialDistance;
-    const double sensitivity = 0.5;
-    double newSize = _initialElementValue! * scaleFactor;
-    newSize =
-        _initialElementValue! + (newSize - _initialElementValue!) * sensitivity;
-    const double minSize = 10.0;
-    const double maxSize = 300.0;
-    newSize = newSize.clamp(minSize, maxSize);
-
-    setState(() {
-      _updateElementSize(id, newSize);
-      _checkGridAlignment(
-        _getCurrentElementPosition(id),
-        _getElementRenderedSize(id),
-      );
-    });
-  }
-
-  void _onResizePanEnd(int id) {
-    _initialDragPoint = null;
-    _initialElementValue = null;
-    _clearGridAlignment();
-  }
-
-  void _onRotatePanStart(int id, DragStartDetails details) {
-    _saveState();
-    _initialDragPoint = details.globalPosition;
-    _initialElementValue = _getCurrentElementRotation(id);
-  }
-
-  void _onRotatePanUpdate(int id, DragUpdateDetails details) {
-    if (_initialDragPoint == null || _initialElementValue == null) return;
-    final RenderBox? renderBox =
-        _canvasKey.currentContext?.findRenderObject() as RenderBox?;
-    final Offset? canvasOffset = renderBox?.localToGlobal(Offset.zero);
-
-    if (canvasOffset == null) return;
-
-    final Offset elementCurrentPosition = _getCurrentElementPosition(id);
-    final Size elementCurrentSize = _getElementRenderedSize(id);
-    final Offset elementCenterGlobal = Offset(
-      canvasOffset.dx +
-          elementCurrentPosition.dx +
-          elementCurrentSize.width / 2,
-      canvasOffset.dy +
-          elementCurrentPosition.dy +
-          elementCurrentSize.height / 2,
-    );
-    final Offset v1 = _initialDragPoint! - elementCenterGlobal;
-    final Offset v2 = details.globalPosition - elementCenterGlobal;
-    double angle1 = atan2(v1.dy, v1.dx);
-    double angle2 = atan2(v2.dy, v2.dx);
-    double angleDeltaRadians = angle2 - angle1;
-    double angleDeltaDegrees = angleDeltaRadians * 180 / pi;
-    double newRotation = (_initialElementValue! + angleDeltaDegrees) % 360;
-    if (newRotation < 0) {
-      newRotation += 360;
+  void _checkGridAlignment(Offset elementPosition, Size elementSize, Size canvasSize) {
+    if (!_showGrid) return;
+    int? newH, newV;
+    const tolerance = 10.0;
+    final centerX = elementPosition.dx + elementSize.width / 2;
+    final centerY = elementPosition.dy + elementSize.height / 2;
+    for (int i = 0; i <= 4; i++) {
+      if ((centerX - (i * canvasSize.width / 4)).abs() < tolerance) newV = i;
+      if ((centerY - (i * canvasSize.height / 4)).abs() < tolerance) newH = i;
     }
-
-    setState(() {
-      _updateElementRotation(id, newRotation);
-    });
+    if (newH != _highlightedHorizontalGridLineIndex || newV != _highlightedVerticalGridLineIndex) {
+      setState(() {
+        _highlightedHorizontalGridLineIndex = newH;
+        _highlightedVerticalGridLineIndex = newV;
+      });
+    }
   }
 
-  void _onRotatePanEnd(int id) {
-    _initialDragPoint = null;
-    _initialElementValue = null;
-  }
-
-  double _getCurrentElementSize(int id) {
+  // Getters and Setters
+  Offset _getElementPosition(int id) {
     switch (id) {
-      case 0:
-        return _currentLogoState.logoSize;
-      case 1:
-        return _currentLogoState.companyNameSize;
-      case 2:
-        return _currentLogoState.sloganSize;
-      case 3:
-        return _currentLogoState.logo2Size!;
-      case 4:
-        return _currentLogoState.companyName2Size!;
-      case 5:
-        return _currentLogoState.slogan2Size!;
-      default:
-        return 0;
+      case 0: return _currentLogoState.logoPosition;
+      case 1: return _currentLogoState.companyNamePosition;
+      case 2: return _currentLogoState.sloganPosition;
+      case 3: return _currentLogoState.logo2Position ?? Offset.zero;
+      case 4: return _currentLogoState.companyName2Position ?? Offset.zero;
+      case 5: return _currentLogoState.slogan2Position ?? Offset.zero;
+      default: return Offset.zero;
+    }
+  }
+
+  double _getElementSize(int id) {
+    switch (id) {
+      case 0: return _currentLogoState.logoSize;
+      case 1: return _currentLogoState.companyNameSize;
+      case 2: return _currentLogoState.sloganSize;
+      case 3: return _currentLogoState.logo2Size ?? 0;
+      case 4: return _currentLogoState.companyName2Size ?? 0;
+      case 5: return _currentLogoState.slogan2Size ?? 0;
+      default: return 0;
+    }
+  }
+
+  Size _getElementRenderedSize(int id) {
+    final sizeValue = _getElementSize(id);
+    switch (id) {
+      case 0: case 3: return Size(sizeValue, sizeValue);
+      case 1: case 4: return TextSizeUtil.getTextSize(widget.companyName, TextStyle(fontSize: sizeValue, fontWeight: FontWeight.bold));
+      case 2: case 5: return TextSizeUtil.getTextSize(widget.sloganName, TextStyle(fontSize: sizeValue, fontStyle: FontStyle.italic));
+      default: return Size.zero;
+    }
+  }
+
+  double _getElementRotation(int id) {
+    switch (id) {
+      case 0: return _currentLogoState.logoRotation;
+      case 1: return _currentLogoState.companyNameRotation;
+      case 2: return _currentLogoState.sloganRotation;
+      case 3: return _currentLogoState.logo2Rotation ?? 0;
+      case 4: return _currentLogoState.companyName2Rotation ?? 0;
+      case 5: return _currentLogoState.slogan2Rotation ?? 0;
+      default: return 0;
     }
   }
 
   void _updateElementSize(int id, double newSize) {
-    if (id == 0) {
-      _currentLogoState = _currentLogoState.copyWith(logoSize: newSize);
-    } else if (id == 1) {
-      _currentLogoState = _currentLogoState.copyWith(companyNameSize: newSize);
-    } else if (id == 2) {
-      _currentLogoState = _currentLogoState.copyWith(sloganSize: newSize);
-    } else if (id == 3) {
-      _currentLogoState = _currentLogoState.copyWith(logo2Size: newSize);
-    } else if (id == 4) {
-      _currentLogoState = _currentLogoState.copyWith(companyName2Size: newSize);
-    } else if (id == 5) {
-      _currentLogoState = _currentLogoState.copyWith(slogan2Size: newSize);
-    }
-  }
-
-  double _getCurrentElementRotation(int id) {
-    switch (id) {
-      case 0:
-        return _currentLogoState.logoRotation;
-      case 1:
-        return _currentLogoState.companyNameRotation;
-      case 2:
-        return _currentLogoState.sloganRotation;
-      case 3:
-        return _currentLogoState.logo2Rotation!;
-      case 4:
-        return _currentLogoState.companyName2Rotation!;
-      case 5:
-        return _currentLogoState.slogan2Rotation!;
-      default:
-        return 0;
-    }
+    if (id == 0) _currentLogoState = _currentLogoState.copyWith(logoSize: newSize);
+    else if (id == 1) _currentLogoState = _currentLogoState.copyWith(companyNameSize: newSize);
+    else if (id == 2) _currentLogoState = _currentLogoState.copyWith(sloganSize: newSize);
+    else if (id == 3) _currentLogoState = _currentLogoState.copyWith(logo2Size: newSize);
+    else if (id == 4) _currentLogoState = _currentLogoState.copyWith(companyName2Size: newSize);
+    else if (id == 5) _currentLogoState = _currentLogoState.copyWith(slogan2Size: newSize);
   }
 
   void _updateElementRotation(int id, double newRotation) {
-    if (id == 0) {
-      _currentLogoState = _currentLogoState.copyWith(logoRotation: newRotation);
-    } else if (id == 1) {
-      _currentLogoState = _currentLogoState.copyWith(
-        companyNameRotation: newRotation,
-      );
-    } else if (id == 2) {
-      _currentLogoState = _currentLogoState.copyWith(
-        sloganRotation: newRotation,
-      );
-    } else if (id == 3) {
-      _currentLogoState = _currentLogoState.copyWith(
-        logo2Rotation: newRotation,
-      );
-    } else if (id == 4) {
-      _currentLogoState = _currentLogoState.copyWith(
-        companyName2Rotation: newRotation,
-      );
-    } else if (id == 5) {
-      _currentLogoState = _currentLogoState.copyWith(
-        slogan2Rotation: newRotation,
-      );
-    }
+    if (id == 0) _currentLogoState = _currentLogoState.copyWith(logoRotation: newRotation);
+    else if (id == 1) _currentLogoState = _currentLogoState.copyWith(companyNameRotation: newRotation);
+    else if (id == 2) _currentLogoState = _currentLogoState.copyWith(sloganRotation: newRotation);
+    else if (id == 3) _currentLogoState = _currentLogoState.copyWith(logo2Rotation: newRotation);
+    else if (id == 4) _currentLogoState = _currentLogoState.copyWith(companyName2Rotation: newRotation);
+    else if (id == 5) _currentLogoState = _currentLogoState.copyWith(slogan2Rotation: newRotation);
   }
 
-  Offset _getCurrentElementPosition(int id) {
-    switch (id) {
-      case 0:
-        return _currentLogoState.logoPosition;
-      case 1:
-        return _currentLogoState.companyNamePosition;
-      case 2:
-        return _currentLogoState.sloganPosition;
-      case 3:
-        return _currentLogoState.logo2Position!;
-      case 4:
-        return _currentLogoState.companyName2Position!;
-      case 5:
-        return _currentLogoState.slogan2Position!;
-      default:
-        return Offset.zero;
-    }
-  }
+  // ** REPLACE YOUR ENTIRE build() METHOD WITH THIS **
 
-  @override
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.grey.shade200,
-        title: const Text(
-          'Logo Maker',
-          style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-        ),
+        title: const Text('Logo Maker', style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
         actions: [
+          IconButton(icon: const Icon(Icons.undo, size: 40), onPressed: _undo, tooltip: 'Undo last change'),
+          IconButton(icon: const Icon(Icons.save, size: 40), onPressed: () {}, tooltip: 'Save Logo'),
           IconButton(
-            icon: const Icon(Icons.undo, size: 40),
-            onPressed: _undo,
-            tooltip: 'Undo last change',
-          ),
-          IconButton(
-            icon: const Icon(Icons.save, size: 40),
-            onPressed: _showSaveOptions,
-            tooltip: 'Save Logo',
-          ),
-          IconButton(
-            icon: const Icon(Icons.edit, size: 40),
-            onPressed: () {
-              setState(() {
-                isEditing = !isEditing;
-                id = null;
-                _clearGridAlignment();
-              });
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    isEditing
-                        ? 'Editing mode enabled'
-                        : 'Editing mode disabled',
-                  ),
-                ),
-              );
-            },
+            icon: Icon(isEditing ? Icons.edit_off : Icons.edit, size: 40),
+            onPressed: () => setState(() {
+              isEditing = !isEditing;
+              selectedElement = null;
+              _clearGridAlignment();
+            }),
             tooltip: 'Toggle Edit Mode',
           ),
         ],
@@ -817,66 +415,66 @@ class _DownloadLogoState extends State<DownloadLogo> {
                   showGrid: _showGrid,
                   isEditingMode: isEditing,
                   selectedElementId: selectedElement,
-                  highlightedHorizontalGridLineIndex:
-                      _highlightedHorizontalGridLineIndex,
-                  highlightedVerticalGridLineIndex:
-                      _highlightedVerticalGridLineIndex,
+                  highlightedHorizontalGridLineIndex: _highlightedHorizontalGridLineIndex,
+                  highlightedVerticalGridLineIndex: _highlightedVerticalGridLineIndex,
                   isLayersRibbonExtended: _isLayersRibbonExtended,
-                  onToggleGrid: () {
-                    setState(() {
-                      _showGrid = !_showGrid;
-                      if (!_showGrid) {
-                        _clearGridAlignment();
-                      }
-                    });
+                  onToggleGrid: () => setState(() => _showGrid = !_showGrid),
+                  onToggleLayersRibbon: () => setState(() => _isLayersRibbonExtended = !_isLayersRibbonExtended),
+                  onElementTap: _elementSelect,
+                  onElementPanStart: (id, details) => _saveState(),
+                  onElementPanUpdate: _updateElementPosition,
+                  // --- CORRECTED SECTION START ---
+                  // This callback is for the main element drag. It also ends with details.
+                  // We adapt it to call our simpler `_onPanEnd` function.
+                  onElementPanEnd: (id,) {
+                    _onPanEnd(id);
                   },
-                  onToggleLayersRibbon: () {
-                    setState(() {
-                      _isLayersRibbonExtended = !_isLayersRibbonExtended;
-                    });
-                  },
-                  onElementTap: (id) {
-                    setState(() {
-                      selectedElement = id;
-                      _clearGridAlignment();
-                    });
-                  },
-                  onElementPanStart: _onPanStart,
-                  onElementPanUpdate: _onPanUpdate,
-                  onElementPanEnd: _onPanEnd,
+                  // ---
                   onElementDelete: _deleteElement,
                   onElementSplit: _splitElement,
                   onElementRotateTap: _rotateElementByTap,
                   onElementRotatePanStart: _onRotatePanStart,
                   onElementRotatePanUpdate: _onRotatePanUpdate,
-                  onElementRotatePanEnd: _onRotatePanEnd,
+                  // This callback provides details, so we use an adapter.
+                  onElementRotatePanEnd: (id,) {
+                    _onPanEnd(id);
+                  },
+                  // ---
                   onElementResizeTap: _resizeElementByTap,
                   onElementResizePanStart: _onResizePanStart,
                   onElementResizePanUpdate: _onResizePanUpdate,
-                  onElementResizePanEnd: _onResizePanEnd,
+                  // This callback also provides details, so we use an adapter.
+                  onElementResizePanEnd: (id,) {
+                    _onPanEnd(id);
+                  },
+                  // --- CORRECTED SECTION END ---
                   isCheckerboardActive: isCheckerboardActive,
                   checkerboardOpacity: checkerboardOpacity,
                   isCheckerboardVisible: isCheckerboardVisible,
                 ),
               ),
-              Column(
-                children: [Container(height: 300, color: Colors.grey.shade200)],
-              ),
+              Column(children: [Container(height: 300, color: Colors.grey.shade200)]),
             ],
           ),
-
           Align(
             alignment: Alignment.bottomCenter,
             child: AnimatedSlide(
               duration: const Duration(milliseconds: 300),
-              offset: showDropUp ? Offset(0, 0) : Offset(0, 1),
+              offset: showDropUp ? Offset.zero : const Offset(0, 1),
               curve: Curves.easeInOut,
               child: DropUpPanel(
                 onClose: () => setState(() => showDropUp = false),
-                onToggleCheckerboard: _handleToggleCheckerboard,
-                onOpacityChanged: (val) {
-                  setState(() => checkerboardOpacity = val);
+                onToggleCheckerboard: (val) {
+                  setState(() {
+                    // This is the crucial variable that LogoCanvas uses.
+                    // When the user toggles it from the panel, they are changing its active state.
+                    isCheckerboardActive = val;
+
+                    // It also makes sense to keep the visibility in sync.
+                    isCheckerboardVisible = val;
+                  });
                 },
+                onOpacityChanged: (val) => setState(() => checkerboardOpacity = val),
               ),
             ),
           ),
@@ -884,18 +482,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
       ),
       bottomNavigationBar: LogoBottomNavBar(
         selectedIndex: selectedIndex,
-        onItemSelected: (index) {
-          setState(() {
-            selectedIndex = index;
-            if (index == 0) {
-              // Toggle DropUpPanel
-              showDropUp = !showDropUp;
-            } else {
-              // Hide DropUpPanel if any other tab is selected
-              showDropUp = false;
-            }
-          });
-        },
+        onItemSelected: _handleBottomNavTap,
         hasTapped: true,
       ),
     );
