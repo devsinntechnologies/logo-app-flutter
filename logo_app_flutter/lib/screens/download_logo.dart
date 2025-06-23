@@ -1,7 +1,6 @@
 // ** PASTE THIS ENTIRE CODE BLOCK INTO YOUR FILE **
 
 import 'package:flutter/material.dart';
-import 'package:flutter/gestures.dart';
 import 'dart:math';
 
 import 'package:logo_app_flutter/components/logo_bottom_nav_bar.dart';
@@ -72,6 +71,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
       companyNameSize: 20,
       companyNameRotation: 0,
       isCompanyNameVisible: true,
+      companyName: widget.companyName,
+      sloganName: widget.sloganName,
       sloganPosition: const Offset(150, 240),
       sloganSize: 18,
       sloganRotation: 0,
@@ -83,23 +84,27 @@ class _DownloadLogoState extends State<DownloadLogo> {
     _saveState();
   }
 
-  void _handleBottomNavTap(int index) {
+  void _handleBottomNavTap(int index) async {
     setState(() {
       selectedIndex = index;
-      if (index == 0) {
-        showDropUp = !showDropUp;
-      } else {
-        showDropUp = false;
-      }
+      showDropUp = index == 0 ? !showDropUp : false;
     });
 
     if (index == 2) {
-      Navigator.of(context).push(_createSlideRoute());
+      final result = await Navigator.of(context).push<String>(_createSlideRoute());
+      if (result != null && result.isNotEmpty) {
+        setState(() {
+          _currentLogoState = _currentLogoState.copyWith(
+            companyName: result,
+            isCompanyNameVisible: true,
+          );
+        });
+      }
     }
   }
 
-  Route _createSlideRoute() {
-    return PageRouteBuilder(
+  Route<String> _createSlideRoute() {
+    return PageRouteBuilder<String>(
       pageBuilder: (context, animation, secondaryAnimation) => const TextScreen(),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = Offset(1.0, 0.0);
@@ -110,6 +115,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
       },
     );
   }
+
 
   // --- CORE LOGIC ---
 

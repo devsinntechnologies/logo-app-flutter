@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'dart:ui';
 
 class LogoStateData {
   final Offset logoPosition;
@@ -31,6 +31,9 @@ class LogoStateData {
   final double? slogan2Rotation;
   final bool isSlogan2Visible;
 
+  final String? companyName;
+  final String? sloganName;
+
   LogoStateData({
     required this.logoPosition,
     required this.logoSize,
@@ -56,6 +59,8 @@ class LogoStateData {
     this.slogan2Size,
     this.slogan2Rotation,
     this.isSlogan2Visible = false,
+    this.companyName,
+    this.sloganName,
   });
 
   LogoStateData copyWith({
@@ -83,6 +88,8 @@ class LogoStateData {
     double? slogan2Size,
     double? slogan2Rotation,
     bool? isSlogan2Visible,
+    String? companyName,
+    String? sloganName,
   }) {
     return LogoStateData(
       logoPosition: logoPosition ?? this.logoPosition,
@@ -104,12 +111,13 @@ class LogoStateData {
       companyName2Position: companyName2Position ?? this.companyName2Position,
       companyName2Size: companyName2Size ?? this.companyName2Size,
       companyName2Rotation: companyName2Rotation ?? this.companyName2Rotation,
-      isCompanyName2Visible:
-          isCompanyName2Visible ?? this.isCompanyName2Visible,
+      isCompanyName2Visible: isCompanyName2Visible ?? this.isCompanyName2Visible,
       slogan2Position: slogan2Position ?? this.slogan2Position,
       slogan2Size: slogan2Size ?? this.slogan2Size,
       slogan2Rotation: slogan2Rotation ?? this.slogan2Rotation,
       isSlogan2Visible: isSlogan2Visible ?? this.isSlogan2Visible,
+      companyName: companyName ?? this.companyName,
+      sloganName: sloganName ?? this.sloganName,
     );
   }
 }

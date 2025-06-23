@@ -1,3 +1,4 @@
+// ✅ TEXT SCREEN
 import 'package:flutter/material.dart';
 
 class TextScreen extends StatefulWidget {
@@ -41,14 +42,14 @@ class _TextScreenState extends State<TextScreen> {
           IconButton(
             icon: const Icon(Icons.check),
             onPressed: () {
-              print('Submitted: ${_controller.text}');
+              Navigator.pop(context, _controller.text);
             },
           ),
         ],
       ),
       body: Column(
         children: [
-          const SizedBox(height: 120), // Push down from top
+          const SizedBox(height: 120),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 40),
             child: TextField(
