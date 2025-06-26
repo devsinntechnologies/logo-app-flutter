@@ -93,7 +93,7 @@ class LogoCanvas extends StatelessWidget {
 
             if (isCheckerboardVisible)
               Opacity(
-                opacity: checkerboardOpacity,
+                opacity: 0.5 * checkerboardOpacity,
                 child: Image.asset(
                   'lib/assets/icons/checkerboard.png',
                   width: double.infinity,
