@@ -1,6 +1,4 @@
-
 import 'package:flutter/material.dart';
-
 
 typedef BottomNavItemTapCallback = void Function(int index);
 
@@ -12,7 +10,8 @@ class LogoBottomNavBar extends StatelessWidget {
   const LogoBottomNavBar({
     super.key,
     required this.selectedIndex,
-    required this.onItemSelected, required this.hasTapped,
+    required this.onItemSelected,
+    required this.hasTapped,
   });
 
   @override
@@ -66,8 +65,8 @@ class LogoBottomNavBar extends StatelessWidget {
                   children: [
                     Icon(
                       iconData,
-                      color: isSelected && hasTapped ? Colors.black : Colors.white,
-
+                      color:
+                          isSelected && hasTapped ? Colors.black : Colors.white,
 
                       size: 20,
                     ),
@@ -76,9 +75,10 @@ class LogoBottomNavBar extends StatelessWidget {
                       label,
                       style: TextStyle(
                         fontSize: 11,
-                        color: isSelected && hasTapped ? Colors.black : Colors.white,
-
-
+                        color:
+                            isSelected && hasTapped
+                                ? Colors.black
+                                : Colors.white,
                       ),
                     ),
                   ],

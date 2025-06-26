@@ -1,4 +1,3 @@
-// ✅ TEXT SCREEN
 import 'package:flutter/material.dart';
 
 class TextScreen extends StatefulWidget {
@@ -27,24 +26,31 @@ class _TextScreenState extends State<TextScreen> {
     super.dispose();
   }
 
+  void _confirmText() {
+    final trimmedText = _controller.text.trim();
+    if (trimmedText.isNotEmpty) {
+      Navigator.pop(
+        context,
+        trimmedText,
+      ); // Return to previous screen with text
+    } else {
+      Navigator.pop(context); // Return without doing anything
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: const Text('Input Text'),
+        title: const Text('Add New Text'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.check),
-            onPressed: () {
-              Navigator.pop(context, _controller.text);
-            },
-          ),
+          IconButton(icon: const Icon(Icons.check), onPressed: _confirmText),
         ],
       ),
       body: Column(
@@ -65,10 +71,7 @@ class _TextScreenState extends State<TextScreen> {
                 ),
                 border: InputBorder.none,
               ),
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w500,
-              ),
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w500),
               textAlign: TextAlign.center,
               cursorColor: Colors.black,
             ),

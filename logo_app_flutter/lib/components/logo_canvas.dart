@@ -1,5 +1,6 @@
+// ✅ logo_canvas.dart
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../models/logo_state_data.dart';
 import 'editable_element_wrapper.dart';
 import 'grid_painter.dart';
@@ -101,98 +102,14 @@ class LogoCanvas extends StatelessWidget {
                 ),
               ),
 
-            // --- Grid Toggle ---
-            Positioned(
-              top: 20,
-              right: 0,
-              child: GestureDetector(
-                onTap: onToggleGrid,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade700,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(25.0),
-                      bottomLeft: Radius.circular(25.0),
-                    ),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 8,
-                        offset: Offset(-2, 2),
-                      ),
-                    ],
-                  ),
-                  child: Icon(
-                    showGrid ? Icons.grid_off : Icons.grid_on,
-                    color: Colors.white,
-                    size: 28,
-                  ),
-                ),
-              ),
-            ),
-
-            // --- Layers Ribbon Toggle ---
-            Positioned(
-              top: 20,
-              left: 0,
-              child: GestureDetector(
-                onTap: onToggleLayersRibbon,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  width: isLayersRibbonExtended ? 180.0 : 60.0,
-                  height: 44.0,
-                  curve: Curves.easeInOut,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade700,
-                    borderRadius: const BorderRadius.only(
-                      topRight: Radius.circular(25.0),
-                      bottomRight: Radius.circular(25.0),
-                    ),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 8,
-                        offset: Offset(2, 2),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left: 16.0),
-                        child: Icon(
-                          isLayersRibbonExtended ? Icons.arrow_back_ios : Icons.layers,
-                          color: Colors.white,
-                          size: 28,
-                        ),
-                      ),
-                      if (isLayersRibbonExtended)
-                        const Expanded(
-                          child: Padding(
-                            padding: EdgeInsets.only(left: 8.0, right: 16.0),
-                            child: Text(
-                              'No Layers Found',
-                              style: TextStyle(color: Colors.white, fontSize: 14),
-                              softWrap: false,
-                              overflow: TextOverflow.fade,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-
             // --- Logo SVG ---
             if (logoState.isLogoVisible)
               _buildEditableWrapper(
                 id: 0,
                 position: logoState.logoPosition,
                 rotation: logoState.logoRotation,
-                child: SvgPicture.string(svgLogo,
+                child: SvgPicture.string(
+                  svgLogo,
                   height: logoState.logoSize,
                   width: logoState.logoSize,
                 ),
@@ -231,18 +148,18 @@ class LogoCanvas extends StatelessWidget {
                 canvasSize: canvasSize,
               ),
 
-            // --- Optional: Second Slogan ---
-            if (logoState.isSlogan2Visible && logoState.sloganName != null)
+            // --- Custom Texts (Newly Added by User) ---
+            for (int i = 0; i < logoState.customTexts.length; i++)
               _buildEditableWrapper(
-                id: 5,
-                position: logoState.slogan2Position ?? const Offset(50, 50),
-                rotation: logoState.slogan2Rotation ?? 0,
+                id: 100 + i,
+                position: logoState.customTexts[i].position,
+                rotation: logoState.customTexts[i].rotation,
                 child: Text(
-                  logoState.sloganName!,
+                  logoState.customTexts[i].text,
                   style: TextStyle(
-                    fontSize: logoState.slogan2Size ?? 18,
-                    fontStyle: FontStyle.italic,
+                    fontSize: logoState.customTexts[i].size,
                     color: Colors.black,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 canvasSize: canvasSize,
