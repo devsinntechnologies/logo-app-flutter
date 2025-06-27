@@ -1,48 +1,38 @@
-// lib/widgets/editable_element_wrapper.dart
-import 'dart:math'; // Required for math.pi and atan2
+// ✅ PASTE THIS ENTIRE CODE BLOCK INTO lib/widgets/editable_element_wrapper.dart
+
+import 'dart:math';
 import 'package:flutter/material.dart';
+import 'corner_action_icon.dart';
 
-import 'corner_action_icon.dart'; // Import the widget from Step 4
-
-// Define callbacks for element interactions
+// --- Typedefs remain the same ---
 typedef ElementTapCallback = void Function(int id);
-typedef ElementPanUpdateCallback =
-    void Function(int id, Offset delta); // For position change
-typedef ElementPanStartCallback =
-    void Function(int id, DragStartDetails details);
+typedef ElementPanUpdateCallback = void Function(int id, Offset delta);
+typedef ElementPanStartCallback = void Function(int id, DragStartDetails details);
 typedef ElementPanEndCallback = void Function(int id);
-
-// For actions like delete, split, and tap-to-rotate/resize
 typedef ElementActionCallback = void Function(int id);
-
-// For pan-based rotate/resize, which need DragUpdateDetails for gesture info
-typedef ElementDragUpdateCallback =
-    void Function(int id, DragUpdateDetails details);
+typedef ElementDragUpdateCallback = void Function(int id, DragUpdateDetails details);
 
 class EditableElementWrapper extends StatelessWidget {
   final int id;
   final Offset position;
   final double rotation;
   final Widget child;
-  final Size
-  canvasSize; // Needed for resize/rotate calculations relative to canvas
+  final Size canvasSize;
   final bool isSelected;
   final bool isEditingMode;
+  final bool isLocked; // ✅ NEW: To disable interactions
 
-  // Callbacks from _DownloadLogoState
+  // Callbacks
   final ElementTapCallback onTap;
   final ElementPanStartCallback onPanStart;
   final ElementPanUpdateCallback onPanUpdate;
   final ElementPanEndCallback onPanEnd;
-
   final ElementActionCallback onDelete;
   final ElementActionCallback onSplit;
-
   final ElementActionCallback onRotateTap;
   final ElementPanStartCallback onRotatePanStart;
   final ElementDragUpdateCallback onRotatePanUpdate;
   final ElementPanEndCallback onRotatePanEnd;
-
   final ElementActionCallback onResizeTap;
   final ElementPanStartCallback onResizePanStart;
   final ElementDragUpdateCallback onResizePanUpdate;
@@ -57,6 +47,7 @@ class EditableElementWrapper extends StatelessWidget {
     required this.canvasSize,
     required this.isSelected,
     required this.isEditingMode,
+    required this.isLocked, // ✅ NEW
     required this.onTap,
     required this.onPanStart,
     required this.onPanUpdate,
@@ -75,30 +66,27 @@ class EditableElementWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Determine if interactions should be active
+    final bool canInteract = !isLocked && isEditingMode && isSelected;
+
     return Positioned(
       left: position.dx,
       top: position.dy,
       child: GestureDetector(
-        onTap: () => onTap(id),
-        // Pass the element ID to the pan callbacks
-        onPanStart:
-            isEditingMode && isSelected
-                ? (details) => onPanStart(id, details)
-                : null,
-        onPanUpdate:
-            isEditingMode && isSelected
-                ? (details) => onPanUpdate(id, details.delta)
-                : null,
-        onPanEnd:
-            isEditingMode && isSelected ? (details) => onPanEnd(id) : null,
+        // ✅ Interactions are now conditional on `isLocked`
+        onTap: !isLocked ? () => onTap(id) : null,
+        onPanStart: canInteract ? (details) => onPanStart(id, details) : null,
+        onPanUpdate: canInteract ? (details) => onPanUpdate(id, details.delta) : null,
+        onPanEnd: canInteract ? (details) => onPanEnd(id) : null,
         child: Container(
-          decoration:
-              isSelected && isEditingMode
-                  ? BoxDecoration(
-                    border: Border.all(color: Colors.black38, width: 3),
-                    borderRadius: BorderRadius.circular(6),
-                  )
-                  : null,
+          decoration: isSelected && isEditingMode
+              ? BoxDecoration(
+            border: Border.all(
+                color: isLocked ? Colors.red.shade300 : Colors.black38,
+                width: 3),
+            borderRadius: BorderRadius.circular(6),
+          )
+              : null,
           padding: const EdgeInsets.all(2),
           child: Stack(
             clipBehavior: Clip.none,
@@ -111,15 +99,14 @@ class EditableElementWrapper extends StatelessWidget {
                 ),
               ),
 
-              // Now add Positioned Corner Icons based on //
-              if (isSelected && isEditingMode) ...[
+              // Corner icons
+              if (canInteract) ...[
                 Positioned(
                   top: -15,
                   left: -15,
                   child: CornerActionIcon(
                     icon: Icons.close,
                     onTap: () => onDelete(id),
-                    //: //.topLeft,
                   ),
                 ),
                 Positioned(
@@ -128,7 +115,6 @@ class EditableElementWrapper extends StatelessWidget {
                   child: CornerActionIcon(
                     icon: Icons.call_split,
                     onTap: () => onSplit(id),
-                    //: //.topRight,
                   ),
                 ),
                 Positioned(
@@ -140,7 +126,6 @@ class EditableElementWrapper extends StatelessWidget {
                     onPanStart: (details) => onRotatePanStart(id, details),
                     onPanUpdate: (details) => onRotatePanUpdate(id, details),
                     onPanEnd: (details) => onRotatePanEnd(id),
-                    //: //.bottomLeft,
                   ),
                 ),
                 Positioned(
@@ -152,13 +137,29 @@ class EditableElementWrapper extends StatelessWidget {
                     onPanStart: (details) => onResizePanStart(id, details),
                     onPanUpdate: (details) => onResizePanUpdate(id, details),
                     onPanEnd: (details) => onResizePanEnd(id),
-                    //: //.bottomRight,
                   ),
                 ),
               ],
-            ],
-          )
 
+              // ✅ NEW: Visual indicator when locked
+              if (isLocked)
+                Positioned.fill(
+                  child: Container(
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Icon(Icons.lock,
+                        color: Colors.white,
+                        size: 32,
+                        shadows: [
+                          Shadow(color: Colors.black, blurRadius: 4)
+                        ]),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );

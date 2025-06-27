@@ -14,7 +14,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Auto Design Module',
-      home: InternetChecker(child: const HomeScreen()),
+      home: InternetChecker(
+          child: const HomeScreen()
+      ),
     );
   }
 }

@@ -1,5 +1,7 @@
-// ✅ logo_state_data.dart
+// ✅ PASTE THIS ENTIRE CODE BLOCK INTO logo_state_data.dart
+
 import 'dart:ui';
+import 'package:collection/collection.dart'; // Add this import. Run: flutter pub add collection
 
 class CustomTextElement {
   final String text;
@@ -30,7 +32,7 @@ class CustomTextElement {
 }
 
 class LogoStateData {
-  // Existing fields...
+  // --- Element Properties ---
   final Offset logoPosition;
   final double logoSize;
   final double logoRotation;
@@ -48,7 +50,7 @@ class LogoStateData {
   final bool isSloganVisible;
   final String? sloganName;
 
-  // Optional second elements...
+  // --- Optional second elements ---
   final Offset? logo2Position;
   final double? logo2Size;
   final double? logo2Rotation;
@@ -64,8 +66,12 @@ class LogoStateData {
   final double? slogan2Rotation;
   final bool isSlogan2Visible;
 
-  // ✅ New custom text elements
+  // --- Dynamic elements ---
   final List<CustomTextElement> customTexts;
+
+  // ✅ --- NEW: Layer Management State ---
+  final Set<int> lockedElements;
+  final List<int> elementOrder;
 
   LogoStateData({
     required this.logoPosition,
@@ -95,7 +101,22 @@ class LogoStateData {
     this.slogan2Rotation,
     required this.isSlogan2Visible,
     this.customTexts = const [],
+    this.lockedElements = const {}, // Default to empty set
+    this.elementOrder = const [], // Default to empty list
   });
+
+  // Helper to get all visible element IDs
+  List<int> get visibleElementIds {
+    final ids = <int>[];
+    if (isLogoVisible) ids.add(0);
+    if (isCompanyNameVisible) ids.add(1);
+    if (isSloganVisible) ids.add(2);
+    if (isLogo2Visible) ids.add(3);
+    if (isCompanyName2Visible) ids.add(4);
+    if (isSlogan2Visible) ids.add(5);
+    ids.addAll(customTexts.mapIndexed((index, _) => 100 + index));
+    return ids;
+  }
 
   LogoStateData copyWith({
     Offset? logoPosition,
@@ -125,6 +146,8 @@ class LogoStateData {
     double? slogan2Rotation,
     bool? isSlogan2Visible,
     List<CustomTextElement>? customTexts,
+    Set<int>? lockedElements,
+    List<int>? elementOrder,
   }) {
     return LogoStateData(
       logoPosition: logoPosition ?? this.logoPosition,
@@ -149,12 +172,14 @@ class LogoStateData {
       companyName2Size: companyName2Size ?? this.companyName2Size,
       companyName2Rotation: companyName2Rotation ?? this.companyName2Rotation,
       isCompanyName2Visible:
-          isCompanyName2Visible ?? this.isCompanyName2Visible,
+      isCompanyName2Visible ?? this.isCompanyName2Visible,
       slogan2Position: slogan2Position ?? this.slogan2Position,
       slogan2Size: slogan2Size ?? this.slogan2Size,
       slogan2Rotation: slogan2Rotation ?? this.slogan2Rotation,
       isSlogan2Visible: isSlogan2Visible ?? this.isSlogan2Visible,
       customTexts: customTexts ?? this.customTexts,
+      lockedElements: lockedElements ?? this.lockedElements,
+      elementOrder: elementOrder ?? this.elementOrder,
     );
   }
 }
