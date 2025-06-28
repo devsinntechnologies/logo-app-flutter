@@ -74,7 +74,8 @@ class LogoBottomNavBar extends StatelessWidget {
                     Text(
                       label,
                       style: TextStyle(
-                        fontSize: 11,
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
                         color:
                             isSelected && hasTapped
                                 ? Colors.black

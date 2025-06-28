@@ -1,7 +1,7 @@
-// ✅ PASTE THIS ENTIRE CODE BLOCK INTO logo_state_data.dart
+
 
 import 'dart:ui';
-import 'package:collection/collection.dart'; // Add this import. Run: flutter pub add collection
+import 'package:collection/collection.dart';
 
 class CustomTextElement {
   final String text;
@@ -32,7 +32,7 @@ class CustomTextElement {
 }
 
 class LogoStateData {
-  // --- Element Properties ---
+  
   final Offset logoPosition;
   final double logoSize;
   final double logoRotation;
@@ -50,7 +50,7 @@ class LogoStateData {
   final bool isSloganVisible;
   final String? sloganName;
 
-  // --- Optional second elements ---
+  
   final Offset? logo2Position;
   final double? logo2Size;
   final double? logo2Rotation;
@@ -66,10 +66,10 @@ class LogoStateData {
   final double? slogan2Rotation;
   final bool isSlogan2Visible;
 
-  // --- Dynamic elements ---
+  
   final List<CustomTextElement> customTexts;
 
-  // ✅ --- NEW: Layer Management State ---
+  
   final Set<int> lockedElements;
   final List<int> elementOrder;
 
@@ -101,11 +101,11 @@ class LogoStateData {
     this.slogan2Rotation,
     required this.isSlogan2Visible,
     this.customTexts = const [],
-    this.lockedElements = const {}, // Default to empty set
-    this.elementOrder = const [], // Default to empty list
+    this.lockedElements = const {}, 
+    this.elementOrder = const [], 
   });
 
-  // Helper to get all visible element IDs
+  
   List<int> get visibleElementIds {
     final ids = <int>[];
     if (isLogoVisible) ids.add(0);

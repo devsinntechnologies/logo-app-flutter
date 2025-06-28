@@ -614,7 +614,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.grey.shade200,
-        title: const Text('Logo Maker', style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+        title: const Text('Logo Maker', style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
         actions: [
           IconButton(icon: const Icon(Icons.undo, size: 40), onPressed: _undo, tooltip: 'Undo last change'),
           IconButton(icon: const Icon(Icons.save, size: 40), onPressed: () {}, tooltip: 'Save Logo'),

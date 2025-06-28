@@ -1,10 +1,10 @@
-// ✅ PASTE THIS ENTIRE CODE BLOCK INTO lib/widgets/editable_element_wrapper.dart
+
 
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'corner_action_icon.dart';
 
-// --- Typedefs remain the same ---
+
 typedef ElementTapCallback = void Function(int id);
 typedef ElementPanUpdateCallback = void Function(int id, Offset delta);
 typedef ElementPanStartCallback = void Function(int id, DragStartDetails details);
@@ -20,9 +20,9 @@ class EditableElementWrapper extends StatelessWidget {
   final Size canvasSize;
   final bool isSelected;
   final bool isEditingMode;
-  final bool isLocked; // ✅ NEW: To disable interactions
+  final bool isLocked; 
 
-  // Callbacks
+  
   final ElementTapCallback onTap;
   final ElementPanStartCallback onPanStart;
   final ElementPanUpdateCallback onPanUpdate;
@@ -47,7 +47,7 @@ class EditableElementWrapper extends StatelessWidget {
     required this.canvasSize,
     required this.isSelected,
     required this.isEditingMode,
-    required this.isLocked, // ✅ NEW
+    required this.isLocked, 
     required this.onTap,
     required this.onPanStart,
     required this.onPanUpdate,
@@ -66,14 +66,14 @@ class EditableElementWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Determine if interactions should be active
+    
     final bool canInteract = !isLocked && isEditingMode && isSelected;
 
     return Positioned(
       left: position.dx,
       top: position.dy,
       child: GestureDetector(
-        // ✅ Interactions are now conditional on `isLocked`
+        
         onTap: !isLocked ? () => onTap(id) : null,
         onPanStart: canInteract ? (details) => onPanStart(id, details) : null,
         onPanUpdate: canInteract ? (details) => onPanUpdate(id, details.delta) : null,
@@ -94,12 +94,12 @@ class EditableElementWrapper extends StatelessWidget {
               Transform.rotate(
                 angle: rotation * pi / 180,
                 child: Container(
-                  padding: const EdgeInsets.all(12), // space for corners
+                  padding: const EdgeInsets.all(12), 
                   child: child,
                 ),
               ),
 
-              // Corner icons
+              
               if (canInteract) ...[
                 Positioned(
                   top: -15,
@@ -141,7 +141,7 @@ class EditableElementWrapper extends StatelessWidget {
                 ),
               ],
 
-              // ✅ NEW: Visual indicator when locked
+              
               if (isLocked)
                 Positioned.fill(
                   child: Container(
