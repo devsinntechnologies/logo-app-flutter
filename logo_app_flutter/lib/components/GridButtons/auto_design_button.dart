@@ -37,7 +37,7 @@ class AutoDesignButton extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Image.asset(
-                    'lib/assets/icons/wandd.png',
+                    'assets/icons/wandd.png',
                     width: 40,
                     height: 40,
                   ),

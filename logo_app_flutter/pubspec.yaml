@@ -39,11 +39,18 @@ dependencies:
   http: ^1.4.0
   flutter_svg: ^2.1.0
   connectivity_plus: ^6.1.4
-  screenshot: ^1.0.0
+  screenshot: ^3.0.0 
   path_provider: ^2.0.0 
   fluttericon: ^2.0.0
   font_awesome_flutter: ^10.8.0
   iconsax: ^0.0.8
+  flutter_colorpicker: ^1.0.3
+  image_picker: ^1.1.2
+  flutter_image_compress: ^2.1.0
+  gallery_saver_plus: ^3.2.8
+  permission_handler: ^11.0.1
+  no_screenshot: ^0.3.1
+  
   
   
 
@@ -71,8 +78,11 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-     - lib/assets/icons/
-     - lib/assets/svgs/
+    - assets/texture_images/
+    - assets/logo_images/
+    - assets/icons/
+    - assets/svgs/
+    - assets/bg_images/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

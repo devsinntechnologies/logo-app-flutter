@@ -38,7 +38,7 @@ class MyDesignButton extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Image.asset(
-                    'lib/assets/icons/myData.png',
+                    'assets/icons/myData.png',
                     width: 40,
                     height: 40,
                   ),

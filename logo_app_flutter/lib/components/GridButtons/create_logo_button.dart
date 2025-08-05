@@ -46,7 +46,7 @@ class CreateLogoButton extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Image.asset(
-                    'lib/assets/icons/createLogo.png',
+                    'assets/icons/createLogo.png',
                     width: 40,
                     height: 40,
                   ),

@@ -22,7 +22,7 @@ class LogoBottomNavBar extends StatelessWidget {
         height: 70,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: List.generate(5, (index) {
+          children: List.generate(6, (index) {
             IconData iconData;
             String label;
 
@@ -30,6 +30,7 @@ class LogoBottomNavBar extends StatelessWidget {
               case 0:
                 iconData = Icons.layers;
                 label = 'Background';
+
                 break;
               case 1:
                 iconData = Icons.article_rounded;
@@ -42,11 +43,18 @@ class LogoBottomNavBar extends StatelessWidget {
               case 3:
                 iconData = Icons.edit;
                 label = 'Effects';
+
                 break;
-              case 4:
+                case 4:
+                iconData = Icons.palette;
+                label = 'Palette';
+
+                break;
+              case 5:
               default:
                 iconData = Icons.image;
                 label = 'Images';
+
                 break;
             }
 
@@ -56,7 +64,7 @@ class LogoBottomNavBar extends StatelessWidget {
               onTap: () => onItemSelected(index),
               child: Container(
                 // margin: EdgeInsets.only(bottom: 20),
-                width: MediaQuery.of(context).size.width / 5,
+                width: MediaQuery.of(context).size.width / 6,
                 height: 60,
                 color: isSelected && hasTapped ? Colors.white : Colors.black,
 

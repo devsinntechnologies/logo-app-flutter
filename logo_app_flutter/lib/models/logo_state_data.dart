@@ -1,5 +1,3 @@
-
-
 import 'dart:ui';
 import 'package:collection/collection.dart';
 
@@ -8,12 +6,18 @@ class CustomTextElement {
   final Offset position;
   final double size;
   final double rotation;
+  final double opacity;
+  final bool isVisible;
+  final int? layerIndex;
 
   const CustomTextElement({
     required this.text,
     required this.position,
     required this.size,
     required this.rotation,
+    this.opacity = 1.0,
+    this.isVisible = true,
+    this.layerIndex,
   });
 
   CustomTextElement copyWith({
@@ -21,18 +25,63 @@ class CustomTextElement {
     Offset? position,
     double? size,
     double? rotation,
+    double? opacity,
+    bool? isVisible,
+    int? layerIndex,
   }) {
     return CustomTextElement(
       text: text ?? this.text,
       position: position ?? this.position,
       size: size ?? this.size,
       rotation: rotation ?? this.rotation,
+      opacity: opacity ?? this.opacity,
+      isVisible: isVisible ?? this.isVisible,
+      layerIndex: layerIndex ?? this.layerIndex,
+    );
+  }
+}
+
+class CustomImageElement {
+  final String path;
+  final Offset position;
+  final double rotation;
+  final double? size;
+  final double opacity;
+  final bool isVisible;
+  final int? layerIndex;
+
+  const CustomImageElement({
+    required this.path,
+    required this.position,
+    required this.rotation,
+    this.size,
+    this.opacity = 1.0,
+    this.isVisible = true,
+    this.layerIndex,
+  });
+
+  CustomImageElement copyWith({
+    String? path,
+    Offset? position,
+    double? rotation,
+    double? size,
+    double? opacity,
+    bool? isVisible,
+    int? layerIndex,
+  }) {
+    return CustomImageElement(
+      path: path ?? this.path,
+      position: position ?? this.position,
+      rotation: rotation ?? this.rotation,
+      size: size ?? this.size,
+      opacity: opacity ?? this.opacity,
+      isVisible: isVisible ?? this.isVisible,
+      layerIndex: layerIndex ?? this.layerIndex,
     );
   }
 }
 
 class LogoStateData {
-  
   final Offset logoPosition;
   final double logoSize;
   final double logoRotation;
@@ -50,7 +99,6 @@ class LogoStateData {
   final bool isSloganVisible;
   final String? sloganName;
 
-  
   final Offset? logo2Position;
   final double? logo2Size;
   final double? logo2Rotation;
@@ -66,10 +114,9 @@ class LogoStateData {
   final double? slogan2Rotation;
   final bool isSlogan2Visible;
 
-  
   final List<CustomTextElement> customTexts;
+  final List<CustomImageElement> customImages;
 
-  
   final Set<int> lockedElements;
   final List<int> elementOrder;
 
@@ -100,12 +147,15 @@ class LogoStateData {
     this.slogan2Size,
     this.slogan2Rotation,
     required this.isSlogan2Visible,
-    this.customTexts = const [],
-    this.lockedElements = const {}, 
-    this.elementOrder = const [], 
-  });
+    List<CustomTextElement>? customTexts,
+    List<CustomImageElement>? customImages,
+    Set<int>? lockedElements,
+    List<int>? elementOrder,
+  })  : customTexts = customTexts ?? [],
+        customImages = customImages ?? [],
+        lockedElements = lockedElements ?? {},
+        elementOrder = elementOrder ?? [];
 
-  
   List<int> get visibleElementIds {
     final ids = <int>[];
     if (isLogoVisible) ids.add(0);
@@ -115,6 +165,7 @@ class LogoStateData {
     if (isCompanyName2Visible) ids.add(4);
     if (isSlogan2Visible) ids.add(5);
     ids.addAll(customTexts.mapIndexed((index, _) => 100 + index));
+    ids.addAll(customImages.mapIndexed((index, _) => 200 + index));
     return ids;
   }
 
@@ -146,6 +197,7 @@ class LogoStateData {
     double? slogan2Rotation,
     bool? isSlogan2Visible,
     List<CustomTextElement>? customTexts,
+    List<CustomImageElement>? customImages,
     Set<int>? lockedElements,
     List<int>? elementOrder,
   }) {
@@ -172,14 +224,15 @@ class LogoStateData {
       companyName2Size: companyName2Size ?? this.companyName2Size,
       companyName2Rotation: companyName2Rotation ?? this.companyName2Rotation,
       isCompanyName2Visible:
-      isCompanyName2Visible ?? this.isCompanyName2Visible,
+          isCompanyName2Visible ?? this.isCompanyName2Visible,
       slogan2Position: slogan2Position ?? this.slogan2Position,
       slogan2Size: slogan2Size ?? this.slogan2Size,
       slogan2Rotation: slogan2Rotation ?? this.slogan2Rotation,
       isSlogan2Visible: isSlogan2Visible ?? this.isSlogan2Visible,
-      customTexts: customTexts ?? this.customTexts,
-      lockedElements: lockedElements ?? this.lockedElements,
-      elementOrder: elementOrder ?? this.elementOrder,
+      customTexts: customTexts ?? [...this.customTexts],
+      customImages: customImages ?? [...this.customImages],
+      lockedElements: lockedElements ?? {...this.lockedElements},
+      elementOrder: elementOrder ?? [...this.elementOrder],
     );
   }
 }

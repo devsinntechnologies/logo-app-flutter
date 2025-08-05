@@ -1,16 +1,29 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first, use_super_parameters, use_build_context_synchronously
+import 'dart:io';
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:logo_app_flutter/components/logoBottomNavbarItems/shape_selector_widget.dart';
+import 'package:logo_app_flutter/provider/selected_color_provider.dart';
+import 'package:logo_app_flutter/screens/color_screen.dart';
+import 'package:logo_app_flutter/screens/gradiant_picker_screen.dart';
+import 'package:logo_app_flutter/screens/select_bg_images.dart';
+import 'package:logo_app_flutter/screens/select_texture_images.dart';
+import 'package:provider/provider.dart';
 
 class DropUpPanel extends StatefulWidget {
   final VoidCallback onClose;
   final Function(bool) onToggleCheckerboard;
   final Function(double) onOpacityChanged;
+  final Function(String) onShapeSelected;
 
   const DropUpPanel({
     super.key,
     required this.onClose,
     required this.onToggleCheckerboard,
     required this.onOpacityChanged,
+    required this.onShapeSelected,
   });
 
   @override
@@ -18,80 +31,149 @@ class DropUpPanel extends StatefulWidget {
 }
 
 class _DropUpPanelState extends State<DropUpPanel> {
+  Future<void> pickImageFromDevice(BuildContext context) async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      final file = File(pickedFile.path);
+      final bytes = await pickedFile.readAsBytes();
+      final codec = await ui.instantiateImageCodec(bytes);
+      final frame = await codec.getNextFrame();
+      final image = frame.image;
+
+     
+      final provider = Provider.of<SelectedColorProvider>( context,listen: false,
+      );
+      provider.setBackgroundImage(image, file);
+    }
+  }
+
+  String? selectedShapeName;
+  int selectedIndex = 0;
+  Color _baseColor = Colors.red; // Default palette color
+
+
+
+  final List<String> options = [
+    'Color',
+    'Gradient',
+    'Background',
+    'Texture',
+    'Image',
+  ];
   double _opacityValue = 1.0;
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-      bottom: 70,
-      left: 0,
-      right: 0,
-      child: Material(
-        elevation: 10,
-        borderRadius: BorderRadius.circular(12),
-        color: Colors.white,
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Top row of options
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: const [
-                  _TopOption(label: 'Color'),
-                  _TopOption(label: 'Gradient'),
-                  _TopOption(label: 'Background'),
-                  _TopOption(label: 'Texture'),
-                  _TopOption(label: 'Image'),
-                ],
-              ),
-              const SizedBox(height: 13),
-
-              // Opacity slider
-              Row(
-                children: [
-                  const Icon(Icons.opacity, color: Colors.grey),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Slider(
-                      activeColor: Colors.yellow,
-                      value: _opacityValue,
-                      min: 0,
-                      max: 1,
-                      onChanged: (val) {
-                        setState(() {
-                          _opacityValue = val;
-                        });
-                        widget.onOpacityChanged(_opacityValue); // notify parent
-                      },
-                    ),
-                  ),
-                  Text(
-                    "${(_opacityValue * 100).round()}%",
-                    style: const TextStyle(color: Colors.black),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 16),
-
-              // Shape selector with Transparent option
-              SizedBox(
-                height: 50,
-                child: ShapeSelectorWidget(
-                  onShapeSelected: (shapeName) {
-                    if (shapeName == "Transparent") {
-                      widget.onToggleCheckerboard(true); // Turn ON
-                    } else if (shapeName == "TransparentOff") {
-                      widget.onToggleCheckerboard(false); // Turn OFF
-                    }
-                    // You can also handle other shapes here if needed
+    return Material(
+      elevation: 10,
+      borderRadius: BorderRadius.circular(12),
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _TopOption(
+                  label: options[0],
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ColorScreen()),
+                    );
                   },
                 ),
+                _TopOption(
+                  label: options[1],
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => GradientPickerScreen(),
+                      ),
+                    );
+                  },
+                ),
+                _TopOption(
+                  label: options[2],
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SelectBgImages(),
+                      ),
+                    );
+                  },
+                ),
+                _TopOption(
+                  label: options[3],
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SelectTextureImages(),
+                      ),
+                    );
+                  },
+                ),
+                _TopOption(
+                  label: options[4],
+                  onTap: () {
+                    pickImageFromDevice(context);
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 13),
+
+            // Opacity slider
+            Row(
+              children: [
+                const Icon(Icons.opacity, color: Colors.grey),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Slider(
+                    activeColor: Colors.yellow,
+                    value: _opacityValue,
+                    min: 0,
+                    max: 1,
+                    onChanged: (val) {
+                      setState(() {
+                        _opacityValue = val;
+                      });
+                      widget.onOpacityChanged(_opacityValue);
+                    },
+                  ),
+                ),
+                Text(
+                  "${(_opacityValue * 100).round()}%",
+                  style: const TextStyle(color: Colors.black),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Shape selector
+            SizedBox(
+              height: 50,
+              child: ShapeSelectorWidget(
+                onShapeSelected: (shapeName) {
+                  if (shapeName == "Transparent") {
+                    widget.onToggleCheckerboard(true);
+                  } else if (shapeName == "TransparentOff") {
+                    widget.onToggleCheckerboard(false);
+                  } else {
+                    widget.onToggleCheckerboard(true);
+                    widget.onShapeSelected(shapeName);
+                  }
+                },
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -100,14 +182,25 @@ class _DropUpPanelState extends State<DropUpPanel> {
 
 class _TopOption extends StatelessWidget {
   final String label;
-  const _TopOption({required this.label});
+  final VoidCallback onTap;
+
+  const _TopOption({
+    required this.label,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(label, style: const TextStyle(fontSize: 10, color: Colors.grey)),
-      ],
+    return GestureDetector(
+      onTap: onTap,
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 12,
+          color: Colors.black,
+          fontWeight: FontWeight.normal,
+        ),
+      ),
     );
   }
 }

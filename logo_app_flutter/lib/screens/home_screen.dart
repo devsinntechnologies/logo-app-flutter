@@ -30,7 +30,7 @@ class HomeScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset("lib/assets/icons/award.png", width: 100),
+                  Image.asset("assets/icons/award.png", width: 100),
                   const SizedBox(height: 60),
                   Row(
                     children: [
@@ -78,7 +78,7 @@ class HomeScreen extends StatelessWidget {
                 builder:
                     (context) => IconButton(
                       icon: Image.asset(
-                        "lib/assets/icons/menu.png",
+                        "assets/icons/menu.png",
                         width: 30,
                         height: 30,
                       ),
@@ -97,7 +97,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              Image.asset("lib/assets/icons/crown.png", width: 30, height: 30),
+              Image.asset("assets/icons/crown.png", width: 30, height: 30),
               // SizedBox(width: 1),
             ],
           ),
@@ -141,7 +141,7 @@ class HomeScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Image.asset(
-                        'lib/assets/icons/color-palette.png',
+                        'assets/icons/color-palette.png',
                         width: 40,
                         height: 40,
                       ),

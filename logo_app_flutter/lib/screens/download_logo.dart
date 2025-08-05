@@ -1,9 +1,28 @@
+// ignore_for_file: deprecated_member_use, curly_braces_in_flow_control_structures, use_build_context_synchronously, no_leading_underscores_for_local_identifiers
+
+import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+import 'package:logo_app_flutter/provider/selected_color_provider.dart';
+import 'package:logo_app_flutter/screens/art_select_screen.dart';
+import 'package:no_screenshot/no_screenshot.dart';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:gallery_saver_plus/gallery_saver.dart';
+
+import 'package:image_picker/image_picker.dart';
 import 'dart:math';
 
-import 'package:flutter_svg/flutter_svg.dart'; // Added for layer preview
+// Added for layer preview
 import 'package:logo_app_flutter/components/logo_bottom_nav_bar.dart';
 import 'package:logo_app_flutter/models/logo_state_data.dart';
+import 'package:logo_app_flutter/screens/color_screen.dart';
+import 'package:logo_app_flutter/screens/layer_panel.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
+import 'package:screenshot/screenshot.dart';
 
 import '../components/logoBottomNavbarItems/drop_up_panel.dart';
 import '../components/logo_canvas.dart';
@@ -27,8 +46,12 @@ class DownloadLogo extends StatefulWidget {
 }
 
 class _DownloadLogoState extends State<DownloadLogo> {
+  final _noScreenshot = NoScreenshot.instance;
+
+  String selectedShapeName = ""; // 👈 Add this
   // --- State Management ---
   late LogoStateData _currentLogoState;
+
   final List<LogoStateData> _undoStack = [];
   final int _maxUndoHistory = 10;
 
@@ -36,6 +59,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
   bool _showGrid = false;
   bool _isLayersPanelVisible = false; // Changed from _isLayersRibbonExtended
   bool showDropUp = false;
+  bool showPaletteBar = false;
+  int selectedPaletteIndex = 0; // highlight & refresh ke liye
 
   // --- Background Toggles ---
   bool isCheckerboardActive = false;
@@ -52,13 +77,107 @@ class _DownloadLogoState extends State<DownloadLogo> {
   int? _highlightedVerticalGridLineIndex;
   final GlobalKey _canvasKey = GlobalKey();
 
+  final List<List<Color>> paletteList = [
+    [Colors.white, Colors.grey, Colors.white],
+    [Colors.red, Colors.orange, Colors.yellow],
+    [Colors.green, Colors.teal, Colors.lightGreen],
+    [Colors.blue, Colors.indigo, Colors.cyan],
+    [Colors.purple, Colors.deepPurple, Colors.pink],
+    [Colors.brown, Colors.grey, Colors.black],
+    [Colors.deepOrange, Colors.amber, Colors.lime],
+    [Colors.blueGrey, Colors.white, Colors.grey.shade300],
+  ];
+
   // --- Drag State ---
   Offset? _initialDragPoint;
   double? _initialElementValue;
 
+  Future<void> saveCanvasToGallery(GlobalKey canvasKey) async {
+    // ✅ Step 1: Ask Permission for Android 13+ and older
+    final isGranted = await _requestGalleryPermission();
+    if (!isGranted) {
+      print("❌ Storage permission not granted");
+      return;
+    }
+
+    try {
+      // ✅ Step 2: Capture image from widget
+      RenderRepaintBoundary boundary =
+          canvasKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+      ByteData? byteData = await image.toByteData(
+        format: ui.ImageByteFormat.png,
+      );
+      Uint8List pngBytes = byteData!.buffer.asUint8List();
+
+      // ✅ Step 3: Save to temp directory
+      final directory = await getTemporaryDirectory();
+      final filePath =
+          '${directory.path}/logo_${DateTime.now().millisecondsSinceEpoch}.png';
+      final file = await File(filePath).writeAsBytes(pngBytes);
+
+      // ✅ Step 4: Save to Gallery using gallery_saver_plus
+      final result = await GallerySaver.saveImage(
+        file.path,
+        albumName: "LogoMaker",
+      );
+      print("✅ Image saved to gallery: $result");
+    } catch (e) {
+      print("❌ Failed to save canvas: $e");
+    }
+  }
+
+  /// 🔐 Handles permission for all Android versions
+  Future<bool> _requestGalleryPermission() async {
+    if (Platform.isAndroid) {
+      final storage = await Permission.storage.request();
+      final photos = await Permission.photos.request(); // Android 13+
+
+      return storage.isGranted || photos.isGranted;
+    }
+    return true; // iOS will handle internally
+  }
+
+  void _showSaveConfirmationDialog(BuildContext context, GlobalKey canvasKey) {
+    showDialog(
+      barrierDismissible: true,
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          title: const Text('Save Logo'),
+          content: const Text(
+            'Do you want to save this logo to your gallery?',
+            style: TextStyle(fontSize: 14),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel', style: TextStyle(fontSize: 16)),
+            ),
+            Spacer(),
+            TextButton(
+              onPressed: () {
+                saveCanvasToGallery(canvasKey);
+                Navigator.of(context).pop(); // Close the dialog
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Logo saved to gallery!')),
+                );
+              },
+              child: const Text('Save', style: TextStyle(fontSize: 16)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   void initState() {
     super.initState();
+    _noScreenshot.screenshotOff();
     _currentLogoState = LogoStateData(
       logoPosition: const Offset(150, 100),
       logoSize: 100,
@@ -78,11 +197,354 @@ class _DownloadLogoState extends State<DownloadLogo> {
       isCompanyName2Visible: false,
       isSlogan2Visible: false,
       customTexts: [],
-      // ✅ Set initial layer state
+      customImages: [],
       lockedElements: {},
-      elementOrder: [0, 1, 2], // Default render order
+      elementOrder: [0, 1, 2],
     );
+
     _saveState();
+  }
+
+  @override
+  void dispose() {
+    _noScreenshot.screenshotOn();
+    super.dispose();
+  }
+
+  // --- Build Method ---
+  @override
+  Widget build(BuildContext context) {
+    return Screenshot(
+      controller: ScreenshotController(),
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.grey.shade200,
+          title: const Text(
+            'Logo Maker',
+            style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.undo, size: 40),
+              onPressed: _undo,
+              tooltip: 'Undo last change',
+            ),
+            IconButton(
+              icon: const Icon(Icons.save, size: 40),
+              onPressed: () => _showSaveConfirmationDialog(context, _canvasKey),
+              tooltip: 'Save Logo',
+            ),
+            IconButton(
+              icon: Icon(isEditing ? Icons.edit_off : Icons.edit, size: 40),
+              onPressed:
+                  () => setState(() {
+                    isEditing = !isEditing;
+                    selectedElement = null;
+                    _clearGridAlignment();
+                  }),
+              tooltip: 'Toggle Edit Mode',
+            ),
+          ],
+        ),
+        body: Stack(
+          children: [
+            SizedBox(height: 700, width: double.infinity),
+            Column(
+              children: [
+                Expanded(
+                  child: Stack(
+                    children: [
+                      RepaintBoundary(
+                        key: _canvasKey,
+                        child: LogoCanvas(
+                          selectedShapeName: selectedShapeName,
+                          // key: _canvasKey,
+                          logoState: _currentLogoState,
+                          svgLogo: widget.svgLogo,
+                          companyName: widget.companyName,
+                          sloganName: widget.sloganName,
+                          showGrid: _showGrid,
+                          isEditingMode: true,
+                          selectedElementId: selectedElement,
+                          highlightedHorizontalGridLineIndex:
+                              _highlightedHorizontalGridLineIndex,
+                          highlightedVerticalGridLineIndex:
+                              _highlightedVerticalGridLineIndex,
+                          isLayersRibbonExtended: _isLayersPanelVisible,
+                          onToggleGrid:
+                              () => setState(() => _showGrid = !_showGrid),
+                          onToggleLayersRibbon:
+                              () => setState(
+                                () =>
+                                    _isLayersPanelVisible =
+                                        !_isLayersPanelVisible,
+                              ),
+                          onElementPanStart: _onPanStart,
+                          onElementPanUpdate: _updateElementPosition,
+                          onElementPanEnd: _onPanEnd,
+                          onElementTap: _elementSelect,
+                          onElementDelete: _deleteElement,
+                          onElementSplit: _splitElement,
+                          onElementRotateTap: _rotateElementByTap,
+                          onElementRotatePanStart: _onRotatePanStart,
+                          onElementRotatePanUpdate: _onRotatePanUpdate,
+                          onElementRotatePanEnd: _onPanEnd,
+                          onElementResizeTap: _resizeElementByTap,
+                          onElementResizePanStart: _onResizePanStart,
+                          onElementResizePanUpdate: _onResizePanUpdate,
+                          onElementResizePanEnd: _onPanEnd,
+                          isCheckerboardActive: true,
+                          checkerboardOpacity: checkerboardOpacity,
+                          isCheckerboardVisible: isCheckerboardVisible,
+                          // ✅ UNCOMMENTED: Now the canvas knows what to draw and what is locked.
+                          lockedElements: _currentLogoState.lockedElements,
+                          elementOrder: _currentLogoState.elementOrder,
+                        ),
+                      ),
+
+                      // Layer 2: The Grid Toggle Ribbon (Top Right)
+                      Positioned(
+                        top: 20,
+                        right: 0,
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _showGrid = !_showGrid;
+                            });
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade700,
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(25.0),
+                                bottomLeft: Radius.circular(25.0),
+                              ),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.black26,
+                                  blurRadius: 8,
+                                  offset: Offset(-2, 2),
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              _showGrid ? Icons.grid_off : Icons.grid_on,
+                              color: Colors.white,
+                              size: 28,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        top: 20,
+                        left: 0,
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _isLayersPanelVisible = !_isLayersPanelVisible;
+                            });
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade700,
+                              borderRadius: const BorderRadius.only(
+                                topRight: Radius.circular(25.0),
+                                bottomRight: Radius.circular(25.0),
+                              ),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.black26,
+                                  blurRadius: 8,
+                                  offset: Offset(2, 2),
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.layers,
+                              color: Colors.white,
+                              size: 28,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      AnimatedPositioned(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                        top: 80,
+                        left: _isLayersPanelVisible ? 10 : -300,
+                        child: LayersPanel(
+                          logoState: _currentLogoState,
+                          svgLogo: widget.svgLogo,
+                          onClose:
+                              () =>
+                                  setState(() => _isLayersPanelVisible = false),
+                          onToggleLock: _toggleLock,
+                          onToggleLockAll: _toggleLockAll,
+                          onReorder: _reorderLayer,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                Column(
+                  children: [
+                    Container(height: 300, color: Colors.grey.shade200),
+                  ],
+                ),
+              ],
+            ),
+
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: AnimatedSlide(
+                duration: const Duration(milliseconds: 300),
+                offset:
+                    (showDropUp || showPaletteBar)
+                        ? Offset.zero
+                        : const Offset(0, 1),
+                curve: Curves.easeInOut,
+                child: Material(
+                  color: Colors.transparent,
+                  child: Container(
+                    width: double.infinity,
+                    constraints: const BoxConstraints(maxHeight: 400),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (showDropUp)
+                            DropUpPanel(
+                              onClose: () => setState(() => showDropUp = false),
+                              onToggleCheckerboard: (val) {
+                                setState(() {
+                                  isCheckerboardActive = val;
+                                  isCheckerboardVisible = val;
+                                });
+                              },
+                              onOpacityChanged:
+                                  (val) =>
+                                      setState(() => checkerboardOpacity = val),
+                              onShapeSelected: (shapeName) {
+                                setState(() {
+                                  selectedShapeName = shapeName;
+                                });
+                              },
+                            ),
+                          if (showPaletteBar)
+                            SizedBox(
+                              height: 80,
+                              child: ListView.separated(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: paletteList.length,
+                                separatorBuilder:
+                                    (_, __) => const SizedBox(width: 10),
+                                itemBuilder: (context, index) {
+                                  final colors = paletteList[index];
+                                  final isSelected =
+                                      selectedPaletteIndex == index;
+
+                                  return GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        selectedPaletteIndex = index;
+                                        Provider.of<SelectedColorProvider>(
+                                          context,
+                                          listen: false,
+                                        ).resetRotation();
+                                      });
+                                    },
+                                    child: Container(
+                                      width: 60,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(10),
+                                        border: Border.all(
+                                          color:
+                                              isSelected
+                                                  ? Colors.orange
+                                                  : Colors.grey.shade400,
+                                          width: isSelected ? 2 : 1,
+                                        ),
+                                      ),
+                                      child:
+                                       Stack(
+                                        clipBehavior: Clip.none,
+                                        children: [
+                                          ClipRRect(
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
+                                            child: Column(
+                                              children:
+                                                  colors
+                                                      .map(
+                                                        (color) => Container(
+                                                          height: 20,
+                                                          width:
+                                                              double.infinity,
+                                                          color: color,
+                                                        ),
+                                                      )
+                                                      .toList(),
+                                            ),
+                                          ),
+
+                                          if (isSelected)
+                                            Positioned(
+                                              top: 30,
+                                              right: 15,
+                                              child: InkWell(
+                                                onTap: () {
+                                                  Provider.of<
+                                                    SelectedColorProvider
+                                                  >(
+                                                    context,
+                                                    listen: false,
+                                                  ).setColorsRotated(colors);
+                                                },
+                                                child: const CircleAvatar(
+                                                  radius: 10,
+                                                  backgroundColor: Colors.white,
+                                                  child: Icon(
+                                                    Icons.refresh,
+                                                    size: 14,
+                                                    color: Colors.orange,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        bottomNavigationBar: LogoBottomNavBar(
+          selectedIndex: selectedIndex,
+          onItemSelected: _handleBottomNavTap,
+          hasTapped: true,
+        ),
+      ),
+    );
   }
 
   // --- State Save/Undo ---
@@ -102,21 +564,35 @@ class _DownloadLogoState extends State<DownloadLogo> {
         selectedElement = null;
         _clearGridAlignment();
       });
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Undo successful!')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Undo successful!')));
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Nothing to undo!')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Nothing to undo!')));
     }
   }
 
-  // --- Navigation & Element Creation ---
   void _handleBottomNavTap(int index) async {
+    // 👇 Index update kro
     setState(() {
       selectedIndex = index;
-      showDropUp = index == 0 ? !showDropUp : false;
     });
 
+    // 👇 DropUp aur Palette toggle ek frame delay k sath karo
+    Future.delayed(Duration.zero, () {
+      setState(() {
+        showDropUp = index == 0;
+        showPaletteBar = index == 4;
+      });
+    });
+
+    // ✅ Navigation & other logic
     if (index == 2) {
-      final result = await Navigator.of(context).push<String>(_createSlideRoute());
+      final result = await Navigator.of(
+        context,
+      ).push<String>(_createSlideRoute());
       if (result != null && result.isNotEmpty) {
         _saveState();
         setState(() {
@@ -126,10 +602,13 @@ class _DownloadLogoState extends State<DownloadLogo> {
             size: 22,
             rotation: 0,
           );
-          final updatedCustomTexts = List<CustomTextElement>.from(_currentLogoState.customTexts)..add(newTextElement);
+          final updatedCustomTexts = List<CustomTextElement>.from(
+            _currentLogoState.customTexts,
+          )..add(newTextElement);
           final newElementId = 100 + _currentLogoState.customTexts.length;
-          final updatedElementOrder = List<int>.from(_currentLogoState.elementOrder)..add(newElementId);
-
+          final updatedElementOrder = List<int>.from(
+            _currentLogoState.elementOrder,
+          )..add(newElementId);
           _currentLogoState = _currentLogoState.copyWith(
             customTexts: updatedCustomTexts,
             elementOrder: updatedElementOrder,
@@ -137,16 +616,254 @@ class _DownloadLogoState extends State<DownloadLogo> {
         });
       }
     }
+
+    if (index == 1) {
+      final selectedImagePath = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder:
+              (context) => ArtSelectScreen(
+                images: [
+                  'assets/logo_images/logo_1.jpg',
+                  'assets/logo_images/logo_2.png',
+                  'assets/logo_images/logo_3.jpg',
+                  'assets/logo_images/logo_4.png',
+                  'assets/logo_images/logo_5.jpg',
+                  'assets/logo_images/logo_6.jpg',
+                  'assets/logo_images/logo_7.png',
+                  'assets/logo_images/logo_8.jpg',
+                  'assets/logo_images/logo_9.png',
+                  'assets/logo_images/logo_10.jpg',
+                ],
+              ),
+        ),
+      );
+      if (selectedImagePath != null && mounted) {
+        _addImageToCanvas(selectedImagePath);
+      }
+    }
+
+    if (index == 3) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ColorScreen()),
+      );
+    }
+
+    if (index == 5) {
+      final picker = ImagePicker();
+      final selectedSource = await showDialog<ImageSource>(
+        context: context,
+        barrierDismissible: true,
+        builder:
+            (context) => AlertDialog(
+              title: const Text('Select Image Source'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, ImageSource.camera),
+                  child: const Text('Camera'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, ImageSource.gallery),
+                  child: const Text('Gallery'),
+                ),
+              ],
+            ),
+      );
+      if (selectedSource != null) {
+        final pickedFile = await picker.pickImage(source: selectedSource);
+        if (pickedFile != null) {
+          final imageIndex = _currentLogoState.customImages.length;
+          final newImage = CustomImageElement(
+            path: pickedFile.path,
+            position: _getCanvasCenter() ?? const Offset(100, 100),
+            size: 100,
+            rotation: 0,
+          );
+          _saveState();
+          setState(() {
+            _currentLogoState = _currentLogoState.copyWith(
+              customImages: [..._currentLogoState.customImages, newImage],
+              elementOrder: [
+                ..._currentLogoState.elementOrder,
+                200 + imageIndex,
+              ],
+            );
+          });
+        }
+      }
+    }
   }
+
+  // --- Navigation & Element Creation ---
+  // void _handleBottomNavTap(int index) async {
+  //   setState(() {
+  //     selectedIndex = index;
+  //     // showDropUp = index == 0 ? !showDropUp : false;
+  //     showDropUp = index == 0;
+  //     showPaletteBar = index == 4;
+  //   });
+  //   void _addImageToCanvas(String imagePath) {
+  //     final newImage = CustomImageElement(
+  //       path: imagePath,
+  //       position: _getCanvasCenter() ?? const Offset(100, 100),
+  //       rotation: 0,
+  //       size: 120,
+  //     );
+
+  //     final updatedImages = List<CustomImageElement>.from(
+  //       _currentLogoState.customImages,
+  //     )..add(newImage);
+
+  //     setState(() {
+  //       _currentLogoState = _currentLogoState.copyWith(
+  //         customImages: updatedImages,
+  //       );
+  //     });
+  //   }
+
+  //   // 👉 Handle Text screen navigation (index == 2)
+  //   if (index == 2) {
+  //     final result = await Navigator.of(
+  //       context,
+  //     ).push<String>(_createSlideRoute());
+  //     if (result != null && result.isNotEmpty) {
+  //       _saveState();
+  //       setState(() {
+  //         final newTextElement = CustomTextElement(
+  //           text: result,
+  //           position: _getCanvasCenter() ?? const Offset(150, 150),
+  //           size: 22,
+  //           rotation: 0,
+  //         );
+  //         final updatedCustomTexts = List<CustomTextElement>.from(
+  //           _currentLogoState.customTexts,
+  //         )..add(newTextElement);
+
+  //         final newElementId = 100 + _currentLogoState.customTexts.length;
+  //         final updatedElementOrder = List<int>.from(
+  //           _currentLogoState.elementOrder,
+  //         )..add(newElementId);
+
+  //         _currentLogoState = _currentLogoState.copyWith(
+  //           customTexts: updatedCustomTexts,
+  //           elementOrder: updatedElementOrder,
+  //         );
+  //       });
+  //     }
+  //   }
+  //   if (index == 1) {
+  //     final selectedImagePath = await Navigator.push(
+  //       context,
+  //       MaterialPageRoute(
+  //         builder:
+  //             (context) => ArtSelectScreen(
+  //               images: [
+  //                 'assets/logo_images/logo_1.jpg',
+  //                 'assets/logo_images/logo_2.png',
+  //                 'assets/logo_images/logo_3.jpg',
+  //                 'assets/logo_images/logo_4.png',
+  //                 'assets/logo_images/logo_5.jpg',
+  //                 'assets/logo_images/logo_6.jpg',
+  //                 'assets/logo_images/logo_7.png',
+  //                 'assets/logo_images/logo_8.jpg',
+  //                 'assets/logo_images/logo_9.png',
+  //                 'assets/logo_images/logo_10.jpg',
+  //               ],
+  //             ),
+  //       ),
+  //     );
+  //     if (selectedImagePath != null && mounted) {
+  //       _addImageToCanvas(selectedImagePath);
+  //     }
+  //   }
+
+  //   if (index == 3) {
+  //     Navigator.push(
+  //       context,
+  //       MaterialPageRoute(builder: (context) => ColorScreen()),
+  //     );
+  //   }
+
+  //   if (index == 5) {
+  //     final picker = ImagePicker();
+
+  //     final selectedSource = await showDialog<ImageSource>(
+  //       barrierDismissible: true,
+  //       context: context,
+  //       builder:
+  //           (context) => AlertDialog(
+  //             title: const Text('Select Image Source'),
+  //             actions: [
+  //               TextButton(
+  //                 onPressed: () => Navigator.pop(context, ImageSource.camera),
+  //                 child: const Text('Camera'),
+  //               ),
+  //               TextButton(
+  //                 onPressed: () => Navigator.pop(context, ImageSource.gallery),
+  //                 child: const Text('Gallery'),
+  //               ),
+  //             ],
+  //           ),
+  //     );
+
+  //     if (selectedSource != null) {
+  //       final pickedFile = await picker.pickImage(source: selectedSource);
+  //       if (pickedFile != null) {
+  //         final imageIndex = _currentLogoState.customImages.length;
+
+  //         final newImage = CustomImageElement(
+  //           path: pickedFile.path,
+  //           position: _getCanvasCenter() ?? const Offset(100, 100),
+  //           size: 100,
+  //           rotation: 0,
+  //         );
+
+  //         _saveState(); // optional if undo feature used
+
+  //         setState(() {
+  //           _currentLogoState = _currentLogoState.copyWith(
+  //             customImages: [..._currentLogoState.customImages, newImage],
+  //             elementOrder: [
+  //               ..._currentLogoState.elementOrder,
+  //               200 + imageIndex,
+  //             ],
+  //           );
+  //         });
+  //       }
+  //     }
+  //   }
+  // }
 
   Route<String> _createSlideRoute() {
     return PageRouteBuilder<String>(
-      pageBuilder: (context, animation, secondaryAnimation) => const TextScreen(),
+      pageBuilder:
+          (context, animation, secondaryAnimation) => const TextScreen(),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = Offset(1.0, 0.0);
         const end = Offset.zero;
         const curve = Curves.ease;
-        final tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+        final tween = Tween(
+          begin: begin,
+          end: end,
+        ).chain(CurveTween(curve: curve));
+        return SlideTransition(position: animation.drive(tween), child: child);
+      },
+    );
+  }
+
+  Route<String> navRoute() {
+    return PageRouteBuilder<String>(
+      pageBuilder:
+          (context, animation, secondaryAnimation) => const TextScreen(),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        const begin = Offset(1.0, 0.0);
+        const end = Offset.zero;
+        const curve = Curves.ease;
+        final tween = Tween(
+          begin: begin,
+          end: end,
+        ).chain(CurveTween(curve: curve));
         return SlideTransition(position: animation.drive(tween), child: child);
       },
     );
@@ -169,12 +886,17 @@ class _DownloadLogoState extends State<DownloadLogo> {
       // Remove from collections first
       final newOrder = List<int>.from(newState.elementOrder)..remove(id);
       final newLocked = Set<int>.from(newState.lockedElements)..remove(id);
-      newState = newState.copyWith(elementOrder: newOrder, lockedElements: newLocked);
+      newState = newState.copyWith(
+        elementOrder: newOrder,
+        lockedElements: newLocked,
+      );
 
       if (id >= 100) {
         final index = id - 100;
         if (index < _currentLogoState.customTexts.length) {
-          final updatedCustomTexts = List<CustomTextElement>.from(_currentLogoState.customTexts)..removeAt(index);
+          final updatedCustomTexts = List<CustomTextElement>.from(
+            _currentLogoState.customTexts,
+          )..removeAt(index);
           newState = newState.copyWith(customTexts: updatedCustomTexts);
         }
       } else if (id == 0) {
@@ -195,7 +917,49 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
       _currentLogoState = newState;
       selectedElement = null;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
+    });
+  }
+
+  void _openArtSelectScreen() async {
+    final selectedImagePath = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) => ArtSelectScreen(
+              images: [
+                'assets/logo_images/logo_1.jpg',
+                'assets/logo_images/logo_2.png',
+                'assets/logo_images/logo_3.jpg',
+                'assets/logo_images/logo_4.png',
+                'assets/logo_images/logo_5.jpg',
+                'assets/logo_images/logo_6.jpg',
+                'assets/logo_images/logo_7.png',
+                'assets/logo_images/logo_8.jpg',
+                'assets/logo_images/logo_9.png',
+                'assets/logo_images/logo_10.jpg',
+              ],
+            ),
+      ),
+    );
+
+    if (selectedImagePath != null && mounted) {
+      _addImageToCanvas(selectedImagePath);
+    }
+  }
+
+  void _addImageToCanvas(String imagePath) {
+    final newImage = CustomImageElement(
+      path: imagePath,
+      position: _getCanvasCenter() ?? Offset(100, 100),
+      rotation: 0,
+      size: 120,
+    );
+
+    setState(() {
+      _currentLogoState.customImages.add(newImage);
     });
   }
 
@@ -206,7 +970,12 @@ class _DownloadLogoState extends State<DownloadLogo> {
     if (isLocked) {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
-        ..showSnackBar(const SnackBar(content: Text('Element is locked.'), duration: Duration(seconds: 1)));
+        ..showSnackBar(
+          const SnackBar(
+            content: Text('Element is locked.'),
+            duration: Duration(seconds: 1),
+          ),
+        );
     }
     return isLocked;
   }
@@ -214,7 +983,9 @@ class _DownloadLogoState extends State<DownloadLogo> {
   void _splitElement(int id) {
     if (_isElementLocked(id)) return;
     if (id >= 100) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Cannot split custom text elements.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cannot split custom text elements.')),
+      );
       return;
     }
     _saveState();
@@ -222,15 +993,32 @@ class _DownloadLogoState extends State<DownloadLogo> {
       String message = 'Element split!';
       Offset offset = const Offset(20, 20);
       if (id == 0) {
-        _currentLogoState = _currentLogoState.copyWith(logo2Position: _currentLogoState.logoPosition + offset, logo2Size: _currentLogoState.logoSize, logo2Rotation: _currentLogoState.logoRotation, isLogo2Visible: true);
+        _currentLogoState = _currentLogoState.copyWith(
+          logo2Position: _currentLogoState.logoPosition + offset,
+          logo2Size: _currentLogoState.logoSize,
+          logo2Rotation: _currentLogoState.logoRotation,
+          isLogo2Visible: true,
+        );
       } else if (id == 1) {
-        _currentLogoState = _currentLogoState.copyWith(companyName2Position: _currentLogoState.companyNamePosition + offset, companyName2Size: _currentLogoState.companyNameSize, companyName2Rotation: _currentLogoState.companyNameRotation, isCompanyName2Visible: true);
+        _currentLogoState = _currentLogoState.copyWith(
+          companyName2Position: _currentLogoState.companyNamePosition + offset,
+          companyName2Size: _currentLogoState.companyNameSize,
+          companyName2Rotation: _currentLogoState.companyNameRotation,
+          isCompanyName2Visible: true,
+        );
       } else if (id == 2) {
-        _currentLogoState = _currentLogoState.copyWith(slogan2Position: _currentLogoState.sloganPosition + offset, slogan2Size: _currentLogoState.sloganSize, slogan2Rotation: _currentLogoState.sloganRotation, isSlogan2Visible: true);
+        _currentLogoState = _currentLogoState.copyWith(
+          slogan2Position: _currentLogoState.sloganPosition + offset,
+          slogan2Size: _currentLogoState.sloganSize,
+          slogan2Rotation: _currentLogoState.sloganRotation,
+          isSlogan2Visible: true,
+        );
       } else {
         message = 'Cannot split this element.';
       }
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
     });
   }
 
@@ -242,17 +1030,35 @@ class _DownloadLogoState extends State<DownloadLogo> {
       if (id >= 100) {
         _updateElementRotation(id, _getElementRotation(id) + rotationStep);
       } else if (id == 0) {
-        _currentLogoState = _currentLogoState.copyWith(logoRotation: (_currentLogoState.logoRotation + rotationStep) % 360);
+        _currentLogoState = _currentLogoState.copyWith(
+          logoRotation: (_currentLogoState.logoRotation + rotationStep) % 360,
+        );
       } else if (id == 1) {
-        _currentLogoState = _currentLogoState.copyWith(companyNameRotation: (_currentLogoState.companyNameRotation + rotationStep) % 360);
+        _currentLogoState = _currentLogoState.copyWith(
+          companyNameRotation:
+              (_currentLogoState.companyNameRotation + rotationStep) % 360,
+        );
       } else if (id == 2) {
-        _currentLogoState = _currentLogoState.copyWith(sloganRotation: (_currentLogoState.sloganRotation + rotationStep) % 360);
+        _currentLogoState = _currentLogoState.copyWith(
+          sloganRotation:
+              (_currentLogoState.sloganRotation + rotationStep) % 360,
+        );
       } else if (id == 3) {
-        _currentLogoState = _currentLogoState.copyWith(logo2Rotation: ((_currentLogoState.logo2Rotation ?? 0) + rotationStep) % 360);
+        _currentLogoState = _currentLogoState.copyWith(
+          logo2Rotation:
+              ((_currentLogoState.logo2Rotation ?? 0) + rotationStep) % 360,
+        );
       } else if (id == 4) {
-        _currentLogoState = _currentLogoState.copyWith(companyName2Rotation: ((_currentLogoState.companyName2Rotation ?? 0) + rotationStep) % 360);
+        _currentLogoState = _currentLogoState.copyWith(
+          companyName2Rotation:
+              ((_currentLogoState.companyName2Rotation ?? 0) + rotationStep) %
+              360,
+        );
       } else if (id == 5) {
-        _currentLogoState = _currentLogoState.copyWith(slogan2Rotation: ((_currentLogoState.slogan2Rotation ?? 0) + rotationStep) % 360);
+        _currentLogoState = _currentLogoState.copyWith(
+          slogan2Rotation:
+              ((_currentLogoState.slogan2Rotation ?? 0) + rotationStep) % 360,
+        );
       }
     });
   }
@@ -266,51 +1072,124 @@ class _DownloadLogoState extends State<DownloadLogo> {
       if (id >= 100) {
         _updateElementSize(id, max(minSize, _getElementSize(id) + resizeStep));
       } else if (id == 0) {
-        _currentLogoState = _currentLogoState.copyWith(logoSize: max(minSize, _currentLogoState.logoSize + resizeStep));
+        _currentLogoState = _currentLogoState.copyWith(
+          logoSize: max(minSize, _currentLogoState.logoSize + resizeStep),
+        );
       } else if (id == 1) {
-        _currentLogoState = _currentLogoState.copyWith(companyNameSize: max(minSize, _currentLogoState.companyNameSize + resizeStep));
+        _currentLogoState = _currentLogoState.copyWith(
+          companyNameSize: max(
+            minSize,
+            _currentLogoState.companyNameSize + resizeStep,
+          ),
+        );
       } else if (id == 2) {
-        _currentLogoState = _currentLogoState.copyWith(sloganSize: max(minSize, _currentLogoState.sloganSize + resizeStep));
+        _currentLogoState = _currentLogoState.copyWith(
+          sloganSize: max(minSize, _currentLogoState.sloganSize + resizeStep),
+        );
       } else if (id == 3) {
-        _currentLogoState = _currentLogoState.copyWith(logo2Size: max(minSize, (_currentLogoState.logo2Size ?? minSize) + resizeStep));
+        _currentLogoState = _currentLogoState.copyWith(
+          logo2Size: max(
+            minSize,
+            (_currentLogoState.logo2Size ?? minSize) + resizeStep,
+          ),
+        );
       } else if (id == 4) {
-        _currentLogoState = _currentLogoState.copyWith(companyName2Size: max(minSize, (_currentLogoState.companyName2Size ?? minSize) + resizeStep));
+        _currentLogoState = _currentLogoState.copyWith(
+          companyName2Size: max(
+            minSize,
+            (_currentLogoState.companyName2Size ?? minSize) + resizeStep,
+          ),
+        );
       } else if (id == 5) {
-        _currentLogoState = _currentLogoState.copyWith(slogan2Size: max(minSize, (_currentLogoState.slogan2Size ?? minSize) + resizeStep));
+        _currentLogoState = _currentLogoState.copyWith(
+          slogan2Size: max(
+            minSize,
+            (_currentLogoState.slogan2Size ?? minSize) + resizeStep,
+          ),
+        );
       }
     });
   }
 
   void _updateElementPosition(int id, Offset delta) {
     if (_isElementLocked(id)) return;
-    final RenderBox? renderBox = _canvasKey.currentContext?.findRenderObject() as RenderBox?;
+
+    final RenderBox? renderBox =
+        _canvasKey.currentContext?.findRenderObject() as RenderBox?;
     if (renderBox == null) return;
+
     final canvasSize = renderBox.size;
     final originalPosition = _getElementPosition(id);
     final elementSize = _getElementRenderedSize(id);
+
     if (elementSize == Size.zero) return;
-    final newPosition = _limitOffset(originalPosition, delta, elementSize, canvasSize);
+
+    final newPosition = _limitOffset(
+      originalPosition,
+      delta,
+      elementSize,
+      canvasSize,
+    );
+
     setState(() {
-      if (id >= 100) {
+      if (id >= 100 && id < 200) {
+        // Custom Text Elements
         final index = id - 100;
-        if (index < _currentLogoState.customTexts.length) {
-          final updatedTexts = List<CustomTextElement>.from(_currentLogoState.customTexts);
-          updatedTexts[index] = updatedTexts[index].copyWith(position: newPosition);
-          _currentLogoState = _currentLogoState.copyWith(customTexts: updatedTexts);
+        if (index >= 0 && index < _currentLogoState.customTexts.length) {
+          final updatedTexts = List<CustomTextElement>.from(
+            _currentLogoState.customTexts,
+          );
+          updatedTexts[index] = updatedTexts[index].copyWith(
+            position: newPosition,
+          );
+          _currentLogoState = _currentLogoState.copyWith(
+            customTexts: updatedTexts,
+          );
         }
       } else if (id == 0) {
-        _currentLogoState = _currentLogoState.copyWith(logoPosition: newPosition);
+        _currentLogoState = _currentLogoState.copyWith(
+          logoPosition: newPosition,
+        );
       } else if (id == 1) {
-        _currentLogoState = _currentLogoState.copyWith(companyNamePosition: newPosition);
+        _currentLogoState = _currentLogoState.copyWith(
+          companyNamePosition: newPosition,
+        );
       } else if (id == 2) {
-        _currentLogoState = _currentLogoState.copyWith(sloganPosition: newPosition);
+        _currentLogoState = _currentLogoState.copyWith(
+          sloganPosition: newPosition,
+        );
       } else if (id == 3) {
-        _currentLogoState = _currentLogoState.copyWith(logo2Position: newPosition);
+        _currentLogoState = _currentLogoState.copyWith(
+          logo2Position: newPosition,
+        );
       } else if (id == 4) {
-        _currentLogoState = _currentLogoState.copyWith(companyName2Position: newPosition);
+        _currentLogoState = _currentLogoState.copyWith(
+          companyName2Position: newPosition,
+        );
       } else if (id == 5) {
-        _currentLogoState = _currentLogoState.copyWith(slogan2Position: newPosition);
+        _currentLogoState = _currentLogoState.copyWith(
+          slogan2Position: newPosition,
+        );
+      } else if (id >= 200 && id < 300) {
+        final index = id - 200;
+        final images = _currentLogoState.customImages;
+
+        // ✅ Ye condition crash se bachayegi
+        if (index >= 0 && index < images.length) {
+          final updatedImages = List<CustomImageElement>.from(images);
+          updatedImages[index] = updatedImages[index].copyWith(
+            position: newPosition,
+          );
+          _currentLogoState = _currentLogoState.copyWith(
+            customImages: updatedImages,
+          );
+        } else {
+          debugPrint(
+            '❌ Invalid image index: $index, List length: ${images.length}',
+          );
+        }
       }
+
       _checkGridAlignment(newPosition, elementSize, canvasSize);
     });
   }
@@ -325,14 +1204,19 @@ class _DownloadLogoState extends State<DownloadLogo> {
   void _onResizePanUpdate(int id, DragUpdateDetails details) {
     if (_isElementLocked(id)) return;
     if (_initialDragPoint == null || _initialElementValue == null) return;
-    final RenderBox? renderBox = _canvasKey.currentContext?.findRenderObject() as RenderBox?;
+    final RenderBox? renderBox =
+        _canvasKey.currentContext?.findRenderObject() as RenderBox?;
     if (renderBox == null) return;
     final Offset canvasOffset = renderBox.localToGlobal(Offset.zero);
     final elementPosition = _getElementPosition(id);
     final elementSize = _getElementRenderedSize(id);
-    final elementCenterGlobal = canvasOffset + elementPosition + Offset(elementSize.width / 2, elementSize.height / 2);
+    final elementCenterGlobal =
+        canvasOffset +
+        elementPosition +
+        Offset(elementSize.width / 2, elementSize.height / 2);
     final initialDistance = (_initialDragPoint! - elementCenterGlobal).distance;
-    final currentDistance = (details.globalPosition - elementCenterGlobal).distance;
+    final currentDistance =
+        (details.globalPosition - elementCenterGlobal).distance;
     if (initialDistance == 0) return;
     final scaleFactor = currentDistance / initialDistance;
     double newSize = (_initialElementValue! * scaleFactor).clamp(10.0, 300.0);
@@ -349,12 +1233,16 @@ class _DownloadLogoState extends State<DownloadLogo> {
   void _onRotatePanUpdate(int id, DragUpdateDetails details) {
     if (_isElementLocked(id)) return;
     if (_initialDragPoint == null || _initialElementValue == null) return;
-    final RenderBox? renderBox = _canvasKey.currentContext?.findRenderObject() as RenderBox?;
+    final RenderBox? renderBox =
+        _canvasKey.currentContext?.findRenderObject() as RenderBox?;
     if (renderBox == null) return;
     final Offset canvasOffset = renderBox.localToGlobal(Offset.zero);
     final elementPosition = _getElementPosition(id);
     final elementSize = _getElementRenderedSize(id);
-    final elementCenterGlobal = canvasOffset + elementPosition + Offset(elementSize.width / 2, elementSize.height / 2);
+    final elementCenterGlobal =
+        canvasOffset +
+        elementPosition +
+        Offset(elementSize.width / 2, elementSize.height / 2);
     final v1 = _initialDragPoint! - elementCenterGlobal;
     final v2 = details.globalPosition - elementCenterGlobal;
     double angleDelta = atan2(v2.dy, v2.dx) - atan2(v1.dy, v1.dx);
@@ -362,8 +1250,17 @@ class _DownloadLogoState extends State<DownloadLogo> {
     setState(() => _updateElementRotation(id, newRotation));
   }
 
+  // void _onPanStart(int id, DragStartDetails details) {
+  //   if (_isElementLocked(id)) return;
+  //   _saveState();
+  // }
   void _onPanStart(int id, DragStartDetails details) {
     if (_isElementLocked(id)) return;
+
+    setState(() {
+      selectedElement = id; // ✅ yeh line add karo
+    });
+
     _saveState();
   }
 
@@ -376,7 +1273,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
   // --- Getters & Helpers ---
 
   Offset? _getCanvasCenter() {
-    final RenderBox? renderBox = _canvasKey.currentContext?.findRenderObject() as RenderBox?;
+    final RenderBox? renderBox =
+        _canvasKey.currentContext?.findRenderObject() as RenderBox?;
     if (renderBox != null) {
       final size = renderBox.size;
       return Offset(size.width / 2, size.height / 2);
@@ -384,15 +1282,27 @@ class _DownloadLogoState extends State<DownloadLogo> {
     return null;
   }
 
-  Offset _limitOffset(Offset original, Offset delta, Size elementSize, Size canvasSize) {
+  Offset _limitOffset(
+    Offset original,
+    Offset delta,
+    Size elementSize,
+    Size canvasSize,
+  ) {
     final newOffset = original + delta;
-    final clampedDx = newOffset.dx.clamp(0.0, canvasSize.width - elementSize.width);
-    final clampedDy = newOffset.dy.clamp(0.0, canvasSize.height - elementSize.height);
+    final clampedDx = newOffset.dx.clamp(
+      0.0,
+      canvasSize.width - elementSize.width,
+    );
+    final clampedDy = newOffset.dy.clamp(
+      0.0,
+      canvasSize.height - elementSize.height,
+    );
     return Offset(clampedDx, clampedDy);
   }
 
   void _clearGridAlignment() {
-    if (_highlightedHorizontalGridLineIndex != null || _highlightedVerticalGridLineIndex != null) {
+    if (_highlightedHorizontalGridLineIndex != null ||
+        _highlightedVerticalGridLineIndex != null) {
       setState(() {
         _highlightedHorizontalGridLineIndex = null;
         _highlightedVerticalGridLineIndex = null;
@@ -400,17 +1310,26 @@ class _DownloadLogoState extends State<DownloadLogo> {
     }
   }
 
-  void _checkGridAlignment(Offset elementPosition, Size elementSize, Size canvasSize) {
+  void _checkGridAlignment(
+    Offset elementPosition,
+    Size elementSize,
+    Size canvasSize,
+  ) {
+    // Remove this line if you want alignment to work even when grid icon is off
     if (!_showGrid) return;
+
     int? newH, newV;
     const tolerance = 10.0;
     final centerX = elementPosition.dx + elementSize.width / 2;
     final centerY = elementPosition.dy + elementSize.height / 2;
+
     for (int i = 0; i <= 4; i++) {
       if ((centerX - (i * canvasSize.width / 4)).abs() < tolerance) newV = i;
       if ((centerY - (i * canvasSize.height / 4)).abs() < tolerance) newH = i;
     }
-    if (newH != _highlightedHorizontalGridLineIndex || newV != _highlightedVerticalGridLineIndex) {
+
+    if (newH != _highlightedHorizontalGridLineIndex ||
+        newV != _highlightedVerticalGridLineIndex) {
       setState(() {
         _highlightedHorizontalGridLineIndex = newH;
         _highlightedVerticalGridLineIndex = newV;
@@ -421,7 +1340,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
   Offset _getElementPosition(int id) {
     if (id >= 100) {
       final index = id - 100;
-      if (index < _currentLogoState.customTexts.length) return _currentLogoState.customTexts[index].position;
+      if (index < _currentLogoState.customTexts.length)
+        return _currentLogoState.customTexts[index].position;
     }
     switch (id) {
       case 0:
@@ -444,7 +1364,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
   double _getElementSize(int id) {
     if (id >= 100) {
       final index = id - 100;
-      if (index < _currentLogoState.customTexts.length) return _currentLogoState.customTexts[index].size;
+      if (index < _currentLogoState.customTexts.length)
+        return _currentLogoState.customTexts[index].size;
     }
     switch (id) {
       case 0:
@@ -470,7 +1391,14 @@ class _DownloadLogoState extends State<DownloadLogo> {
       final index = id - 100;
       if (index < _currentLogoState.customTexts.length) {
         final text = _currentLogoState.customTexts[index].text;
-        return TextSizeUtil.getTextSize(text, TextStyle(fontSize: sizeValue, color: Colors.black, fontWeight: FontWeight.w500));
+        return TextSizeUtil.getTextSize(
+          text,
+          TextStyle(
+            fontSize: sizeValue,
+            color: Colors.black,
+            fontWeight: FontWeight.w500,
+          ),
+        );
       }
     }
     switch (id) {
@@ -479,10 +1407,24 @@ class _DownloadLogoState extends State<DownloadLogo> {
         return Size(sizeValue, sizeValue);
       case 1:
       case 4:
-        return TextSizeUtil.getTextSize(widget.companyName, TextStyle(fontSize: sizeValue, fontWeight: FontWeight.bold));
+        return TextSizeUtil.getTextSize(
+          widget.companyName,
+          TextStyle(
+            fontSize: sizeValue,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        );
       case 2:
       case 5:
-        return TextSizeUtil.getTextSize(widget.sloganName, TextStyle(fontSize: sizeValue, fontStyle: FontStyle.italic));
+        return TextSizeUtil.getTextSize(
+          widget.sloganName,
+          TextStyle(
+            fontSize: sizeValue,
+            fontStyle: FontStyle.italic,
+            color: Colors.black,
+          ),
+        );
       default:
         return Size.zero;
     }
@@ -491,7 +1433,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
   double _getElementRotation(int id) {
     if (id >= 100) {
       final index = id - 100;
-      if (index < _currentLogoState.customTexts.length) return _currentLogoState.customTexts[index].rotation;
+      if (index < _currentLogoState.customTexts.length)
+        return _currentLogoState.customTexts[index].rotation;
     }
     switch (id) {
       case 0:
@@ -515,9 +1458,13 @@ class _DownloadLogoState extends State<DownloadLogo> {
     if (id >= 100) {
       final index = id - 100;
       if (index < _currentLogoState.customTexts.length) {
-        final updatedTexts = List<CustomTextElement>.from(_currentLogoState.customTexts);
+        final updatedTexts = List<CustomTextElement>.from(
+          _currentLogoState.customTexts,
+        );
         updatedTexts[index] = updatedTexts[index].copyWith(size: newSize);
-        _currentLogoState = _currentLogoState.copyWith(customTexts: updatedTexts);
+        _currentLogoState = _currentLogoState.copyWith(
+          customTexts: updatedTexts,
+        );
       }
     } else if (id == 0) {
       _currentLogoState = _currentLogoState.copyWith(logoSize: newSize);
@@ -538,22 +1485,38 @@ class _DownloadLogoState extends State<DownloadLogo> {
     if (id >= 100) {
       final index = id - 100;
       if (index < _currentLogoState.customTexts.length) {
-        final updatedTexts = List<CustomTextElement>.from(_currentLogoState.customTexts);
-        updatedTexts[index] = updatedTexts[index].copyWith(rotation: newRotation);
-        _currentLogoState = _currentLogoState.copyWith(customTexts: updatedTexts);
+        final updatedTexts = List<CustomTextElement>.from(
+          _currentLogoState.customTexts,
+        );
+        updatedTexts[index] = updatedTexts[index].copyWith(
+          rotation: newRotation,
+        );
+        _currentLogoState = _currentLogoState.copyWith(
+          customTexts: updatedTexts,
+        );
       }
     } else if (id == 0) {
       _currentLogoState = _currentLogoState.copyWith(logoRotation: newRotation);
     } else if (id == 1) {
-      _currentLogoState = _currentLogoState.copyWith(companyNameRotation: newRotation);
+      _currentLogoState = _currentLogoState.copyWith(
+        companyNameRotation: newRotation,
+      );
     } else if (id == 2) {
-      _currentLogoState = _currentLogoState.copyWith(sloganRotation: newRotation);
+      _currentLogoState = _currentLogoState.copyWith(
+        sloganRotation: newRotation,
+      );
     } else if (id == 3) {
-      _currentLogoState = _currentLogoState.copyWith(logo2Rotation: newRotation);
+      _currentLogoState = _currentLogoState.copyWith(
+        logo2Rotation: newRotation,
+      );
     } else if (id == 4) {
-      _currentLogoState = _currentLogoState.copyWith(companyName2Rotation: newRotation);
+      _currentLogoState = _currentLogoState.copyWith(
+        companyName2Rotation: newRotation,
+      );
     } else if (id == 5) {
-      _currentLogoState = _currentLogoState.copyWith(slogan2Rotation: newRotation);
+      _currentLogoState = _currentLogoState.copyWith(
+        slogan2Rotation: newRotation,
+      );
     }
   }
 
@@ -568,7 +1531,9 @@ class _DownloadLogoState extends State<DownloadLogo> {
       } else {
         newLockedSet.add(id);
       }
-      _currentLogoState = _currentLogoState.copyWith(lockedElements: newLockedSet);
+      _currentLogoState = _currentLogoState.copyWith(
+        lockedElements: newLockedSet,
+      );
     });
   }
 
@@ -577,7 +1542,9 @@ class _DownloadLogoState extends State<DownloadLogo> {
     setState(() {
       if (shouldLock) {
         // Lock all visible elements
-        _currentLogoState = _currentLogoState.copyWith(lockedElements: _currentLogoState.visibleElementIds.toSet());
+        _currentLogoState = _currentLogoState.copyWith(
+          lockedElements: _currentLogoState.visibleElementIds.toSet(),
+        );
       } else {
         // Unlock all
         _currentLogoState = _currentLogoState.copyWith(lockedElements: {});
@@ -607,342 +1574,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
       _currentLogoState = _currentLogoState.copyWith(elementOrder: order);
     });
   }
-
-  // --- Build Method ---
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.grey.shade200,
-        title: const Text('Logo Maker', style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
-        actions: [
-          IconButton(icon: const Icon(Icons.undo, size: 40), onPressed: _undo, tooltip: 'Undo last change'),
-          IconButton(icon: const Icon(Icons.save, size: 40), onPressed: () {}, tooltip: 'Save Logo'),
-          IconButton(
-            icon: Icon(isEditing ? Icons.edit_off : Icons.edit, size: 40),
-            onPressed: () => setState(() {
-              isEditing = !isEditing;
-              selectedElement = null;
-              _clearGridAlignment();
-            }),
-            tooltip: 'Toggle Edit Mode',
-          ),
-        ],
-      ),
-      body: Stack(
-        children: [
-          Container(height: 500, width: double.infinity, color: Colors.white),
-          Column(
-            children: [
-              Expanded(
-                child: Stack(
-                  children: [
-                    // Layer 1: The actual Logo Canvas
-                    // --- THIS IS THE NEW, CORRECTED CODE ---
-                    LogoCanvas(
-                      canvasKey: _canvasKey,
-                      logoState: _currentLogoState,
-                      svgLogo: widget.svgLogo,
-                      companyName: widget.companyName,
-                      sloganName: widget.sloganName,
-                      showGrid: _showGrid,
-                      isEditingMode: isEditing,
-                      selectedElementId: selectedElement,
-                      highlightedHorizontalGridLineIndex: _highlightedHorizontalGridLineIndex,
-                      highlightedVerticalGridLineIndex: _highlightedVerticalGridLineIndex,
-                      isLayersRibbonExtended: _isLayersPanelVisible,
-                      onToggleGrid: () => setState(() => _showGrid = !_showGrid),
-                      onToggleLayersRibbon: () => setState(() => _isLayersPanelVisible = !_isLayersPanelVisible),
-                      onElementPanStart: _onPanStart,
-                      onElementPanUpdate: _updateElementPosition,
-                      onElementPanEnd: _onPanEnd,
-                      onElementTap: _elementSelect,
-                      onElementDelete: _deleteElement,
-                      onElementSplit: _splitElement,
-                      onElementRotateTap: _rotateElementByTap,
-                      onElementRotatePanStart: _onRotatePanStart,
-                      onElementRotatePanUpdate: _onRotatePanUpdate,
-                      onElementRotatePanEnd: _onPanEnd,
-                      onElementResizeTap: _resizeElementByTap,
-                      onElementResizePanStart: _onResizePanStart,
-                      onElementResizePanUpdate: _onResizePanUpdate,
-                      onElementResizePanEnd: _onPanEnd,
-                      isCheckerboardActive: isCheckerboardActive,
-                      checkerboardOpacity: checkerboardOpacity,
-                      isCheckerboardVisible: isCheckerboardVisible,
-                      // ✅ UNCOMMENTED: Now the canvas knows what to draw and what is locked.
-                      lockedElements: _currentLogoState.lockedElements,
-                      elementOrder: _currentLogoState.elementOrder,
-                    ),
-
-                    // Layer 2: The Grid Toggle Ribbon (Top Right)
-                    Positioned(
-                      top: 20,
-                      right: 0,
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _showGrid = !_showGrid;
-                          });
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade700,
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(25.0),
-                              bottomLeft: Radius.circular(25.0),
-                            ),
-                            boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 8, offset: Offset(-2, 2))],
-                          ),
-                          child: Icon(_showGrid ? Icons.grid_off : Icons.grid_on, color: Colors.white, size: 28),
-                        ),
-                      ),
-                    ),
-
-                    // Layer 3: The Layers Ribbon (Top Left)
-                    Positioned(
-                      top: 20,
-                      left: 0,
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _isLayersPanelVisible = !_isLayersPanelVisible;
-                          });
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade700,
-                            borderRadius: const BorderRadius.only(
-                              topRight: Radius.circular(25.0),
-                              bottomRight: Radius.circular(25.0),
-                            ),
-                            boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 8, offset: Offset(2, 2))],
-                          ),
-                          child: const Icon(Icons.layers, color: Colors.white, size: 28),
-                        ),
-                      ),
-                    ),
-
-                    // ✅ Layer 4: THE NEW LAYERS PANEL
-                    AnimatedPositioned(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                      top: 80,
-                      left: _isLayersPanelVisible ? 10 : -300,
-                      child: _LayersPanel(
-                        logoState: _currentLogoState,
-                        svgLogo: widget.svgLogo,
-                        onClose: () => setState(() => _isLayersPanelVisible = false),
-                        onToggleLock: _toggleLock,
-                        onToggleLockAll: _toggleLockAll,
-                        onReorder: _reorderLayer,
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              Column(children: [Container(height: 300, color: Colors.grey.shade200)]),
-            ],
-          ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: AnimatedSlide(
-              duration: const Duration(milliseconds: 300),
-              offset: showDropUp ? Offset.zero : const Offset(0, 1),
-              curve: Curves.easeInOut,
-              child: Stack(
-                children: [
-                  DropUpPanel(
-                    onClose: () => setState(() => showDropUp = false),
-                    onToggleCheckerboard: (val) {
-                      setState(() {
-                        isCheckerboardActive = val;
-                        isCheckerboardVisible = val;
-                      });
-                    },
-                    onOpacityChanged: (val) => setState(() => checkerboardOpacity = val),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-      bottomNavigationBar: LogoBottomNavBar(
-        selectedIndex: selectedIndex,
-        onItemSelected: _handleBottomNavTap,
-        hasTapped: true,
-      ),
-    );
-  }
 }
 
-// ✅ --- PASTE THIS CORRECTED WIDGET AT THE BOTTOM OF download_logo.dart ---
-
-class _LayersPanel extends StatelessWidget {
-  final LogoStateData logoState;
-  final String svgLogo;
-  final VoidCallback onClose;
-  final ValueChanged<int> onToggleLock;
-  final ValueChanged<bool> onToggleLockAll;
-  final Function(int, bool) onReorder; // id, moveUp
-
-  const _LayersPanel({
-    required this.logoState,
-    required this.svgLogo,
-    required this.onClose,
-    required this.onToggleLock,
-    required this.onToggleLockAll,
-    required this.onReorder,
-  });
-
-  Widget _buildLayerPreview(BuildContext context, int id) {
-    Widget child;
-    String text = '';
-
-    switch (id) {
-      case 0:
-      case 3:
-        child = SvgPicture.string(svgLogo, colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn));
-        text = 'Logo';
-        break;
-      case 1:
-      case 4:
-        child = Text(logoState.companyName ?? '', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold));
-        text = 'Company';
-        break;
-      case 2:
-      case 5:
-        child = Text(logoState.sloganName ?? '', style: const TextStyle(fontSize: 18, fontStyle: FontStyle.italic));
-        text = 'Slogan';
-        break;
-      default:
-        if (id >= 100) {
-          final customText = logoState.customTexts[id - 100];
-          child = Text(customText.text, style: const TextStyle(fontSize: 18));
-          text = customText.text;
-        } else {
-          child = const Icon(Icons.error);
-          text = 'Unknown';
-        }
-    }
-
-    return Row(
-      children: [
-        Container(
-          width: 40,
-          height: 40,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(4),
-            color: Colors.white.withOpacity(0.5),
-          ),
-          child: FittedBox(
-            child: child,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            text,
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final orderedVisibleIds = logoState.elementOrder.where((id) => logoState.visibleElementIds.contains(id)).toList();
-    final areAllLocked = logoState.lockedElements.length == logoState.visibleElementIds.length && logoState.visibleElementIds.isNotEmpty;
-
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        // Allow the panel to take up to 70% of the screen height
-        maxHeight: MediaQuery.of(context).size.height * 0.7,
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: Container(
-          width: 280,
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade800.withOpacity(0.95),
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: const [BoxShadow(color: Colors.black38, blurRadius: 10, spreadRadius: 2)],
-          ),
-          child: Column(
-            // ❌  REMOVED: mainAxisSize: MainAxisSize.min
-            // This was the source of the bug. Removing it allows the Column
-            // to fill the parent's height, giving space to the Expanded widget.
-            children: [
-              // --- Header ---
-              Row(
-                children: [
-                  Checkbox(
-                    value: areAllLocked,
-                    onChanged: (val) => onToggleLockAll(val ?? false),
-                    checkColor: Colors.black,
-                    activeColor: Colors.white,
-                    side: const BorderSide(color: Colors.white),
-                  ),
-                  const Text('Lock All', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                  const Spacer(),
-                  IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white),
-                    onPressed: onClose,
-                  ),
-                ],
-              ),
-              const Divider(color: Colors.white54, height: 1),
-              // --- Layer List ---
-              if (orderedVisibleIds.isEmpty)
-                const Expanded( // Use expanded to center the text vertically
-                  child: Center(
-                    child: Text('No layers found.', style: TextStyle(color: Colors.white70)),
-                  ),
-                )
-              else
-              // This Expanded now works correctly because the Column fills its parent
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: orderedVisibleIds.length,
-                    itemBuilder: (context, index) {
-                      final id = orderedVisibleIds[index];
-                      final isLocked = logoState.lockedElements.contains(id);
-                      return ListTile(
-                        dense: true,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-                        title: _buildLayerPreview(context, id),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: Icon(isLocked ? Icons.lock : Icons.lock_open, color: Colors.white),
-                              onPressed: () => onToggleLock(id),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.arrow_upward, color: Colors.white),
-                              onPressed: index > 0 ? () => onReorder(id, true) : null,
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.arrow_downward, color: Colors.white),
-                              onPressed: index < orderedVisibleIds.length - 1 ? () => onReorder(id, false) : null,
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
+// ✅-- PASTE THIS CORRECTED WIDGET AT THE BOTTOM OF download_logo.dart ---

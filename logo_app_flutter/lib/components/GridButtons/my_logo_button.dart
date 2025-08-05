@@ -46,7 +46,7 @@ class MyLogoButton extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Image.asset(
-                    'lib/assets/icons/gallery.png',
+                    'assets/icons/gallery.png',
                     width: 40,
                     height: 40,
                   ),

@@ -24,6 +24,8 @@ class TemplateWidget extends StatefulWidget {
 }
 
 class _TemplateWidgetState extends State<TemplateWidget> {
+  int? selectedIndex;
+
   late Future<List<String>> _futureSvgList;
 
   @override
@@ -70,6 +72,9 @@ class _TemplateWidgetState extends State<TemplateWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       body: FutureBuilder<List<String>>(
         future: _futureSvgList,
@@ -92,83 +97,140 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                 crossAxisCount: 2,
                 crossAxisSpacing: 3,
                 mainAxisSpacing: 3,
-                childAspectRatio: 0.8,
+                childAspectRatio: 0.7,
               ),
               itemBuilder: (context, index) {
                 return InkWell(
                   onTap: () {
-
-                    final selectedSvg = svgList[index];
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder:
-                            (context) => DownloadLogo(
-                              svgLogo: selectedSvg,
-                              companyName: widget.companyName,
-                              sloganName: widget.slogan,
-                            ),
-                      ),
-                    );
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade200),
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    child: Column(
-                      children: [
-                        SvgPicture.string(
-                          svgList[index],
-                          placeholderBuilder:
-                              (context) => const Center(
-                                child: CircularProgressIndicator(),
+                    if (selectedIndex == index) {
+                      final selectedSvg = svgList[index];
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (context) => DownloadLogo(
+                                svgLogo: selectedSvg,
+                                companyName: widget.companyName,
+                                sloganName: widget.slogan,
                               ),
-                          height: 80,
-                          width: 80,
                         ),
-                        const SizedBox(height: 8),
-                        Flexible(
-                          child: Text(
-                            widget.companyName,
-                            textAlign: TextAlign.center,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: _getFontStyle(
-                              widget.selectedFontIndex,
-                              fontSize: 14,
+                      );
+                    } else {
+                      setState(() {
+                        selectedIndex = index;
+                      });
+                    }
+                  },
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(10),
+                        width: screenWidth * 1.7,
+
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color:
+                                selectedIndex == index
+                                    ? Colors.orange
+                                    : Colors.grey.shade300,
+                            width: selectedIndex == index ? 2.5 : 1,
+                          ),
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: Column(
+                          children: [
+                            SvgPicture.string(
+                              svgList[index],
+                              placeholderBuilder:
+                                  (context) => const Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                              height: 80,
+                              width: 80,
+                            ),
+                            const SizedBox(height: 8),
+                            Flexible(
+                              child: Text(
+                                widget.companyName,
+                                textAlign: TextAlign.center,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: _getFontStyle(
+                                  widget.selectedFontIndex,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Flexible(
+                              child: Text(
+                                widget.slogan,
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: _getFontStyle(
+                                  widget.selectedFontIndex,
+                                  fontSize: 10,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Flexible(
+                              child: Text(
+                                widget.category,
+                                textAlign: TextAlign.center,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      if (selectedIndex == index)
+                        Positioned(
+                          bottom: 20,
+                          child: SizedBox(
+                            height: 30,
+
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.orange,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                              ),
+                              onPressed: () {
+                                final selectedSvg = svgList[index];
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder:
+                                        (context) => DownloadLogo(
+                                          svgLogo: selectedSvg,
+                                          companyName: widget.companyName,
+                                          sloganName: widget.slogan,
+                                        ),
+                                  ),
+                                );
+                              },
+                              child: Row(
+                                children: [
+                                  Icon(Icons.edit, color: Colors.white),
+                                  SizedBox(width: 5),
+                                  const Text("Edit"),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                        const SizedBox(height: 4),
-                        Flexible(
-                          child: Text(
-                            widget.slogan,
-                            textAlign: TextAlign.center,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: _getFontStyle(
-                              widget.selectedFontIndex,
-                              fontSize: 10,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Flexible(
-                          child: Text(
-                            widget.category,
-                            textAlign: TextAlign.center,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 11,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                    ],
                   ),
                 );
               },
