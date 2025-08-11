@@ -1,5 +1,5 @@
 import 'dart:ui';
-import 'package:collection/collection.dart';
+
 
 class CustomTextElement {
   final String text;
@@ -9,6 +9,7 @@ class CustomTextElement {
   final double opacity;
   final bool isVisible;
   final int? layerIndex;
+  final Color color; // ✅ ADD THIS LINE
 
   const CustomTextElement({
     required this.text,
@@ -18,6 +19,7 @@ class CustomTextElement {
     this.opacity = 1.0,
     this.isVisible = true,
     this.layerIndex,
+    this.color = const Color(0xFF000000), // ✅ default black color
   });
 
   CustomTextElement copyWith({
@@ -28,6 +30,7 @@ class CustomTextElement {
     double? opacity,
     bool? isVisible,
     int? layerIndex,
+    Color? color, // ✅ ADD THIS
   }) {
     return CustomTextElement(
       text: text ?? this.text,
@@ -37,9 +40,11 @@ class CustomTextElement {
       opacity: opacity ?? this.opacity,
       isVisible: isVisible ?? this.isVisible,
       layerIndex: layerIndex ?? this.layerIndex,
+      color: color ?? this.color, // ✅ ADD THIS
     );
   }
 }
+
 
 class CustomImageElement {
   final String path;
@@ -80,6 +85,57 @@ class CustomImageElement {
     );
   }
 }
+
+
+class LogoElement {
+  final int id;
+  final Offset position;
+  final double size;
+  final double rotation;
+  final double opacity;
+  final bool isVisible;
+  final int? layerIndex;
+  final String text;
+  final Color color; // ✅ NEW
+
+  LogoElement({
+    required this.id,
+    required this.position,
+    required this.size,
+    required this.rotation,
+    required this.opacity,
+    required this.isVisible,
+    this.layerIndex,
+    required this.text,
+    this.color = const Color(0xFF000000), // default black
+  });
+
+  LogoElement copyWith({
+    int? id,
+    Offset? position,
+    double? size,
+    double? rotation,
+    double? opacity,
+    bool? isVisible,
+    int? layerIndex,
+    String? text,
+    Color? color, // ✅ NEW
+  }) {
+    return LogoElement(
+      id: id ?? this.id,
+      position: position ?? this.position,
+      size: size ?? this.size,
+      rotation: rotation ?? this.rotation,
+      opacity: opacity ?? this.opacity,
+      isVisible: isVisible ?? this.isVisible,
+      layerIndex: layerIndex ?? this.layerIndex,
+      text: text ?? this.text,
+      color: color ?? this.color, // ✅ assign
+    );
+  }
+}
+
+
 
 class LogoStateData {
   final Offset logoPosition;
@@ -156,18 +212,24 @@ class LogoStateData {
         lockedElements = lockedElements ?? {},
         elementOrder = elementOrder ?? [];
 
-  List<int> get visibleElementIds {
-    final ids = <int>[];
-    if (isLogoVisible) ids.add(0);
-    if (isCompanyNameVisible) ids.add(1);
-    if (isSloganVisible) ids.add(2);
-    if (isLogo2Visible) ids.add(3);
-    if (isCompanyName2Visible) ids.add(4);
-    if (isSlogan2Visible) ids.add(5);
-    ids.addAll(customTexts.mapIndexed((index, _) => 100 + index));
-    ids.addAll(customImages.mapIndexed((index, _) => 200 + index));
-    return ids;
+  
+  Set<int> get visibleElementIds {
+  final ids = <int>{};
+  if (isLogoVisible) ids.add(0);
+  if (isCompanyNameVisible) ids.add(1);
+  if (isSloganVisible) ids.add(2);
+  if (isLogo2Visible) ids.add(3);
+  if (isCompanyName2Visible) ids.add(4);
+  if (isSlogan2Visible) ids.add(5);
+  for (int i = 0; i < customTexts.length; i++) {
+    if (customTexts[i].isVisible) ids.add(100 + i);
   }
+  for (int i = 0; i < customImages.length; i++) {
+    if (customImages[i].isVisible) ids.add(200 + i);
+  }
+  return ids;
+}
+
 
   LogoStateData copyWith({
     Offset? logoPosition,

@@ -242,34 +242,6 @@ class TrianglePainter extends CustomPainter {
   }
 }
 
-// class DiamondPainter extends CustomPainter {
-//   final Color color;
-//   final Gradient? gradient;
-
-//   DiamondPainter(this.color, this.gradient);
-
-//   @override
-//   void paint(Canvas canvas, Size size) {
-//     final paint = Paint();
-//     if (gradient != null) {
-//       paint.shader = gradient!.createShader(Rect.fromLTWH(0, 0, size.width, size.height));
-//     } else {
-//       paint.color = color;
-//     }
-
-//     final path = Path()
-//       ..moveTo(size.width / 2, 0)
-//       ..lineTo(0, size.height / 2)
-//       ..lineTo(size.width / 2, size.height)
-//       ..lineTo(size.width, size.height / 2)
-//       ..close();
-
-//     canvas.drawPath(path, paint);
-//   }
-
-//   @override
-//   bool shouldRepaint(_) => false;
-// }
 
 class DiamondPainter extends CustomPainter {
   final Color? color;

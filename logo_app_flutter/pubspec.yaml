@@ -50,6 +50,7 @@ dependencies:
   gallery_saver_plus: ^3.2.8
   permission_handler: ^11.0.1
   no_screenshot: ^0.3.1
+  collection: ^1.19.1
   
   
   

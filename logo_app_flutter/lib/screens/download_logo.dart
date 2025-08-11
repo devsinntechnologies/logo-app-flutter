@@ -3,8 +3,10 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
+import 'package:collection/collection.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
 import 'package:logo_app_flutter/screens/art_select_screen.dart';
+import 'package:logo_app_flutter/screens/movement_panel.dart';
 import 'package:no_screenshot/no_screenshot.dart';
 
 import 'package:flutter/material.dart';
@@ -51,16 +53,40 @@ class _DownloadLogoState extends State<DownloadLogo> {
   String selectedShapeName = ""; // 👈 Add this
   // --- State Management ---
   late LogoStateData _currentLogoState;
+  //  int? _selectedElementId;
+   int? selectedElementId;
 
   final List<LogoStateData> _undoStack = [];
   final int _maxUndoHistory = 10;
+  List<LogoElement> customTextElements = [];
+  List<LogoElement> customImageElements = [];
+  LogoElement? _getElementById(int id) {
+  return customTextElements.firstWhereOrNull((e) => e.id == id);
+}
+
+
+
+  final List<Color> colorList = [
+    Colors.red,
+    Colors.blue,
+    Colors.orange,
+    Colors.green,
+    Colors.purple,
+    Colors.teal,
+    Colors.black,
+  ];
 
   // --- UI Toggles ---
   bool _showGrid = false;
-  bool _isLayersPanelVisible = false; // Changed from _isLayersRibbonExtended
+  bool _isLayersPanelVisible = false;
   bool showDropUp = false;
+  bool showEffectPanel = false;
+
   bool showPaletteBar = false;
-  int selectedPaletteIndex = 0; // highlight & refresh ke liye
+  int selectedPaletteIndex = 0;
+
+  // --- Movement Panel Toggle ---
+  bool isMovementPanelVisible = true;
 
   // --- Background Toggles ---
   bool isCheckerboardActive = false;
@@ -87,6 +113,9 @@ class _DownloadLogoState extends State<DownloadLogo> {
     [Colors.deepOrange, Colors.amber, Colors.lime],
     [Colors.blueGrey, Colors.white, Colors.grey.shade300],
   ];
+
+  int? _selectedBottomOption; // null = none selected
+
 
   // --- Drag State ---
   Offset? _initialDragPoint;
@@ -177,6 +206,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
   @override
   void initState() {
     super.initState();
+    selectedElement = selectedElementId;
     _noScreenshot.screenshotOff();
     _currentLogoState = LogoStateData(
       logoPosition: const Offset(150, 100),
@@ -210,6 +240,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
     _noScreenshot.screenshotOn();
     super.dispose();
   }
+
+
 
   // --- Build Method ---
   @override
@@ -403,13 +435,51 @@ class _DownloadLogoState extends State<DownloadLogo> {
                 ),
               ],
             ),
+           
+if (selectedElement != null && isMovementPanelVisible)
+  Positioned(
+    bottom: -100,
+    
+    child: MovementPanel(
+      onDirectionPressed: (String direction) {
+        const double moveAmount = 5.0;
+        Offset delta;
+
+        switch (direction) {
+          case 'up':
+            delta = const Offset(0, -moveAmount);
+            break;
+          case 'down':
+            delta = const Offset(0, moveAmount);
+            break;
+          case 'left':
+            delta = const Offset(-moveAmount, 0);
+            break;
+          case 'right':
+            delta = const Offset(moveAmount, 0);
+            break;
+          default:
+            delta = Offset.zero;
+        }
+setState(() {
+  
+});
+        _updateElementPosition(selectedElement!, delta);
+      },
+      onDuplicatePressed: _duplicateSelectedElement,
+   
+      selectedElementId: selectedElement,
+      isVisible: true,
+    ),
+  ),
+
 
             Align(
               alignment: Alignment.bottomCenter,
               child: AnimatedSlide(
                 duration: const Duration(milliseconds: 300),
                 offset:
-                    (showDropUp || showPaletteBar)
+                    (showDropUp || showPaletteBar || showEffectPanel)
                         ? Offset.zero
                         : const Offset(0, 1),
                 curve: Curves.easeInOut,
@@ -475,8 +545,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
                                           width: isSelected ? 2 : 1,
                                         ),
                                       ),
-                                      child:
-                                       Stack(
+                                      child: Stack(
                                         clipBehavior: Clip.none,
                                         children: [
                                           ClipRRect(
@@ -529,6 +598,15 @@ class _DownloadLogoState extends State<DownloadLogo> {
                                 },
                               ),
                             ),
+
+                          if (showEffectPanel)
+                            Positioned(
+                              bottom: 40,
+                              left: 0,
+                              right: 0,
+
+                              child: _buildEffectPanel(),
+                            ),
                         ],
                       ),
                     ),
@@ -543,6 +621,77 @@ class _DownloadLogoState extends State<DownloadLogo> {
           onItemSelected: _handleBottomNavTap,
           hasTapped: true,
         ),
+      ),
+    );
+  }
+
+  Widget _buildEffectPanel() {
+    return Container(
+      // padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+         
+          const SizedBox(height: 10),
+
+          // Color list below it
+          SizedBox(
+            height: 50,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: colorList.length + 1,
+              separatorBuilder: (_, __) => const SizedBox(width: 10),
+              itemBuilder: (context, index) {
+                if (index == 0) {
+                  return GestureDetector(
+                    onTap: () {
+                      Provider.of<SelectedColorProvider>(
+                        context,
+                        listen: false,
+                      ).resetColor();
+                      // setState(() => showEffectPanel = false);
+                    },
+                    child: Container(
+                      width: 60,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(
+                        Icons.close,
+                        color: Colors.black,
+                        size: 30,
+                      ),
+                    ),
+                  );
+                }
+
+                final color = colorList[index - 1];
+                return GestureDetector(
+                  onTap: () {
+                    Provider.of<SelectedColorProvider>(
+                      context,
+                      listen: false,
+                    ).setColor(color);
+                   
+                  },
+                  child: Container(
+                    width: 50,
+                    decoration: BoxDecoration(
+                      color: color,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.grey.shade400),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -585,6 +734,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
       setState(() {
         showDropUp = index == 0;
         showPaletteBar = index == 4;
+        showEffectPanel = index == 3;
       });
     });
 
@@ -643,12 +793,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
       }
     }
 
-    if (index == 3) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => ColorScreen()),
-      );
-    }
 
     if (index == 5) {
       final picker = ImagePicker();
@@ -695,146 +839,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
     }
   }
 
-  // --- Navigation & Element Creation ---
-  // void _handleBottomNavTap(int index) async {
-  //   setState(() {
-  //     selectedIndex = index;
-  //     // showDropUp = index == 0 ? !showDropUp : false;
-  //     showDropUp = index == 0;
-  //     showPaletteBar = index == 4;
-  //   });
-  //   void _addImageToCanvas(String imagePath) {
-  //     final newImage = CustomImageElement(
-  //       path: imagePath,
-  //       position: _getCanvasCenter() ?? const Offset(100, 100),
-  //       rotation: 0,
-  //       size: 120,
-  //     );
-
-  //     final updatedImages = List<CustomImageElement>.from(
-  //       _currentLogoState.customImages,
-  //     )..add(newImage);
-
-  //     setState(() {
-  //       _currentLogoState = _currentLogoState.copyWith(
-  //         customImages: updatedImages,
-  //       );
-  //     });
-  //   }
-
-  //   // 👉 Handle Text screen navigation (index == 2)
-  //   if (index == 2) {
-  //     final result = await Navigator.of(
-  //       context,
-  //     ).push<String>(_createSlideRoute());
-  //     if (result != null && result.isNotEmpty) {
-  //       _saveState();
-  //       setState(() {
-  //         final newTextElement = CustomTextElement(
-  //           text: result,
-  //           position: _getCanvasCenter() ?? const Offset(150, 150),
-  //           size: 22,
-  //           rotation: 0,
-  //         );
-  //         final updatedCustomTexts = List<CustomTextElement>.from(
-  //           _currentLogoState.customTexts,
-  //         )..add(newTextElement);
-
-  //         final newElementId = 100 + _currentLogoState.customTexts.length;
-  //         final updatedElementOrder = List<int>.from(
-  //           _currentLogoState.elementOrder,
-  //         )..add(newElementId);
-
-  //         _currentLogoState = _currentLogoState.copyWith(
-  //           customTexts: updatedCustomTexts,
-  //           elementOrder: updatedElementOrder,
-  //         );
-  //       });
-  //     }
-  //   }
-  //   if (index == 1) {
-  //     final selectedImagePath = await Navigator.push(
-  //       context,
-  //       MaterialPageRoute(
-  //         builder:
-  //             (context) => ArtSelectScreen(
-  //               images: [
-  //                 'assets/logo_images/logo_1.jpg',
-  //                 'assets/logo_images/logo_2.png',
-  //                 'assets/logo_images/logo_3.jpg',
-  //                 'assets/logo_images/logo_4.png',
-  //                 'assets/logo_images/logo_5.jpg',
-  //                 'assets/logo_images/logo_6.jpg',
-  //                 'assets/logo_images/logo_7.png',
-  //                 'assets/logo_images/logo_8.jpg',
-  //                 'assets/logo_images/logo_9.png',
-  //                 'assets/logo_images/logo_10.jpg',
-  //               ],
-  //             ),
-  //       ),
-  //     );
-  //     if (selectedImagePath != null && mounted) {
-  //       _addImageToCanvas(selectedImagePath);
-  //     }
-  //   }
-
-  //   if (index == 3) {
-  //     Navigator.push(
-  //       context,
-  //       MaterialPageRoute(builder: (context) => ColorScreen()),
-  //     );
-  //   }
-
-  //   if (index == 5) {
-  //     final picker = ImagePicker();
-
-  //     final selectedSource = await showDialog<ImageSource>(
-  //       barrierDismissible: true,
-  //       context: context,
-  //       builder:
-  //           (context) => AlertDialog(
-  //             title: const Text('Select Image Source'),
-  //             actions: [
-  //               TextButton(
-  //                 onPressed: () => Navigator.pop(context, ImageSource.camera),
-  //                 child: const Text('Camera'),
-  //               ),
-  //               TextButton(
-  //                 onPressed: () => Navigator.pop(context, ImageSource.gallery),
-  //                 child: const Text('Gallery'),
-  //               ),
-  //             ],
-  //           ),
-  //     );
-
-  //     if (selectedSource != null) {
-  //       final pickedFile = await picker.pickImage(source: selectedSource);
-  //       if (pickedFile != null) {
-  //         final imageIndex = _currentLogoState.customImages.length;
-
-  //         final newImage = CustomImageElement(
-  //           path: pickedFile.path,
-  //           position: _getCanvasCenter() ?? const Offset(100, 100),
-  //           size: 100,
-  //           rotation: 0,
-  //         );
-
-  //         _saveState(); // optional if undo feature used
-
-  //         setState(() {
-  //           _currentLogoState = _currentLogoState.copyWith(
-  //             customImages: [..._currentLogoState.customImages, newImage],
-  //             elementOrder: [
-  //               ..._currentLogoState.elementOrder,
-  //               200 + imageIndex,
-  //             ],
-  //           );
-  //         });
-  //       }
-  //     }
-  //   }
-  // }
-
   Route<String> _createSlideRoute() {
     return PageRouteBuilder<String>(
       pageBuilder:
@@ -869,13 +873,13 @@ class _DownloadLogoState extends State<DownloadLogo> {
     );
   }
 
-  // --- Element Selection & Deletion ---
   void _elementSelect(int id) {
-    setState(() {
-      selectedElement = id;
-      _clearGridAlignment();
-    });
-  }
+  setState(() {
+    selectedElement = id;
+    _selectedBottomOption = null; // ✅ close bottom options
+  });
+}
+
 
   void _deleteElement(int id) {
     _saveState();
@@ -923,47 +927,63 @@ class _DownloadLogoState extends State<DownloadLogo> {
     });
   }
 
-  void _openArtSelectScreen() async {
-    final selectedImagePath = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder:
-            (context) => ArtSelectScreen(
-              images: [
-                'assets/logo_images/logo_1.jpg',
-                'assets/logo_images/logo_2.png',
-                'assets/logo_images/logo_3.jpg',
-                'assets/logo_images/logo_4.png',
-                'assets/logo_images/logo_5.jpg',
-                'assets/logo_images/logo_6.jpg',
-                'assets/logo_images/logo_7.png',
-                'assets/logo_images/logo_8.jpg',
-                'assets/logo_images/logo_9.png',
-                'assets/logo_images/logo_10.jpg',
-              ],
-            ),
-      ),
-    );
-
-    if (selectedImagePath != null && mounted) {
-      _addImageToCanvas(selectedImagePath);
-    }
-  }
-
   void _addImageToCanvas(String imagePath) {
+    final index = _currentLogoState.customImages.length;
+
     final newImage = CustomImageElement(
       path: imagePath,
-      position: _getCanvasCenter() ?? Offset(100, 100),
+      position: _getCanvasCenter() ?? const Offset(100, 100),
       rotation: 0,
       size: 120,
     );
 
     setState(() {
-      _currentLogoState.customImages.add(newImage);
+      _currentLogoState = _currentLogoState.copyWith(
+        customImages: [..._currentLogoState.customImages, newImage],
+        elementOrder: [..._currentLogoState.elementOrder, 200 + index],
+      );
     });
   }
 
-  // --- Element Transformations (respecting lock) ---
+
+void _duplicateSelectedElement() {
+  if (selectedElementId == null) return;
+
+  final original = _getElementById(selectedElementId!);
+  if (original == null) return;
+
+  final newId = DateTime.now().millisecondsSinceEpoch;
+
+  final duplicated = original.copyWith(
+    id: newId,
+    position: original.position + const Offset(20, 20), // thoda move
+  );
+
+  setState(() {
+    if (selectedElementId! >= 100 && selectedElementId! < 200) {
+      // Duplicate custom text element
+      final updatedCustomTexts = List<CustomTextElement>.from(_currentLogoState.customTexts)..add(duplicated as CustomTextElement);
+      final updatedElementOrder = List<int>.from(_currentLogoState.elementOrder)..add(newId);
+      _currentLogoState = _currentLogoState.copyWith(
+        customTexts: updatedCustomTexts,
+        elementOrder: updatedElementOrder,
+      );
+    } else if (selectedElementId! >= 200) {
+      // Duplicate custom image element
+      final updatedCustomImages = List<CustomImageElement>.from(_currentLogoState.customImages)..add(duplicated as CustomImageElement);
+      final updatedElementOrder = List<int>.from(_currentLogoState.elementOrder)..add(newId);
+      _currentLogoState = _currentLogoState.copyWith(
+        customImages: updatedCustomImages,
+        elementOrder: updatedElementOrder,
+      );
+    }
+    selectedElementId = newId;
+    selectedElement = newId;
+  });
+}
+
+
+
 
   bool _isElementLocked(int id) {
     final isLocked = _currentLogoState.lockedElements.contains(id);
@@ -1335,6 +1355,24 @@ class _DownloadLogoState extends State<DownloadLogo> {
         _highlightedVerticalGridLineIndex = newV;
       });
     }
+  }
+
+  void _addCustomImage(String imagePath) {
+    final index = _currentLogoState.customImages.length;
+
+    final imageElement = CustomImageElement(
+      path: imagePath,
+      position: const Offset(100, 100),
+      rotation: 0,
+      size: 100,
+    );
+
+    setState(() {
+      _currentLogoState = _currentLogoState.copyWith(
+        customImages: [..._currentLogoState.customImages, imageElement],
+        elementOrder: [..._currentLogoState.elementOrder, 200 + index], // ✅
+      );
+    });
   }
 
   Offset _getElementPosition(int id) {

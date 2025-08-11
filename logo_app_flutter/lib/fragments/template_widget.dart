@@ -9,6 +9,7 @@ class TemplateWidget extends StatefulWidget {
   final String slogan;
   final String category;
   final int selectedFontIndex;
+  final TextStyle fontStyle;
 
   const TemplateWidget({
     super.key,
@@ -16,6 +17,7 @@ class TemplateWidget extends StatefulWidget {
     required this.slogan,
     required this.category,
     required this.selectedFontIndex,
+    required this.fontStyle,
     required String fontFamily,
   });
 
@@ -37,38 +39,77 @@ class _TemplateWidgetState extends State<TemplateWidget> {
     );
   }
 
-  TextStyle _getFontStyle(int index, {double fontSize = 14}) {
-    switch (index) {
-      case 0:
-        return GoogleFonts.roboto(
-          color: Colors.black87,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 1.2,
-          fontSize: fontSize,
-        );
-      case 1:
-        return GoogleFonts.pacifico(
-          color: Colors.black87,
-          letterSpacing: 1.2,
-          fontSize: fontSize,
-        );
-      case 2:
-        return GoogleFonts.poppins(
-          color: Colors.black87,
-          fontWeight: FontWeight.normal,
-          letterSpacing: 1.2,
-          fontSize: fontSize,
-        );
-      case 3:
-        return GoogleFonts.dancingScript(
-          color: Colors.black87,
-          letterSpacing: 1.2,
-          fontSize: fontSize,
-        );
-      default:
-        return TextStyle(fontSize: fontSize, color: Colors.black87);
-    }
+ TextStyle _getFontStyle(int index, {double fontSize = 14}) {
+  switch (index) {
+    case 0:
+      return GoogleFonts.roboto(
+        fontSize: fontSize,
+        color: Colors.black87,
+        fontWeight: FontWeight.bold,
+        letterSpacing: 1.2,
+      );
+    case 1:
+      return GoogleFonts.pacifico(
+        fontSize: fontSize,
+        color: Colors.black87,
+        letterSpacing: 1.2,
+      );
+    case 2:
+      return GoogleFonts.poppins(
+        fontSize: fontSize,
+        color: Colors.black87,
+        fontWeight: FontWeight.normal,
+        letterSpacing: 1.2,
+      );
+    case 3:
+      return GoogleFonts.dancingScript(
+        fontSize: fontSize,
+        color: Colors.black87,
+        letterSpacing: 1.2,
+      );
+    case 4:
+      return GoogleFonts.satisfy(
+        fontSize: fontSize,
+        color: Colors.black87,
+        letterSpacing: 1.2,
+      );
+    case 5:
+      return GoogleFonts.lato(
+        fontSize: fontSize,
+        color: Colors.black87,
+        letterSpacing: 1.2,
+      );
+    case 6:
+      return GoogleFonts.orbitron(
+        fontSize: fontSize,
+        color: Colors.black87,
+        letterSpacing: 1.2,
+      );
+    case 7:
+      return GoogleFonts.openSans(
+        fontSize: fontSize,
+        color: Colors.black87,
+        letterSpacing: 1.2,
+      );
+    case 8:
+      return GoogleFonts.bebasNeue(
+        fontSize: fontSize,
+        color: Colors.black87,
+        letterSpacing: 1.2,
+      );
+    case 9:
+      return GoogleFonts.pressStart2p(
+        fontSize: fontSize - 2, // this font is blocky, reduce size a bit
+        color: Colors.black87,
+        letterSpacing: 1.2,
+      );
+    default:
+      return TextStyle(
+        fontSize: fontSize,
+        color: Colors.black87,
+      );
   }
+}
 
   @override
   Widget build(BuildContext context) {

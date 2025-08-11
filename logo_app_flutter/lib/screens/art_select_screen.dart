@@ -1,3 +1,6 @@
+
+
+
 import 'package:flutter/material.dart';
 
 class ArtSelectScreen extends StatelessWidget {
@@ -24,22 +27,8 @@ class ArtSelectScreen extends StatelessWidget {
             onPressed: () => Navigator.pop(context),
           ),
           elevation: 0,
-          bottom: const PreferredSize(
-            preferredSize: Size.fromHeight(50),
-            child: TabBar(
-              isScrollable: true,
-              indicatorColor: Colors.orange,
-              labelColor: Colors.black,
-              unselectedLabelColor: Colors.grey,
-              tabs: [
-                Tab(text: 'ANIMAL'),
-                Tab(text: 'ARCHITECTURE'),
-                Tab(text: 'BEAUTY'),
-                Tab(text: 'BUSINESS'),
-                Tab(text: 'TECH'),
-              ],
-            ),
-          ),
+          // Remove the bottom TabBar from here
+          // bottom: ...
         ),
         body: TabBarView(
           children: List.generate(5, (_) {
@@ -96,7 +85,25 @@ class ArtSelectScreen extends StatelessWidget {
             );
           }),
         ),
+        bottomNavigationBar:  Container(
+            height: 100,
+          color: Colors.white,
+          child: TabBar(
+            isScrollable: true,
+            indicatorColor: Colors.orange,
+            labelColor: Colors.black,
+            unselectedLabelColor: Colors.grey,
+            tabs: [
+              Tab(text: 'ANIMAL'),
+              Tab(text: 'ARCHITECTURE'),
+              Tab(text: 'BEAUTY'),
+              Tab(text: 'BUSINESS'),
+              Tab(text: 'TECH'),
+            ],
+          ),
+        ),
       ),
     );
   }
 }
+
