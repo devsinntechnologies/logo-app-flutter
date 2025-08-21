@@ -1,5 +1,7 @@
-import 'dart:ui';
 
+
+
+import 'dart:ui';
 
 class CustomTextElement {
   final String text;
@@ -9,7 +11,7 @@ class CustomTextElement {
   final double opacity;
   final bool isVisible;
   final int? layerIndex;
-  final Color color; // ✅ ADD THIS LINE
+  final Color color;
 
   const CustomTextElement({
     required this.text,
@@ -19,7 +21,7 @@ class CustomTextElement {
     this.opacity = 1.0,
     this.isVisible = true,
     this.layerIndex,
-    this.color = const Color(0xFF000000), // ✅ default black color
+    this.color = const Color(0xFF000000),
   });
 
   CustomTextElement copyWith({
@@ -30,7 +32,7 @@ class CustomTextElement {
     double? opacity,
     bool? isVisible,
     int? layerIndex,
-    Color? color, // ✅ ADD THIS
+    Color? color,
   }) {
     return CustomTextElement(
       text: text ?? this.text,
@@ -40,11 +42,10 @@ class CustomTextElement {
       opacity: opacity ?? this.opacity,
       isVisible: isVisible ?? this.isVisible,
       layerIndex: layerIndex ?? this.layerIndex,
-      color: color ?? this.color, // ✅ ADD THIS
+      color: color ?? this.color,
     );
   }
 }
-
 
 class CustomImageElement {
   final String path;
@@ -86,62 +87,57 @@ class CustomImageElement {
   }
 }
 
-
-class LogoElement {
-  final int id;
+class CustomSvgElement {
+  final String svgString;
   final Offset position;
+   final Color color; //
   final double size;
   final double rotation;
   final double opacity;
   final bool isVisible;
   final int? layerIndex;
-  final String text;
-  final Color color; // ✅ NEW
 
-  LogoElement({
-    required this.id,
+  const CustomSvgElement({
+    required this.svgString,
     required this.position,
+    required this.color,
     required this.size,
     required this.rotation,
-    required this.opacity,
-    required this.isVisible,
+    this.opacity = 1.0,
+    this.isVisible = true,
     this.layerIndex,
-    required this.text,
-    this.color = const Color(0xFF000000), // default black
   });
 
-  LogoElement copyWith({
-    int? id,
+  CustomSvgElement copyWith({
+    String? svgString,
     Offset? position,
+    Color? color,
     double? size,
     double? rotation,
     double? opacity,
     bool? isVisible,
     int? layerIndex,
-    String? text,
-    Color? color, // ✅ NEW
   }) {
-    return LogoElement(
-      id: id ?? this.id,
+    return CustomSvgElement(
+      svgString: svgString ?? this.svgString,
       position: position ?? this.position,
+      color: color ?? this.color,
       size: size ?? this.size,
       rotation: rotation ?? this.rotation,
       opacity: opacity ?? this.opacity,
       isVisible: isVisible ?? this.isVisible,
       layerIndex: layerIndex ?? this.layerIndex,
-      text: text ?? this.text,
-      color: color ?? this.color, // ✅ assign
     );
   }
 }
-
-
 
 class LogoStateData {
   final Offset logoPosition;
   final double logoSize;
   final double logoRotation;
   final bool isLogoVisible;
+  final String? svgLogo; 
+
 
   final Offset companyNamePosition;
   final double companyNameSize;
@@ -172,15 +168,22 @@ class LogoStateData {
 
   final List<CustomTextElement> customTexts;
   final List<CustomImageElement> customImages;
+  final List<CustomSvgElement> customSVGs;
 
   final Set<int> lockedElements;
   final List<int> elementOrder;
 
   LogoStateData({
+    List<CustomTextElement>? customTexts,
+    List<CustomImageElement>? customImages,
+    List<CustomSvgElement>? customSVGs,
+    Set<int>? lockedElements,
+    List<int>? elementOrder,
     required this.logoPosition,
     required this.logoSize,
     required this.logoRotation,
     required this.isLogoVisible,
+    this.svgLogo,
     required this.companyNamePosition,
     required this.companyNameSize,
     required this.companyNameRotation,
@@ -203,39 +206,40 @@ class LogoStateData {
     this.slogan2Size,
     this.slogan2Rotation,
     required this.isSlogan2Visible,
-    List<CustomTextElement>? customTexts,
-    List<CustomImageElement>? customImages,
-    Set<int>? lockedElements,
-    List<int>? elementOrder,
-  })  : customTexts = customTexts ?? [],
+  }) : customTexts = customTexts ?? [],
         customImages = customImages ?? [],
+        customSVGs = customSVGs ?? [],
         lockedElements = lockedElements ?? {},
         elementOrder = elementOrder ?? [];
 
-  
   Set<int> get visibleElementIds {
-  final ids = <int>{};
-  if (isLogoVisible) ids.add(0);
-  if (isCompanyNameVisible) ids.add(1);
-  if (isSloganVisible) ids.add(2);
-  if (isLogo2Visible) ids.add(3);
-  if (isCompanyName2Visible) ids.add(4);
-  if (isSlogan2Visible) ids.add(5);
-  for (int i = 0; i < customTexts.length; i++) {
-    if (customTexts[i].isVisible) ids.add(100 + i);
+    final ids = <int>{};
+    if (isLogoVisible) ids.add(0);
+    if (isCompanyNameVisible) ids.add(1);
+    if (isSloganVisible) ids.add(2);
+    if (isLogo2Visible) ids.add(3);
+    if (isCompanyName2Visible) ids.add(4);
+    if (isSlogan2Visible) ids.add(5);
+    for (int i = 0; i < customTexts.length; i++) {
+      if (customTexts[i].isVisible) ids.add(100 + i);
+    }
+    for (int i = 0; i < customImages.length; i++) {
+      if (customImages[i].isVisible) ids.add(200 + i);
+    }
+    for (int i = 0; i < customSVGs.length; i++) {
+      if (customSVGs[i].isVisible) ids.add(300 + i);
+    }
+    return ids;
   }
-  for (int i = 0; i < customImages.length; i++) {
-    if (customImages[i].isVisible) ids.add(200 + i);
-  }
-  return ids;
-}
 
+  
 
   LogoStateData copyWith({
     Offset? logoPosition,
     double? logoSize,
     double? logoRotation,
     bool? isLogoVisible,
+    String? svgLogo,
     Offset? companyNamePosition,
     double? companyNameSize,
     double? companyNameRotation,
@@ -260,6 +264,7 @@ class LogoStateData {
     bool? isSlogan2Visible,
     List<CustomTextElement>? customTexts,
     List<CustomImageElement>? customImages,
+    List<CustomSvgElement>? customSVGs,
     Set<int>? lockedElements,
     List<int>? elementOrder,
   }) {
@@ -268,6 +273,7 @@ class LogoStateData {
       logoSize: logoSize ?? this.logoSize,
       logoRotation: logoRotation ?? this.logoRotation,
       isLogoVisible: isLogoVisible ?? this.isLogoVisible,
+      svgLogo: svgLogo ?? this.svgLogo,
       companyNamePosition: companyNamePosition ?? this.companyNamePosition,
       companyNameSize: companyNameSize ?? this.companyNameSize,
       companyNameRotation: companyNameRotation ?? this.companyNameRotation,
@@ -285,16 +291,17 @@ class LogoStateData {
       companyName2Position: companyName2Position ?? this.companyName2Position,
       companyName2Size: companyName2Size ?? this.companyName2Size,
       companyName2Rotation: companyName2Rotation ?? this.companyName2Rotation,
-      isCompanyName2Visible:
-          isCompanyName2Visible ?? this.isCompanyName2Visible,
+      isCompanyName2Visible: isCompanyName2Visible ?? this.isCompanyName2Visible,
       slogan2Position: slogan2Position ?? this.slogan2Position,
       slogan2Size: slogan2Size ?? this.slogan2Size,
       slogan2Rotation: slogan2Rotation ?? this.slogan2Rotation,
       isSlogan2Visible: isSlogan2Visible ?? this.isSlogan2Visible,
-      customTexts: customTexts ?? [...this.customTexts],
-      customImages: customImages ?? [...this.customImages],
-      lockedElements: lockedElements ?? {...this.lockedElements},
-      elementOrder: elementOrder ?? [...this.elementOrder],
+      customTexts: customTexts ?? this.customTexts,
+      customImages: customImages ?? this.customImages,
+      customSVGs: customSVGs ?? this.customSVGs,
+      lockedElements: lockedElements ?? this.lockedElements,
+      elementOrder: elementOrder ?? this.elementOrder,
     );
   }
 }
+

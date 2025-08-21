@@ -39,7 +39,7 @@ dependencies:
   http: ^1.4.0
   flutter_svg: ^2.1.0
   connectivity_plus: ^6.1.4
-  screenshot: ^3.0.0 
+  # screenshot: ^3.0.0 
   path_provider: ^2.0.0 
   fluttericon: ^2.0.0
   font_awesome_flutter: ^10.8.0
@@ -49,8 +49,9 @@ dependencies:
   flutter_image_compress: ^2.1.0
   gallery_saver_plus: ^3.2.8
   permission_handler: ^11.0.1
-  no_screenshot: ^0.3.1
+  # no_screenshot: ^0.3.1
   collection: ^1.19.1
+  image_cropper: ^9.1.0
   
   
   

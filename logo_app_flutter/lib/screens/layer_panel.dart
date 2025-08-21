@@ -28,7 +28,7 @@ class LayersPanel extends StatelessWidget {
       case 3:
         child = SvgPicture.string(
           svgLogo,
-          colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
+          colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
         );
         text = 'Logo';
         break;
@@ -36,7 +36,7 @@ class LayersPanel extends StatelessWidget {
       case 4:
         child = Text(
           logoState.companyName ?? '',
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          style: const TextStyle(color: Colors.white,fontSize: 20, fontWeight: FontWeight.bold),
         );
         text = 'Company';
         break;
@@ -44,7 +44,7 @@ class LayersPanel extends StatelessWidget {
       case 5:
         child = Text(
           logoState.sloganName ?? '',
-          style: const TextStyle(fontSize: 18, fontStyle: FontStyle.italic),
+          style: const TextStyle(color: Colors.white,fontSize: 18, fontStyle: FontStyle.italic),
         );
         text = 'Slogan';
         break;
@@ -63,25 +63,25 @@ class LayersPanel extends StatelessWidget {
       children: [
         Container(
           width: 40,
-          height: 40,
+          height: 20,
           alignment: Alignment.center,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(4),
-            color: Colors.white.withOpacity(0.5),
+            // color: Colors.white.withOpacity(0.5),
           ),
           child: FittedBox(child: child),
         ),
         const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            text,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w500,
-            ),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
+        // Expanded(
+        //   child: Text(
+        //     text,
+        //     style: const TextStyle(
+        //       color: Colors.white,
+        //       fontWeight: FontWeight.w500,
+        //     ),
+        //     overflow: TextOverflow.ellipsis,
+        //   ),
+        // ),
       ],
     );
   }
@@ -104,44 +104,47 @@ class LayersPanel extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: Container(
-          width: 280,
+          width: 236,
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: Colors.grey.shade800.withOpacity(0.95),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(0),
             boxShadow: const [
               BoxShadow(color: Colors.black38, blurRadius: 10, spreadRadius: 2),
             ],
           ),
           child: Column(
-            // ❌  REMOVED: mainAxisSize: MainAxisSize.min
-            // This was the source of the bug. Removing it allows the Column
-            // to fill the parent's height, giving space to the Expanded widget.
+            
             children: [
               // --- Header ---
-              Row(
+              Stack(
                 children: [
-                  Checkbox(
-                    value: areAllLocked,
-                    onChanged: (val) => onToggleLockAll(val ?? false),
-                    checkColor: Colors.black,
-                    activeColor: Colors.white,
-                    side: const BorderSide(color: Colors.white),
-                  ),
-                  const Text(
-                    'Lock All',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white),
-                    onPressed: onClose,
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: areAllLocked,
+                        onChanged: (val) => onToggleLockAll(val ?? false),
+                        checkColor: Colors.black,
+                        activeColor: Colors.white,
+                        side: const BorderSide(color: Colors.white),
+                      ),
+                      const Text(
+                        'Lock All',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Spacer(),
+                      // IconButton(
+                      //   icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+                      //   onPressed: onClose, // same function rahega panel close karne ke liye
+                      // ),
+                    ],
                   ),
                 ],
               ),
+
               const Divider(color: Colors.white54, height: 1),
               // --- Layer List ---
               if (orderedVisibleIds.isEmpty)
@@ -168,7 +171,8 @@ class LayersPanel extends StatelessWidget {
                           horizontal: 4,
                         ),
                         title: _buildLayerPreview(context, id),
-                        trailing: Row(
+                        trailing: 
+                        Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(

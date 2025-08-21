@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
 import 'package:provider/provider.dart';
 // adjust path as needed
@@ -12,8 +11,20 @@ class ColorScreen extends StatefulWidget {
 }
 
 class _ColorScreenState extends State<ColorScreen> {
-  Color selectedColor = Colors.purple; 
-
+  Color selectedColor = Colors.purple;
+  final List<Color> colorList = [
+    Colors.white,
+    Colors.red,
+    Colors.pinkAccent,
+    Colors.purple,
+    Colors.orangeAccent,
+    Colors.teal,
+    Colors.lightBlueAccent,
+    Colors.black,
+    Colors.grey,
+    Colors.yellow,
+    Colors.cyanAccent,
+  ];
   final List<Color> colorGrid = [
     Colors.white,
     Colors.red,
@@ -36,48 +47,86 @@ class _ColorScreenState extends State<ColorScreen> {
     Colors.teal,
     Colors.lightBlueAccent,
   ];
-
-  void _openColorPickerDialog() {
-    Color tempColor = selectedColor;
+  void _openColorPickerDialog(BuildContext context) {
+    Color tempColor = selectedColor; // Pehle se selected color
 
     showDialog(
       context: context,
       barrierDismissible: true,
-      builder: (_) {
-        return AlertDialog(
-      
-          title: const Text('Pick a color'),
-          content: SingleChildScrollView(
-            child: ColorPicker(
-              pickerColor: tempColor,
-              onColorChanged: (color) {
-                setState(() {
-                  tempColor = color;
-                });
-              },
-              
-              showLabel: true,
-              pickerAreaHeightPercent: 0.8,
-            ),
-          ),
-          actions: [
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('SELECT'),
-              onPressed: () {
-                Provider.of<SelectedColorProvider>(
-                  context,
-                  listen: false,
-                ).setColor(tempColor);
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              title: const Text(
+                'Select a Color',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // ✅ Grid of colors
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 12,
+                      children:
+                          colorList.map((color) {
+                            final isSelected = tempColor == color;
+                            return GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  tempColor = color;
+                                });
+                              },
+                              child: CircleAvatar(
+                                radius: 20,
+                                backgroundColor: color,
+                                child:
+                                    isSelected
+                                        ? const Icon(
+                                          Icons.done,
+                                          color: Colors.white,
+                                        )
+                                        : null,
+                              ),
+                            );
+                          }).toList(),
+                    ),
+                    const SizedBox(height: 20),
+
+                   
+                  ],
+                  // ),
+                  // ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  child: const Text('CANCEL'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                TextButton(
+                  child: const Text(
+                    'SELECT',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  onPressed: () {
+                    Provider.of<SelectedColorProvider>(
+                      context,
+                      listen: false,
+                    ).setColor(tempColor);
+
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -109,6 +158,8 @@ class _ColorScreenState extends State<ColorScreen> {
                     context,
                     listen: false,
                   ).setColor(colorGrid[index]);
+
+                    Navigator.of(context).pop();
                 },
                 child: Container(
                   width: 50,
@@ -120,7 +171,9 @@ class _ColorScreenState extends State<ColorScreen> {
           ),
           const SizedBox(height: 20),
           ElevatedButton.icon(
-            onPressed: _openColorPickerDialog,
+            onPressed: () {
+              _openColorPickerDialog(context);
+            },
             icon: const Icon(Icons.palette),
             label: const Text("PICK ANOTHER"),
             style: ElevatedButton.styleFrom(
