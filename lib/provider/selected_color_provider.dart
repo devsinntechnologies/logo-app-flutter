@@ -1,14 +1,72 @@
 import 'dart:io';
+import 'dart:async';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:logo_app_flutter/models/logo_state_data.dart';
+import 'package:logo_app_flutter/provider/undo_provider.dart';
+
+class FontStyleState {
+  final bool isBold;
+  final bool isItalic;
+  final bool isUnderline;
+
+  FontStyleState({
+    this.isBold = false,
+    this.isItalic = false,
+    this.isUnderline = false,
+  });
+
+  FontStyleState copyWith({bool? isBold, bool? isItalic, bool? isUnderline}) {
+    return FontStyleState(
+      isBold: isBold ?? this.isBold,
+      isItalic: isItalic ?? this.isItalic,
+      isUnderline: isUnderline ?? this.isUnderline,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'isBold': isBold, 'isItalic': isItalic, 'isUnderline': isUnderline};
+  }
+
+  factory FontStyleState.fromJson(Map<String, dynamic> json) {
+    return FontStyleState(
+      isBold: json['isBold'] ?? false,
+      isItalic: json['isItalic'] ?? false,
+      isUnderline: json['isUnderline'] ?? false,
+    );
+  }
+}
 
 class SelectedColorProvider extends ChangeNotifier {
+  UndoProvider? _undoProvider;
+
+  dynamic _backgroundTexture;
+
+  Color? _backgroundColor;
+
+  String? _selectedShape;
+  String? _selectedShapeName; 
+
+  final Map<int, double> _elementTextSizes = {};
+  double _companyTextSize = 28.0; 
+  double _sloganTextSize = 16.0; 
+
   Color _selectedColor = Colors.white;
   Gradient? _selectedGradient;
   ui.Image? _backgroundImage;
   double get intensity => _brightness;
   final Map<int, Color> _overrideColors = {};
   final Map<int, Color> _individualElementColors = {};
+  final Map<int, String> _elementFonts = {};
+  final Map<int, double> _elementShadowOffsets = {};
+  final Map<int, Color> _elementShadowColors = {};
+  final Map<int, Color> _elementColors = {};
+  final Map<int, Color> _elementOutlineColors = {};
+  final Map<int, double> _elementOutlineWidths = {};
+  final Map<int, double> _elementShadowOffsetsX = {};
+  final Map<int, double> _elementShadowOffsetsY = {};
+  final Map<int, FontStyleState> _fontStyles = {};
+
   int _selectedIndex = 0;
   int get selectedIndex => _selectedIndex;
   File? _imageFile;
@@ -47,17 +105,265 @@ class SelectedColorProvider extends ChangeNotifier {
 
   bool get isSvgColorOverridden => _isSvgColorOverridden;
 
+  Timer? _notifyTimer;
+  void _throttledNotify() {
+    _notifyTimer?.cancel();
+    _notifyTimer = Timer(const Duration(milliseconds: 100), () {
+      notifyListeners();
+    });
+  }
+
   void setSvgColorOverridden(bool value) {
     _isSvgColorOverridden = value;
-    notifyListeners();
+    _throttledNotify();
+  }
+
+  dynamic _logoStateRef;
+
+  void setLogoStateReference(dynamic logoState) {
+    _logoStateRef = logoState;
   }
 
   set selectedElementId(int? id) {
     _selectedElementId = id;
+
+    if (id != null && !_elementSizes.containsKey(id)) {
+      double defaultSize = _getDefaultSizeForElement(id);
+      _elementSizes[id] = defaultSize;
+    }
+
+    notifyListeners();
+  }
+
+  double _getDefaultSizeForElement(int elementId) {
+    switch (elementId) {
+      case 0:
+        return _logoStateRef?.logoSize ?? 100.0;
+      case 1:
+        return _logoStateRef?.companyNameSize ?? 26.0;
+      case 2:
+        return _logoStateRef?.sloganSize ?? 18.0;
+      default:
+        if (elementId >= 100 && elementId < 200) {
+          final index = elementId - 100;
+          if (_logoStateRef?.customTexts != null &&
+              index < _logoStateRef.customTexts.length) {
+            return _logoStateRef.customTexts[index].size ?? 26.0;
+          }
+          return 26.0;
+        } else if (elementId >= 200 && elementId < 300) {
+          final index = elementId - 200;
+          if (_logoStateRef?.customImages != null &&
+              index < _logoStateRef.customImages.length) {
+            return _logoStateRef.customImages[index].size ?? 100.0;
+          }
+          return 100.0;
+        } else if (elementId >= 300 && elementId < 400) {
+          final index = elementId - 300;
+          if (_logoStateRef?.customSVGs != null &&
+              index < _logoStateRef.customSVGs.length) {
+            return _logoStateRef.customSVGs[index].size ?? 100.0;
+          }
+          return 100.0;
+        }
+        return 100.0;
+    }
+  }
+
+  double getSizeForElementWithInit(int elementId) {
+    if (!_elementSizes.containsKey(elementId)) {
+      double defaultSize = _getDefaultSizeForElement(elementId);
+      _elementSizes[elementId] = defaultSize;
+    }
+    return _elementSizes[elementId]!;
+  }
+
+  double mapActualToUI(double actualSize, int elementId) {
+    double actualMin, actualMax;
+
+    if (elementId == 0) {
+      actualMin = 50.0;
+      actualMax = 300.0;
+    } else if (elementId == 1 ||
+        elementId == 2 ||
+        (elementId >= 100 && elementId < 200)) {
+      actualMin = 8.0;
+      actualMax = 72.0;
+    } else if (elementId >= 200 && elementId < 300) {
+      actualMin = 20.0;
+      actualMax = 200.0;
+    } else if (elementId >= 300 && elementId < 400) {
+      actualMin = 20.0;
+      actualMax = 200.0;
+    } else {
+      actualMin = 10.0;
+      actualMax = 200.0;
+    }
+
+    const double uiMin = 1.0;
+    const double uiMax = 100.0;
+
+    actualSize = actualSize.clamp(actualMin, actualMax);
+
+    double normalizedValue = (actualSize - actualMin) / (actualMax - actualMin);
+    return uiMin + (normalizedValue * (uiMax - uiMin));
+  }
+
+  double mapUIToActual(double uiValue, int elementId) {
+    double actualMin, actualMax;
+
+    if (elementId == 0) {
+      actualMin = 50.0;
+      actualMax = 300.0;
+    } else if (elementId == 1 ||
+        elementId == 2 ||
+        (elementId >= 100 && elementId < 200)) {
+      actualMin = 8.0;
+      actualMax = 72.0;
+    } else if (elementId >= 200 && elementId < 300) {
+      actualMin = 20.0;
+      actualMax = 200.0;
+    } else if (elementId >= 300 && elementId < 400) {
+      actualMin = 20.0;
+      actualMax = 200.0;
+    } else {
+      actualMin = 10.0;
+      actualMax = 200.0;
+    }
+
+    const double uiMin = 1.0;
+    const double uiMax = 100.0;
+
+    uiValue = uiValue.clamp(uiMin, uiMax);
+
+    double normalizedValue = (uiValue - uiMin) / (uiMax - uiMin);
+    return actualMin + (normalizedValue * (actualMax - actualMin));
+  }
+
+  double getRotationForElement(int? id) {
+    if (id == null) return 0.0;
+
+    if (_elementRotations.containsKey(id)) {
+      return _elementRotations[id]!;
+    }
+
+    if (_currentLogoState != null) {
+      if (id >= 100 && id < 200) {
+        final index = id - 100;
+        if (index >= 0 && index < _currentLogoState!.customTexts.length) {
+          return _currentLogoState!.customTexts[index].rotation;
+        }
+      } else if (id >= 200 && id < 300) {
+        final index = id - 200;
+        if (index >= 0 && index < _currentLogoState!.customImages.length) {
+          return _currentLogoState!.customImages[index].rotation;
+        }
+      } else if (id >= 300 && id < 400) {
+        final index = id - 300;
+        if (index >= 0 && index < _currentLogoState!.customSVGs.length) {
+          return _currentLogoState!.customSVGs[index].rotation;
+        }
+      } else {
+        switch (id) {
+          case 0:
+            return _currentLogoState!.logoRotation;
+          case 1:
+            return _currentLogoState!.companyNameRotation;
+          case 2:
+            return _currentLogoState!.sloganRotation;
+          case 3:
+            return _currentLogoState!.logo2Rotation ?? 0;
+          case 4:
+            return _currentLogoState!.companyName2Rotation ?? 0;
+          case 5:
+            return _currentLogoState!.slogan2Rotation ?? 0;
+        }
+      }
+    }
+
+    return 0.0;
+  }
+
+  void setRotationForElement(int id, double rotation) {
+    if (_currentLogoState == null) return;
+
+    _saveUndoState('Rotate element $id to ${rotation.toInt()}°');
+
+    if (id >= 100 && id < 200) {
+      final index = id - 100;
+      if (index >= 0 && index < _currentLogoState!.customTexts.length) {
+        final updatedTexts = List<CustomTextElement>.from(
+          _currentLogoState!.customTexts,
+        );
+        updatedTexts[index] = updatedTexts[index].copyWith(rotation: rotation);
+        _currentLogoState = _currentLogoState!.copyWith(
+          customTexts: updatedTexts,
+        );
+      }
+    } else if (id >= 200 && id < 300) {
+      final index = id - 200;
+      if (index >= 0 && index < _currentLogoState!.customImages.length) {
+        final updatedImages = List<CustomImageElement>.from(
+          _currentLogoState!.customImages,
+        );
+        updatedImages[index] = updatedImages[index].copyWith(
+          rotation: rotation,
+        );
+        _currentLogoState = _currentLogoState!.copyWith(
+          customImages: updatedImages,
+        );
+      }
+    } else if (id >= 300 && id < 400) {
+      final index = id - 300;
+      if (index >= 0 && index < _currentLogoState!.customSVGs.length) {
+        final updatedSVGs = List<CustomSvgElement>.from(
+          _currentLogoState!.customSVGs,
+        );
+        updatedSVGs[index] = updatedSVGs[index].copyWith(rotation: rotation);
+        _currentLogoState = _currentLogoState!.copyWith(
+          customSVGs: updatedSVGs,
+        );
+      }
+    } else {
+      switch (id) {
+        case 0:
+          _currentLogoState = _currentLogoState!.copyWith(
+            logoRotation: rotation,
+          );
+          break;
+        case 1:
+          _currentLogoState = _currentLogoState!.copyWith(
+            companyNameRotation: rotation,
+          );
+          break;
+        case 2:
+          _currentLogoState = _currentLogoState!.copyWith(
+            sloganRotation: rotation,
+          );
+          break;
+        case 3:
+          _currentLogoState = _currentLogoState!.copyWith(
+            logo2Rotation: rotation,
+          );
+          break;
+        case 4:
+          _currentLogoState = _currentLogoState!.copyWith(
+            companyName2Rotation: rotation,
+          );
+          break;
+        case 5:
+          _currentLogoState = _currentLogoState!.copyWith(
+            slogan2Rotation: rotation,
+          );
+          break;
+      }
+    }
+
     notifyListeners();
   }
 
   void setColor(Color color) {
+    _saveUndoState('Change background color');
     _selectedColor = color;
     _baseColor = color;
     _selectedGradient = null;
@@ -73,6 +379,13 @@ class SelectedColorProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void removeGradient() {
+    _selectedGradient = null; 
+    _backgroundImage = null;
+    _isColorManuallySelected = true;
+    notifyListeners();
+  }
+
   Color getEffectiveColorForElement({
     required int id,
     required Color defaultColor,
@@ -82,10 +395,10 @@ class SelectedColorProvider extends ChangeNotifier {
 
   void setPaletteIndex(int index) {
     _selectedIndex = index;
-    notifyListeners(); // UI ko update karne k liye
+    notifyListeners();
   }
-  
-  void setBackgroundImage(ui.Image image, File? file) {
+
+  void setBackgroundImage(ui.Image? image, File? file) {
     _backgroundImage = image;
     _selectedGradient = null;
     _imageFile = file;
@@ -94,7 +407,7 @@ class SelectedColorProvider extends ChangeNotifier {
     if (file != null && file.existsSync()) {
       file.delete();
     }
-  //!
+    //!
     notifyListeners();
   }
 
@@ -124,10 +437,28 @@ class SelectedColorProvider extends ChangeNotifier {
   }
 
   void resetColor() {
-    _selectedColor = Colors.white;
-    _selectedGradient = null;
+    _backgroundColor = Colors.white;
+    notifyListeners();
+  }
+
+  // void resetGradient() {
+  //   _backgroundGradient = null;
+  //   notifyListeners();
+  // }
+
+  void resetTexture() {
+    _backgroundTexture = null;
+    notifyListeners();
+  }
+
+  void resetBackgroundImage() {
     _backgroundImage = null;
-    _isColorManuallySelected = false;
+  }
+
+  List<Color>? _palette;
+
+  void resetPalette() {
+    _palette = null;
     notifyListeners();
   }
 
@@ -150,12 +481,18 @@ class SelectedColorProvider extends ChangeNotifier {
   }
 
   // Color? _selectedColor;
-  double _opacity = 1.0; // 👈 default 100%
+  double _opacity = 1.0; // Default opacity (100%)
 
   double get opacity => _opacity;
 
   void setOpacity(double value) {
-    _opacity = value;
+    _opacity = value.clamp(0.0, 1.0); 
+    notifyListeners(); 
+  }
+
+  void setOpacityWithUndo(double opacity) {
+    _saveUndoState('Change opacity to ${(opacity * 100).round()}%');
+    _opacity = opacity;
     notifyListeners();
   }
 
@@ -166,6 +503,19 @@ class SelectedColorProvider extends ChangeNotifier {
     _isColorManuallySelected = true;
     notifyListeners();
   }
+
+  final Map<int, double> _elementSizes = {};
+  double? getSizeForElement(int? id) => id == null ? null : _elementSizes[id];
+  void setSizeForElementWithUndo(int id, double size) {
+    _saveUndoState('Resize element $id');
+    _elementSizes[id] = size;
+    notifyListeners();
+  }
+
+  Map<int, double> _elementRotations = {};
+  // double? getRotationForElement(int? id) =>
+  //     id == null ? null : _elementRotations[id];
+
 
   void setAllColorsWithBrightness(Color baseColor, double brightnessFactor) {
     brightnessFactor = brightnessFactor.clamp(0.0, 1.0);
@@ -242,19 +592,34 @@ class SelectedColorProvider extends ChangeNotifier {
   //   _isColorManuallySelected = true;
   //   notifyListeners();
   // }
-  final Map<int, Color> _elementColors = {};
-  final Map<int, Color> _elementOutlineColors = {};
-  final Map<int, double> _elementOutlineWidths = {};
 
   // ========== Outline Setters ==========
-  void setOutlineColor(int elementId, Color color) {
+  void setOutlineColorWithUndo(int elementId, Color color) {
+    _saveUndoState('Change outline color of element $elementId');
     _elementOutlineColors[elementId] = color;
-    notifyListeners();
+    _throttledNotify();
   }
 
-  void setOutlineWidth(int elementId, double width) {
+  void setOutlineWidthWithUndo(int elementId, double width) {
+    _saveUndoState('Change outline width of element $elementId');
     _elementOutlineWidths[elementId] = width;
-    notifyListeners();
+    _throttledNotify();
+  }
+
+  String getFontForElement(int id, {String fallback = 'Roboto'}) {
+    return _elementFonts[id] ?? fallback;
+  }
+
+  double getShadowOffsetYForElement(int id, {double fallback = 0.0}) {
+    return _elementShadowOffsetsY[id] ?? fallback;
+  }
+
+  double getShadowOffsetXForElement(int id, {double fallback = 0.0}) {
+    return _elementShadowOffsetsX[id] ?? fallback;
+  }
+
+  Color getShadowColorForElement(int id, {Color fallback = Colors.black}) {
+    return _elementShadowColors[id] ?? fallback;
   }
 
   // ========== Outline Getters ==========
@@ -266,16 +631,14 @@ class SelectedColorProvider extends ChangeNotifier {
     return _elementOutlineWidths[elementId] ?? 0.0;
   }
 
-  /// Remove any active selection (editing handles/icons hide ho jaye)
   void clearSelection() {
     _selectedElementId = null;
     notifyListeners();
   }
 
-  /// Restore selection if needed
   void setSelectedElement(int id) {
     _selectedElementId = id;
-    notifyListeners();
+    _throttledNotify();
   }
 
   void setInitialColorsFromPalette(
@@ -284,15 +647,13 @@ class SelectedColorProvider extends ChangeNotifier {
   ) {
     _rotateIndex = 0;
 
-    // Company / Slogan / Shape ke liye
     _companyTextColor = paletteColors[1 % paletteColors.length];
     _sloganColor = paletteColors[2 % paletteColors.length];
     _shapeColor = paletteColors[0 % paletteColors.length];
 
-    // Baaki elements ke liye
     int index = 0;
     for (var elementId in allElementIds) {
-      if (elementId >= 200 && elementId < 300) continue; // images skip
+      if (elementId >= 200 && elementId < 300) continue;
       _overrideColors[elementId] = paletteColors[index % paletteColors.length];
       index++;
     }
@@ -310,7 +671,7 @@ class SelectedColorProvider extends ChangeNotifier {
     if (allElementIds != null) {
       int index = 0;
       for (var elementId in allElementIds) {
-        if (elementId >= 200 && elementId < 300) continue; // images skip
+        if (elementId >= 200 && elementId < 300) continue;
         _overrideColors[elementId] =
             paletteColors[(index + _rotateIndex) % paletteColors.length];
         index++;
@@ -358,24 +719,341 @@ class SelectedColorProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setOverrideColorForElement(int id, Color color) {
-    _overrideColors[id] = color;
+  void setUndoProvider(UndoProvider undoProvider) {
+    _undoProvider = undoProvider;
+  }
+
+  void updateLogoState(LogoStateData logoState) {
+    _currentLogoState = logoState;
     notifyListeners();
   }
 
-  void clearOverrideForElement(int id) {
-    if (_overrideColors.containsKey(id)) {
-      _overrideColors.remove(id);
+  Map<String, dynamic> captureCurrentState() {
+    return {
+      'logoState': _currentLogoState?.toJson() ?? {},
+      'selectedColor': _selectedColor.value,
+      'backgroundColor': _backgroundColor?.value,
+      'selectedGradient': _selectedGradient?.toString(),
+      'backgroundImage': _backgroundImage?.toString(),
+      'elementColors': _elementColors.map(
+        (k, v) => MapEntry(k.toString(), v.value),
+      ),
+      'opacity': _opacity, // Ensure opacity is captured
+      'selectedElementId': _selectedElementId,
+      // ... other fields
+    };
+  }
+
+  void restoreFromState(Map<String, dynamic> state) {
+    try {
+      if (state['logoState'] != null) {
+        _currentLogoState = LogoStateData.fromJson(state['logoState']);
+      }
+      if (state['opacity'] != null) {
+        _opacity = state['opacity']; // Restore opacity value
+      }
+      if (state['selectedShapeName'] != null) {
+        _selectedShapeName = state['selectedShapeName'];
+      }
+      notifyListeners(); // CRITICAL: Notify UI after restoring
+    } catch (e) {
+      print('Error restoring state: $e');
+    }
+  }
+
+  void setSizeForElement(int id, double size) {
+    _saveUndoState('Resize element $id');
+    _elementSizes[id] = size;
+    notifyListeners();
+  }
+
+  void setColorForElement(int id, Color color) {
+    _saveUndoState('Change color for element $id');
+    _elementColors[id] = color;
+    notifyListeners();
+  }
+
+  void setFontForElement(int id, String font) {
+    _saveUndoState('Change font of element $id');
+    _elementFonts[id] = font;
+    _throttledNotify();
+  }
+
+  void setOutlineColor(int elementId, Color color) {
+    _saveUndoState('Change outline color of element $elementId');
+    _elementOutlineColors[elementId] = color;
+    _throttledNotify();
+  }
+
+  void setOutlineWidth(int elementId, double width) {
+    _saveUndoState('Change outline width of element $elementId');
+    _elementOutlineWidths[elementId] = width;
+    _throttledNotify();
+  }
+
+  void setShadowColorForElement(int id, Color color) {
+    _saveUndoState('Change shadow color of element $id');
+    _elementShadowColors[id] = color;
+    _throttledNotify();
+  }
+
+  void setShadowOffsetXForElement(int id, double offsetX) {
+    _saveUndoState('Change shadow X offset of element $id');
+    _elementShadowOffsetsX[id] = offsetX;
+    _throttledNotify();
+  }
+
+  void setShadowOffsetYForElement(int id, double offsetY) {
+    _saveUndoState('Change shadow Y offset of element $id');
+    _elementShadowOffsetsY[id] = offsetY;
+    _throttledNotify();
+  }
+
+  void toggleBold(int id) {
+    _saveUndoState('Toggle bold for element $id');
+    _fontStyles[id] = getFontStyleForElement(
+      id,
+    ).copyWith(isBold: !getFontStyleForElement(id).isBold);
+    notifyListeners();
+  }
+
+  void toggleItalic(int id) {
+    _saveUndoState('Toggle italic for element $id');
+    _fontStyles[id] = getFontStyleForElement(
+      id,
+    ).copyWith(isItalic: !getFontStyleForElement(id).isItalic);
+    notifyListeners();
+  }
+
+  void toggleUnderline(int id) {
+    _saveUndoState('Toggle underline for element $id');
+    _fontStyles[id] = getFontStyleForElement(
+      id,
+    ).copyWith(isUnderline: !getFontStyleForElement(id).isUnderline);
+    notifyListeners();
+  }
+
+  // Add this method to allow applying a palette of colors
+  void applyPalette(List<Color> palette) {
+    // Implement your logic to apply the palette to your elements.
+    // For example, if you have a list of elements, assign each color from the palette.
+    // This is a placeholder implementation:
+    // _elements.asMap().forEach((i, element) {
+    //   if (i < palette.length) {
+    //     element.color = palette[i];
+    //   }
+    // });
+    // notifyListeners();
+  }
+
+  void initializeUndoSystem() {
+    if (_undoProvider != null) {
+      _undoProvider!.saveState(
+        action: 'Initial state',
+        state: captureCurrentState(),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _notifyTimer?.cancel();
+    super.dispose();
+  }
+
+  FontStyleState getFontStyleForElement(int id) {
+    return _fontStyles[id] ?? FontStyleState();
+  }
+
+  void setFontStyleForElement(int id, FontStyleState style) {
+    _fontStyles[id] = style;
+    notifyListeners();
+  }
+
+  double? getCompanyTextSize() => _companyTextSize;
+  void setCompanyTextSize(double size) {
+    _saveUndoState('Change company text size');
+    _companyTextSize = size;
+    notifyListeners();
+  }
+
+  double? getSloganTextSize() => _sloganTextSize;
+  void setSloganTextSize(double size) {
+    _saveUndoState('Change slogan text size');
+    _sloganTextSize = size;
+    notifyListeners();
+  }
+
+  double? getTextSizeForElement(int id) {
+    return _elementTextSizes[id];
+  }
+
+  void setTextSizeForElement(int id, double size) {
+    _saveUndoState('Change text size for element $id');
+    _elementTextSizes[id] = size;
+    notifyListeners();
+  }
+
+  Color? getElementColor(int id) {
+    return _overrideColors[id] ?? _elementColors[id];
+  }
+
+  LogoStateData? _currentLogoState;
+
+  LogoStateData? getCurrentLogoState() {
+    return _currentLogoState;
+  }
+
+  List<int> getCurrentElementOrder() {
+    if (_currentLogoState != null) {
+      return _currentLogoState!.elementOrder;
+    }
+    return [0, 1, 2, 3, 4, 5]; 
+  }
+
+  // Add this missing method
+  List<int> getAllElementIds() {
+    if (_currentLogoState != null) {
+      return _currentLogoState!.elementOrder;
+    }
+    return [0, 1, 2, 3, 4, 5]; 
+  }
+
+  List<Color> getCurrentPalette() {
+    List<Color> palette = [];
+    final elementOrder = getCurrentElementOrder();
+
+    for (int id in elementOrder) {
+      Color? elementColor = getElementColor(id);
+      if (elementColor != null) {
+        palette.add(elementColor);
+      } else {
+        switch (id) {
+          case 0:
+            palette.add(Colors.blue);
+            break;
+          case 1:
+            palette.add(Colors.black);
+            break;
+          case 2:
+            palette.add(Colors.grey);
+            break;
+          default:
+            palette.add(Colors.red);
+            break;
+        }
+      }
+    }
+
+    return palette.isNotEmpty
+        ? palette
+        : [Colors.blue, Colors.red, Colors.green];
+  }
+
+  void setElementColor(int elementId, Color color) {
+    _elementColors[elementId] = color;
+    notifyListeners();
+  }
+
+  void setBackgroundColor(Color? color) {
+    _backgroundColor = color;
+    if (color != null) {
+      _selectedGradient = null;
+    }
+    notifyListeners();
+  }
+
+  Color? get backgroundColor => _backgroundColor;
+
+  void setElementTexture(int i, param1) {}
+
+  void _saveUndoState(String action) {
+    if (_undoProvider != null) {
+      _undoProvider!.saveState(action: action, state: captureCurrentState());
+    }
+  }
+
+  void moveElementUp(int elementId) {
+    final state = _currentLogoState;
+    if (state == null) return;
+    final idx = state.elementOrder.indexOf(elementId);
+    if (idx > 0) {
+      final newOrder = List<int>.from(state.elementOrder);
+      newOrder.removeAt(idx);
+      newOrder.insert(idx - 1, elementId);
+      _currentLogoState = state.copyWith(elementOrder: newOrder);
       notifyListeners();
     }
   }
 
-  Color getColorForElement(int id, {required Color fallback}) {
-    return _overrideColors[id] ?? fallback;
+  void moveElementDown(int elementId) {
+    final state = _currentLogoState;
+    if (state == null) return;
+    final idx = state.elementOrder.indexOf(elementId);
+    if (idx >= 0 && idx < state.elementOrder.length - 1) {
+      final newOrder = List<int>.from(state.elementOrder);
+      newOrder.removeAt(idx);
+      newOrder.insert(idx + 1, elementId);
+      _currentLogoState = state.copyWith(elementOrder: newOrder);
+      notifyListeners();
+    }
   }
 
-  void setColorForElement(int id, Color color) {
-    _individualElementColors[id] = color;
+  void updateLogoPosition(Offset newPosition) {
+    if (_currentLogoState == null) return;
+    _saveUndoState('Move logo');
+    _currentLogoState = _currentLogoState!.copyWith(logoPosition: newPosition);
+    notifyListeners();
+  }
+
+  void updateCompanyNamePosition(Offset newPosition) {
+    if (_currentLogoState == null) return;
+    _saveUndoState('Move company name');
+    _currentLogoState = _currentLogoState!.copyWith(
+      companyNamePosition: newPosition,
+    );
+    notifyListeners();
+  }
+
+  void updateSloganPosition(Offset newPosition) {
+    if (_currentLogoState == null) return;
+    _saveUndoState('Move slogan');
+    _currentLogoState = _currentLogoState!.copyWith(
+      sloganPosition: newPosition,
+    );
+    notifyListeners();
+  }
+
+  void resetAllEditorState() {
+    _backgroundColor = Colors.white;
+    _selectedColor = Colors.white;
+    _selectedGradient = null;
+    _backgroundImage = null;
+    _backgroundTexture = null;
+    _palette = null;
+    _opacity = 1.0;
+    _isColorManuallySelected = false;
+    _companyTextColor = Colors.black;
+    _sloganColor = Colors.black;
+    _shapeColor = Colors.white;
+    _rotateIndex = 0;
+    _elementColors.clear();
+    _overrideColors.clear();
+    _elementFonts.clear();
+    _elementShadowOffsets.clear();
+    _elementShadowColors.clear();
+    _elementOutlineColors.clear();
+    _elementOutlineWidths.clear();
+    _elementShadowOffsetsX.clear();
+    _elementShadowOffsetsY.clear();
+    _fontStyles.clear();
+    _elementSizes.clear();
+    _elementRotations.clear();
+    _elementTextSizes.clear();
+    _companyTextSize = 28.0;
+    _sloganTextSize = 16.0;
+    _selectedElementId = null;
+    _isSvgColorOverridden = false;
     notifyListeners();
   }
 }

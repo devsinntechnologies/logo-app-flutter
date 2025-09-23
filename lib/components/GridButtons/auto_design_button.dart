@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:logo_app_flutter/models/logo_state_data.dart';
 import 'package:logo_app_flutter/screens/design_input_screen.dart';
 
 class AutoDesignButton extends StatelessWidget {
   const AutoDesignButton({super.key});
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const DesignInputScreen()),
+          MaterialPageRoute(
+            builder: (context) => DesignInputScreen(),
+          ),
         );
       },
       child: Center(
@@ -36,11 +38,7 @@ class AutoDesignButton extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Image.asset(
-                    'assets/icons/wandd.png',
-                    width: 40,
-                    height: 40,
-                  ),
+                  Image.asset('assets/icons/wandd.png', width: 40, height: 40),
                   SizedBox(height: 20),
                   const Text(
                     'Auto Design',

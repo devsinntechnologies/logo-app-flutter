@@ -1,27 +1,42 @@
-
-
-
 import 'dart:ui';
+
+import 'package:flutter/material.dart';
 
 class CustomTextElement {
   final String text;
   final Offset position;
   final double size;
   final double rotation;
-  final double opacity;
+  final Color? color;
+  final String? fontFamily;
+  final bool isBold;
+  final bool isItalic;
+  final bool isUnderline;
+  final Color? outlineColor;
+  final double? outlineWidth;
+  final Color? shadowColor;
+  final double? shadowOffsetX;
+  final double? shadowOffsetY;
+  final double? opacity;
   final bool isVisible;
-  final int? layerIndex;
-  final Color color;
 
-  const CustomTextElement({
+  CustomTextElement({
     required this.text,
     required this.position,
     required this.size,
     required this.rotation,
-    this.opacity = 1.0,
+    this.color,
+    this.fontFamily,
+    this.isBold = false,
+    this.isItalic = false,
+    this.isUnderline = false,
+    this.outlineColor,
+    this.outlineWidth,
+    this.shadowColor,
+    this.shadowOffsetX,
+    this.shadowOffsetY,
+    this.opacity,
     this.isVisible = true,
-    this.layerIndex,
-    this.color = const Color(0xFF000000),
   });
 
   CustomTextElement copyWith({
@@ -29,20 +44,80 @@ class CustomTextElement {
     Offset? position,
     double? size,
     double? rotation,
+    Color? color,
+    String? fontFamily,
+    bool? isBold,
+    bool? isItalic,
+    bool? isUnderline,
+    Color? outlineColor,
+    double? outlineWidth,
+    Color? shadowColor,
+    double? shadowOffsetX,
+    double? shadowOffsetY,
     double? opacity,
     bool? isVisible,
-    int? layerIndex,
-    Color? color,
   }) {
     return CustomTextElement(
       text: text ?? this.text,
       position: position ?? this.position,
       size: size ?? this.size,
       rotation: rotation ?? this.rotation,
+      color: color ?? this.color,
+      fontFamily: fontFamily ?? this.fontFamily,
+      isBold: isBold ?? this.isBold,
+      isItalic: isItalic ?? this.isItalic,
+      isUnderline: isUnderline ?? this.isUnderline,
+      outlineColor: outlineColor ?? this.outlineColor,
+      outlineWidth: outlineWidth ?? this.outlineWidth,
+      shadowColor: shadowColor ?? this.shadowColor,
+      shadowOffsetX: shadowOffsetX ?? this.shadowOffsetX,
+      shadowOffsetY: shadowOffsetY ?? this.shadowOffsetY,
       opacity: opacity ?? this.opacity,
       isVisible: isVisible ?? this.isVisible,
-      layerIndex: layerIndex ?? this.layerIndex,
-      color: color ?? this.color,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'text': text,
+      'position': {'dx': position.dx, 'dy': position.dy},
+      'size': size,
+      'rotation': rotation,
+      'color': color?.value,
+      'fontFamily': fontFamily,
+      'isBold': isBold,
+      'isItalic': isItalic,
+      'isUnderline': isUnderline,
+      'outlineColor': outlineColor?.value,
+      'outlineWidth': outlineWidth,
+      'shadowColor': shadowColor?.value,
+      'shadowOffsetX': shadowOffsetX,
+      'shadowOffsetY': shadowOffsetY,
+      'opacity': opacity,
+      'isVisible': isVisible,
+    };
+  }
+
+  factory CustomTextElement.fromJson(Map<String, dynamic> json) {
+    return CustomTextElement(
+      text: json['text'],
+      position: Offset(json['position']['dx'], json['position']['dy']),
+      size: (json['size'] as num?)?.toDouble() ?? 16.0,
+      rotation: (json['rotation'] as num?)?.toDouble() ?? 0.0,
+      color: json['color'] != null ? Color(json['color']) : null,
+      fontFamily: json['fontFamily'],
+      isBold: json['isBold'] ?? false,
+      isItalic: json['isItalic'] ?? false,
+      isUnderline: json['isUnderline'] ?? false,
+      outlineColor:
+          json['outlineColor'] != null ? Color(json['outlineColor']) : null,
+      outlineWidth: (json['outlineWidth'] as num?)?.toDouble(),
+      shadowColor:
+          json['shadowColor'] != null ? Color(json['shadowColor']) : null,
+      shadowOffsetX: (json['shadowOffsetX'] as num?)?.toDouble(),
+      shadowOffsetY: (json['shadowOffsetY'] as num?)?.toDouble(),
+      opacity: (json['opacity'] as num?)?.toDouble(),
+      isVisible: json['isVisible'] ?? true,
     );
   }
 }
@@ -50,39 +125,63 @@ class CustomTextElement {
 class CustomImageElement {
   final String path;
   final Offset position;
+  final double size;
   final double rotation;
-  final double? size;
-  final double opacity;
+  final bool isAsset;
   final bool isVisible;
-  final int? layerIndex;
+  final double opacity;
 
   const CustomImageElement({
     required this.path,
     required this.position,
+    required this.size,
     required this.rotation,
-    this.size,
-    this.opacity = 1.0,
+    this.isAsset = false,
     this.isVisible = true,
-    this.layerIndex,
+    this.opacity = 1.0,
   });
 
   CustomImageElement copyWith({
     String? path,
     Offset? position,
-    double? rotation,
     double? size,
-    double? opacity,
+    double? rotation,
+    bool? isAsset,
     bool? isVisible,
-    int? layerIndex,
+    double? opacity, 
   }) {
     return CustomImageElement(
       path: path ?? this.path,
       position: position ?? this.position,
-      rotation: rotation ?? this.rotation,
       size: size ?? this.size,
-      opacity: opacity ?? this.opacity,
+      rotation: rotation ?? this.rotation,
+      isAsset: isAsset ?? this.isAsset,
       isVisible: isVisible ?? this.isVisible,
-      layerIndex: layerIndex ?? this.layerIndex,
+      opacity: opacity ?? this.opacity,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'path': path,
+      'position': {'dx': position.dx, 'dy': position.dy},
+      'size': size,
+      'rotation': rotation,
+      'isAsset': isAsset,
+      'isVisible': isVisible,
+      'opacity': opacity,
+    };
+  }
+
+  factory CustomImageElement.fromJson(Map<String, dynamic> json) {
+    return CustomImageElement(
+      path: json['path'],
+      position: Offset(json['position']['dx'], json['position']['dy']),
+      size: json['size'],
+      rotation: json['rotation'],
+      isAsset: json['isAsset'] ?? false,
+      isVisible: json['isVisible'] ?? true,
+      opacity: json['opacity'] ?? 1.0,
     );
   }
 }
@@ -90,54 +189,93 @@ class CustomImageElement {
 class CustomSvgElement {
   final String svgString;
   final Offset position;
-   final Color color; //
   final double size;
   final double rotation;
-  final double opacity;
+  final Color? color;
+  final double? opacity;
   final bool isVisible;
-  final int? layerIndex;
+  final Color? outlineColor;
+  final double? outlineWidth;
 
-  const CustomSvgElement({
+  CustomSvgElement({
     required this.svgString,
     required this.position,
-    required this.color,
     required this.size,
     required this.rotation,
-    this.opacity = 1.0,
+    this.color,
+    this.opacity,
     this.isVisible = true,
-    this.layerIndex,
+    this.outlineColor,
+    this.outlineWidth,
   });
 
   CustomSvgElement copyWith({
     String? svgString,
     Offset? position,
-    Color? color,
     double? size,
     double? rotation,
+    Color? color,
     double? opacity,
     bool? isVisible,
-    int? layerIndex,
+    Color? outlineColor,
+    double? outlineWidth,
   }) {
     return CustomSvgElement(
       svgString: svgString ?? this.svgString,
       position: position ?? this.position,
-      color: color ?? this.color,
       size: size ?? this.size,
       rotation: rotation ?? this.rotation,
+      color: color ?? this.color,
       opacity: opacity ?? this.opacity,
       isVisible: isVisible ?? this.isVisible,
-      layerIndex: layerIndex ?? this.layerIndex,
+      outlineColor: outlineColor ?? this.outlineColor,
+      outlineWidth: outlineWidth ?? this.outlineWidth,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'svgString': svgString,
+      'position': {'dx': position.dx, 'dy': position.dy},
+      'color': color?.value,
+      'size': size,
+      'rotation': rotation,
+      'isVisible': isVisible,
+      'opacity': opacity,
+      'outlineColor': outlineColor?.value,
+      'outlineWidth': outlineWidth,
+    };
+  }
+
+  factory CustomSvgElement.fromJson(Map<String, dynamic> json) {
+    return CustomSvgElement(
+      svgString: json['svgString'],
+      position: Offset(json['position']['dx'], json['position']['dy']),
+      size: json['size']?.toDouble() ?? 16.0,
+      rotation: json['rotation']?.toDouble() ?? 0.0,
+      color: json['color'] != null ? Color(json['color']) : null,
+      isVisible: json['isVisible'] ?? true,
+      opacity: json['opacity']?.toDouble() ?? 1.0,
+      outlineColor:
+          json['outlineColor'] != null ? Color(json['outlineColor']) : null,
+      outlineWidth: (json['outlineWidth'] as num?)?.toDouble(),
     );
   }
 }
 
 class LogoStateData {
+  final Color backgroundColor;
+  final Color? logoColor;
+  final Gradient? backgroundGradient;
+  final String? backgroundTexture;
+  final String? backgroundImage;
+  final List<Color>? palette;
+  final double opacity;
   final Offset logoPosition;
   final double logoSize;
   final double logoRotation;
   final bool isLogoVisible;
-  final String? svgLogo; 
-
+  final String? svgLogo;
 
   final Offset companyNamePosition;
   final double companyNameSize;
@@ -173,12 +311,22 @@ class LogoStateData {
   final Set<int> lockedElements;
   final List<int> elementOrder;
 
+  String companyNameFont; // <-- Add this
+  String sloganFont; // <-- Add this
+
   LogoStateData({
     List<CustomTextElement>? customTexts,
     List<CustomImageElement>? customImages,
     List<CustomSvgElement>? customSVGs,
     Set<int>? lockedElements,
     List<int>? elementOrder,
+    this.backgroundColor = Colors.white,
+    this.logoColor,
+    this.backgroundGradient,
+    this.backgroundTexture,
+    this.backgroundImage,
+    this.palette,
+    this.opacity = 1.0,
     required this.logoPosition,
     required this.logoSize,
     required this.logoRotation,
@@ -206,11 +354,13 @@ class LogoStateData {
     this.slogan2Size,
     this.slogan2Rotation,
     required this.isSlogan2Visible,
+    this.companyNameFont = 'Roboto', 
+    this.sloganFont = 'Roboto',
   }) : customTexts = customTexts ?? [],
-        customImages = customImages ?? [],
-        customSVGs = customSVGs ?? [],
-        lockedElements = lockedElements ?? {},
-        elementOrder = elementOrder ?? [];
+       customImages = customImages ?? [],
+       customSVGs = customSVGs ?? [],
+       lockedElements = lockedElements ?? {},
+       elementOrder = elementOrder ?? [];
 
   Set<int> get visibleElementIds {
     final ids = <int>{};
@@ -232,14 +382,13 @@ class LogoStateData {
     return ids;
   }
 
-  
-
   LogoStateData copyWith({
     Offset? logoPosition,
     double? logoSize,
     double? logoRotation,
     bool? isLogoVisible,
     String? svgLogo,
+    Color? logoColor,
     Offset? companyNamePosition,
     double? companyNameSize,
     double? companyNameRotation,
@@ -286,12 +435,14 @@ class LogoStateData {
       sloganName: sloganName ?? this.sloganName,
       logo2Position: logo2Position ?? this.logo2Position,
       logo2Size: logo2Size ?? this.logo2Size,
+      logoColor: logoColor ?? this.logoColor,
       logo2Rotation: logo2Rotation ?? this.logo2Rotation,
       isLogo2Visible: isLogo2Visible ?? this.isLogo2Visible,
       companyName2Position: companyName2Position ?? this.companyName2Position,
       companyName2Size: companyName2Size ?? this.companyName2Size,
       companyName2Rotation: companyName2Rotation ?? this.companyName2Rotation,
-      isCompanyName2Visible: isCompanyName2Visible ?? this.isCompanyName2Visible,
+      isCompanyName2Visible:
+          isCompanyName2Visible ?? this.isCompanyName2Visible,
       slogan2Position: slogan2Position ?? this.slogan2Position,
       slogan2Size: slogan2Size ?? this.slogan2Size,
       slogan2Rotation: slogan2Rotation ?? this.slogan2Rotation,
@@ -303,5 +454,107 @@ class LogoStateData {
       elementOrder: elementOrder ?? this.elementOrder,
     );
   }
-}
 
+  Map<String, dynamic> toJson() {
+    return {
+      'logoPosition': {'dx': logoPosition.dx, 'dy': logoPosition.dy},
+      'companyNamePosition': {
+        'dx': companyNamePosition.dx,
+        'dy': companyNamePosition.dy,
+      },
+      'sloganPosition': {'dx': sloganPosition.dx, 'dy': sloganPosition.dy},
+      'logoSize': logoSize,
+      'companyNameSize': companyNameSize,
+      'sloganSize': sloganSize,
+      'logoRotation': logoRotation,
+      'companyNameRotation': companyNameRotation,
+      'sloganRotation': sloganRotation,
+      'isLogoVisible': isLogoVisible,
+      'isCompanyNameVisible': isCompanyNameVisible,
+      'isSloganVisible': isSloganVisible,
+      'companyName': companyName,
+      'sloganName': sloganName,
+      'svgLogo': svgLogo,
+      'elementOrder': elementOrder,
+      'lockedElements': lockedElements.toList(),
+      'customTexts': customTexts.map((e) => e.toJson()).toList(),
+      'customImages': customImages.map((e) => e.toJson()).toList(),
+      'customSVGs': customSVGs.map((e) => e.toJson()).toList(),
+    };
+  }
+
+  factory LogoStateData.fromJson(Map<String, dynamic> json) {
+    return LogoStateData(
+      logoPosition: Offset(
+        (json['logoPosition']['dx'] as num).toDouble(),
+        (json['logoPosition']['dy'] as num).toDouble(),
+      ),
+      companyNamePosition: Offset(
+        (json['companyNamePosition']['dx'] as num).toDouble(),
+        (json['companyNamePosition']['dy'] as num).toDouble(),
+      ),
+      sloganPosition: Offset(
+        (json['sloganPosition']['dx'] as num).toDouble(),
+        (json['sloganPosition']['dy'] as num).toDouble(),
+      ),
+      elementOrder: List<int>.from(json['elementsOrder'] ?? [0, 1, 2]),
+      logoSize: json['logoSize']?.toDouble() ?? 100.0,
+      companyNameSize: json['companyNameSize']?.toDouble() ?? 28.0,
+      sloganSize: json['sloganSize']?.toDouble() ?? 16.0,
+      logoRotation: json['logoRotation']?.toDouble() ?? 0.0,
+      companyNameRotation: json['companyNameRotation']?.toDouble() ?? 0.0,
+      sloganRotation: json['sloganRotation']?.toDouble() ?? 0.0,
+      isLogoVisible: json['isLogoVisible'] ?? true,
+      isCompanyNameVisible: json['isCompanyNameVisible'] ?? true,
+      isSloganVisible: json['isSloganVisible'] ?? true,
+      companyName: json['companyName'],
+      sloganName: json['sloganName'],
+      svgLogo: json['svgLogo'],
+      lockedElements: Set<int>.from(json['lockedElements'] ?? []),
+      customTexts:
+          (json['customTexts'] as List?)
+              ?.map((e) => CustomTextElement.fromJson(e))
+              .toList() ??
+          [],
+      customImages:
+          (json['customImages'] as List?)
+              ?.map((e) => CustomImageElement.fromJson(e))
+              .toList() ??
+          [],
+      customSVGs:
+          (json['customSVGs'] as List?)
+              ?.map((e) => CustomSvgElement.fromJson(e))
+              .toList() ??
+          [],
+      isLogo2Visible: json['isLogo2Visible'] ?? false,
+      isCompanyName2Visible: json['isCompanyName2Visible'] ?? false,
+      isSlogan2Visible: json['isSlogan2Visible'] ?? false,
+      logo2Position:
+          json['logo2Position'] != null
+              ? Offset(json['logo2Position']['dx'], json['logo2Position']['dy'])
+              : null,
+      logo2Size: json['logo2Size']?.toDouble(),
+      logo2Rotation: json['logo2Rotation']?.toDouble(),
+      companyName2Position:
+          json['companyName2Position'] != null
+              ? Offset(
+                json['companyName2Position']['dx'],
+                json['companyName2Position']['dy'],
+              )
+              : null,
+      companyName2Size: json['companyName2Size']?.toDouble(),
+      companyName2Rotation: json['companyName2Rotation']?.toDouble(),
+      slogan2Position:
+          json['slogan2Position'] != null
+              ? Offset(
+                json['slogan2Position']['dx'],
+                json['slogan2Position']['dy'],
+              )
+              : null,
+      slogan2Size: json['slogan2Size']?.toDouble(),
+      slogan2Rotation: json['slogan2Rotation']?.toDouble(),
+      companyNameFont: json['companyNameFont'] ?? 'Roboto',
+      sloganFont: json['sloganFont'] ?? 'Roboto',
+    );
+  }
+}

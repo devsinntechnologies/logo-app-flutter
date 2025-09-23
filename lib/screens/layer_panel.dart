@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:logo_app_flutter/models/logo_state_data.dart';
+import 'package:logo_app_flutter/provider/selected_color_provider.dart';
+import 'package:logo_app_flutter/provider/undo_provider.dart' show UndoProvider;
+import 'package:provider/provider.dart';
 
 class LayersPanel extends StatelessWidget {
   final LogoStateData logoState;
@@ -19,6 +22,19 @@ class LayersPanel extends StatelessWidget {
     required this.onToggleLockAll,
     required this.onReorder,
   });
+
+  void _saveLayerState(BuildContext context, String action) {
+    final undoProvider = Provider.of<UndoProvider>(context, listen: false);
+    final colorProvider = Provider.of<SelectedColorProvider>(
+      context,
+      listen: false,
+    );
+
+    if (!undoProvider.isUndoRedoInProgress) {
+      final currentState = colorProvider.captureCurrentState();
+      undoProvider.saveState(action: action, state: currentState);
+    }
+  }
 
   Widget _buildLayerPreview(BuildContext context, int id) {
     Widget child;
@@ -196,25 +212,34 @@ class LayersPanel extends StatelessWidget {
                                 isLocked ? Icons.lock : Icons.lock_open,
                                 color: Colors.white,
                               ),
-                              onPressed: () => onToggleLock(id),
+                              onPressed: () {
+                                _saveLayerState(context, 'Lock element $id');
+                                onToggleLock(id);
+                              },
                             ),
                             IconButton(
                               icon: const Icon(
                                 Icons.arrow_upward,
                                 color: Colors.white,
                               ),
-                              onPressed:
-                                  index > 0 ? () => onReorder(id, true) : null,
+                              onPressed: () {
+                                Provider.of<SelectedColorProvider>(
+                                  context,
+                                  listen: false,
+                                ).moveElementUp(id);
+                              },
                             ),
                             IconButton(
                               icon: const Icon(
                                 Icons.arrow_downward,
                                 color: Colors.white,
                               ),
-                              onPressed:
-                                  index < orderedVisibleIds.length - 1
-                                      ? () => onReorder(id, false)
-                                      : null,
+                              onPressed: () {
+                                Provider.of<SelectedColorProvider>(
+                                  context,
+                                  listen: false,
+                                ).moveElementDown(id);
+                              },
                             ),
                           ],
                         ),

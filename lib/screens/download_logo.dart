@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:logo_app_flutter/provider/interestitial_ad.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
+import 'package:logo_app_flutter/provider/undo_provider.dart';
 import 'package:logo_app_flutter/screens/art_select_screen.dart';
 import 'package:logo_app_flutter/screens/movement_panel.dart';
 // import 'package:no_screenshot/no_screenshot.dart';
@@ -29,6 +30,8 @@ import '../components/logoBottomNavbarItems/drop_up_panel.dart';
 import '../components/logo_canvas.dart';
 import '../utils/text_size_util.dart';
 import 'text_screen.dart';
+import 'package:logo_app_flutter/provider/smart_interstitial_manager.dart';
+import 'package:logo_app_flutter/components/undo_redo_widget.dart';
 
 class DownloadLogo extends StatefulWidget {
   final String svgLogo;
@@ -54,14 +57,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
   late LogoStateData _currentLogoState;
   //  int? _selectedElementId;
   int? selectedElementId;
-
-  final List<LogoStateData> _undoStack = [];
-  final int _maxUndoHistory = 10;
-  //   List<LogoElement> customTextElements = [];
-  //   List<LogoElement> customImageElements = [];
-  //   LogoElement? _getElementById(int id) {
-  //   return customTextElements.firstWhereOrNull((e) => e.id == id);
-  // }
 
   final List<Color> colorList = [
     Colors.red,
@@ -161,6 +156,13 @@ class _DownloadLogoState extends State<DownloadLogo> {
   }
 
   void _showSaveConfirmationDialog(BuildContext context, GlobalKey canvasKey) {
+    final adManager = Provider.of<SmartInterstitialManager>(
+      context,
+      listen: false,
+    );
+    adManager.onDownloadAttempted(); // Track first-time download
+    adManager.onButtonClick('save_logo'); // Track button click
+
     showDialog(
       barrierDismissible: true,
       context: context,
@@ -232,6 +234,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
       logoRotation: 0,
       isLogoVisible: true,
       svgLogo: widget.svgLogo,
+      logoColor: null,
       companyNamePosition: const Offset(160, 200),
       companyNameSize: 20,
       companyNameRotation: 0,
@@ -247,11 +250,16 @@ class _DownloadLogoState extends State<DownloadLogo> {
       isSlogan2Visible: false,
       customTexts: [],
       customImages: [],
+      customSVGs: [],
       lockedElements: {},
       elementOrder: [0, 1, 2],
+      backgroundColor: Colors.white,
+      backgroundGradient: null,
+      backgroundTexture: null,
+      backgroundImage: null,
+      palette: null,
+      opacity: 1.0,
     );
-
-    _saveState();
   }
 
   @override
@@ -259,283 +267,363 @@ class _DownloadLogoState extends State<DownloadLogo> {
     super.dispose();
   }
 
+  void _onLogoColorChanged(Color color) {
+    setState(() {
+      _currentLogoState = _currentLogoState.copyWith(logoColor: color);
+    });
+    Provider.of<SelectedColorProvider>(
+      context,
+      listen: false,
+    ).updateLogoState(_currentLogoState);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.grey.shade200,
-        title: const Text(
-          'Logo Maker',
-          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+    return WillPopScope(
+      onWillPop: () async {
+        final shouldDiscard = await _showDiscardChangesDialog(context);
+        if (shouldDiscard) {
+          _resetEditorStateToDefault();
+          return true; 
+        }
+        return false; 
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.grey.shade200,
+          title: const Text(
+            'Logo Maker',
+            style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+          ),
+          actions: [
+            // Add undo/redo buttons
+            _buildCustomUndoRedoWidget(),
+            const SizedBox(width: 8),
+            IconButton(
+              icon: const Icon(Icons.save, size: 40),
+              onPressed: () => _showSaveConfirmationDialog(context, _canvasKey),
+              tooltip: 'Save Logo',
+            ),
+          ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.undo, size: 40),
-            onPressed: _undo,
-            tooltip: 'Undo last change',
-          ),
-          IconButton(
-            icon: const Icon(Icons.save, size: 40),
-            onPressed: () => _showSaveConfirmationDialog(context, _canvasKey),
-            tooltip: 'Save Logo',
-          ),
-        ],
-      ),
-      body: Stack(
-        children: [
-          SizedBox(height: 700, width: double.infinity),
-          Column(
-            children: [
-              Expanded(
-                child: Stack(
-                  children: [
-                    RepaintBoundary(
-                      key: _canvasKey,
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.translucent,
-                        onTap: () {
-                          setState(() {
-                            selectedElement = null;
-                            isMovementPanelVisible = false;
-                          });
-                        },
-                        child: LogoCanvas(
-                          selectedShapeName: selectedShapeName,
+        body: Stack(
+          children: [
+            SizedBox(height: 700, width: double.infinity),
+            Column(
+              children: [
+                Expanded(
+                  child: Stack(
+                    children: [
+                      RepaintBoundary(
+                        key: _canvasKey,
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.translucent,
+                          onTap: () {
+                            setState(() {
+                              selectedElement = null;
+                              isMovementPanelVisible = false;
+                            });
+                          },
+                          child: Consumer<SelectedColorProvider>(
+                            builder: (context, provider, _) {
+                              final logoState =
+                                  provider.getCurrentLogoState() ??
+                                  _currentLogoState;
+                              return LogoCanvas(
+                                selectedShapeName: selectedShapeName,
+                                logoState: logoState,
+                                svgLogo: widget.svgLogo,
+                                companyName: widget.companyName,
+                                sloganName: widget.sloganName,
+                                showGrid: _showGrid,
+                                isEditingMode: true,
+                                selectedElementId: selectedElement,
+                                highlightedHorizontalGridLineIndex:
+                                    _highlightedHorizontalGridLineIndex,
+                                highlightedVerticalGridLineIndex:
+                                    _highlightedVerticalGridLineIndex,
+                                isLayersRibbonExtended: _isLayersPanelVisible,
+                                onToggleGrid:
+                                    () =>
+                                        setState(() => _showGrid = !_showGrid),
+                                onToggleLayersRibbon:
+                                    () => setState(
+                                      () =>
+                                          _isLayersPanelVisible =
+                                              !_isLayersPanelVisible,
+                                    ),
+                                onElementPanStart: _onPanStart,
+                                onElementPanUpdate: _updateElementPosition,
+                                onElementPanEnd: _onPanEnd,
+                                onElementTap: _elementSelect,
+                                onElementDelete: _deleteElement,
+                                onElementSplit: _splitElement,
+                                onElementRotateTap: _rotateElementByTap,
+                                onElementRotatePanStart: _onRotatePanStart,
+                                onElementRotatePanUpdate: _onRotatePanUpdate,
+                                onElementRotatePanEnd: _onPanEnd,
+                                onElementResizeTap: _resizeElementByTap,
+                                onElementResizePanStart: _onResizePanStart,
+                                onElementResizePanUpdate: _onResizePanUpdate,
+                                onElementResizePanEnd: _onPanEnd,
+                                isCheckerboardActive: true,
+                                checkerboardOpacity: checkerboardOpacity,
+                                isCheckerboardVisible: isCheckerboardVisible,
 
-                          logoState: _currentLogoState,
-                          svgLogo: widget.svgLogo,
-                          companyName: widget.companyName,
-                          sloganName: widget.sloganName,
-                          showGrid: _showGrid,
-                          isEditingMode: true,
-                          selectedElementId: selectedElement,
-                          highlightedHorizontalGridLineIndex:
-                              _highlightedHorizontalGridLineIndex,
-                          highlightedVerticalGridLineIndex:
-                              _highlightedVerticalGridLineIndex,
-                          isLayersRibbonExtended: _isLayersPanelVisible,
-                          onToggleGrid:
-                              () => setState(() => _showGrid = !_showGrid),
-                          onToggleLayersRibbon:
-                              () => setState(
-                                () =>
-                                    _isLayersPanelVisible =
-                                        !_isLayersPanelVisible,
-                              ),
-                          onElementPanStart: _onPanStart,
-                          onElementPanUpdate: _updateElementPosition,
-                          onElementPanEnd: _onPanEnd,
-                          onElementTap: _elementSelect,
-                          onElementDelete: _deleteElement,
-                          onElementSplit: _splitElement,
-                          onElementRotateTap: _rotateElementByTap,
-                          onElementRotatePanStart: _onRotatePanStart,
-                          onElementRotatePanUpdate: _onRotatePanUpdate,
-                          onElementRotatePanEnd: _onPanEnd,
-                          onElementResizeTap: _resizeElementByTap,
-                          onElementResizePanStart: _onResizePanStart,
-                          onElementResizePanUpdate: _onResizePanUpdate,
-                          onElementResizePanEnd: _onPanEnd,
-                          isCheckerboardActive: true,
-                          checkerboardOpacity: checkerboardOpacity,
-                          isCheckerboardVisible: isCheckerboardVisible,
-
-                          lockedElements: _currentLogoState.lockedElements,
-                          elementOrder: _currentLogoState.elementOrder,
-                        ),
-                      ),
-                    ),
-
-                    Positioned(
-                      top: 20,
-                      right: 0,
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _showGrid = !_showGrid;
-                          });
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade700,
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(25.0),
-                              bottomLeft: Radius.circular(25.0),
-                            ),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Colors.black26,
-                                blurRadius: 8,
-                                offset: Offset(-2, 2),
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            _showGrid ? Icons.grid_off : Icons.grid_on,
-                            color: Colors.white,
-                            size: 28,
+                                lockedElements:
+                                    _currentLogoState.lockedElements,
+                                elementOrder: logoState.elementOrder,
+                              );
+                            },
                           ),
                         ),
                       ),
-                    ),
-                    Positioned(
-                      top: 20,
-                      left: 0,
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _isLayersPanelVisible = !_isLayersPanelVisible;
-                          });
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade700,
-                            borderRadius: const BorderRadius.only(
-                              topRight: Radius.circular(25.0),
-                              bottomRight: Radius.circular(25.0),
-                            ),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Colors.black26,
-                                blurRadius: 8,
-                                offset: Offset(2, 2),
-                              ),
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.layers,
-                            color: Colors.white,
-                            size: 28,
-                          ),
-                        ),
-                      ),
-                    ),
-                    if (_isLayersPanelVisible)
+
                       Positioned(
-                        top: 30,
-                        right: 70,
-                        child: Container(
-                          height: 40,
-                          width: 100,
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade800.withOpacity(0.95),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.arrow_back_ios_new,
-                                  size: 20,
-                                  color: Colors.white,
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    _isLayersPanelVisible =
-                                        !_isLayersPanelVisible;
-                                  });
-                                },
+                        top: 20,
+                        right: 0,
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _showGrid = !_showGrid;
+                            });
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade700,
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(25.0),
+                                bottomLeft: Radius.circular(25.0),
                               ),
-                            ],
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.black26,
+                                  blurRadius: 8,
+                                  offset: Offset(-2, 2),
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              _showGrid ? Icons.grid_off : Icons.grid_on,
+                              color: Colors.white,
+                              size: 28,
+                            ),
                           ),
                         ),
                       ),
-
-                    AnimatedPositioned(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                      top: 20,
-                      left: _isLayersPanelVisible ? 0 : -300,
-                      child: LayersPanel(
-                        logoState: _currentLogoState,
-                        svgLogo: widget.svgLogo,
-                        onClose:
-                            () => setState(() => _isLayersPanelVisible = false),
-                        onToggleLock: _toggleLock,
-                        onToggleLockAll: _toggleLockAll,
-                        onReorder: _reorderLayer,
+                      Positioned(
+                        top: 20,
+                        left: 0,
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _isLayersPanelVisible = !_isLayersPanelVisible;
+                            });
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade700,
+                              borderRadius: const BorderRadius.only(
+                                topRight: Radius.circular(25.0),
+                                bottomRight: Radius.circular(25.0),
+                              ),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.black26,
+                                  blurRadius: 8,
+                                  offset: Offset(2, 2),
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.layers,
+                              color: Colors.white,
+                              size: 28,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
+                      if (_isLayersPanelVisible)
+                        Positioned(
+                          top: 30,
+                          right: 70,
+                          child: Container(
+                            height: 40,
+                            width: 100,
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade800.withOpacity(0.95),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.arrow_back_ios_new,
+                                    size: 20,
+                                    color: Colors.white,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _isLayersPanelVisible =
+                                          !_isLayersPanelVisible;
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                      AnimatedPositioned(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                        top: 20,
+                        left: _isLayersPanelVisible ? 0 : -300,
+                        child: Consumer<SelectedColorProvider>(
+                          builder: (context, provider, _) {
+                            final logoState =
+                                provider.getCurrentLogoState() ??
+                                _currentLogoState;
+                            return LayersPanel(
+                              logoState: logoState,
+                              svgLogo: widget.svgLogo,
+                              onClose:
+                                  () => setState(
+                                    () => _isLayersPanelVisible = false,
+                                  ),
+                              onToggleLock: _toggleLock,
+                              onToggleLockAll: _toggleLockAll,
+                              onReorder: (id, moveUp) {
+                                if (moveUp) {
+                                  provider.moveElementUp(id);
+                                } else {
+                                  provider.moveElementDown(id);
+                                }
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                Column(
+                  children: [
+                    Container(height: 300, color: Colors.grey.shade200),
                   ],
                 ),
-              ),
-
-              Column(
-                children: [Container(height: 300, color: Colors.grey.shade200)],
-              ),
-            ],
-          ),
-          if (tabToolbarIndex != -1 &&
-              (!isMovementPanelVisible || selectedElement == null))
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: kBottomNavigationBarHeight - 50,
-              top: MediaQuery.sizeOf(context).height.toDouble() * 0.44,
-              child: AnimatedContainer(
-                duration: Duration(microseconds: 300),
-                height: 230,
-                child: _buildToolbarForTabs(tabToolbarIndex),
-              ),
+              ],
             ),
-          if (selectedElement != null && isMovementPanelVisible)
-            Positioned(
-              bottom: -100,
-
-              child: MovementPanel(
-                isVisible: true,
-                onDirectionPressed: (String direction) {
-                  const double moveAmount = 5.0;
-                  Offset delta;
-
-                  switch (direction) {
-                    case 'up':
-                      delta = const Offset(0, -moveAmount);
-                      break;
-                    case 'down':
-                      delta = const Offset(0, moveAmount);
-                      break;
-                    case 'left':
-                      delta = const Offset(-moveAmount, 0);
-                      break;
-                    case 'right':
-                      delta = const Offset(moveAmount, 0);
-                      break;
-                    default:
-                      delta = Offset.zero;
-                  }
-                  setState(() {});
-
-                  _updateElementPosition(selectedElement!, delta);
-                },
-                onDuplicatePressed: () {
-                  print('Duplicate called for $selectedElement');
-                  duplicateSelectedElement(selectedElement!);
-                },
-                onBringToFrontPressed:
-                    () => bringToFront(selectedElement!, _currentLogoState),
-                onSendToBackPressed:
-                    () => sendToBack(selectedElement!, _currentLogoState),
-
-                selectedElementId: selectedElement,
+            if (tabToolbarIndex != -1 &&
+                (!isMovementPanelVisible || selectedElement == null))
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: kBottomNavigationBarHeight - 50,
+                top: MediaQuery.sizeOf(context).height.toDouble() * 0.44,
+                child: AnimatedContainer(
+                  duration: Duration(microseconds: 300),
+                  height: 230,
+                  child: _buildToolbarForTabs(tabToolbarIndex),
+                ),
               ),
+            if (selectedElement != null && isMovementPanelVisible)
+              Positioned(
+                bottom: -100,
+
+                child: MovementPanel(
+                  isVisible: true,
+                  onLogoColorChanged: _onLogoColorChanged,
+                  onDirectionPressed: (String direction) {
+                    const double moveAmount = 5.0;
+                    Offset delta;
+
+                    switch (direction) {
+                      case 'up':
+                        delta = const Offset(0, -moveAmount);
+                        break;
+                      case 'down':
+                        delta = const Offset(0, moveAmount);
+                        break;
+                      case 'left':
+                        delta = const Offset(-moveAmount, 0);
+                        break;
+                      case 'right':
+                        delta = const Offset(moveAmount, 0);
+                        break;
+                      default:
+                        delta = Offset.zero;
+                    }
+                    setState(() {});
+
+                    _updateElementPosition(selectedElement!, delta);
+                  },
+                  onDuplicatePressed: () {
+                    print('Duplicate called for $selectedElement');
+                    duplicateSelectedElement(selectedElement!);
+                  },
+                  onBringToFrontPressed:
+                      () => bringToFront(selectedElement!, _currentLogoState),
+                  onSendToBackPressed:
+                      () => sendToBack(selectedElement!, _currentLogoState),
+
+                  selectedElementId: selectedElement,
+                ),
+              ),
+          ],
+        ),
+        bottomNavigationBar: LogoBottomNavBar(
+          selectedIndex: selectedIndex,
+          onItemSelected: _handleBottomNavTap,
+          hasTapped: true,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCustomUndoRedoWidget() {
+    return Consumer<UndoProvider>(
+      builder: (context, undoProvider, child) {
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: Icon(
+                Icons.undo,
+                size: 32,
+                color: undoProvider.canUndo ? Colors.black : Colors.grey,
+              ),
+              onPressed: undoProvider.canUndo ? _undo : null,
+              tooltip:
+                  undoProvider.canUndo
+                      ? 'Undo: ${undoProvider.getLastAction()}'
+                      : 'No actions to undo',
             ),
-        ],
-      ),
-      bottomNavigationBar: LogoBottomNavBar(
-        selectedIndex: selectedIndex,
-        onItemSelected: _handleBottomNavTap,
-        hasTapped: true,
-      ),
+            IconButton(
+              icon: Icon(
+                Icons.redo,
+                size: 32,
+                color: undoProvider.canRedo ? Colors.black : Colors.grey,
+              ),
+              onPressed: undoProvider.canRedo ? _redo : null,
+              tooltip:
+                  undoProvider.canRedo
+                      ? 'Redo: ${undoProvider.getNextAction()}'
+                      : 'No actions to redo',
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -552,109 +640,130 @@ class _DownloadLogoState extends State<DownloadLogo> {
           },
           onOpacityChanged: (val) => setState(() => checkerboardOpacity = val),
           onShapeSelected: (shapeName) {
+            _saveUndoState('Change shape to $shapeName');
+
             setState(() {
               selectedShapeName = shapeName;
             });
+
+            final colorProvider = Provider.of<SelectedColorProvider>(
+              context,
+              listen: false,
+            );
+            colorProvider.updateLogoState(_currentLogoState);
           },
         );
-      case 3:
-        return _buildEffectPanel();
+      // case 3:
+      //   return _buildEffectPanel();
       case 4:
-        return Container(
-          color: Colors.black,
-          height: 50,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            separatorBuilder: (_, __) => const SizedBox(width: 10),
-            itemCount: paletteList.length,
-            itemBuilder: (context, index) {
-              final colors = paletteList[index];
-              final isSelected = selectedPaletteIndex == index;
-              return GestureDetector(
-                onTap: () {
-                  final provider = Provider.of<SelectedColorProvider>(
-                    context,
-                    listen: false,
-                  );
-                  setState(() {
-                    selectedPaletteIndex = index;
-                    provider.setInitialColorsFromPalette(
-                      colors,
-                      _currentLogoState.elementOrder,
-                    );
-                  });
-                },
-                child: Container(
-                  height: 35,
-                  width: 50,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: isSelected ? Colors.orange : Colors.grey.shade400,
-                      width: isSelected ? 2 : 1,
-                    ),
-                  ),
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Column(
-                          children:
-                              colors
-                                  .map(
-                                    (color) => Container(
-                                      height: 93.6,
-                                      width: double.infinity,
-                                      color: color,
-                                    ),
-                                  )
-                                  .toList(),
-                        ),
-                      ),
-                      if (isSelected)
-                        Positioned.fill(
-                          child: Align(
-                            alignment: Alignment.center,
-                            child: InkWell(
-                              onTap: () {
-                                Provider.of<SelectedColorProvider>(
-                                  context,
-                                  listen: false,
-                                ).setColorsRotated(
-                                  colors,
-                                  allElementIds: _currentLogoState.elementOrder,
-                                );
-                              },
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.white,
-                                  border: Border.all(
-                                    color: Colors.orange,
-                                    width: 1,
-                                  ),
-                                ),
-                                padding: const EdgeInsets.all(2),
-                                child: const Icon(
-                                  Icons.refresh,
-                                  size: 10,
-                                  color: Colors.orange,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        );
+        return _buildPaletteSelection();
       default:
         return SizedBox.shrink();
     }
+  }
+
+  Widget _buildPaletteSelection() {
+    return Container(
+      color: const ui.Color.fromARGB(255, 72, 70, 70),
+      height: 50,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        separatorBuilder: (_, __) => const SizedBox(width: 10),
+        itemCount: paletteList.length,
+        itemBuilder: (context, index) {
+          final colors = paletteList[index];
+          final isSelected = selectedPaletteIndex == index;
+          return GestureDetector(
+            onTap: () {
+              _saveUndoState('Apply color palette ${index + 1}');
+              final provider = Provider.of<SelectedColorProvider>(
+                context,
+                listen: false,
+              );
+
+              setState(() {
+                selectedPaletteIndex = index;
+              });
+
+              provider.setInitialColorsFromPalette(
+                colors,
+                _currentLogoState.elementOrder,
+              );
+
+              provider.updateLogoState(_currentLogoState);
+            },
+            child: Container(
+              height: 10,
+              width: 50,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: isSelected ? Colors.orange : Colors.grey.shade400,
+                  width: isSelected ? 2 : 1,
+                ),
+              ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Column(
+                      children:
+                          colors
+                              .map(
+                                (color) => Container(
+                                  height: 93.6,
+                                  width: double.infinity,
+                                  color: color,
+                                ),
+                              )
+                              .toList(),
+                    ),
+                  ),
+                  if (isSelected)
+                    Positioned.fill(
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: InkWell(
+                          onTap: () {
+                            _saveUndoState('Rotate palette colors');
+                            final provider = Provider.of<SelectedColorProvider>(
+                              context,
+                              listen: false,
+                            );
+                            provider.setColorsRotated(
+                              colors,
+                              allElementIds: _currentLogoState.elementOrder,
+                            );
+                            // CRITICAL: Sync logo state back to provider
+                            provider.updateLogoState(_currentLogoState);
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white,
+                              border: Border.all(
+                                color: Colors.orange,
+                                width: 1,
+                              ),
+                            ),
+                            padding: const EdgeInsets.all(2),
+                            child: const Icon(
+                              Icons.refresh,
+                              size: 10,
+                              color: Colors.orange,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   void bringToFront(int elementId, dynamic logoState) {
@@ -677,10 +786,12 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
   Widget _buildEffectPanel() {
     return Container(
-      decoration: BoxDecoration(color: const ui.Color.fromARGB(255, 0, 0, 0)),
+      decoration: BoxDecoration(
+        color: const ui.Color.fromARGB(255, 72, 70, 70),
+      ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        spacing: 10,
         children: [
           Text("Opacity", style: TextStyle(color: Colors.white)),
           Row(
@@ -699,6 +810,14 @@ class _DownloadLogoState extends State<DownloadLogo> {
                       activeColor: Colors.orange,
                       onChanged: (value) {
                         provider.setOpacity(value);
+                      },
+                      onChangeStart: (value) {
+                        _saveUndoState('Change opacity');
+                      },
+                      onChangeEnd: (value) {
+                        _saveUndoState(
+                          'Set opacity to ${(value * 100).round()}%',
+                        );
                       },
                     );
                   },
@@ -732,11 +851,11 @@ class _DownloadLogoState extends State<DownloadLogo> {
                 if (index == 0) {
                   return GestureDetector(
                     onTap: () {
+                      _saveUndoState('Reset background color');
                       Provider.of<SelectedColorProvider>(
                         context,
                         listen: false,
                       ).resetColor();
-                      // setState(() => showEffectPanel = false);
                     },
                     child: Container(
                       width: 60,
@@ -756,10 +875,16 @@ class _DownloadLogoState extends State<DownloadLogo> {
                 final color = colorList[index - 1];
                 return GestureDetector(
                   onTap: () {
-                    Provider.of<SelectedColorProvider>(
+                    _saveUndoState('Change element color');
+                    final provider = Provider.of<SelectedColorProvider>(
                       context,
                       listen: false,
-                    ).setColor(color);
+                    );
+                    if (selectedElement != null) {
+                      provider.setElementColor(selectedElement!, color);
+                    } else {
+                      provider.setBackgroundColor(color);
+                    }
                   },
                   child: Container(
                     width: 50,
@@ -778,30 +903,117 @@ class _DownloadLogoState extends State<DownloadLogo> {
     );
   }
 
-  // --- State Save/Undo ---
-  void _saveState() {
-    if (_undoStack.length >= _maxUndoHistory) {
-      _undoStack.removeAt(0);
-    }
-    _undoStack.add(_currentLogoState.copyWith());
-    if (mounted) setState(() {});
+  void _saveUndoState(String action) {
+    final colorProvider = Provider.of<SelectedColorProvider>(
+      context,
+      listen: false,
+    );
+    final undoProvider = Provider.of<UndoProvider>(context, listen: false);
+
+    colorProvider.updateLogoState(_currentLogoState);
+
+    final currentState = colorProvider.captureCurrentState();
+    currentState['selectedShapeName'] =
+        selectedShapeName; 
+
+    undoProvider.saveState(action: action, state: currentState);
+
+    print('✅ Saved undo state: $action');
+    print('   Opacity: ${colorProvider.opacity}');
+    print('   Shape: $selectedShapeName');
   }
 
   void _undo() {
-    if (_undoStack.length > 1) {
-      setState(() {
-        _undoStack.removeLast();
-        _currentLogoState = _undoStack.last.copyWith();
-        selectedElement = null;
-        _clearGridAlignment();
-      });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Undo successful!')));
+    final adManager = Provider.of<SmartInterstitialManager>(
+      context,
+      listen: false,
+    );
+    adManager.onButtonClick('undo');
+
+    final undoProvider = Provider.of<UndoProvider>(context, listen: false);
+    final colorProvider = Provider.of<SelectedColorProvider>(
+      context,
+      listen: false,
+    );
+
+    if (undoProvider.canUndo) {
+      final previousState = undoProvider.undo();
+      if (previousState != null) {
+        colorProvider.restoreFromState(previousState.data);
+
+        final restoredLogoState = colorProvider.getCurrentLogoState();
+        if (restoredLogoState != null) {
+          setState(() {
+            _currentLogoState = restoredLogoState;
+            selectedElement = null;
+            _clearGridAlignment();
+            if (previousState.data['selectedShapeName'] != null) {
+              selectedShapeName = previousState.data['selectedShapeName'];
+            }
+          });
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Undo: ${previousState.action}'),
+            duration: const Duration(milliseconds: 800),
+          ),
+        );
+      }
     } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Nothing to undo!')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Nothing to undo!'),
+          duration: Duration(milliseconds: 800),
+        ),
+      );
+    }
+  }
+
+  void _redo() {
+    final adManager = Provider.of<SmartInterstitialManager>(
+      context,
+      listen: false,
+    );
+    adManager.onButtonClick('redo');
+
+    final undoProvider = Provider.of<UndoProvider>(context, listen: false);
+    final colorProvider = Provider.of<SelectedColorProvider>(
+      context,
+      listen: false,
+    );
+
+    if (undoProvider.canRedo) {
+      final redoState = undoProvider.redo();
+      if (redoState != null) {
+        colorProvider.restoreFromState(redoState.data);
+
+        final restoredLogoState = colorProvider.getCurrentLogoState();
+        if (restoredLogoState != null) {
+          setState(() {
+            _currentLogoState = restoredLogoState;
+            selectedElement = null;
+            _clearGridAlignment();
+            if (redoState.data['selectedShapeName'] != null) {
+              selectedShapeName = redoState.data['selectedShapeName'];
+            }
+          });
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Redo: ${redoState.action}'),
+            duration: const Duration(milliseconds: 800),
+          ),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Nothing to redo!'),
+          duration: Duration(milliseconds: 800),
+        ),
+      );
     }
   }
 
@@ -827,7 +1039,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
         context,
       ).push<String>(_createSlideRoute());
       if (result != null && result.isNotEmpty) {
-        _saveState();
+        _saveUndoState('Add text element'); 
         setState(() {
           final newTextElement = CustomTextElement(
             text: result,
@@ -856,7 +1068,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
         MaterialPageRoute(
           builder:
               (context) => ArtSelectScreen(
-                images: [
+                images: const [
                   'assets/logo_images/logo_1.png',
                   'assets/logo_images/logo_2.png',
                   'assets/logo_images/logo_3.png',
@@ -872,6 +1084,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
         ),
       );
       if (selectedImagePath != null && mounted) {
+        _saveUndoState('Add art element');
         _addImageToCanvas(selectedImagePath);
       }
     }
@@ -907,7 +1120,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
             size: 100,
             rotation: 0,
           );
-          _saveState();
+          _saveUndoState('Add custom image');
           setState(() {
             _currentLogoState = _currentLogoState.copyWith(
               customImages: [..._currentLogoState.customImages, newImage],
@@ -957,6 +1170,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
   }
 
   void _elementSelect(int id) {
+    print("Selected Element Id: $id ");
     setState(() {
       selectedElement = id;
       isMovementPanelVisible = true;
@@ -964,12 +1178,11 @@ class _DownloadLogoState extends State<DownloadLogo> {
   }
 
   void _deleteElement(int id) {
-    _saveState();
+    _saveUndoState('Delete element $id');
     setState(() {
       String message = 'Element deleted!';
       LogoStateData newState = _currentLogoState;
 
-      // Remove from collections first
       final newOrder = List<int>.from(newState.elementOrder)..remove(id);
       final newLocked = Set<int>.from(newState.lockedElements)..remove(id);
       newState = newState.copyWith(
@@ -1002,6 +1215,13 @@ class _DownloadLogoState extends State<DownloadLogo> {
       }
 
       _currentLogoState = newState;
+
+      final colorProvider = Provider.of<SelectedColorProvider>(
+        context,
+        listen: false,
+      );
+      colorProvider.updateLogoState(_currentLogoState);
+
       selectedElement = null;
       ScaffoldMessenger.of(
         context,
@@ -1009,212 +1229,9 @@ class _DownloadLogoState extends State<DownloadLogo> {
     });
   }
 
-  void _addImageToCanvas(String imagePath) {
-    final index = _currentLogoState.customImages.length;
-    final newImage = CustomImageElement(
-      path: imagePath,
-      position: _getCanvasCenter() ?? const Offset(150, 150),
-      rotation: 0,
-      size: 120,
-    );
-
-    setState(() {
-      final updatedCustomImages = List<CustomImageElement>.from(
-        _currentLogoState.customImages,
-      )..add(newImage);
-      final newElementId = 200 + index;
-      final updatedElementOrder = List<int>.from(_currentLogoState.elementOrder)
-        ..add(newElementId);
-
-      _currentLogoState = _currentLogoState.copyWith(
-        customImages: updatedCustomImages,
-        elementOrder: updatedElementOrder,
-      );
-    });
-  }
-
-  void duplicateSelectedElement(int id) {
-    setState(() {
-      if (id == 0) {
-        String? svgString = _currentLogoState.svgLogo;
-
-        if (svgString == null || svgString.isEmpty) {
-          if (_currentLogoState.customSVGs.isNotEmpty) {
-            final lastSvg = _currentLogoState.customSVGs.last;
-            svgString = lastSvg.svgString;
-          } else {
-            debugPrint('❌ No SVG to duplicate.');
-            return;
-          }
-        }
-
-        final newSvgElement = CustomSvgElement(
-          svgString: svgString,
-          position: _currentLogoState.logoPosition + const Offset(20, 20),
-          size: _currentLogoState.logoSize,
-          rotation: _currentLogoState.logoRotation,
-          opacity: 1.0,
-          isVisible: true,
-          color: Colors.black,
-        );
-
-        final updatedSVGs = [..._currentLogoState.customSVGs, newSvgElement];
-        final newElementId = 300 + updatedSVGs.length - 1;
-
-        _currentLogoState = _currentLogoState.copyWith(
-          customSVGs: updatedSVGs,
-          elementOrder: [..._currentLogoState.elementOrder, newElementId],
-        );
-
-        debugPrint('✅ Duplicated SVG: $newElementId');
-        return;
-      }
-
-      if (id == 1) {
-        final newText = CustomTextElement(
-          text: _currentLogoState.companyName ?? '',
-          position:
-              _currentLogoState.companyNamePosition + const Offset(20, 20),
-          size: _currentLogoState.companyNameSize,
-          rotation: _currentLogoState.companyNameRotation,
-          color: Colors.black,
-        );
-
-        final updatedTexts = [..._currentLogoState.customTexts, newText];
-        final newElementId = 100 + updatedTexts.length - 1;
-
-        _currentLogoState = _currentLogoState.copyWith(
-          customTexts: updatedTexts,
-          elementOrder: [..._currentLogoState.elementOrder, newElementId],
-        );
-
-        debugPrint('✅ Duplicated Company Name: $newElementId');
-        return;
-      }
-
-      // Case 2: Slogan
-      if (id == 2) {
-        final newText = CustomTextElement(
-          text: _currentLogoState.sloganName ?? '',
-          position: _currentLogoState.sloganPosition + const Offset(20, 20),
-          size: _currentLogoState.sloganSize,
-          rotation: _currentLogoState.sloganRotation,
-          color: Colors.black,
-        );
-
-        final updatedTexts = [..._currentLogoState.customTexts, newText];
-        final newElementId = 100 + updatedTexts.length - 1;
-
-        _currentLogoState = _currentLogoState.copyWith(
-          customTexts: updatedTexts,
-          elementOrder: [..._currentLogoState.elementOrder, newElementId],
-        );
-
-        debugPrint('✅ Duplicated Slogan: $newElementId');
-        return;
-      }
-
-      // Case 100+: Custom Text
-      if (id >= 100 && id < 200) {
-        final index = id - 100;
-        if (index < 0 || index >= _currentLogoState.customTexts.length) {
-          debugPrint('❌ Invalid custom text index: $index');
-          return;
-        }
-
-        final original = _currentLogoState.customTexts[index];
-        final newText = original.copyWith(
-          position: original.position + const Offset(20, 20),
-        );
-
-        final updatedTexts = [..._currentLogoState.customTexts, newText];
-        final newElementId = 100 + updatedTexts.length - 1;
-
-        _currentLogoState = _currentLogoState.copyWith(
-          customTexts: updatedTexts,
-          elementOrder: [..._currentLogoState.elementOrder, newElementId],
-        );
-
-        debugPrint('✅ Duplicated Custom Text: $newElementId');
-        return;
-      }
-
-      // Case 200+: Custom Images
-      if (id >= 200 && id < 300) {
-        final index = id - 200;
-        if (index < 0 || index >= _currentLogoState.customImages.length) {
-          debugPrint('❌ Invalid custom image index: $index');
-          return;
-        }
-
-        final original = _currentLogoState.customImages[index];
-        final newImage = original.copyWith(
-          position: original.position + const Offset(20, 20),
-        );
-
-        final updatedImages = [..._currentLogoState.customImages, newImage];
-        final newElementId = 200 + updatedImages.length - 1;
-
-        _currentLogoState = _currentLogoState.copyWith(
-          customImages: updatedImages,
-          elementOrder: [..._currentLogoState.elementOrder, newElementId],
-        );
-
-        debugPrint('✅ Duplicated Custom Image: $newElementId');
-        return;
-      }
-
-      // Case 300+: Custom SVG
-      if (id >= 300 && id < 400) {
-        final index = id - 300;
-        if (index < 0 || index >= _currentLogoState.customSVGs.length) {
-          debugPrint('❌ Invalid custom SVG index: $index');
-          return;
-        }
-
-        final original = _currentLogoState.customSVGs[index];
-        final newSvg = original.copyWith(
-          position: original.position + const Offset(20, 20),
-        );
-
-        final updatedSVGs = [..._currentLogoState.customSVGs, newSvg];
-        final newElementId = 300 + updatedSVGs.length - 1;
-
-        _currentLogoState = _currentLogoState.copyWith(
-          customSVGs: updatedSVGs,
-          elementOrder: [..._currentLogoState.elementOrder, newElementId],
-        );
-
-        debugPrint('✅ Duplicated Custom SVG: $newElementId');
-        return;
-      }
-    });
-  }
-
-  bool _isElementLocked(int id) {
-    final isLocked = _currentLogoState.lockedElements.contains(id);
-    if (isLocked) {
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          const SnackBar(
-            content: Text('Element is locked.'),
-            duration: Duration(seconds: 1),
-          ),
-        );
-    }
-    return isLocked;
-  }
-
   void _splitElement(int id) {
     if (_isElementLocked(id)) return;
-    if (id >= 100) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cannot split custom text elements.')),
-      );
-      return;
-    }
-    _saveState();
+    _saveUndoState('Split element $id');
     setState(() {
       String message = 'Element split!';
       Offset offset = const Offset(20, 20);
@@ -1257,7 +1274,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
   void _rotateElementByTap(int id) {
     if (_isElementLocked(id)) return;
-    _saveState();
+    _saveUndoState('Rotate element $id by 45°');
     setState(() {
       const double rotationStep = 45.0;
       if (id >= 100) {
@@ -1298,7 +1315,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
   void _resizeElementByTap(int id) {
     if (_isElementLocked(id)) return;
-    _saveState();
+    _saveUndoState('Resize element $id');
     setState(() {
       const double resizeStep = 20.0;
       const double minSize = 10.0;
@@ -1429,22 +1446,18 @@ class _DownloadLogoState extends State<DownloadLogo> {
   //     });
   //   }
 
-  // --- Pan / Drag Handling ---
   void _onPanStart(int id, DragStartDetails details) {
-    _saveState();
     if (_isElementLocked(id)) return;
-
+    _saveUndoState('Move element $id');
     debugPrint('Pan started for id=$id');
     setState(() {
       selectedElement = id;
     });
-
-    _saveState();
   }
 
   void _updateElementPosition(int id, Offset delta) {
     if (_isElementLocked(id)) return;
-    _saveState();
+
     final RenderBox? renderBox =
         _canvasKey.currentContext?.findRenderObject() as RenderBox?;
     if (renderBox == null) return;
@@ -1464,7 +1477,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
     setState(() {
       if (id >= 100 && id < 200) {
-        // Custom Text Elements
         final index = id - 100;
         if (index >= 0 && index < _currentLogoState.customTexts.length) {
           final updatedTexts = List<CustomTextElement>.from(
@@ -1478,11 +1490,11 @@ class _DownloadLogoState extends State<DownloadLogo> {
           );
         }
       } else if (id >= 200 && id < 300) {
-        // Custom Images
         final index = id - 200;
-        final images = _currentLogoState.customImages;
-        if (index >= 0 && index < images.length) {
-          final updatedImages = List<CustomImageElement>.from(images);
+        if (index >= 0 && index < _currentLogoState.customImages.length) {
+          final updatedImages = List<CustomImageElement>.from(
+            _currentLogoState.customImages,
+          );
           updatedImages[index] = updatedImages[index].copyWith(
             position: newPosition,
           );
@@ -1490,8 +1502,21 @@ class _DownloadLogoState extends State<DownloadLogo> {
             customImages: updatedImages,
           );
         }
+      } else if (id >= 300 && id < 400) {
+        // ✅ Custom SVGs (DUPLICATE LOGOS)
+        final index = id - 300;
+        if (index >= 0 && index < _currentLogoState.customSVGs.length) {
+          final updatedSVGs = List<CustomSvgElement>.from(
+            _currentLogoState.customSVGs,
+          );
+          updatedSVGs[index] = updatedSVGs[index].copyWith(
+            position: newPosition,
+          );
+          _currentLogoState = _currentLogoState.copyWith(
+            customSVGs: updatedSVGs,
+          );
+        }
       } else {
-        // Predefined elements
         switch (id) {
           case 0:
             _currentLogoState = _currentLogoState.copyWith(
@@ -1525,6 +1550,12 @@ class _DownloadLogoState extends State<DownloadLogo> {
             break;
         }
       }
+
+      final colorProvider = Provider.of<SelectedColorProvider>(
+        context,
+        listen: false,
+      );
+      colorProvider.updateLogoState(_currentLogoState);
 
       _checkGridAlignment(newPosition, elementSize, canvasSize);
     });
@@ -1575,10 +1606,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
   }
 
   void _onResizePanStart(int id, DragStartDetails details) {
-    _saveState();
-
     if (_isElementLocked(id)) return;
-    _saveState();
+    _saveUndoState('Resize element $id');
     _initialDragPoint = details.globalPosition;
     _initialElementValue = _getElementSize(id);
   }
@@ -1606,10 +1635,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
   }
 
   void _onRotatePanStart(int id, DragStartDetails details) {
-    _saveState();
-
     if (_isElementLocked(id)) return;
-    _saveState();
+    _saveUndoState('Rotate element $id');
     _initialDragPoint = details.globalPosition;
     _initialElementValue = _getElementRotation(id);
   }
@@ -1634,6 +1661,34 @@ class _DownloadLogoState extends State<DownloadLogo> {
     setState(() => _updateElementRotation(id, newRotation));
   }
 
+  void _addImageToCanvas(String imagePath) {
+    _saveUndoState('Add art element');
+
+    final imageIndex = _currentLogoState.customImages.length;
+    final newImage = CustomImageElement(
+      path: imagePath,
+      position: _getCanvasCenter() ?? const Offset(100, 100),
+      size: 100,
+      rotation: 0,
+      isAsset: imagePath.startsWith('assets/'),
+      isVisible: true,
+      opacity: 1.0,
+    );
+
+    setState(() {
+      _currentLogoState = _currentLogoState.copyWith(
+        customImages: [..._currentLogoState.customImages, newImage],
+        elementOrder: [..._currentLogoState.elementOrder, 200 + imageIndex],
+      );
+
+      final colorProvider = Provider.of<SelectedColorProvider>(
+        context,
+        listen: false,
+      );
+      colorProvider.updateLogoState(_currentLogoState);
+    });
+  }
+
   // void _onPanStart(int id, DragStartDetails details) {
   //   if (_isElementLocked(id)) return;
   //   _saveState();
@@ -1654,7 +1709,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
   //   _clearGridAlignment();
   // }
 
-  // --- Getters & Helpers ---
 
   Offset? _getCanvasCenter() {
     final RenderBox? renderBox =
@@ -1699,7 +1753,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
     Size elementSize,
     Size canvasSize,
   ) {
-    // Remove this line if you want alignment to work even when grid icon is off
     if (!_showGrid) return;
 
     int? newH, newV;
@@ -1739,49 +1792,27 @@ class _DownloadLogoState extends State<DownloadLogo> {
     });
   }
 
-  // Offset _getElementPosition(int id) {
-  //   if (id >= 100) {
-  //     final index = id - 100;
-  //     if (index < _currentLogoState.customTexts.length)
-  //       return _currentLogoState.customTexts[index].position;
-  //   }
-  //   switch (id) {
-  //     case 0:
-  //       return _currentLogoState.logoPosition;
-  //     case 1:
-  //       return _currentLogoState.companyNamePosition;
-  //     case 2:
-  //       return _currentLogoState.sloganPosition;
-  //     case 3:
-  //       return _currentLogoState.logo2Position ?? Offset.zero;
-  //     case 4:
-  //       return _currentLogoState.companyName2Position ?? Offset.zero;
-  //     case 5:
-  //       return _currentLogoState.slogan2Position ?? Offset.zero;
-  //     default:
-  //       return Offset.zero;
-  //   }
-  // }
-
   double _getElementSize(int id) {
+    final provider = Provider.of<SelectedColorProvider>(context, listen: false);
+    final logoState = provider.getCurrentLogoState() ?? _currentLogoState;
     if (id >= 100) {
       final index = id - 100;
-      if (index < _currentLogoState.customTexts.length)
-        return _currentLogoState.customTexts[index].size;
+      if (index < logoState.customTexts.length)
+        return logoState.customTexts[index].size;
     }
     switch (id) {
       case 0:
-        return _currentLogoState.logoSize;
+        return logoState.logoSize;
       case 1:
-        return _currentLogoState.companyNameSize;
+        return logoState.companyNameSize;
       case 2:
-        return _currentLogoState.sloganSize;
+        return logoState.sloganSize;
       case 3:
-        return _currentLogoState.logo2Size ?? 0;
+        return logoState.logo2Size ?? 0;
       case 4:
-        return _currentLogoState.companyName2Size ?? 0;
+        return logoState.companyName2Size ?? 0;
       case 5:
-        return _currentLogoState.slogan2Size ?? 0;
+        return logoState.slogan2Size ?? 0;
       default:
         return 0;
     }
@@ -1832,37 +1863,69 @@ class _DownloadLogoState extends State<DownloadLogo> {
   //   }
   // }
 
+  // Offset _getElementPosition(int id) {
+  //   final provider = Provider.of<SelectedColorProvider>(context, listen: false);
+  // //         widget.companyName,
+  // //         TextStyle(
+  // //           fontSize: sizeValue,
+  // //           fontWeight: FontWeight.bold,
+  // //           color: Colors.black,
+  // //         ),
+  // //       );
+  // //     case 2:
+  // //     case 5:
+  // //       return TextSizeUtil.getTextSize(
+  // //         widget.sloganName,
+  // //         TextStyle(
+  // //           fontSize: sizeValue,
+  // //           fontStyle: FontStyle.italic,
+  // //           color: Colors.black,
+  // //         ),
+  // //       );
+  // //     default:
+  // //       return Size.zero;
+  // //   }
+  // // }
+
   Offset _getElementPosition(int id) {
+    final provider = Provider.of<SelectedColorProvider>(context, listen: false);
+    final logoState = provider.getCurrentLogoState() ?? _currentLogoState;
     if (id >= 100 && id < 200) {
       final index = id - 100;
-      if (index >= 0 && index < _currentLogoState.customTexts.length) {
-        return _currentLogoState.customTexts[index].position;
+      if (index >= 0 && index < logoState.customTexts.length) {
+        return logoState.customTexts[index].position;
       } else {
         return Offset.zero;
       }
     } else if (id >= 200 && id < 300) {
       final index = id - 200;
-      if (index >= 0 && index < _currentLogoState.customImages.length) {
-        return _currentLogoState.customImages[index].position;
+      if (index >= 0 && index < logoState.customImages.length) {
+        return logoState.customImages[index].position;
+      } else {
+        return Offset.zero;
+      }
+    } else if (id >= 300 && id < 400) {
+      final index = id - 300;
+      if (index >= 0 && index < logoState.customSVGs.length) {
+        return logoState.customSVGs[index].position;
       } else {
         return Offset.zero;
       }
     }
-
-    // predefined elements
+    
     switch (id) {
       case 0:
-        return _currentLogoState.logoPosition;
+        return logoState.logoPosition;
       case 1:
-        return _currentLogoState.companyNamePosition;
+        return logoState.companyNamePosition;
       case 2:
-        return _currentLogoState.sloganPosition;
+        return logoState.sloganPosition;
       case 3:
-        return _currentLogoState.logo2Position ?? Offset.zero;
+        return logoState.logo2Position ?? Offset.zero;
       case 4:
-        return _currentLogoState.companyName2Position ?? Offset.zero;
+        return logoState.companyName2Position ?? Offset.zero;
       case 5:
-        return _currentLogoState.slogan2Position ?? Offset.zero;
+        return logoState.slogan2Position ?? Offset.zero;
       default:
         return Offset.zero;
     }
@@ -1889,18 +1952,33 @@ class _DownloadLogoState extends State<DownloadLogo> {
       } else {
         return Size(100, 100);
       }
+    } else if (id >= 300 && id < 400) {
+      final index = id - 300;
+      if (index >= 0 && index < _currentLogoState.customSVGs.length) {
+        final sizeValue = _currentLogoState.customSVGs[index].size;
+        return Size(sizeValue, sizeValue);
+      } else {
+        return Size(100, 100);
+      }
     }
 
-    // predefined elements
     final sizeValue = _getElementSize(id);
     return Size(sizeValue, sizeValue);
   }
 
   double _getElementRotation(int id) {
-    if (id >= 100) {
+    if (id >= 100 && id < 200) {
       final index = id - 100;
       if (index < _currentLogoState.customTexts.length)
         return _currentLogoState.customTexts[index].rotation;
+    } else if (id >= 200 && id < 300) {
+      final index = id - 200;
+      if (index < _currentLogoState.customImages.length)
+        return _currentLogoState.customImages[index].rotation;
+    } else if (id >= 300 && id < 400) {
+      final index = id - 300;
+      if (index < _currentLogoState.customSVGs.length)
+        return _currentLogoState.customSVGs[index].rotation;
     }
     switch (id) {
       case 0:
@@ -1921,7 +1999,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
   }
 
   void _updateElementSize(int id, double newSize) {
-    if (id >= 100) {
+    if (id >= 100 && id < 200) {
+
       final index = id - 100;
       if (index < _currentLogoState.customTexts.length) {
         final updatedTexts = List<CustomTextElement>.from(
@@ -1931,6 +2010,28 @@ class _DownloadLogoState extends State<DownloadLogo> {
         _currentLogoState = _currentLogoState.copyWith(
           customTexts: updatedTexts,
         );
+      }
+    } else if (id >= 200 && id < 300) {
+      // ✅ Custom Images
+      final index = id - 200;
+      if (index < _currentLogoState.customImages.length) {
+        final updatedImages = List<CustomImageElement>.from(
+          _currentLogoState.customImages,
+        );
+        updatedImages[index] = updatedImages[index].copyWith(size: newSize);
+        _currentLogoState = _currentLogoState.copyWith(
+          customImages: updatedImages,
+        );
+      }
+    } else if (id >= 300 && id < 400) {
+      // ✅ Custom SVGs
+      final index = id - 300;
+      if (index < _currentLogoState.customSVGs.length) {
+        final updatedSVGs = List<CustomSvgElement>.from(
+          _currentLogoState.customSVGs,
+        );
+        updatedSVGs[index] = updatedSVGs[index].copyWith(size: newSize);
+        _currentLogoState = _currentLogoState.copyWith(customSVGs: updatedSVGs);
       }
     } else if (id == 0) {
       _currentLogoState = _currentLogoState.copyWith(logoSize: newSize);
@@ -1945,11 +2046,16 @@ class _DownloadLogoState extends State<DownloadLogo> {
     } else if (id == 5) {
       _currentLogoState = _currentLogoState.copyWith(slogan2Size: newSize);
     }
+    final colorProvider = Provider.of<SelectedColorProvider>(
+      context,
+      listen: false,
+    );
+    colorProvider.updateLogoState(_currentLogoState);
   }
 
   void _updateElementRotation(int id, double newRotation) {
-    _saveState();
-    if (id >= 100) {
+    if (id >= 100 && id < 200) {
+      
       final index = id - 100;
       if (index < _currentLogoState.customTexts.length) {
         final updatedTexts = List<CustomTextElement>.from(
@@ -1961,6 +2067,30 @@ class _DownloadLogoState extends State<DownloadLogo> {
         _currentLogoState = _currentLogoState.copyWith(
           customTexts: updatedTexts,
         );
+      }
+    } else if (id >= 200 && id < 300) {
+      // ✅ Custom Images
+      final index = id - 200;
+      if (index < _currentLogoState.customImages.length) {
+        final updatedImages = List<CustomImageElement>.from(
+          _currentLogoState.customImages,
+        );
+        updatedImages[index] = updatedImages[index].copyWith(
+          rotation: newRotation,
+        );
+        _currentLogoState = _currentLogoState.copyWith(
+          customImages: updatedImages,
+        );
+      }
+    } else if (id >= 300 && id < 400) {
+      // ✅ Custom SVGs
+      final index = id - 300;
+      if (index < _currentLogoState.customSVGs.length) {
+        final updatedSVGs = List<CustomSvgElement>.from(
+          _currentLogoState.customSVGs,
+        );
+        updatedSVGs[index] = updatedSVGs[index].copyWith(rotation: newRotation);
+        _currentLogoState = _currentLogoState.copyWith(customSVGs: updatedSVGs);
       }
     } else if (id == 0) {
       _currentLogoState = _currentLogoState.copyWith(logoRotation: newRotation);
@@ -1985,12 +2115,15 @@ class _DownloadLogoState extends State<DownloadLogo> {
         slogan2Rotation: newRotation,
       );
     }
+    final colorProvider = Provider.of<SelectedColorProvider>(
+      context,
+      listen: false,
+    );
+    colorProvider.updateLogoState(_currentLogoState);
   }
 
-  // ✅ --- NEW: Layer Panel Handlers ---
-
   void _toggleLock(int id) {
-    _saveState();
+    _saveUndoState('Toggle lock element $id');
     setState(() {
       final newLockedSet = Set<int>.from(_currentLogoState.lockedElements);
       if (newLockedSet.contains(id)) {
@@ -2005,7 +2138,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
   }
 
   void _toggleLockAll(bool shouldLock) {
-    _saveState();
+    _saveUndoState(shouldLock ? 'Lock all elements' : 'Unlock all elements');
     setState(() {
       if (shouldLock) {
         _currentLogoState = _currentLogoState.copyWith(
@@ -2018,7 +2151,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
   }
 
   void _reorderLayer(int id, bool moveUp) {
-    _saveState();
+    _saveUndoState(moveUp ? 'Move element $id up' : 'Move element $id down');
     setState(() {
       final order = List<int>.from(_currentLogoState.elementOrder);
       final currentIndex = order.indexOf(id);
@@ -2037,8 +2170,367 @@ class _DownloadLogoState extends State<DownloadLogo> {
         }
       }
       _currentLogoState = _currentLogoState.copyWith(elementOrder: order);
+
+      final colorProvider = Provider.of<SelectedColorProvider>(
+        context,
+        listen: false,
+      );
+      colorProvider.updateLogoState(_currentLogoState);
     });
+  }
+
+  bool _isElementLocked(int id) {
+    return _currentLogoState.lockedElements.contains(id);
+  }
+
+  void duplicateSelectedElement(int id) {
+    _saveUndoState('Duplicate element $id');
+    setState(() {
+      final logoState = _currentLogoState;
+      final provider = Provider.of<SelectedColorProvider>(
+        context,
+        listen: false,
+      );
+
+      FontStyleState fontStyle = provider.getFontStyleForElement(id);
+      Color outlineColor = provider.getOutlineColor(id);
+      double outlineWidth = provider.getOutlineWidth(id);
+      Color shadowColor = provider.getShadowColorForElement(id);
+      double shadowOffsetX = provider.getShadowOffsetXForElement(id);
+      double shadowOffsetY = provider.getShadowOffsetYForElement(id);
+      String fontFamily = provider.getFontForElement(id);
+      Color? color = provider.getElementColor(id);
+      double opacity = provider.opacity;
+      double size = provider.getSizeForElement(id) ?? _getElementSize(id);
+      double rotation = provider.getRotationForElement(id);
+
+      if (id >= 100 && id < 200) {
+        final index = id - 100;
+        if (index >= 0 && index < logoState.customTexts.length) {
+          final original = logoState.customTexts[index];
+
+          final currentSize = provider.getSizeForElement(id) ?? original.size;
+          final currentRotation =
+              provider.getRotationForElement(id) ?? original.rotation;
+          final currentColor = provider.getElementColor(id) ?? original.color;
+          final fontStyle = provider.getFontStyleForElement(id);
+          final currentFont =
+              provider.getFontForElement(id) ?? original.fontFamily;
+
+          final duplicated = CustomTextElement(
+            text: original.text,
+            position: original.position + const Offset(20, 20),
+            size: currentSize,
+            rotation: currentRotation,
+            color: currentColor,
+            fontFamily: currentFont,
+            isBold: fontStyle.isBold,
+            isItalic: fontStyle.isItalic,
+            isUnderline: fontStyle.isUnderline,
+            outlineColor: provider.getOutlineColor(id) ?? original.outlineColor,
+            outlineWidth: provider.getOutlineWidth(id) ?? original.outlineWidth,
+            shadowColor:
+                provider.getShadowColorForElement(id) ?? original.shadowColor,
+            shadowOffsetX:
+                provider.getShadowOffsetXForElement(id) ??
+                original.shadowOffsetX,
+            shadowOffsetY:
+                provider.getShadowOffsetYForElement(id) ??
+                original.shadowOffsetY,
+            opacity: opacity,
+            isVisible: true,
+          );
+          final newCustomTexts = List<CustomTextElement>.from(
+            logoState.customTexts,
+          )..add(duplicated);
+          final newElementId = 100 + newCustomTexts.length - 1;
+          final newElementOrder = List<int>.from(logoState.elementOrder)
+            ..add(newElementId);
+          final newState = logoState.copyWith(
+            customTexts: newCustomTexts,
+            elementOrder: newElementOrder,
+          );
+          _currentLogoState = newState;
+          provider.updateLogoState(newState);
+        }
+        return;
+      }
+
+      if (id >= 200 && id < 300) {
+        final index = id - 200;
+        if (index >= 0 && index < logoState.customImages.length) {
+          final original = logoState.customImages[index];
+
+          final currentSize =
+              provider.getSizeForElement(id) ?? original.size ?? 100.0;
+          final currentRotation =
+              provider.getRotationForElement(id) ?? original.rotation;
+          final currentOpacity = provider.opacity;
+
+          final duplicated = CustomImageElement(
+            path: original.path,
+            position: original.position + const Offset(20, 20),
+            size: currentSize,
+            rotation: currentRotation, // ✅ Use current rotation
+            isAsset: original.isAsset,
+            isVisible: true,
+            opacity: currentOpacity,
+          );
+          final newCustomImages = List<CustomImageElement>.from(
+            logoState.customImages,
+          )..add(duplicated);
+          final newElementId = 200 + newCustomImages.length - 1;
+          final newElementOrder = List<int>.from(logoState.elementOrder)
+            ..add(newElementId);
+          final newState = logoState.copyWith(
+            customImages: newCustomImages,
+            elementOrder: newElementOrder,
+          );
+          _currentLogoState = newState;
+          provider.updateLogoState(newState);
+        }
+        return;
+      }
+
+      if (id >= 300 && id < 400) {
+        final index = id - 300;
+        if (index >= 0 && index < logoState.customSVGs.length) {
+          final original = logoState.customSVGs[index];
+          final duplicated = CustomSvgElement(
+            svgString: original.svgString,
+            position: original.position + const Offset(20, 20),
+            size: original.size,
+            rotation: original.rotation,
+            color: original.color,
+            opacity: original.opacity,
+            isVisible: original.isVisible,
+            outlineColor: original.outlineColor,
+            outlineWidth: original.outlineWidth,
+          );
+          final newCustomSVGs = List<CustomSvgElement>.from(
+            logoState.customSVGs,
+          )..add(duplicated);
+          final newElementId = 300 + newCustomSVGs.length - 1;
+          final newElementOrder = List<int>.from(logoState.elementOrder)
+            ..add(newElementId);
+          final newState = logoState.copyWith(
+            customSVGs: newCustomSVGs,
+            elementOrder: newElementOrder,
+          );
+          _currentLogoState = newState;
+          provider.updateLogoState(newState);
+        }
+        return;
+      }
+
+      if (id == 0) {
+        final duplicated = CustomSvgElement(
+          svgString: logoState.svgLogo!,
+          position: logoState.logoPosition + const Offset(20, 20),
+          size: size,
+          color: provider.getElementColor(0) ?? color,
+          rotation: rotation,
+          opacity: opacity,
+          isVisible: true,
+          outlineColor: provider.getOutlineColor(id),
+          outlineWidth: provider.getOutlineWidth(id),
+        );
+        final newCustomSVGs = List<CustomSvgElement>.from(logoState.customSVGs)
+          ..add(duplicated);
+        final newElementId = 300 + newCustomSVGs.length - 1;
+        final newElementOrder = List<int>.from(logoState.elementOrder)
+          ..add(newElementId);
+        final newState = logoState.copyWith(
+          customSVGs: newCustomSVGs,
+          elementOrder: newElementOrder,
+        );
+        _currentLogoState = newState;
+        provider.updateLogoState(newState);
+        return;
+      }
+
+      if (id == 1) {
+        final duplicated = CustomTextElement(
+          text: logoState.companyName!,
+          position: logoState.companyNamePosition + const Offset(20, 20),
+          size: size,
+          rotation: rotation,
+          color: color ?? Colors.black,
+          fontFamily: fontFamily,
+          isBold: fontStyle.isBold,
+          isItalic: fontStyle.isItalic,
+          isUnderline: fontStyle.isUnderline,
+          outlineColor: outlineColor,
+          outlineWidth: outlineWidth,
+          shadowColor: shadowColor,
+          shadowOffsetX: shadowOffsetX,
+          shadowOffsetY: shadowOffsetY,
+          opacity: opacity,
+          isVisible: true,
+        );
+        final newCustomTexts = List<CustomTextElement>.from(
+          logoState.customTexts,
+        )..add(duplicated);
+        final newElementId = 100 + newCustomTexts.length - 1;
+        final newElementOrder = List<int>.from(logoState.elementOrder)
+          ..add(newElementId);
+        final newState = logoState.copyWith(
+          customTexts: newCustomTexts,
+          elementOrder: newElementOrder,
+        );
+        _currentLogoState = newState;
+        provider.updateLogoState(newState);
+        return;
+      }
+
+      // --- Slogan (id == 2) as CustomTextElement ---
+      if (id == 2) {
+        final duplicated = CustomTextElement(
+          text: logoState.sloganName!,
+          position: logoState.sloganPosition + const Offset(20, 20),
+          size: size,
+          rotation: rotation,
+          color: color ?? Colors.black,
+          fontFamily: fontFamily,
+          isBold: fontStyle.isBold,
+          isItalic: fontStyle.isItalic,
+          isUnderline: fontStyle.isUnderline,
+          outlineColor: outlineColor,
+          outlineWidth: outlineWidth,
+          shadowColor: shadowColor,
+          shadowOffsetX: shadowOffsetX,
+          shadowOffsetY: shadowOffsetY,
+          opacity: opacity,
+          isVisible: true,
+        );
+        final newCustomTexts = List<CustomTextElement>.from(
+          logoState.customTexts,
+        )..add(duplicated);
+        final newElementId = 100 + newCustomTexts.length - 1;
+        final newElementOrder = List<int>.from(logoState.elementOrder)
+          ..add(newElementId);
+        final newState = logoState.copyWith(
+          customTexts: newCustomTexts,
+          elementOrder: newElementOrder,
+        );
+        _currentLogoState = newState;
+        provider.updateLogoState(newState);
+        return;
+      }
+    });
+  }
+
+  void _testUndoRedo() {
+    _testUndoRedo() {
+      final undoProvider = Provider.of<UndoProvider>(context, listen: false);
+      print('Can Undo: ${undoProvider.canUndo}');
+      print('Can Redo: ${undoProvider.canRedo}');
+    }
+  }
+
+  void _resetEditorStateToDefault() {
+    setState(() {
+      _currentLogoState = LogoStateData(
+        logoPosition: const Offset(150, 100),
+        logoSize: 100,
+        logoRotation: 0,
+        isLogoVisible: true,
+        svgLogo: widget.svgLogo,
+        companyNamePosition: const Offset(160, 200),
+        companyNameSize: 20,
+        companyNameRotation: 0,
+        isCompanyNameVisible: true,
+        logoColor: null,
+        companyName: widget.companyName,
+        sloganName: widget.sloganName,
+        sloganPosition: const Offset(150, 240),
+        sloganSize: 18,
+        sloganRotation: 0,
+        isSloganVisible: true,
+        isLogo2Visible: false,
+        isCompanyName2Visible: false,
+        isSlogan2Visible: false,
+        customTexts: [],
+        customImages: [],
+        customSVGs: [],
+        lockedElements: {},
+        elementOrder: [0, 1, 2],
+        backgroundColor: Colors.white,
+        backgroundGradient: null,
+        backgroundTexture: null,
+        backgroundImage: null,
+        palette: null,
+        opacity: 1.0,
+      );
+      selectedElement = null;
+      selectedElementId = null;
+      tabToolbarIndex = 0;
+      selectedIndex = 0;
+      _showGrid = false;
+      _isLayersPanelVisible = false;
+      showDropUp = false;
+      selectedPaletteIndex = 0;
+      isMovementPanelVisible = true;
+      isCheckerboardActive = false;
+      isCheckerboardVisible = false;
+      checkerboardOpacity = 1.0;
+      isEditing = false;
+      _highlightedHorizontalGridLineIndex = null;
+      _highlightedVerticalGridLineIndex = null;
+
+      // Reset local state for palette, effects, backgrounds, etc.
+      // selectedPalette = null;
+      // selectedEffect = null;
+      // selectedBackgroundImage = null;
+      // selectedTexture = null;
+      // selectedGradient = null;
+      // selectedBackgroundColor = Colors.white;
+    });
+
+    final colorProvider = Provider.of<SelectedColorProvider>(
+      context,
+      listen: false,
+    );
+    colorProvider.resetAllEditorState();
+    colorProvider.updateLogoState(_currentLogoState);
+
+    final undoProvider = Provider.of<UndoProvider>(context, listen: false);
+    undoProvider.clear();
   }
 }
 
-// ✅-- PASTE THIS CORRECTED WIDGET AT THE BOTTOM OF download_logo.dart ---
+Future<bool> _showDiscardChangesDialog(BuildContext context) async {
+  final result = await ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: const Text('Are you sure you want to discard your changes?'),
+      action: SnackBarAction(
+        label: 'Discard',
+        onPressed: () {
+          Navigator.of(context).pop(true);
+        },
+      ),
+      duration: const Duration(seconds: 3),
+    ),
+  );
+  return await showDialog<bool>(
+        context: context,
+        builder:
+            (context) => AlertDialog(
+              title: const Text('Discard Changes?'),
+              content: const Text(
+                'Are you sure you want to discard your edits?',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: const Text('Discard'),
+                ),
+              ],
+            ),
+      ) ??
+      false;
+}

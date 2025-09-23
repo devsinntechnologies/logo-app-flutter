@@ -1,6 +1,7 @@
 // ignore_for_file: unnecessary_null_comparison, avoid_print, no_leading_underscores_for_local_identifiers
 
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -13,7 +14,6 @@ import 'editable_element_wrapper.dart';
 import 'grid_painter.dart';
 
 class LogoCanvas extends StatefulWidget {
-  // final GlobalKey canvasKey;
   final String selectedShapeName;
   final LogoStateData logoState;
   final String svgLogo;
@@ -50,7 +50,6 @@ class LogoCanvas extends StatefulWidget {
 
   const LogoCanvas({
     super.key,
-
     required this.selectedShapeName,
     required this.logoState,
     required this.svgLogo,
@@ -132,7 +131,6 @@ class _LogoCanvasState extends State<LogoCanvas> {
                 ),
               ),
 
-            // ✅ Square show only if selected
             if (widget.isCheckerboardVisible && selectedShape == "Square")
               Opacity(
                 opacity: widget.checkerboardOpacity,
@@ -215,6 +213,7 @@ class _LogoCanvasState extends State<LogoCanvas> {
                   painter: HeartPainter(shapeColor, gradient, bgImage),
                 ),
               ),
+
             if (widget.isCheckerboardActive == false ||
                 widget.isCheckerboardVisible == false ||
                 selectedShape.isEmpty)
@@ -241,8 +240,8 @@ class _LogoCanvasState extends State<LogoCanvas> {
     final provider = Provider.of<SelectedColorProvider>(context, listen: true);
 
     final bool isSelected = provider.selectedElementId == id;
-    final outlineColor = provider.getOutlineColor(id);
-    final outlineWidth = provider.getOutlineWidth(id);
+    final outlineColor = provider.getOutlineColor(id) ?? Colors.transparent;
+    final outlineWidth = provider.getOutlineWidth(id) ?? 0.0;
 
     const Color highlightColor = Colors.red;
 
@@ -271,16 +270,16 @@ class _LogoCanvasState extends State<LogoCanvas> {
       required Size childSize,
     }) {
       final topLeftPosition = Offset(
-        centerPosition.dx - childSize.width / 3,
-        centerPosition.dy - childSize.height / 2.5,
+        centerPosition.dx - childSize.width / 2,
+        centerPosition.dy - childSize.height / 2,
       );
 
       return _buildEditableWrapper(
         id: id,
         position: topLeftPosition,
-        rotation: rotation,
+        rotation: 0,
         isLocked: widget.lockedElements.contains(id),
-        child: child,
+        child: Transform.rotate(angle: rotation * pi / 180, child: child),
         canvasSize: canvasSize,
       );
     }
@@ -298,10 +297,17 @@ class _LogoCanvasState extends State<LogoCanvas> {
       final customText = widget.logoState.customTexts[index];
       if (!customText.isVisible) return null;
 
+      final styleState = provider.getFontStyleForElement(id);
       final textStyle = TextStyle(
-        fontSize: customText.size,
-        color: companyColor,
-        fontWeight: FontWeight.w500,
+        fontSize: provider.getSizeForElement(id) ?? customText.size,
+        color: provider.getElementColor(id) ?? customText.color,
+        fontWeight: styleState.isBold ? FontWeight.bold : FontWeight.normal,
+        fontStyle: styleState.isItalic ? FontStyle.italic : FontStyle.normal,
+        decoration:
+            styleState.isUnderline
+                ? TextDecoration.underline
+                : TextDecoration.none,
+        fontFamily: provider.getFontForElement(id) ?? customText.fontFamily,
       );
 
       final measuredSize = _calculateTextSize(customText.text, textStyle);
@@ -313,12 +319,21 @@ class _LogoCanvasState extends State<LogoCanvas> {
       return wrap(
         Center(
           child: Opacity(
-            opacity: customText.opacity.clamp(0.0, 1.0),
+            opacity: (customText.opacity ?? 1.0).clamp(0.0, 1.0),
             child: StrokedText(
               text: customText.text,
               style: textStyle,
               strokeColor: outlineColor,
               strokeWidth: outlineWidth,
+              showShadow: true,
+              shadowOffset: Offset(
+                provider.getShadowOffsetXForElement(id),
+                provider.getShadowOffsetYForElement(id),
+              ),
+              shadowBlur: 12,
+              shadowColor: provider
+                  .getShadowColorForElement(id)
+                  .withOpacity(0.7),
             ),
           ),
         ),
@@ -337,26 +352,63 @@ class _LogoCanvasState extends State<LogoCanvas> {
       final image = widget.logoState.customImages[index];
       if (!image.isVisible) return null;
 
-      final imageSize = Size(image.size ?? 100, image.size ?? 100);
+      final double size = provider.getSizeForElement(id) ?? image.size ?? 100;
+      final imageSize = Size(size, size);
 
+      Widget imageWidget;
+
+      try {
+        if (image.isAsset || image.path.startsWith('assets/')) {
+          // For asset images
+          imageWidget = Image.asset(
+            image.path,
+            height: imageSize.height,
+            width: imageSize.width,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) {
+              print('Asset loading error for ${image.path}: $error');
+              return Container(
+                height: imageSize.height,
+                width: imageSize.width,
+                color: Colors.red.withOpacity(0.3),
+                child: const Icon(Icons.broken_image, color: Colors.red),
+              );
+            },
+          );
+        } else {
+          // For file images
+          imageWidget = Image.file(
+            File(image.path),
+            height: imageSize.height,
+            width: imageSize.width,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) {
+              print('File loading error for ${image.path}: $error');
+              return Container(
+                height: imageSize.height,
+                width: imageSize.width,
+                color: Colors.red.withOpacity(0.3),
+                child: const Icon(Icons.broken_image, color: Colors.red),
+              );
+            },
+          );
+        }
+      } catch (e) {
+        print('Image loading exception for ${image.path}: $e');
+        imageWidget = Container(
+          height: imageSize.height,
+          width: imageSize.width,
+          color: Colors.grey.withOpacity(0.3),
+          child: const Icon(Icons.image_not_supported, color: Colors.grey),
+        );
+      }
+
+      // Then apply opacity and return the widget:
       return wrap(
         Center(
           child: Opacity(
-            opacity: image.opacity.clamp(0.0, 1.0) ?? 1.0,
-            child:
-                image.path.startsWith('assets/')
-                    ? Image.asset(
-                      image.path,
-                      height: imageSize.height,
-                      width: imageSize.width,
-                      fit: BoxFit.contain,
-                    )
-                    : Image.file(
-                      File(image.path),
-                      height: imageSize.height,
-                      width: imageSize.width,
-                      fit: BoxFit.contain,
-                    ),
+            opacity: image.opacity.clamp(0.0, 1.0),
+            child: imageWidget,
           ),
         ),
         centerPosition: image.position,
@@ -365,14 +417,15 @@ class _LogoCanvasState extends State<LogoCanvas> {
       );
     }
 
-    // ✅ Custom SVG (300–399) + Outline
+    // ✅ Custom SVG (300–399)
     if (id >= 300 && id < 400) {
       final index = id - 300;
       if (index < 0 || index >= widget.logoState.customSVGs.length) return null;
       final svgElement = widget.logoState.customSVGs[index];
       if (!svgElement.isVisible) return null;
 
-      final svgSize = Size(svgElement.size, svgElement.size);
+      final double size = provider.getSizeForElement(id) ?? svgElement.size;
+      final svgSize = Size(size, size);
 
       return wrap(
         Consumer<SelectedColorProvider>(
@@ -381,11 +434,13 @@ class _LogoCanvasState extends State<LogoCanvas> {
               opacity: provider.opacity,
               child: StrokedSvg(
                 svgString: svgElement.svgString,
-                width: svgElement.size,
-                height: svgElement.size,
-                strokeColor: outlineColor,
-                strokeWidth: outlineWidth,
-                fillColor: null, // ya agar fill color dena ho to pass kar do
+                width: size,
+                height: size,
+                strokeColor:
+                    svgElement.outlineColor ??
+                    Colors.transparent, 
+                strokeWidth: svgElement.outlineWidth ?? 0.0,
+                fillColor: svgElement.color,
               ),
             );
           },
@@ -399,11 +454,11 @@ class _LogoCanvasState extends State<LogoCanvas> {
     // ✅ Main Logo / Company Name / Slogan
     switch (id) {
       case 0: // Shape (Main Logo SVG)
-        final logoSize = widget.logoState.logoSize;
+        final logoSize =
+            provider.getSizeForElement(0) ?? widget.logoState.logoSize;
         final shapeSize = Size(logoSize, logoSize) * 0.9;
         final centerPosition =
-            (widget.logoState.logoPosition == Offset.zero ||
-                    widget.logoState.logoPosition == null)
+            (widget.logoState.logoPosition == Offset.zero)
                 ? _centerAlign(canvasSize, shapeSize)
                 : widget.logoState.logoPosition;
 
@@ -420,31 +475,44 @@ class _LogoCanvasState extends State<LogoCanvas> {
                       strokeColor: outlineColor,
                       strokeWidth: outlineWidth,
                       fillColor:
-                          provider.isColorOverrideActive || isSelected
-                              ? (isSelected ? highlightColor : shapeColor)
-                              : null,
+                          isSelected
+                              ? highlightColor
+                              : (provider.isSvgColorOverridden
+                                  ? shapeColor
+                                  : null),
                     ),
                   );
                 },
               ),
               centerPosition: centerPosition,
-              rotation: widget.logoState.logoRotation,
+              rotation:
+                  provider.getRotationForElement(id) ??
+                  widget.logoState.logoRotation,
               childSize: shapeSize,
             )
             : null;
 
-      case 1: // Company Name
+      case 1: 
         final nameText = widget.logoState.companyName ?? '';
-        final nameSize = widget.logoState.companyNameSize;
+        final nameSize =
+            provider.getSizeForElement(id) ?? widget.logoState.companyNameSize;
+        final styleState = provider.getFontStyleForElement(id);
         final textStyle = TextStyle(
           fontSize: nameSize,
-          fontWeight: FontWeight.bold,
-          color: companyColor,
+          fontWeight: styleState.isBold ? FontWeight.bold : FontWeight.normal,
+          fontStyle: styleState.isItalic ? FontStyle.italic : FontStyle.normal,
+          decoration:
+              styleState.isUnderline
+                  ? TextDecoration.underline
+                  : TextDecoration.none,
+          color: provider.getElementColor(id) ?? companyColor,
+          fontFamily:
+              provider.getFontForElement(id) ??
+              widget.logoState.companyNameFont,
         );
         final textSize = _calculateTextSize(nameText, textStyle) * 1.09;
         final centerPosition =
-            (widget.logoState.companyNamePosition == Offset.zero ||
-                    widget.logoState.companyNamePosition == null)
+            (widget.logoState.companyNamePosition == Offset.zero)
                 ? _centerAlign(canvasSize, textSize)
                 : widget.logoState.companyNamePosition;
 
@@ -459,25 +527,48 @@ class _LogoCanvasState extends State<LogoCanvas> {
                       style: textStyle,
                       strokeColor: outlineColor,
                       strokeWidth: outlineWidth,
+                      showShadow: true,
+                      shadowOffset: Offset(
+                        provider.getShadowOffsetXForElement(1),
+                        provider.getShadowOffsetYForElement(1),
+                      ),
+                      shadowBlur: 12,
+                      shadowColor: provider
+                          .getShadowColorForElement(1)
+                          .withOpacity(0.7),
                     ),
                   );
                 },
               ),
               centerPosition: centerPosition,
-              rotation: widget.logoState.companyNameRotation,
+              rotation:
+                  provider.getRotationForElement(id) ??
+                  widget.logoState.companyNameRotation,
               childSize: textSize,
             )
             : null;
 
       case 2: // Slogan
         final sloganText = widget.logoState.sloganName ?? '';
-        final sloganSize = widget.logoState.sloganSize;
-        final sloganStyle = TextStyle(fontSize: sloganSize, color: sloganColor);
+        final sloganSize =
+            provider.getSizeForElement(id) ?? widget.logoState.sloganSize;
+        final styleState = provider.getFontStyleForElement(id);
+        final sloganStyle = TextStyle(
+          fontSize: sloganSize,
+          fontWeight: styleState.isBold ? FontWeight.bold : FontWeight.normal,
+          fontStyle: styleState.isItalic ? FontStyle.italic : FontStyle.normal,
+          decoration:
+              styleState.isUnderline
+                  ? TextDecoration.underline
+                  : TextDecoration.none,
+          color: provider.getElementColor(id) ?? sloganColor,
+          fontFamily:
+              provider.getFontForElement(id) ?? widget.logoState.sloganFont,
+        );
         final sloganMeasured =
             _calculateTextSize(sloganText, sloganStyle) * scaleFactor;
         final centerPosition =
-            (widget.logoState.sloganPosition == Offset.zero ||
-                    widget.logoState.sloganPosition == null)
+            (widget.logoState.sloganPosition == Offset.zero)
                 ? _centerAlign(canvasSize, sloganMeasured)
                 : widget.logoState.sloganPosition;
 
@@ -493,13 +584,24 @@ class _LogoCanvasState extends State<LogoCanvas> {
                         style: sloganStyle,
                         strokeColor: outlineColor,
                         strokeWidth: outlineWidth,
+                        showShadow: true,
+                        shadowOffset: Offset(
+                          provider.getShadowOffsetXForElement(2),
+                          provider.getShadowOffsetYForElement(2),
+                        ),
+                        shadowBlur: 12,
+                        shadowColor: provider
+                            .getShadowColorForElement(2)
+                            .withOpacity(0.7),
                       ),
                     ),
                   );
                 },
               ),
               centerPosition: centerPosition,
-              rotation: widget.logoState.sloganRotation,
+              rotation:
+                  provider.getRotationForElement(id) ??
+                  widget.logoState.sloganRotation,
               childSize: sloganMeasured,
             )
             : null;
@@ -507,6 +609,42 @@ class _LogoCanvasState extends State<LogoCanvas> {
       default:
         return null;
     }
+  }
+
+  Widget _buildCustomImage(CustomImageElement imageElement, int id) {
+    return Positioned(
+      left: imageElement.position.dx,
+      top: imageElement.position.dy,
+      child: Transform.rotate(
+        angle: imageElement.rotation * pi / 180,
+        child: Container(
+          width: imageElement.size,
+          height: imageElement.size,
+          child:
+              imageElement.isAsset
+                  ? Image.asset(
+                    imageElement.path,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        color: Colors.red.withOpacity(0.3),
+                        child: const Icon(Icons.error, color: Colors.red),
+                      );
+                    },
+                  )
+                  : Image.file(
+                    File(imageElement.path),
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        color: Colors.red.withOpacity(0.3),
+                        child: const Icon(Icons.error, color: Colors.red),
+                      );
+                    },
+                  ),
+        ),
+      ),
+    );
   }
 
   Widget _buildEditableWrapper({
@@ -539,7 +677,7 @@ class _LogoCanvasState extends State<LogoCanvas> {
       onResizePanStart: widget.onElementResizePanStart,
       onResizePanUpdate: widget.onElementResizePanUpdate,
       onResizePanEnd: widget.onElementResizePanEnd,
-      child: child,
+      child: Transform.rotate(angle: rotation * pi / 180, child: child),
     );
   }
 }
@@ -549,6 +687,10 @@ class StrokedText extends StatelessWidget {
   final TextStyle style;
   final Color strokeColor;
   final double strokeWidth;
+  final bool showShadow;
+  final Offset shadowOffset;
+  final double shadowBlur;
+  final Color shadowColor;
 
   const StrokedText({
     super.key,
@@ -556,23 +698,47 @@ class StrokedText extends StatelessWidget {
     required this.style,
     this.strokeColor = Colors.black,
     this.strokeWidth = 2,
+    this.showShadow = false,
+    this.shadowOffset = const Offset(4, 4),
+    this.shadowBlur = 8,
+    this.shadowColor = const Color(0x80000000),
   });
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // Stroke
-        Text(
-          text,
-          style: style.copyWith(
-            foreground:
-                Paint()
-                  ..style = PaintingStyle.stroke
-                  ..strokeWidth = strokeWidth
-                  ..color = strokeColor,
+        if (showShadow)
+          Positioned(
+            left: shadowOffset.dx,
+            top: shadowOffset.dy,
+            child: Text(
+              text,
+              style: style.copyWith(
+                color: shadowColor,
+                foreground: null,
+                shadows: [
+                  Shadow(
+                    color: shadowColor,
+                    offset: Offset.zero,
+                    blurRadius: shadowBlur,
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
+        // Stroke
+        if (strokeWidth > 0)
+          Text(
+            text,
+            style: style.copyWith(
+              foreground:
+                  Paint()
+                    ..style = PaintingStyle.stroke
+                    ..strokeWidth = strokeWidth
+                    ..color = strokeColor,
+            ),
+          ),
         // Fill
         Text(text, style: style),
       ],
@@ -604,25 +770,26 @@ class StrokedSvg extends StatelessWidget {
       alignment: Alignment.center,
       children: [
         // Stroke layer: draw multiple slightly offset copies
-        for (final offset in [
-          Offset(-strokeWidth, 0),
-          Offset(strokeWidth, 0),
-          Offset(0, -strokeWidth),
-          Offset(0, strokeWidth),
-          Offset(-strokeWidth, -strokeWidth),
-          Offset(-strokeWidth, strokeWidth),
-          Offset(strokeWidth, -strokeWidth),
-          Offset(strokeWidth, strokeWidth),
-        ])
-          Transform.translate(
-            offset: offset,
-            child: SvgPicture.string(
-              svgString,
-              width: width,
-              height: height,
-              colorFilter: ColorFilter.mode(strokeColor, BlendMode.srcIn),
+        if (strokeWidth > 0)
+          for (final offset in [
+            Offset(-strokeWidth, 0),
+            Offset(strokeWidth, 0),
+            Offset(0, -strokeWidth),
+            Offset(0, strokeWidth),
+            Offset(-strokeWidth, -strokeWidth),
+            Offset(-strokeWidth, strokeWidth),
+            Offset(strokeWidth, -strokeWidth),
+            Offset(strokeWidth, strokeWidth),
+          ])
+            Transform.translate(
+              offset: offset,
+              child: SvgPicture.string(
+                svgString,
+                width: width,
+                height: height,
+                colorFilter: ColorFilter.mode(strokeColor, BlendMode.srcIn),
+              ),
             ),
-          ),
 
         // Fill layer
         SvgPicture.string(

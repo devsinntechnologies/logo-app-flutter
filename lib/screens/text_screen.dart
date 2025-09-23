@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:logo_app_flutter/provider/selected_color_provider.dart';
+import 'package:logo_app_flutter/provider/undo_provider.dart';
+import 'package:provider/provider.dart';
 
 class TextScreen extends StatefulWidget {
   const TextScreen({super.key});
@@ -9,21 +12,28 @@ class TextScreen extends StatefulWidget {
 
 class _TextScreenState extends State<TextScreen> {
   final TextEditingController _controller = TextEditingController();
-  final FocusNode _focusNode = FocusNode();
+  String _initialText = '';
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      FocusScope.of(context).requestFocus(_focusNode);
-    });
+    _initialText = _controller.text;
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    _focusNode.dispose();
-    super.dispose();
+  void _saveTextChange() {
+    if (_controller.text != _initialText) {
+      final undoProvider = Provider.of<UndoProvider>(context, listen: false);
+      final colorProvider = Provider.of<SelectedColorProvider>(
+        context,
+        listen: false,
+      );
+
+      final currentState = colorProvider.captureCurrentState();
+      undoProvider.saveState(
+        action: 'Change text from "$_initialText" to "${_controller.text}"',
+        state: currentState,
+      );
+    }
   }
 
   void _confirmText() {
@@ -60,7 +70,6 @@ class _TextScreenState extends State<TextScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 40),
             child: TextField(
               controller: _controller,
-              focusNode: _focusNode,
               autofocus: true,
               decoration: const InputDecoration(
                 hintText: 'Your Text Here',

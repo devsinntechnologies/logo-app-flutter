@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:logo_app_flutter/components/logoBottomNavbarItems/shape_selector_widget.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
+import 'package:logo_app_flutter/provider/undo_provider.dart';
 import 'package:logo_app_flutter/screens/color_screen.dart';
 import 'package:logo_app_flutter/screens/gradiant_picker_screen.dart';
 import 'package:logo_app_flutter/screens/select_bg_images.dart';
@@ -17,6 +18,8 @@ class DropUpPanel extends StatefulWidget {
   final Function(bool) onToggleCheckerboard;
   final Function(double) onOpacityChanged;
   final Function(String) onShapeSelected;
+  final Function(Gradient)? onGradientSelected;
+  final Function(String)? onTextureSelected;
 
   const DropUpPanel({
     super.key,
@@ -24,6 +27,8 @@ class DropUpPanel extends StatefulWidget {
     required this.onToggleCheckerboard,
     required this.onOpacityChanged,
     required this.onShapeSelected,
+    this.onGradientSelected,
+    this.onTextureSelected,
   });
 
   @override
@@ -63,11 +68,24 @@ class _DropUpPanelState extends State<DropUpPanel> {
   ];
   double _opacityValue = 1.0;
 
+  void _saveUndoState(BuildContext context, String action) {
+    final undoProvider = Provider.of<UndoProvider>(context, listen: false);
+    final colorProvider = Provider.of<SelectedColorProvider>(
+      context,
+      listen: false,
+    );
+
+    if (!undoProvider.isUndoRedoInProgress) {
+      final currentState = colorProvider.captureCurrentState();
+      undoProvider.saveState(action: action, state: currentState);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Material(
       elevation: 8,
-      color: const ui.Color.fromARGB(255, 0, 0, 0),
+      color: const ui.Color.fromARGB(255, 72, 70, 70),
       child: Container(
         height: double.infinity,
         padding: const EdgeInsets.all(12),

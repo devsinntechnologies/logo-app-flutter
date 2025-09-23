@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:logo_app_flutter/provider/smart_interstitial_manager.dart';
+import 'package:provider/provider.dart';
 
 class DrawerItem extends StatelessWidget {
   final IconData icon;
@@ -16,4 +18,14 @@ class DrawerItem extends StatelessWidget {
       },
     );
   }
+}
+
+// When settings is opened for the first time:
+void onSettingsPressed(BuildContext context) {
+  final adManager = Provider.of<SmartInterstitialManager>(
+    context,
+    listen: false,
+  );
+  adManager.onSettingsOpened();
+  adManager.onButtonClick('settings');
 }

@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
+import 'package:logo_app_flutter/provider/undo_provider.dart';
 import 'package:provider/provider.dart';
 
 class GradientPickerScreen extends StatefulWidget {
@@ -18,19 +19,78 @@ class _GradientPickerScreenState extends State<GradientPickerScreen> {
   bool isLinear = true;
 
   void pickColor(bool isStartColor) async {
+    Color tempColor = isStartColor ? startColor : endColor;
+
     Color? picked = await showDialog(
       context: context,
       builder:
-          (context) => AlertDialog(
-            title: const Text("Select Color"),
-            content: SingleChildScrollView(
-              child: BlockPicker(
-                pickerColor: isStartColor ? startColor : endColor,
-                onColorChanged: (color) {
-                  Navigator.of(context).pop(color);
-                },
-              ),
-            ),
+          (context) => StatefulBuilder(
+            builder:
+                (context, setState) => AlertDialog(
+                  title: const Text("Select Color"),
+                  content: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        BlockPicker(
+                          pickerColor: tempColor,
+                          onColorChanged: (color) {
+                            setState(() => tempColor = color);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () async {
+                        Color? customPicked = await showDialog<Color>(
+                          context: context,
+                          builder:
+                              (context) => AlertDialog(
+                                title: const Text("Custom Color Picker"),
+                                content: SingleChildScrollView(
+                                  child: ColorPicker(
+                                    pickerColor: tempColor,
+                                    onColorChanged: (color) {
+                                      tempColor = color;
+                                    },
+                                    showLabel: true,
+                                    pickerAreaHeightPercent: 0.8,
+                                  ),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed:
+                                        () => Navigator.of(
+                                          context,
+                                        ).pop(tempColor),
+                                    child: Text("Done"),
+                                  ),
+                                  TextButton(
+                                    onPressed:
+                                        () => Navigator.of(context).pop(),
+                                    child: Text("Cancel"),
+                                  ),
+                                ],
+                              ),
+                        );
+                        if (customPicked != null) {
+                          setState(() => tempColor = customPicked);
+                        }
+                      },
+                      child: const Text("Custom"),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(tempColor),
+                      child: Text("Select"),
+                    ),
+                    // TextButton(
+                    //   onPressed: () => Navigator.of(context).pop(),
+                    //   child: Text("Cancel"),
+                    // ),
+                  ],
+                ),
           ),
     );
     if (picked != null) {
@@ -44,6 +104,68 @@ class _GradientPickerScreenState extends State<GradientPickerScreen> {
     }
   }
 
+  void _onGradientSelectedWithUndo(Gradient gradient) {
+    final colorProvider = Provider.of<SelectedColorProvider>(
+      context,
+      listen: false,
+    );
+    final undoProvider = Provider.of<UndoProvider>(context, listen: false);
+
+    // Save current state before applying gradient
+    final currentState = colorProvider.captureCurrentState();
+    undoProvider.saveState(
+      action: 'Apply ${_getGradientType(gradient)} gradient',
+      state: currentState,
+    );
+
+    // Apply gradient
+    colorProvider.setGradient(gradient);
+  }
+
+  void _onGradientRemovedWithUndo() {
+    final colorProvider = Provider.of<SelectedColorProvider>(
+      context,
+      listen: false,
+    );
+    final undoProvider = Provider.of<UndoProvider>(context, listen: false);
+
+    // Save state before removing gradient
+    final currentState = colorProvider.captureCurrentState();
+    undoProvider.saveState(
+      action: 'Remove gradient background',
+      state: currentState,
+    );
+
+    // Remove gradient
+    colorProvider.removeGradient();
+  }
+
+  void _onGradientColorsChangedWithUndo(List<Color> colors) {
+    final colorProvider = Provider.of<SelectedColorProvider>(
+      context,
+      listen: false,
+    );
+    final undoProvider = Provider.of<UndoProvider>(context, listen: false);
+
+    // Save state before gradient color change
+    final currentState = colorProvider.captureCurrentState();
+    undoProvider.saveState(
+      action: 'Change gradient colors',
+      state: currentState,
+    );
+
+    // Apply new gradient with updated colors
+    final newGradient = LinearGradient(colors: colors);
+    colorProvider.setGradient(newGradient);
+  }
+
+  String _getGradientType(Gradient gradient) {
+    if (gradient is LinearGradient) return 'linear';
+    if (gradient is RadialGradient) return 'radial';
+    if (gradient is SweepGradient) return 'sweep';
+    return 'gradient';
+  }
+
   @override
   Widget build(BuildContext context) {
     // ✅ Linear → use GradientRotation(angle)
@@ -54,6 +176,7 @@ class _GradientPickerScreenState extends State<GradientPickerScreen> {
               colors: [startColor, endColor],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
+
               transform: GradientRotation(angle),
             )
             : RadialGradient(
@@ -67,17 +190,9 @@ class _GradientPickerScreenState extends State<GradientPickerScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: const Text(
-          "Custom Gradient",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
+        title: const Text('Gradient Picker'),
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
       ),
       body: Padding(
         padding: const EdgeInsets.all(10),
@@ -95,7 +210,6 @@ class _GradientPickerScreenState extends State<GradientPickerScreen> {
             ),
             const SizedBox(height: 30),
 
-       
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [

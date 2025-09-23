@@ -1,6 +1,3 @@
-
-
-
 import 'package:flutter/material.dart';
 
 class ArtSelectScreen extends StatelessWidget {
@@ -10,7 +7,7 @@ class ArtSelectScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 5, // adjust tabs count as needed
+      length: 5, 
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.white,

@@ -6,11 +6,13 @@ import 'package:logo_app_flutter/components/GridButtons/create_logo_button.dart'
 import 'package:logo_app_flutter/components/GridButtons/my_design_button.dart';
 import 'package:logo_app_flutter/components/GridButtons/my_logo_button.dart';
 import 'package:logo_app_flutter/components/drawer_items.dart';
+import 'package:logo_app_flutter/models/logo_state_data.dart';
 import 'package:logo_app_flutter/provider/banner_ad_provider.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});
+
 
   BannerAd? _bannerAd;
 
@@ -191,7 +193,10 @@ class HomeScreen extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [CreateLogoButton(), AutoDesignButton()],
+            children: [
+              CreateLogoButton(),
+              AutoDesignButton(),
+            ],
           ),
           SizedBox(height: 30),
           Row(

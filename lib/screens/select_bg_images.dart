@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
+import 'package:logo_app_flutter/provider/undo_provider.dart';
 import 'package:provider/provider.dart';
 
 class SelectBgImages extends StatefulWidget {
@@ -32,10 +33,54 @@ class _SelectBgImagesState extends State<SelectBgImages> {
     'assets/bg_images/bg_9.jpg',
     'assets/bg_images/bg_10.jpg',
   ];
+
+  void _onBackgroundImageSelectedWithUndo(String imagePath) {
+    final colorProvider = Provider.of<SelectedColorProvider>(
+      context,
+      listen: false,
+    );
+    final undoProvider = Provider.of<UndoProvider>(context, listen: false);
+
+    // Save current state before applying background image
+    final currentState = colorProvider.captureCurrentState();
+    undoProvider.saveState(
+      action: 'Set background image: ${imagePath.split('/').last}',
+      state: currentState,
+    );
+
+    // Apply background image
+    loadUiImageFromAsset(imagePath).then((uiImage) {
+      colorProvider.setBackgroundImage(uiImage, null);
+    });
+  }
+
+  void _onBackgroundImageRemovedWithUndo() {
+    final colorProvider = Provider.of<SelectedColorProvider>(
+      context,
+      listen: false,
+    );
+    final undoProvider = Provider.of<UndoProvider>(context, listen: false);
+
+    // Save state before removing background image
+    final currentState = colorProvider.captureCurrentState();
+    undoProvider.saveState(
+      action: 'Remove background image',
+      state: currentState,
+    );
+
+    // Remove background image
+    colorProvider.setBackgroundImage(null, null);
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Select Background Image')),
+      appBar: AppBar(
+        title: const Text('Background Images'),
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+      ),
       body: GridView.builder(
         padding: EdgeInsets.all(16),
         itemCount: images.length,
@@ -59,7 +104,6 @@ class _SelectBgImagesState extends State<SelectBgImages> {
               ); // You can pass `null` for File since it's an asset
               Navigator.pop(context);
             },
-
             child: Container(
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.grey),

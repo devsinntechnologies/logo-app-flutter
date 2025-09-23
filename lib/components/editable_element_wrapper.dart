@@ -1,16 +1,15 @@
-
-
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'corner_action_icon.dart';
 
-
 typedef ElementTapCallback = void Function(int id);
 typedef ElementPanUpdateCallback = void Function(int id, Offset delta);
-typedef ElementPanStartCallback = void Function(int id, DragStartDetails details);
+typedef ElementPanStartCallback =
+    void Function(int id, DragStartDetails details);
 typedef ElementPanEndCallback = void Function(int id);
 typedef ElementActionCallback = void Function(int id);
-typedef ElementDragUpdateCallback = void Function(int id, DragUpdateDetails details);
+typedef ElementDragUpdateCallback =
+    void Function(int id, DragUpdateDetails details);
 
 class EditableElementWrapper extends StatelessWidget {
   final int id;
@@ -20,9 +19,8 @@ class EditableElementWrapper extends StatelessWidget {
   final Size canvasSize;
   final bool isSelected;
   final bool isEditingMode;
-  final bool isLocked; 
+  final bool isLocked;
 
-  
   final ElementTapCallback onTap;
   final ElementPanStartCallback onPanStart;
   final ElementPanUpdateCallback onPanUpdate;
@@ -47,7 +45,7 @@ class EditableElementWrapper extends StatelessWidget {
     required this.canvasSize,
     required this.isSelected,
     required this.isEditingMode,
-    required this.isLocked, 
+    required this.isLocked,
     required this.onTap,
     required this.onPanStart,
     required this.onPanUpdate,
@@ -66,27 +64,33 @@ class EditableElementWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
     final bool canInteract = !isLocked && isEditingMode && isSelected;
 
     return Positioned(
       left: position.dx,
       top: position.dy,
       child: GestureDetector(
-        
         onTap: !isLocked ? () => onTap(id) : null,
-        onPanStart: canInteract ? (details) => onPanStart(id, details) : null,
-        onPanUpdate: canInteract ? (details) => onPanUpdate(id, details.delta) : null,
-        onPanEnd: canInteract ? (details) => onPanEnd(id) : null,
+        onPanStart: (details) {
+          if (onPanStart != null) onPanStart(id, details);
+        },
+        onPanUpdate: (details) {
+          if (onPanUpdate != null) onPanUpdate(id, details.delta);
+        },
+        onPanEnd: (details) {
+          if (onPanEnd != null) onPanEnd(id);
+        },
         child: Container(
-          decoration: isSelected && isEditingMode
-              ? BoxDecoration(
-            border: Border.all(
-                color: isLocked ? Colors.red.shade300 : Colors.black38,
-                width: 3),
-            borderRadius: BorderRadius.circular(6),
-          )
-              : null,
+          decoration:
+              isSelected && isEditingMode
+                  ? BoxDecoration(
+                    border: Border.all(
+                      color: isLocked ? Colors.red.shade300 : Colors.black38,
+                      width: 3,
+                    ),
+                    borderRadius: BorderRadius.circular(6),
+                  )
+                  : null,
           padding: const EdgeInsets.all(2),
           child: Stack(
             clipBehavior: Clip.none,
@@ -94,12 +98,11 @@ class EditableElementWrapper extends StatelessWidget {
               Transform.rotate(
                 angle: rotation * pi / 180,
                 child: Container(
-                  padding: const EdgeInsets.all(12), 
+                  padding: const EdgeInsets.all(12),
                   child: child,
                 ),
               ),
 
-              
               if (canInteract) ...[
                 Positioned(
                   top: -15,
@@ -141,7 +144,6 @@ class EditableElementWrapper extends StatelessWidget {
                 ),
               ],
 
-              
               if (isLocked)
                 Positioned.fill(
                   child: Container(
@@ -150,12 +152,12 @@ class EditableElementWrapper extends StatelessWidget {
                       color: Colors.black.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(6),
                     ),
-                    child: const Icon(Icons.lock,
-                        color: Colors.white,
-                        size: 32,
-                        shadows: [
-                          Shadow(color: Colors.black, blurRadius: 4)
-                        ]),
+                    child: const Icon(
+                      Icons.lock,
+                      color: Colors.white,
+                      size: 32,
+                      shadows: [Shadow(color: Colors.black, blurRadius: 4)],
+                    ),
                   ),
                 ),
             ],

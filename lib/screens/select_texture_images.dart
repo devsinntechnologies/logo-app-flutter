@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
+import 'package:logo_app_flutter/provider/undo_provider.dart';
 import 'package:provider/provider.dart';
 
 class SelectTextureImages extends StatefulWidget {
@@ -32,10 +33,58 @@ class SelectTextureImagesState extends State<SelectTextureImages> {
     'assets/texture_images/texture_9.jpg',
     'assets/texture_images/texture_10.jpg',
   ];
+
+  Future<void> _onTextureSelectedWithUndo(String texturePath) async {
+    final colorProvider = Provider.of<SelectedColorProvider>(
+      context,
+      listen: false,
+    );
+    final undoProvider = Provider.of<UndoProvider>(context, listen: false);
+
+    // Save current state before applying texture
+    final currentState = colorProvider.captureCurrentState();
+    undoProvider.saveState(
+      action: 'Apply texture: ${texturePath.split('/').last}',
+      state: currentState,
+    );
+
+    // Apply texture
+    final uiImage = await loadUiImageFromAsset(texturePath);
+    colorProvider.setBackgroundImage(uiImage, null);
+    if (colorProvider.selectedElementId != null) {
+      colorProvider.setElementTexture(
+        colorProvider.selectedElementId!,
+        texturePath,
+      );
+    }
+  }
+
+  void _onTextureRemovedWithUndo() {
+    final colorProvider = Provider.of<SelectedColorProvider>(
+      context,
+      listen: false,
+    );
+    final undoProvider = Provider.of<UndoProvider>(context, listen: false);
+
+    // Save state before removing texture
+    final currentState = colorProvider.captureCurrentState();
+    undoProvider.saveState(action: 'Remove texture', state: currentState);
+
+    // Remove texture
+    colorProvider.setBackgroundImage(null, null);
+    if (colorProvider.selectedElementId != null) {
+      colorProvider.setElementTexture(colorProvider.selectedElementId!, null);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Select Texture Image')),
+      appBar: AppBar(
+        title: const Text('Textures'),
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+      ),
       body: GridView.builder(
         padding: EdgeInsets.all(16),
         itemCount: images.length,
