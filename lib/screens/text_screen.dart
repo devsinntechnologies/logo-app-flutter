@@ -50,11 +50,18 @@ class _TextScreenState extends State<TextScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: const Text('Add New Text'),
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+        title: Text(
+          'Add New Text',
+          style: TextStyle(
+            color: Theme.of(context).appBarTheme.foregroundColor,
+          ),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
@@ -63,29 +70,89 @@ class _TextScreenState extends State<TextScreen> {
           IconButton(icon: const Icon(Icons.check), onPressed: _confirmText),
         ],
       ),
-      body: Column(
-        children: [
-          const SizedBox(height: 120),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 40),
-            child: TextField(
-              controller: _controller,
-              autofocus: true,
-              decoration: const InputDecoration(
-                hintText: 'Your Text Here',
-                hintStyle: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.grey,
-                ),
-                border: InputBorder.none,
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Enter your text:',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).textTheme.bodyLarge?.color, 
               ),
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w500),
-              textAlign: TextAlign.center,
-              cursorColor: Colors.black,
             ),
-          ),
-        ],
+            const SizedBox(height: 16),
+            TextField(
+              controller: _controller,
+              maxLines: 3,
+              style: TextStyle(
+                color: Theme.of(context).textTheme.bodyLarge?.color, 
+                fontSize: 16,
+              ),
+              decoration: InputDecoration(
+                hintText: 'Type your text here...',
+                hintStyle: TextStyle(
+                  color: isDark ? Colors.grey[400] : Colors.grey[600],
+                ),
+                filled: true,
+                fillColor: isDark ? Colors.grey[850] : Colors.white, 
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: isDark ? Colors.grey[600]! : Colors.grey.shade300,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: isDark ? Colors.grey[600]! : Colors.grey.shade300,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(
+                    color: Colors.orange,
+                    width: 2,
+                  ),
+                ),
+              ),
+              autofocus: true,
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  final text = _controller.text.trim();
+                  if (text.isNotEmpty) {
+                    Navigator.pop(context, text);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Please enter some text')),
+                    );
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'Add Text',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

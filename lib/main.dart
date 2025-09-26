@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:logo_app_flutter/provider/banner_ad_provider.dart';
 import 'package:logo_app_flutter/provider/interestitial_ad.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
+import 'package:logo_app_flutter/provider/theme_provider.dart';
 import 'package:logo_app_flutter/provider/undo_provider.dart' show UndoProvider;
 import 'package:logo_app_flutter/screens/home_screen.dart';
 import 'package:logo_app_flutter/services/internet_checker.dart';
@@ -35,6 +36,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => UndoProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => BannerAdProvider()),
         ChangeNotifierProvider(create: (_) => InterestitialAdProvider()),
         ChangeNotifierProvider(create: (_) => SmartInterstitialManager()),
@@ -61,10 +63,15 @@ class MyApp extends StatelessWidget {
           },
         ),
       ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Auto Design Module',
-        home: InternetChecker(child: HomeScreen()),
+      child: Consumer<ThemeProvider>(
+        builder: (context, value, child) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'Auto Design Module',
+            theme: value.currentTheme,
+            home: InternetChecker(child: HomeScreen()),
+          );
+        },
       ),
     );
   }

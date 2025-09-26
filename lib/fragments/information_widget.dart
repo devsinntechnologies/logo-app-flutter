@@ -41,30 +41,50 @@ class _InformationWidgetState extends State<InformationWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor, 
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
             children: [
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 "CHOOSE INDUSTRY",
-                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).textTheme.bodyLarge?.color, 
+                ),
               ),
               Container(
                 height: 60,
                 margin: const EdgeInsets.all(16),
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.black, width: 2),
+                  // ✅ Theme-aware container colors
+                  color: isDark ? Colors.grey[850] : Colors.white,
+                  border: Border.all(
+                    color: isDark ? Colors.grey[600]! : Colors.black,
+                    width: 2,
+                  ),
                   borderRadius: BorderRadius.circular(15),
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
                     value: selectedCategory,
                     isExpanded: true,
-                    icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 35),
-                    style: const TextStyle(color: Colors.black, fontSize: 16),
+                    icon: Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      size: 35,
+                      color: Theme.of(context).textTheme.bodyLarge?.color, 
+                    ),
+                    style: TextStyle(
+                      color: Theme.of(context).textTheme.bodyLarge?.color, 
+                      fontSize: 16,
+                    ),
+                    dropdownColor: isDark ? Colors.grey[850] : Colors.white, 
                     onChanged: (String? newValue) {
                       setState(() {
                         selectedCategory = newValue!;
@@ -74,22 +94,61 @@ class _InformationWidgetState extends State<InformationWidget> {
                     items: categories.map((String value) {
                       return DropdownMenuItem<String>(
                         value: value,
-                        child: Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
+                        child: Text(
+                          value,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(context).textTheme.bodyLarge?.color, 
+                          ),
+                        ),
                       );
                     }).toList(),
                   ),
                 ),
               ),
-              const Text("YOUR COMPANY NAME", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              Text(
+                "YOUR COMPANY NAME",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).textTheme.bodyLarge?.color, 
+                ),
+              ),
               const SizedBox(height: 8),
               SizedBox(
                 width: 330,
                 child: TextField(
                   controller: nameController,
                   textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Theme.of(context).textTheme.bodyLarge?.color, 
+                  ),
                   decoration: InputDecoration(
                     hintText: 'Enter your company name',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
+                    hintStyle: TextStyle(
+                      color: isDark ? Colors.grey[400] : Colors.grey, 
+                    ),
+                    filled: true,
+                    fillColor: isDark ? Colors.grey[850] : Colors.white, 
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15),
+                      borderSide: BorderSide(
+                        color: isDark ? Colors.grey[600]! : Colors.grey,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15),
+                      borderSide: BorderSide(
+                        color: isDark ? Colors.grey[600]! : Colors.grey,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15),
+                      borderSide: BorderSide(
+                        color: Colors.orange,
+                        width: 2,
+                      ),
+                    ),
                   ),
                   onChanged: (text) {
                     widget.onSave(text, sloganController.text, selectedCategory);
@@ -97,17 +156,49 @@ class _InformationWidgetState extends State<InformationWidget> {
                 ),
               ),
               const SizedBox(height: 12),
-              const Text("SLOGAN", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              Text(
+                "SLOGAN",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).textTheme.bodyLarge?.color, 
+                ),
+              ),
               const SizedBox(height: 8),
               SizedBox(
                 width: 330,
                 child: TextField(
                   controller: sloganController,
                   textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Theme.of(context).textTheme.bodyLarge?.color, 
+                  ),
                   decoration: InputDecoration(
                     hintText: 'Enter your slogan',
-                    hintStyle: TextStyle(color: Colors.black),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
+                    hintStyle: TextStyle(
+                      color: isDark ? Colors.grey[400] : Colors.grey, 
+                    ),
+                    filled: true,
+                    fillColor: isDark ? Colors.grey[850] : Colors.white, 
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15),
+                      borderSide: BorderSide(
+                        color: isDark ? Colors.grey[600]! : Colors.grey,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15),
+                      borderSide: BorderSide(
+                        color: isDark ? Colors.grey[600]! : Colors.grey,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15),
+                      borderSide: BorderSide(
+                        color: Colors.orange,
+                        width: 2,
+                      ),
+                    ),
                   ),
                   onChanged: (text) {
                     widget.onSave(nameController.text, text, selectedCategory);

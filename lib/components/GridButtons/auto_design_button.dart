@@ -4,8 +4,11 @@ import 'package:logo_app_flutter/screens/design_input_screen.dart';
 
 class AutoDesignButton extends StatelessWidget {
   const AutoDesignButton({super.key});
+  
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -17,7 +20,7 @@ class AutoDesignButton extends StatelessWidget {
       },
       child: Center(
         child: Container(
-          height: 120, // ✔️ This sets the height
+          height: 120, 
           width: 150,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
@@ -25,7 +28,9 @@ class AutoDesignButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(30),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.25),
+                color: isDark 
+                    ? Colors.black.withOpacity(0.5) 
+                    : Colors.black.withOpacity(0.25),
                 blurRadius: 10,
                 spreadRadius: 3,
                 offset: const Offset(2, 4),
@@ -33,7 +38,7 @@ class AutoDesignButton extends StatelessWidget {
             ],
           ),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center, // optional
+            crossAxisAlignment: CrossAxisAlignment.center, 
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,7 +48,7 @@ class AutoDesignButton extends StatelessWidget {
                   const Text(
                     'Auto Design',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: Colors.white, 
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -52,7 +57,7 @@ class AutoDesignButton extends StatelessWidget {
               const Spacer(),
               Column(
                 children: [
-                  const Icon(Icons.chevron_right, color: Colors.white),
+                  const Icon(Icons.chevron_right, color: Colors.white), 
                 ],
               ),
             ],

@@ -18,6 +18,7 @@ class BottomNavigationButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Row(
@@ -38,11 +39,21 @@ class BottomNavigationButtons extends StatelessWidget {
                 ),
                 foregroundColor: Colors.black,
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(Icons.arrow_back_ios_new_rounded, size: 16),
+                  Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    size: 16,
+                    color: isDark ? Colors.white : Colors.black,
+                  ),
                   SizedBox(width: 8),
-                  Text('BACK', style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text(
+                    'BACK',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : Colors.black,
+                    ),
+                  ),
                 ],
               ),
             )
@@ -61,13 +72,17 @@ class BottomNavigationButtons extends StatelessWidget {
                   vertical: 16,
                   horizontal: 32,
                 ),
-                foregroundColor: Colors.black,
+                foregroundColor: isDark ? Colors.white : Colors.black,
               ),
-              child: const Row(
+              child: Row(
                 children: [
                   Text('NEXT', style: TextStyle(fontWeight: FontWeight.bold)),
                   SizedBox(width: 8),
-                  Icon(Icons.arrow_forward_ios_rounded, size: 16),
+                  Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 16,
+                    color: isDark ? Colors.white : Colors.black,
+                  ),
                 ],
               ),
             ),

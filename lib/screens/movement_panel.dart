@@ -17,17 +17,18 @@ class MovementPanel extends StatefulWidget {
 
   final VoidCallback onBringToFrontPressed;
   final VoidCallback onSendToBackPressed;
-
+  final VoidCallback? onClose;
   final int? selectedElementId;
 
   const MovementPanel({
     super.key,
     required this.onDirectionPressed,
-    this.onLogoColorChanged, // Add this
+    this.onLogoColorChanged,
     required this.onDuplicatePressed,
     required this.isVisible,
     required this.onBringToFrontPressed,
     required this.onSendToBackPressed,
+    required this.onClose,
     this.selectedElementId,
   });
 
@@ -73,8 +74,6 @@ class _MovementPanelState extends State<MovementPanel>
     adManager.onButtonClick(buttonName);
   }
 
-  
-
   void _saveUndoState(String action) {
     final colorProvider = Provider.of<SelectedColorProvider>(
       context,
@@ -104,15 +103,19 @@ class _MovementPanelState extends State<MovementPanel>
     try {
       if (!widget.isVisible) return const SizedBox.shrink();
 
+      final isDark = Theme.of(context).brightness == Brightness.dark;
       return Align(
         alignment: Alignment.bottomCenter,
         child: Padding(
-          padding: const EdgeInsets.only(bottom: 107),
+          padding: const EdgeInsets.only(bottom: 12),
           child: Container(
             height: MediaQuery.sizeOf(context).width * 0.69,
             width: MediaQuery.sizeOf(context).width * 1,
             decoration: BoxDecoration(
-              color: const Color.fromARGB(255, 72, 70, 70),
+              color:
+                  isDark
+                      ? const Color(0xFF2C2C2C)
+                      : const Color.fromARGB(255, 72, 70, 70),
             ),
             child:
                 _isMoreSelected
@@ -130,6 +133,8 @@ class _MovementPanelState extends State<MovementPanel>
   }
 
   Widget _buildMainView() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return DefaultTabController(
       length: 4,
       child: Column(
@@ -427,28 +432,296 @@ class _MovementPanelState extends State<MovementPanel>
   }
 
   Widget _buildColorsTab(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(top: MediaQuery.sizeOf(context).width * 0.2),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Wrap(
-          spacing: 10,
-          runSpacing: 10,
-          children: [
-            _buildColorBox(context, Colors.red),
-            _buildColorBox(context, Colors.green),
-            _buildColorBox(context, Colors.blue),
-            _buildColorBox(context, Colors.yellow),
-            _buildColorBox(context, Colors.purple),
-            _buildColorBox(context, Colors.orange),
-            _buildColorBox(context, Colors.pink),
-            _buildColorBox(context, Colors.teal),
-            _buildColorBox(context, Colors.brown),
-            _buildColorBox(context, Colors.grey),
+    final List<List<Gradient>> gradientRows = [
+      [
+        LinearGradient(
+          colors: [Colors.red, Colors.orange],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        LinearGradient(
+          colors: [Colors.blue, Colors.purple],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        LinearGradient(
+          colors: [Colors.green, Colors.teal],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        LinearGradient(
+          colors: [Colors.yellow, Colors.orange],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ],
+      [
+        LinearGradient(
+          colors: [Colors.purple, Colors.pink, Colors.red],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+        LinearGradient(
+          colors: [Colors.cyan, Colors.blue, Colors.indigo],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+        LinearGradient(
+          colors: [Colors.lime, Colors.green, Colors.teal],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+        LinearGradient(
+          colors: [Colors.deepOrange, Colors.red, Colors.pink],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+      ],
+      [
+        RadialGradient(
+          colors: [Colors.yellow, Colors.orange, Colors.red],
+          stops: [0.0, 0.5, 1.0],
+        ),
+        RadialGradient(
+          colors: [Colors.white, Colors.blue, Colors.indigo],
+          stops: [0.0, 0.5, 1.0],
+        ),
+        RadialGradient(
+          colors: [Colors.lightGreen, Colors.green, Colors.black],
+          stops: [0.0, 0.5, 1.0],
+        ),
+        SweepGradient(
+          colors: [
+            Colors.red,
+            Colors.orange,
+            Colors.yellow,
+            Colors.green,
+            Colors.blue,
+            Colors.purple,
+          ],
+        ),
+      ],
+    ];
+
+    final List<Color> solidColors = [
+      Color(0xFFFF0000),
+      Color(0xFFB71C1C),
+      Color(0xFFE57373),
+      Color(0xFF880000),
+      Color(0xFFFF9800),
+      Color(0xFFFF5722),
+      Color(0xFFFFCC80),
+      Color(0xFFFFFF00),
+      Color(0xFFFDD835),
+      Color(0xFFFFF176),
+      Color(0xFF4CAF50),
+      Color(0xFF1B5E20),
+      Color(0xFF81C784),
+      Color(0xFF00E676),
+      Color(0xFF8BC34A),
+      Color(0xFF9E9D24),
+      Color(0xFF00BCD4),
+      Color(0xFFB2EBF2),
+      Color(0xFF0097A7),
+      Color(0xFF008080),
+      Color(0xFF80CBC4),
+      Color(0xFF2196F3),
+      Color(0xFF0D47A1),
+      Color(0xFF64B5F6),
+      Color(0xFF001F54),
+      Color(0xFF9C27B0),
+      Color(0xFF4A148C),
+      Color(0xFF673AB7),
+      Color(0xFFE1BEE7),
+      Color(0xFFE91E63),
+      Color(0xFFF48FB1),
+      Color(0xFFAD1457),
+      Color(0xFFFF80AB),
+      Color(0xFFFFC0CB),
+      Colors.brown,
+      Colors.amber,
+      Colors.grey,
+      Colors.black,
+      Colors.white,
+      Colors.blueGrey,
+    ];
+
+    return DefaultTabController(
+      length: 2,
+      child: Column(
+        children: [
+          TabBar(
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.grey,
+            indicatorColor: Colors.orange,
+            tabs: [Tab(text: 'Colors'), Tab(text: 'Gradients')],
+          ),
+
+          Expanded(
+            child: TabBarView(
+              children: [
+                Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(8),
+                    child: Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      children:
+                          solidColors.map((color) {
+                            return _buildColorBox(context, color);
+                          }).toList(),
+                    ),
+                  ),
+                ),
+
+                Padding(
+                  padding: EdgeInsets.all(16),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children:
+                          gradientRows.map((gradientRow) {
+                            return Padding(
+                              padding: EdgeInsets.only(bottom: 10),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children:
+                                    gradientRow.map((gradient) {
+                                      return SingleChildScrollView(
+                                        child: _buildGradientBox(
+                                          context,
+                                          gradient,
+                                        ),
+                                      );
+                                    }).toList(),
+                              ),
+                            );
+                          }).toList(),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGradientToggle(int elementId) {
+    return Consumer<SelectedColorProvider>(
+      builder: (context, provider, _) {
+        final hasGradient = provider.hasGradientForElement(elementId);
+
+        return IconButton(
+          onPressed: () {
+            if (hasGradient) {
+              provider.clearGradientForElement(elementId);
+            }
+          },
+          icon: Icon(
+            hasGradient ? Icons.gradient : Icons.color_lens,
+            color: hasGradient ? Colors.orange : Colors.white,
+          ),
+          tooltip: hasGradient ? 'Remove Gradient' : 'Apply Gradient',
+        );
+      },
+    );
+  }
+
+  Widget _buildGradientBox(BuildContext context, Gradient gradient) {
+    return GestureDetector(
+      onTap: () {
+        _trackButtonClick('gradient_selection');
+
+        if (widget.selectedElementId != null) {
+          _saveUndoState(
+            'Apply gradient to element ${widget.selectedElementId}',
+          );
+
+          final provider = Provider.of<SelectedColorProvider>(
+            context,
+            listen: false,
+          );
+          final elementId = widget.selectedElementId!;
+
+          final adManager = Provider.of<SmartInterstitialManager>(
+            context,
+            listen: false,
+          );
+          adManager.onColorChanged();
+
+          provider.setGradientForElement(elementId, gradient);
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Gradient applied to element $elementId'),
+              duration: Duration(milliseconds: 1000),
+            ),
+          );
+        }
+      },
+      child: Container(
+        width: 50,
+        height: 30,
+        decoration: BoxDecoration(
+          gradient: gradient,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.white, width: 2),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 2,
+              offset: Offset(0, 1),
+            ),
           ],
         ),
       ),
     );
+  }
+
+  // Add this to your movement panel
+  Widget _buildGradientClearButton() {
+    return Consumer<SelectedColorProvider>(
+      builder: (context, provider, child) {
+        final hasGradient =
+            widget.selectedElementId != null &&
+            provider.hasGradientForElement(widget.selectedElementId!);
+
+        if (!hasGradient) return SizedBox.shrink();
+
+        return IconButton(
+          onPressed: () {
+            if (widget.selectedElementId != null) {
+              provider.clearGradientForElement(widget.selectedElementId!);
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text('Gradient removed')));
+            }
+          },
+          icon: Icon(Icons.clear, color: Colors.red),
+          tooltip: 'Remove Gradient',
+        );
+      },
+    );
+  }
+
+  Color _extractPrimaryColorFromGradient(Gradient gradient) {
+    if (gradient is LinearGradient && gradient.colors.isNotEmpty) {
+      return gradient.colors.first;
+    } else if (gradient is RadialGradient && gradient.colors.isNotEmpty) {
+      return gradient.colors.first;
+    }
+    return Colors.blue;
+  }
+
+  Color _extractSecondaryColorFromGradient(Gradient gradient) {
+    if (gradient is LinearGradient && gradient.colors.length > 1) {
+      return gradient.colors.last;
+    } else if (gradient is RadialGradient && gradient.colors.length > 1) {
+      return gradient.colors.last;
+    }
+    return Colors.red;
   }
 
   Widget _buildMoreTab(BuildContext context) {
@@ -1010,9 +1283,7 @@ class _MovementPanelState extends State<MovementPanel>
                 activeColor: Colors.orange,
                 inactiveColor: Colors.grey,
                 onChanged: (value) {
-                  _trackButtonClick(
-                    'size_adjustment',
-                  ); 
+                  _trackButtonClick('size_adjustment');
                   if (mounted) {
                     setState(() {
                       _localRotation = value;
@@ -1131,69 +1402,175 @@ class _MovementPanelState extends State<MovementPanel>
   }
 
   Widget _build3DTab() {
-    double slider1 = 0;
-    double slider2 = 0;
-    double slider3 = 0;
+    return Consumer<SelectedColorProvider>(
+      builder: (context, provider, _) {
+        if (widget.selectedElementId == null) {
+          return const Center(
+            child: Text(
+              "Select an element first",
+              style: TextStyle(color: Colors.white, fontSize: 16),
+            ),
+          );
+        }
 
-    return StatefulBuilder(
-      builder: (context, setState) {
-        Widget buildSlider(
+        final int elementId = widget.selectedElementId!;
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+
+        double rotationX = provider.getRotationXForElement(elementId) ?? 0.0;
+        double rotationY = provider.getRotationYForElement(elementId) ?? 0.0;
+        double rotationZ = provider.getRotationZForElement(elementId) ?? 0.0;
+
+        Widget buildRotationSlider(
           String label,
           double value,
           ValueChanged<double> onChanged,
+          VoidCallback onReset,
         ) {
-          return Row(
-            children: [
-              SizedBox(
-                width: 40,
-                child: Text(
-                  "$label°",
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "$label Axis",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                    SliderTheme(
+                      data: SliderTheme.of(context).copyWith(
+                        activeTrackColor: Colors.orange,
+                        inactiveTrackColor:
+                            isDark ? Colors.grey[600] : Colors.grey[400],
+                        thumbColor: Colors.orange,
+                        overlayColor: Colors.orange.withOpacity(0.2),
+                        valueIndicatorColor: Colors.orange,
+                        valueIndicatorTextStyle: const TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
+                      child: Slider(
+                        value: value,
+                        min: -180.0,
+                        max: 180.0,
+                        divisions: 360,
+                        label: '${value.toStringAsFixed(1)}°',
+                        onChanged: onChanged,
+                      ),
+                    ),
+                    Text(
+                      "${value.toStringAsFixed(1)}°",
+                      style: TextStyle(
+                        color: isDark ? Colors.grey[300] : Colors.grey[200],
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      onPressed: onReset,
+                      icon: Icon(Icons.refresh, color: Colors.orange, size: 18),
+                      tooltip: 'Reset $label',
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                  ],
                 ),
-              ),
-              Expanded(
-                child: SliderTheme(
-                  data: SliderTheme.of(context).copyWith(
-                    activeTrackColor: Colors.orange,
-                    inactiveTrackColor: Colors.orange.withOpacity(0.3),
-                    thumbColor: Colors.orange,
-                    overlayColor: Colors.orange.withOpacity(0.2),
-                  ),
-                  child: Slider(
-                    min: 0,
-                    max: 360,
-                    divisions: 360,
-                    value: value,
-                    onChanged: onChanged,
-                    onChangeEnd: (value) {
-                      _saveUndoState('Change 3D $label to ${value.toInt()}°');
-                    },
-                  ),
-                ),
-              ),
-            ],
+              ],
+            ),
           );
         }
 
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              buildSlider(slider1.toStringAsFixed(0), slider1, (v) {
-                setState(() => slider1 = v);
-                print("Slider 1: $slider1");
-              }),
-              buildSlider(slider2.toStringAsFixed(0), slider2, (v) {
-                setState(() => slider2 = v);
-                print("Slider 2: $slider2");
-              }),
-              buildSlider(slider3.toStringAsFixed(0), slider3, (v) {
-                setState(() => slider3 = v);
-                print("Slider 3: $slider3");
-              }),
-            ],
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                buildRotationSlider(
+                  "X",
+                  rotationX,
+                  (value) {
+                    provider.setRotationXForElement(elementId, value);
+                  },
+                  () {
+                    _saveUndoState('Reset X rotation for element $elementId');
+                    provider.setRotationXForElement(elementId, 0.0);
+                  },
+                ),
+
+                buildRotationSlider(
+                  "Y",
+                  rotationY,
+                  (value) {
+                    provider.setRotationYForElement(elementId, value);
+                  },
+                  () {
+                    _saveUndoState('Reset Y rotation for element $elementId');
+                    provider.setRotationYForElement(elementId, 0.0);
+                  },
+                ),
+
+                buildRotationSlider(
+                  "Z",
+                  rotationZ,
+                  (value) {
+                    provider.setRotationZForElement(elementId, value);
+                  },
+                  () {
+                    _saveUndoState('Reset Z rotation for element $elementId');
+                    provider.setRotationZForElement(elementId, 0.0);
+                  },
+                ),
+
+                const SizedBox(height: 20),
+
+                ElevatedButton.icon(
+                  onPressed: () {
+                    _saveUndoState(
+                      'Reset all 3D rotations for element $elementId',
+                    );
+                    provider.setRotationXForElement(elementId, 0.0);
+                    provider.setRotationYForElement(elementId, 0.0);
+                    provider.setRotationZForElement(elementId, 0.0);
+                  },
+                  icon: const Icon(Icons.refresh, color: Colors.white),
+                  label: const Text(
+                    "Reset All",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.redAccent,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                Text(
+                  "Tip: Combine X, Y, Z rotations for complex 3D effects",
+                  style: TextStyle(
+                    color: isDark ? Colors.grey[400] : Colors.grey[300],
+                    fontSize: 12,
+                    fontStyle: FontStyle.italic,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
           ),
         );
       },

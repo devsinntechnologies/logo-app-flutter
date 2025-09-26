@@ -44,12 +44,15 @@ class SelectedColorProvider extends ChangeNotifier {
 
   Color? _backgroundColor;
 
+  Gradient? _companyTextGradient;
+  Gradient? _sloganGradient;
+
   String? _selectedShape;
-  String? _selectedShapeName; 
+  String? _selectedShapeName;
 
   final Map<int, double> _elementTextSizes = {};
-  double _companyTextSize = 28.0; 
-  double _sloganTextSize = 16.0; 
+  double _companyTextSize = 28.0;
+  double _sloganTextSize = 16.0;
 
   Color _selectedColor = Colors.white;
   Gradient? _selectedGradient;
@@ -66,9 +69,9 @@ class SelectedColorProvider extends ChangeNotifier {
   final Map<int, double> _elementShadowOffsetsX = {};
   final Map<int, double> _elementShadowOffsetsY = {};
   final Map<int, FontStyleState> _fontStyles = {};
+  final Map<int, FontStyleState> _elementFontStyles = {};
 
   int _selectedIndex = 0;
-  int get selectedIndex => _selectedIndex;
   File? _imageFile;
   Color _companyTextColor = Colors.black;
   Color _sloganColor = Colors.black;
@@ -104,6 +107,32 @@ class SelectedColorProvider extends ChangeNotifier {
   bool _isSvgColorOverridden = false;
 
   bool get isSvgColorOverridden => _isSvgColorOverridden;
+
+  // ✅ Add these for 3D rotations
+  final Map<int, double> _elementRotationX = {};
+  final Map<int, double> _elementRotationY = {};
+  final Map<int, double> _elementRotationZ = {};
+
+  double? getRotationXForElement(int id) => _elementRotationX[id] ?? 0.0;
+  void setRotationXForElement(int id, double value) {
+    _saveUndoState('Set X rotation for element $id to ${value.toInt()}°');
+    _elementRotationX[id] = value;
+    notifyListeners();
+  }
+
+  double? getRotationYForElement(int id) => _elementRotationY[id] ?? 0.0;
+  void setRotationYForElement(int id, double value) {
+    _saveUndoState('Set Y rotation for element $id to ${value.toInt()}°');
+    _elementRotationY[id] = value;
+    notifyListeners();
+  }
+
+  double? getRotationZForElement(int id) => _elementRotationZ[id] ?? 0.0;
+  void setRotationZForElement(int id, double value) {
+    _saveUndoState('Set Z rotation for element $id to ${value.toInt()}°');
+    _elementRotationZ[id] = value;
+    notifyListeners();
+  }
 
   Timer? _notifyTimer;
   void _throttledNotify() {
@@ -176,6 +205,77 @@ class SelectedColorProvider extends ChangeNotifier {
       _elementSizes[elementId] = defaultSize;
     }
     return _elementSizes[elementId]!;
+  }
+
+  Map<int, Gradient> _elementGradients = {};
+
+  void setGradientForElement(int elementId, Gradient gradient) {
+    _saveUndoState('Apply gradient to element $elementId');
+    _elementGradients[elementId] = gradient;
+
+    if (elementId == 1) {
+      _companyTextGradient = gradient;
+    } else if (elementId == 2) {
+      _sloganGradient = gradient;
+    } else if (elementId >= 100) {
+      _elementGradients[elementId] = gradient;
+    }
+
+    print('✅ Gradient applied to element $elementId');
+    notifyListeners();
+  }
+
+  Gradient? getGradientForElement(int elementId) {
+    if (elementId == 1 && _companyTextGradient != null) {
+      return _companyTextGradient;
+    }
+    if (elementId == 2 && _sloganGradient != null) {
+      return _sloganGradient;
+    }
+
+    return _elementGradients[elementId];
+  }
+
+  void resetElementGradients() {
+    _elementGradients.clear();
+    _companyTextGradient = null;
+    _sloganGradient = null;
+    _selectedGradient = null;
+    print('✅ All gradients reset');
+    notifyListeners();
+  }
+
+  void discardChanges() {
+    // Reset colors
+    _elementColors.clear();
+    _elementFonts.clear();
+    _elementSizes.clear();
+    _elementRotations.clear();
+    _elementFontStyles.clear();
+
+    // ✅ Reset gradients on discard
+    resetElementGradients();
+
+    // Reset other properties
+    _selectedElementId = null;
+    _companyTextColor = Colors.black;
+    _sloganColor = Colors.black;
+    _selectedColor = Colors.blue;
+
+    print('✅ All changes discarded including gradients');
+    notifyListeners();
+  }
+
+  bool hasGradientForElement(int elementId) {
+    if (elementId == 1 && _companyTextGradient != null) return true;
+    if (elementId == 2 && _sloganGradient != null) return true;
+    return _elementGradients.containsKey(elementId) &&
+        _elementGradients[elementId] != null;
+  }
+
+  void clearGradientForElement(int elementId) {
+    _elementGradients.remove(elementId);
+    notifyListeners();
   }
 
   double mapActualToUI(double actualSize, int elementId) {
@@ -380,7 +480,7 @@ class SelectedColorProvider extends ChangeNotifier {
   }
 
   void removeGradient() {
-    _selectedGradient = null; 
+    _selectedGradient = null;
     _backgroundImage = null;
     _isColorManuallySelected = true;
     notifyListeners();
@@ -486,8 +586,8 @@ class SelectedColorProvider extends ChangeNotifier {
   double get opacity => _opacity;
 
   void setOpacity(double value) {
-    _opacity = value.clamp(0.0, 1.0); 
-    notifyListeners(); 
+    _opacity = value.clamp(0.0, 1.0);
+    notifyListeners();
   }
 
   void setOpacityWithUndo(double opacity) {
@@ -515,7 +615,6 @@ class SelectedColorProvider extends ChangeNotifier {
   Map<int, double> _elementRotations = {};
   // double? getRotationForElement(int? id) =>
   //     id == null ? null : _elementRotations[id];
-
 
   void setAllColorsWithBrightness(Color baseColor, double brightnessFactor) {
     brightnessFactor = brightnessFactor.clamp(0.0, 1.0);
@@ -738,9 +837,17 @@ class SelectedColorProvider extends ChangeNotifier {
       'elementColors': _elementColors.map(
         (k, v) => MapEntry(k.toString(), v.value),
       ),
-      'opacity': _opacity, // Ensure opacity is captured
+      'opacity': _opacity,
       'selectedElementId': _selectedElementId,
-      // ... other fields
+      'elementRotationX': _elementRotationX.map(
+        (k, v) => MapEntry(k.toString(), v),
+      ),
+      'elementRotationY': _elementRotationY.map(
+        (k, v) => MapEntry(k.toString(), v),
+      ),
+      'elementRotationZ': _elementRotationZ.map(
+        (k, v) => MapEntry(k.toString(), v),
+      ),
     };
   }
 
@@ -755,7 +862,25 @@ class SelectedColorProvider extends ChangeNotifier {
       if (state['selectedShapeName'] != null) {
         _selectedShapeName = state['selectedShapeName'];
       }
-      notifyListeners(); // CRITICAL: Notify UI after restoring
+      if (state['elementRotationX'] != null) {
+        _elementRotationX.clear();
+        (state['elementRotationX'] as Map<String, dynamic>).forEach((k, v) {
+          _elementRotationX[int.parse(k)] = v as double;
+        });
+      }
+      if (state['elementRotationY'] != null) {
+        _elementRotationY.clear();
+        (state['elementRotationY'] as Map<String, dynamic>).forEach((k, v) {
+          _elementRotationY[int.parse(k)] = v as double;
+        });
+      }
+      if (state['elementRotationZ'] != null) {
+        _elementRotationZ.clear();
+        (state['elementRotationZ'] as Map<String, dynamic>).forEach((k, v) {
+          _elementRotationZ[int.parse(k)] = v as double;
+        });
+      }
+      notifyListeners();
     } catch (e) {
       print('Error restoring state: $e');
     }
@@ -908,7 +1033,7 @@ class SelectedColorProvider extends ChangeNotifier {
     if (_currentLogoState != null) {
       return _currentLogoState!.elementOrder;
     }
-    return [0, 1, 2, 3, 4, 5]; 
+    return [0, 1, 2, 3, 4, 5];
   }
 
   // Add this missing method
@@ -916,7 +1041,7 @@ class SelectedColorProvider extends ChangeNotifier {
     if (_currentLogoState != null) {
       return _currentLogoState!.elementOrder;
     }
-    return [0, 1, 2, 3, 4, 5]; 
+    return [0, 1, 2, 3, 4, 5];
   }
 
   List<Color> getCurrentPalette() {
@@ -1054,6 +1179,9 @@ class SelectedColorProvider extends ChangeNotifier {
     _sloganTextSize = 16.0;
     _selectedElementId = null;
     _isSvgColorOverridden = false;
+    _elementRotationX.clear();
+    _elementRotationY.clear();
+    _elementRotationZ.clear();
     notifyListeners();
   }
 }

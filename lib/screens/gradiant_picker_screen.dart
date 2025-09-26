@@ -23,76 +23,67 @@ class _GradientPickerScreenState extends State<GradientPickerScreen> {
 
     Color? picked = await showDialog(
       context: context,
-      builder:
-          (context) => StatefulBuilder(
-            builder:
-                (context, setState) => AlertDialog(
-                  title: const Text("Select Color"),
-                  content: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        BlockPicker(
-                          pickerColor: tempColor,
-                          onColorChanged: (color) {
-                            setState(() => tempColor = color);
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () async {
-                        Color? customPicked = await showDialog<Color>(
-                          context: context,
-                          builder:
-                              (context) => AlertDialog(
-                                title: const Text("Custom Color Picker"),
-                                content: SingleChildScrollView(
-                                  child: ColorPicker(
-                                    pickerColor: tempColor,
-                                    onColorChanged: (color) {
-                                      tempColor = color;
-                                    },
-                                    showLabel: true,
-                                    pickerAreaHeightPercent: 0.8,
-                                  ),
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed:
-                                        () => Navigator.of(
-                                          context,
-                                        ).pop(tempColor),
-                                    child: Text("Done"),
-                                  ),
-                                  TextButton(
-                                    onPressed:
-                                        () => Navigator.of(context).pop(),
-                                    child: Text("Cancel"),
-                                  ),
-                                ],
-                              ),
-                        );
-                        if (customPicked != null) {
-                          setState(() => tempColor = customPicked);
-                        }
-                      },
-                      child: const Text("Custom"),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(tempColor),
-                      child: Text("Select"),
-                    ),
-                    // TextButton(
-                    //   onPressed: () => Navigator.of(context).pop(),
-                    //   child: Text("Cancel"),
-                    // ),
-                  ],
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text("Select Color"),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                BlockPicker(
+                  pickerColor: tempColor,
+                  onColorChanged: (color) {
+                    setState(() => tempColor = color);
+                  },
                 ),
+              ],
+            ),
           ),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                Color? customPicked = await showDialog<Color>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text("Custom Color Picker"),
+                    content: SingleChildScrollView(
+                      child: ColorPicker(
+                        pickerColor: tempColor,
+                        onColorChanged: (color) {
+                          tempColor = color;
+                        },
+                        showLabel: true,
+                        pickerAreaHeightPercent: 0.8,
+                      ),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () =>
+                            Navigator.of(context).pop(tempColor),
+                        child: const Text("Done"),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text("Cancel"),
+                      ),
+                    ],
+                  ),
+                );
+                if (customPicked != null) {
+                  setState(() => tempColor = customPicked);
+                }
+              },
+              child: const Text("Custom"),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(tempColor),
+              child: const Text("Select"),
+            ),
+          ],
+        ),
+      ),
     );
+
     if (picked != null) {
       setState(() {
         if (isStartColor) {
@@ -105,56 +96,44 @@ class _GradientPickerScreenState extends State<GradientPickerScreen> {
   }
 
   void _onGradientSelectedWithUndo(Gradient gradient) {
-    final colorProvider = Provider.of<SelectedColorProvider>(
-      context,
-      listen: false,
-    );
+    final colorProvider =
+        Provider.of<SelectedColorProvider>(context, listen: false);
     final undoProvider = Provider.of<UndoProvider>(context, listen: false);
 
-    // Save current state before applying gradient
     final currentState = colorProvider.captureCurrentState();
     undoProvider.saveState(
       action: 'Apply ${_getGradientType(gradient)} gradient',
       state: currentState,
     );
 
-    // Apply gradient
     colorProvider.setGradient(gradient);
   }
 
   void _onGradientRemovedWithUndo() {
-    final colorProvider = Provider.of<SelectedColorProvider>(
-      context,
-      listen: false,
-    );
+    final colorProvider =
+        Provider.of<SelectedColorProvider>(context, listen: false);
     final undoProvider = Provider.of<UndoProvider>(context, listen: false);
 
-    // Save state before removing gradient
     final currentState = colorProvider.captureCurrentState();
     undoProvider.saveState(
       action: 'Remove gradient background',
       state: currentState,
     );
 
-    // Remove gradient
     colorProvider.removeGradient();
   }
 
   void _onGradientColorsChangedWithUndo(List<Color> colors) {
-    final colorProvider = Provider.of<SelectedColorProvider>(
-      context,
-      listen: false,
-    );
+    final colorProvider =
+        Provider.of<SelectedColorProvider>(context, listen: false);
     final undoProvider = Provider.of<UndoProvider>(context, listen: false);
 
-    // Save state before gradient color change
     final currentState = colorProvider.captureCurrentState();
     undoProvider.saveState(
       action: 'Change gradient colors',
       state: currentState,
     );
 
-    // Apply new gradient with updated colors
     final newGradient = LinearGradient(colors: colors);
     colorProvider.setGradient(newGradient);
   }
@@ -168,31 +147,28 @@ class _GradientPickerScreenState extends State<GradientPickerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // ✅ Linear → use GradientRotation(angle)
-    // ✅ Radial → use Alignment from angle
-    final gradient =
-        isLinear
-            ? LinearGradient(
-              colors: [startColor, endColor],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
-              transform: GradientRotation(angle),
-            )
-            : RadialGradient(
-              colors: [startColor, endColor],
-              center: Alignment(
-                math.cos(angle), // X direction
-                math.sin(angle), // Y direction
-              ),
-              radius: 1.0,
-            );
+    final gradient = isLinear
+        ? LinearGradient(
+            colors: [startColor, endColor],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            transform: GradientRotation(angle),
+          )
+        : RadialGradient(
+            colors: [startColor, endColor],
+            center: Alignment(math.cos(angle), math.sin(angle)),
+            radius: 1.0,
+          );
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Gradient Picker'),
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
+        backgroundColor: theme.scaffoldBackgroundColor,
+        foregroundColor: theme.textTheme.bodyLarge?.color,
+        elevation: 0,
       ),
       body: Padding(
         padding: const EdgeInsets.all(10),
@@ -221,108 +197,29 @@ class _GradientPickerScreenState extends State<GradientPickerScreen> {
 
             const SizedBox(height: 15),
 
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(16),
-              ),
+            // Gradient Type
+            _themedSection(
+              title: "Gradient Type",
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "Gradient Type",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 10),
-                  Column(
-                    children: [
-                      GestureDetector(
-                        onTap: () => setState(() => isLinear = true),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 12,
-                            horizontal: 16,
-                          ),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                isLinear
-                                    ? Icons.radio_button_checked
-                                    : Icons.radio_button_off,
-                                color: isLinear ? Colors.orange : Colors.grey,
-                              ),
-                              const SizedBox(width: 8),
-                              const Text(
-                                "Linear",
-                                style: TextStyle(fontWeight: FontWeight.w500),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      GestureDetector(
-                        onTap: () => setState(() => isLinear = false),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 12,
-                            horizontal: 16,
-                          ),
-                          decoration: BoxDecoration(
-                            // color: !isLinear ? Colors.orange.shade50 : Colors.white,
-                            // border: Border.all(
-                            //   color: !isLinear ? Colors.orange : Colors.grey.shade300,
-                            //   width: 2,
-                            // ),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                !isLinear
-                                    ? Icons.radio_button_checked
-                                    : Icons.radio_button_off,
-                                color: !isLinear ? Colors.orange : Colors.grey,
-                              ),
-                              const SizedBox(width: 8),
-                              const Text(
-                                "Radial",
-                                style: TextStyle(fontWeight: FontWeight.w500),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  _radioOption("Linear", isLinear, () {
+                    setState(() => isLinear = true);
+                  }),
+                  const SizedBox(height: 12),
+                  _radioOption("Radial", !isLinear, () {
+                    setState(() => isLinear = false);
+                  }),
                 ],
               ),
             ),
 
             const SizedBox(height: 20),
 
-            // ✅ Angle controls
-            if (isLinear)
-              // 👉 Linear → show angle buttons
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "Gradient Angle",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 10),
-                    Padding(
+            // Gradient Angle
+            isLinear
+                ? _themedSection(
+                    title: "Gradient Angle",
+                    child: Padding(
                       padding: const EdgeInsets.all(14.0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -334,33 +231,17 @@ class _GradientPickerScreenState extends State<GradientPickerScreen> {
                         ],
                       ),
                     ),
-                  ],
-                ),
-              )
-            else
-              // 👉 Radial → show slider (angle rotates gradient center)
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "Gradient Angle",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
+                  )
+                : _themedSection(
+                    title: "Gradient Angle",
+                    child: Row(
                       children: [
                         const Icon(Icons.my_location, color: Colors.orange),
                         Expanded(
                           child: Slider(
                             value: angle,
                             min: 0,
-                            max: 6.28, // 2π radian full circle
+                            max: 6.28,
                             activeColor: Colors.orange,
                             onChanged: (val) {
                               setState(() => angle = val);
@@ -369,9 +250,7 @@ class _GradientPickerScreenState extends State<GradientPickerScreen> {
                         ),
                       ],
                     ),
-                  ],
-                ),
-              ),
+                  ),
 
             const Spacer(),
 
@@ -407,6 +286,27 @@ class _GradientPickerScreenState extends State<GradientPickerScreen> {
     );
   }
 
+  Widget _themedSection({required String title, required Widget child}) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title,
+              style: theme.textTheme.bodyLarge
+                  ?.copyWith(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 10),
+          child,
+        ],
+      ),
+    );
+  }
+
   Widget _colorCircle(String label, Color color, VoidCallback onTap) {
     return Column(
       children: [
@@ -428,12 +328,25 @@ class _GradientPickerScreenState extends State<GradientPickerScreen> {
     );
   }
 
-  Widget _choiceChip(String text, bool selected, VoidCallback onSelected) {
-    return ChoiceChip(
-      label: Text(text),
-      selected: selected,
-      selectedColor: Colors.orange.shade200,
-      onSelected: (_) => onSelected(),
+  Widget _radioOption(String text, bool selected, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Row(
+        children: [
+          Icon(
+            selected ? Icons.radio_button_checked : Icons.radio_button_off,
+            color: selected ? Colors.orange : Colors.grey,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            text,
+            style: Theme.of(context)
+                .textTheme
+                .bodyLarge
+                ?.copyWith(fontWeight: FontWeight.w500),
+          ),
+        ],
+      ),
     );
   }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:logo_app_flutter/fragments/theme_toggle_widget.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
 import 'package:provider/provider.dart';
 // adjust path as needed
@@ -96,8 +97,6 @@ class _ColorScreenState extends State<ColorScreen> {
                           }).toList(),
                     ),
                     const SizedBox(height: 20),
-
-                   
                   ],
                   // ),
                   // ],
@@ -142,6 +141,7 @@ class _ColorScreenState extends State<ColorScreen> {
         title: const Text("Select Color"),
         leading: const BackButton(),
         centerTitle: true,
+        actions: [const ThemeToggleWidget(), const SizedBox(width: 8)],
       ),
       body: Column(
         children: [
@@ -159,7 +159,7 @@ class _ColorScreenState extends State<ColorScreen> {
                     listen: false,
                   ).setColor(colorGrid[index]);
 
-                    Navigator.of(context).pop();
+                  Navigator.of(context).pop();
                 },
                 child: Container(
                   width: 50,

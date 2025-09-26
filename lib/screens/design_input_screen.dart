@@ -72,7 +72,9 @@ class _DesignInputScreenState extends State<DesignInputScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Are you sure?'),
-          content: const Text('Do you really want to go back to the Home Screen?'),
+          content: const Text(
+            'Do you really want to go back to the Home Screen?',
+          ),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -154,7 +156,10 @@ class _DesignInputScreenState extends State<DesignInputScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       bottomNavigationBar: BottomNavigationButtons(
         currentStep: _currentStep,
         totalSteps: stepTitles.length,

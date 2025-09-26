@@ -111,13 +111,16 @@ class _LogoCanvasState extends State<LogoCanvas> {
             if (widget.showGrid)
               CustomPaint(
                 painter: GridPainter(
-                  gridColor: Colors.black,
+                  gridColor:
+                      Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white.withOpacity(0.4)
+                          : Colors.black.withOpacity(0.4),
                   highlightedHorizontalLine:
                       widget.highlightedHorizontalGridLineIndex,
                   highlightedVerticalLine:
                       widget.highlightedVerticalGridLineIndex,
                 ),
-                size: Size.infinite,
+                size: constraints.biggest,
               ),
 
             if (widget.isCheckerboardVisible)
@@ -236,6 +239,57 @@ class _LogoCanvasState extends State<LogoCanvas> {
     );
   }
 
+  Widget _buildSvgWithGradient({
+    required String svgString,
+    required double width,
+    required double height,
+    required Color strokeColor,
+    required double strokeWidth,
+    required Color? fillColor,
+    required int elementId,
+    required SelectedColorProvider provider,
+  }) {
+    final hasGradient = provider.hasGradientForElement(elementId);
+
+    if (hasGradient) {
+      final gradient = provider.getGradientForElement(elementId);
+
+      return ShaderMask(
+        shaderCallback: (bounds) {
+          if (gradient is LinearGradient) {
+            return gradient.createShader(bounds);
+          } else if (gradient is RadialGradient) {
+            return gradient.createShader(bounds);
+          } else if (gradient is SweepGradient) {
+            return gradient.createShader(bounds);
+          }
+          return LinearGradient(
+            colors: gradient!.colors,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ).createShader(bounds);
+        },
+        child: StrokedSvg(
+          svgString: svgString,
+          width: width,
+          height: height,
+          strokeColor: strokeColor,
+          strokeWidth: strokeWidth,
+          fillColor: Colors.white,
+        ),
+      );
+    }
+
+    return StrokedSvg(
+      svgString: svgString,
+      width: width,
+      height: height,
+      strokeColor: strokeColor,
+      strokeWidth: strokeWidth,
+      fillColor: fillColor,
+    );
+  }
+
   Widget? _buildElementById(int id, Size canvasSize) {
     final provider = Provider.of<SelectedColorProvider>(context, listen: true);
 
@@ -268,18 +322,35 @@ class _LogoCanvasState extends State<LogoCanvas> {
       required Offset centerPosition,
       required double rotation,
       required Size childSize,
+      required int elementId,
     }) {
       final topLeftPosition = Offset(
         centerPosition.dx - childSize.width / 2,
         centerPosition.dy - childSize.height / 2,
       );
 
+      final provider = Provider.of<SelectedColorProvider>(
+        context,
+        listen: false,
+      );
+      final rotationX = provider.getRotationXForElement(elementId) ?? 0.0;
+      final rotationY = provider.getRotationYForElement(elementId) ?? 0.0;
+      final rotationZ = provider.getRotationZForElement(elementId) ?? 0.0;
+
       return _buildEditableWrapper(
-        id: id,
+        id: elementId,
         position: topLeftPosition,
-        rotation: 0,
-        isLocked: widget.lockedElements.contains(id),
-        child: Transform.rotate(angle: rotation * pi / 180, child: child),
+        rotation: rotation,
+        isLocked: widget.lockedElements.contains(elementId),
+        child: Transform(
+          transform:
+              Matrix4.identity()
+                ..rotateX(rotationX * pi / 180)
+                ..rotateY(rotationY * pi / 180)
+                ..rotateZ(rotationZ * pi / 180),
+          alignment: Alignment.center,
+          child: child,
+        ),
         canvasSize: canvasSize,
       );
     }
@@ -320,26 +391,18 @@ class _LogoCanvasState extends State<LogoCanvas> {
         Center(
           child: Opacity(
             opacity: (customText.opacity ?? 1.0).clamp(0.0, 1.0),
-            child: StrokedText(
+            child: _buildTextWithGradient(
               text: customText.text,
               style: textStyle,
-              strokeColor: outlineColor,
-              strokeWidth: outlineWidth,
-              showShadow: true,
-              shadowOffset: Offset(
-                provider.getShadowOffsetXForElement(id),
-                provider.getShadowOffsetYForElement(id),
-              ),
-              shadowBlur: 12,
-              shadowColor: provider
-                  .getShadowColorForElement(id)
-                  .withOpacity(0.7),
+              elementId: id,
+              provider: provider,
             ),
           ),
         ),
         centerPosition: customText.position,
         rotation: customText.rotation,
         childSize: textSize,
+        elementId: id,
       );
     }
 
@@ -414,6 +477,7 @@ class _LogoCanvasState extends State<LogoCanvas> {
         centerPosition: image.position,
         rotation: image.rotation,
         childSize: imageSize,
+        elementId: id,
       );
     }
 
@@ -436,9 +500,7 @@ class _LogoCanvasState extends State<LogoCanvas> {
                 svgString: svgElement.svgString,
                 width: size,
                 height: size,
-                strokeColor:
-                    svgElement.outlineColor ??
-                    Colors.transparent, 
+                strokeColor: svgElement.outlineColor ?? Colors.transparent,
                 strokeWidth: svgElement.outlineWidth ?? 0.0,
                 fillColor: svgElement.color,
               ),
@@ -448,11 +510,14 @@ class _LogoCanvasState extends State<LogoCanvas> {
         centerPosition: svgElement.position,
         rotation: svgElement.rotation,
         childSize: svgSize,
+        elementId: id,
       );
     }
 
     // ✅ Main Logo / Company Name / Slogan
     switch (id) {
+      // Replace case 0 in your _buildElementById method:
+
       case 0: // Shape (Main Logo SVG)
         final logoSize =
             provider.getSizeForElement(0) ?? widget.logoState.logoSize;
@@ -464,11 +529,12 @@ class _LogoCanvasState extends State<LogoCanvas> {
 
         return widget.logoState.isLogoVisible
             ? wrap(
+              elementId: id,
               Consumer<SelectedColorProvider>(
                 builder: (context, provider, _) {
                   return Opacity(
                     opacity: provider.opacity,
-                    child: StrokedSvg(
+                    child: _buildSvgWithGradient(
                       svgString: widget.svgLogo,
                       width: logoSize,
                       height: logoSize,
@@ -480,6 +546,8 @@ class _LogoCanvasState extends State<LogoCanvas> {
                               : (provider.isSvgColorOverridden
                                   ? shapeColor
                                   : null),
+                      elementId: 0,
+                      provider: provider,
                     ),
                   );
                 },
@@ -492,7 +560,7 @@ class _LogoCanvasState extends State<LogoCanvas> {
             )
             : null;
 
-      case 1: 
+      case 1:
         final nameText = widget.logoState.companyName ?? '';
         final nameSize =
             provider.getSizeForElement(id) ?? widget.logoState.companyNameSize;
@@ -518,24 +586,17 @@ class _LogoCanvasState extends State<LogoCanvas> {
 
         return widget.logoState.isCompanyNameVisible
             ? wrap(
+              elementId: id,
               Consumer<SelectedColorProvider>(
                 builder: (context, provider, _) {
                   return Opacity(
                     opacity: provider.opacity,
-                    child: StrokedText(
+                    child: _buildTextWithGradient(
+                      // ✅ Use gradient method
                       text: nameText,
                       style: textStyle,
-                      strokeColor: outlineColor,
-                      strokeWidth: outlineWidth,
-                      showShadow: true,
-                      shadowOffset: Offset(
-                        provider.getShadowOffsetXForElement(1),
-                        provider.getShadowOffsetYForElement(1),
-                      ),
-                      shadowBlur: 12,
-                      shadowColor: provider
-                          .getShadowColorForElement(1)
-                          .withOpacity(0.7),
+                      elementId: 1,
+                      provider: provider,
                     ),
                   );
                 },
@@ -574,25 +635,17 @@ class _LogoCanvasState extends State<LogoCanvas> {
 
         return widget.logoState.isSloganVisible
             ? wrap(
+              elementId: id,
               Consumer<SelectedColorProvider>(
                 builder: (context, provider, _) {
                   return Opacity(
                     opacity: provider.opacity,
                     child: Center(
-                      child: StrokedText(
+                      child: _buildTextWithGradient(
                         text: sloganText,
                         style: sloganStyle,
-                        strokeColor: outlineColor,
-                        strokeWidth: outlineWidth,
-                        showShadow: true,
-                        shadowOffset: Offset(
-                          provider.getShadowOffsetXForElement(2),
-                          provider.getShadowOffsetYForElement(2),
-                        ),
-                        shadowBlur: 12,
-                        shadowColor: provider
-                            .getShadowColorForElement(2)
-                            .withOpacity(0.7),
+                        elementId: 2,
+                        provider: provider,
                       ),
                     ),
                   );
@@ -605,10 +658,78 @@ class _LogoCanvasState extends State<LogoCanvas> {
               childSize: sloganMeasured,
             )
             : null;
-
-      default:
-        return null;
     }
+  }
+
+  Widget _buildTextWithGradient({
+    required String text,
+    required TextStyle style,
+    required int elementId,
+    required SelectedColorProvider provider,
+  }) {
+    final hasGradient = provider.hasGradientForElement(elementId);
+
+    if (hasGradient) {
+      final gradient = provider.getGradientForElement(elementId);
+
+      return ShaderMask(
+        shaderCallback: (bounds) {
+          if (gradient is LinearGradient) {
+            return gradient.createShader(bounds);
+          } else if (gradient is RadialGradient) {
+            return gradient.createShader(bounds);
+          } else if (gradient is SweepGradient) {
+            return gradient.createShader(bounds);
+          }
+          return LinearGradient(
+            colors: gradient!.colors,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ).createShader(bounds);
+        },
+        child: Text(text, style: style.copyWith(color: Colors.white)),
+      );
+    }
+
+    return Text(text, style: style);
+  }
+
+  Widget _buildElementWithGradient(int elementId, Widget child) {
+    return Consumer<SelectedColorProvider>(
+      builder: (context, provider, _) {
+        final hasGradient = provider.hasGradientForElement(elementId);
+
+        if (hasGradient) {
+          final gradient = provider.getGradientForElement(elementId);
+
+          return ShaderMask(
+            shaderCallback: (bounds) {
+              if (gradient is LinearGradient) {
+                return LinearGradient(
+                  colors: gradient.colors,
+                  stops: gradient.stops,
+                  begin: gradient.begin,
+                  end: gradient.end,
+                ).createShader(bounds);
+              } else if (gradient is RadialGradient) {
+                return RadialGradient(
+                  colors: gradient.colors,
+                  stops: gradient.stops,
+                  center: gradient.center,
+                  radius: gradient.radius,
+                ).createShader(bounds);
+              }
+              return LinearGradient(
+                colors: gradient!.colors,
+              ).createShader(bounds);
+            },
+            child: child,
+          );
+        }
+
+        return child;
+      },
+    );
   }
 
   Widget _buildCustomImage(CustomImageElement imageElement, int id) {

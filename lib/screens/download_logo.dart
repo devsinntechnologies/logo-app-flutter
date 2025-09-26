@@ -3,6 +3,8 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
+import 'dart:math' as math;
+import 'package:logo_app_flutter/fragments/theme_toggle_widget.dart';
 import 'package:logo_app_flutter/provider/interestitial_ad.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
 import 'package:logo_app_flutter/provider/undo_provider.dart';
@@ -50,7 +52,96 @@ class DownloadLogo extends StatefulWidget {
 }
 
 class _DownloadLogoState extends State<DownloadLogo> {
-  // final _noScreenshot = NoScreenshot.instance;
+  Future<ui.Image> _applyShapeMask(
+    ui.Image sourceImage,
+    String shapeName,
+  ) async {
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    final size = Size(
+      sourceImage.width.toDouble(),
+      sourceImage.height.toDouble(),
+    );
+
+    final shapePath = _createShapePath(shapeName, size);
+    canvas.clipPath(shapePath);
+    canvas.drawImage(sourceImage, Offset.zero, Paint());
+    final picture = recorder.endRecording();
+    return await picture.toImage(sourceImage.width, sourceImage.height);
+  }
+
+  Path _createShapePath(String shapeName, Size size) {
+    final path = Path();
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = math.min(size.width, size.height) / 2;
+
+    switch (shapeName.toLowerCase()) {
+      case 'circle':
+        path.addOval(Rect.fromCircle(center: center, radius: radius));
+        break;
+
+      case 'triangle':
+        path.moveTo(center.dx, center.dy - radius);
+        path.lineTo(center.dx - radius, center.dy + radius);
+        path.lineTo(center.dx + radius, center.dy + radius);
+        path.close();
+        break;
+
+      case 'diamond':
+        path.moveTo(center.dx, center.dy - radius);
+        path.lineTo(center.dx + radius, center.dy);
+        path.lineTo(center.dx, center.dy + radius);
+        path.lineTo(center.dx - radius, center.dy);
+        path.close();
+        break;
+
+      case 'hexagon':
+        final points = <Offset>[];
+        for (int i = 0; i < 6; i++) {
+          final angle = (i * 60.0) * (math.pi / 180.0);
+          points.add(
+            Offset(
+              center.dx + radius * math.cos(angle),
+              center.dy + radius * math.sin(angle),
+            ),
+          );
+        }
+        path.moveTo(points[0].dx, points[0].dy);
+        for (int i = 1; i < points.length; i++) {
+          path.lineTo(points[i].dx, points[i].dy);
+        }
+        path.close();
+        break;
+
+      case 'star':
+        final outerRadius = radius;
+        final innerRadius = radius * 0.4;
+        final points = <Offset>[];
+
+        for (int i = 0; i < 10; i++) {
+          final angle = (i * 36.0) * (math.pi / 180.0);
+          final currentRadius = i.isEven ? outerRadius : innerRadius;
+          points.add(
+            Offset(
+              center.dx + currentRadius * math.cos(angle - math.pi / 2),
+              center.dy + currentRadius * math.sin(angle - math.pi / 2),
+            ),
+          );
+        }
+
+        path.moveTo(points[0].dx, points[0].dy);
+        for (int i = 1; i < points.length; i++) {
+          path.lineTo(points[i].dx, points[i].dy);
+        }
+        path.close();
+        break;
+
+      default:
+        path.addRect(Rect.fromLTWH(0, 0, size.width, size.height));
+    }
+
+    return path;
+  }
 
   String selectedShapeName = ""; // 👈 Add this
   // --- State Management ---
@@ -110,30 +201,74 @@ class _DownloadLogoState extends State<DownloadLogo> {
   Offset? _initialDragPoint;
   double? _initialElementValue;
 
+  Future<void> _saveLogoCleanly(GlobalKey canvasKey) async {
+    final wasMovementPanelVisible = isMovementPanelVisible;
+    final previousSelectedElement = selectedElement;
+    final wasGridVisible = _showGrid;
+
+    try {
+      setState(() {
+        selectedElement = null;
+        isMovementPanelVisible = false;
+        _showGrid = false;
+      });
+
+      final provider = Provider.of<SelectedColorProvider>(
+        context,
+        listen: false,
+      );
+      provider.clearSelection();
+
+      await Future.delayed(const Duration(milliseconds: 150));
+      await WidgetsBinding.instance.endOfFrame;
+
+      await saveCanvasToGallery(canvasKey);
+    } finally {
+      setState(() {
+        selectedElement = previousSelectedElement;
+        isMovementPanelVisible = wasMovementPanelVisible;
+        _showGrid = wasGridVisible;
+      });
+
+      if (previousSelectedElement != null) {
+        final provider = Provider.of<SelectedColorProvider>(
+          context,
+          listen: false,
+        );
+        provider.setSelectedElement(previousSelectedElement);
+      }
+    }
+  }
+
   Future<void> saveCanvasToGallery(GlobalKey canvasKey) async {
-    // ✅ Step 1: Ask Permission for Android 13+ and older
     final isGranted = await _requestGalleryPermission();
     if (!isGranted) {
-      print(" Storage permission not granted");
+      print("Storage permission not granted");
       return;
     }
 
     try {
       RenderRepaintBoundary boundary =
           canvasKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
-      ui.Image image = await boundary.toImage(pixelRatio: 3.0);
-      ByteData? byteData = await image.toByteData(
+      ui.Image canvasImage = await boundary.toImage(pixelRatio: 3.0);
+
+      ui.Image finalImage;
+      if (selectedShapeName.isNotEmpty && selectedShapeName != "none") {
+        finalImage = await _applyShapeMask(canvasImage, selectedShapeName);
+      } else {
+        finalImage = canvasImage;
+      }
+
+      ByteData? byteData = await finalImage.toByteData(
         format: ui.ImageByteFormat.png,
       );
       Uint8List pngBytes = byteData!.buffer.asUint8List();
 
-      // ✅ Step 3: Save to temp directory
       final directory = await getTemporaryDirectory();
       final filePath =
           '${directory.path}/logo_${DateTime.now().millisecondsSinceEpoch}.png';
       final file = await File(filePath).writeAsBytes(pngBytes);
 
-      // ✅ Step 4: Save to Gallery using gallery_saver_plus
       final result = await GallerySaver.saveImage(
         file.path,
         albumName: "LogoMaker",
@@ -156,12 +291,10 @@ class _DownloadLogoState extends State<DownloadLogo> {
   }
 
   void _showSaveConfirmationDialog(BuildContext context, GlobalKey canvasKey) {
-    final adManager = Provider.of<SmartInterstitialManager>(
-      context,
-      listen: false,
-    );
-    adManager.onDownloadAttempted(); // Track first-time download
-    adManager.onButtonClick('save_logo'); // Track button click
+    final shapeText =
+        selectedShapeName.isNotEmpty && selectedShapeName != "none"
+            ? " in ${selectedShapeName} shape"
+            : "";
 
     showDialog(
       barrierDismissible: true,
@@ -170,47 +303,40 @@ class _DownloadLogoState extends State<DownloadLogo> {
         return AlertDialog(
           backgroundColor: Colors.white,
           title: const Text('Save Logo'),
-          content: const Text(
-            'Do you want to save this logo to your gallery?',
-            style: TextStyle(fontSize: 14),
+          content: Text(
+            'Do you want to save this logo to your gallery$shapeText?',
+            style: const TextStyle(fontSize: 14),
           ),
           actions: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
+                  onPressed: () => Navigator.of(context).pop(),
                   child: const Text('Cancel', style: TextStyle(fontSize: 16)),
                 ),
                 TextButton(
                   onPressed: () async {
-                    final provider = Provider.of<SelectedColorProvider>(
+                    final adManager = Provider.of<SmartInterstitialManager>(
                       context,
                       listen: false,
                     );
+                    adManager.onDownloadAttempted();
+                    adManager.onButtonClick('save_logo');
 
-                    int? previousSelection = provider.selectedElementId;
+                    await _saveLogoCleanly(canvasKey);
 
-                    provider.clearSelection();
-
-                    await WidgetsBinding.instance.endOfFrame;
-
-                    await saveCanvasToGallery(canvasKey);
-
-                    if (previousSelection != null) {
-                      provider.setSelectedElement(previousSelection);
-                    }
-
-                    Navigator.of(context).pop(); // Close dialog
+                    Navigator.of(context).pop();
 
                     Provider.of<InterestitialAdProvider>(
                       context,
                       listen: false,
                     ).showAd();
+
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Logo saved to gallery!')),
+                      SnackBar(
+                        content: Text('Logo saved to gallery$shapeText!'),
+                      ),
                     );
                   },
                   child: const Text('Save', style: TextStyle(fontSize: 16)),
@@ -283,20 +409,38 @@ class _DownloadLogoState extends State<DownloadLogo> {
       onWillPop: () async {
         final shouldDiscard = await _showDiscardChangesDialog(context);
         if (shouldDiscard) {
+          final colorProvider = Provider.of<SelectedColorProvider>(
+            context,
+            listen: false,
+          );
+          colorProvider.resetElementGradients();
           _resetEditorStateToDefault();
-          return true; 
+          return true;
         }
-        return false; 
+        return false;
       },
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.grey.shade200,
-          title: const Text(
-            'Logo Maker',
-            style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () async {
+              final shouldDiscard = await _showDiscardChangesDialog(context);
+              if (shouldDiscard) {
+                final colorProvider = Provider.of<SelectedColorProvider>(
+                  context,
+                  listen: false,
+                );
+                colorProvider.resetElementGradients();
+                _resetEditorStateToDefault();
+                Navigator.pop(context);
+              }
+            },
           ),
+          title: const Text('Logo Editor'),
+          centerTitle: true,
           actions: [
-            // Add undo/redo buttons
+            const ThemeToggleWidget(),
+            const SizedBox(width: 8),
             _buildCustomUndoRedoWidget(),
             const SizedBox(width: 8),
             IconButton(
@@ -369,7 +513,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
                                 isCheckerboardActive: true,
                                 checkerboardOpacity: checkerboardOpacity,
                                 isCheckerboardVisible: isCheckerboardVisible,
-
                                 lockedElements:
                                     _currentLogoState.lockedElements,
                                 elementOrder: logoState.elementOrder,
@@ -387,34 +530,56 @@ class _DownloadLogoState extends State<DownloadLogo> {
                             setState(() {
                               _showGrid = !_showGrid;
                             });
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  _showGrid ? 'Grid enabled' : 'Grid disabled',
+                                ),
+                                duration: const Duration(milliseconds: 1000),
+                              ),
+                            );
                           },
+                          onLongPress: () => _showGridPropertiesDialog(context),
                           child: Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 16,
                               vertical: 8,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.grey.shade700,
+                              color:
+                                  Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Colors.grey[800]
+                                      : Colors.grey[300],
                               borderRadius: const BorderRadius.only(
                                 topLeft: Radius.circular(25.0),
                                 bottomLeft: Radius.circular(25.0),
                               ),
-                              boxShadow: const [
+                              boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black26,
+                                  color:
+                                      Theme.of(context).brightness ==
+                                              Brightness.dark
+                                          ? Colors.black.withOpacity(0.5)
+                                          : Colors.black.withOpacity(0.2),
                                   blurRadius: 8,
-                                  offset: Offset(-2, 2),
+                                  offset: const Offset(-2, 2),
                                 ),
                               ],
                             ),
                             child: Icon(
                               _showGrid ? Icons.grid_off : Icons.grid_on,
-                              color: Colors.white,
+                              color:
+                                  Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Colors.white
+                                      : Colors.black87,
                               size: 28,
                             ),
                           ),
                         ),
                       ),
+
                       Positioned(
                         top: 20,
                         left: 0,
@@ -430,27 +595,40 @@ class _DownloadLogoState extends State<DownloadLogo> {
                               vertical: 8,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.grey.shade700,
+                              color:
+                                  Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Colors.grey[800]
+                                      : Colors.grey[300],
                               borderRadius: const BorderRadius.only(
                                 topRight: Radius.circular(25.0),
                                 bottomRight: Radius.circular(25.0),
                               ),
-                              boxShadow: const [
+                              boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black26,
+                                  color:
+                                      Theme.of(context).brightness ==
+                                              Brightness.dark
+                                          ? Colors.black.withOpacity(0.5)
+                                          : Colors.black.withOpacity(0.2),
                                   blurRadius: 8,
-                                  offset: Offset(2, 2),
+                                  offset: const Offset(2, 2),
                                 ),
                               ],
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.layers,
-                              color: Colors.white,
+                              color:
+                                  Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Colors.white
+                                      : Colors.black87,
                               size: 28,
                             ),
                           ),
                         ),
                       ),
+
                       if (_isLayersPanelVisible)
                         Positioned(
                           top: 30,
@@ -459,17 +637,25 @@ class _DownloadLogoState extends State<DownloadLogo> {
                             height: 40,
                             width: 100,
                             decoration: BoxDecoration(
-                              color: Colors.grey.shade800.withOpacity(0.95),
+                              color:
+                                  Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Colors.grey[800]!.withOpacity(0.95)
+                                      : Colors.grey[200]!.withOpacity(0.95),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
                                 IconButton(
-                                  icon: const Icon(
+                                  icon: Icon(
                                     Icons.arrow_back_ios_new,
                                     size: 20,
-                                    color: Colors.white,
+                                    color:
+                                        Theme.of(context).brightness ==
+                                                Brightness.dark
+                                            ? Colors.white
+                                            : Colors.black87,
                                   ),
                                   onPressed: () {
                                     setState(() {
@@ -516,7 +702,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
                     ],
                   ),
                 ),
-
                 Column(
                   children: [
                     Container(height: 300, color: Colors.grey.shade200),
@@ -524,6 +709,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
                 ),
               ],
             ),
+
             if (tabToolbarIndex != -1 &&
                 (!isMovementPanelVisible || selectedElement == null))
               Positioned(
@@ -531,23 +717,30 @@ class _DownloadLogoState extends State<DownloadLogo> {
                 right: 0,
                 bottom: kBottomNavigationBarHeight - 50,
                 top: MediaQuery.sizeOf(context).height.toDouble() * 0.44,
-                child: AnimatedContainer(
-                  duration: Duration(microseconds: 300),
-                  height: 230,
-                  child: _buildToolbarForTabs(tabToolbarIndex),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      height: 280,
+                      child: _buildToolbarForTabs(tabToolbarIndex),
+                    ),
+                  ],
                 ),
               ),
+
             if (selectedElement != null && isMovementPanelVisible)
               Positioned(
-                bottom: -100,
-
+                bottom:
+                    0, 
+                left: 0,
+                right: 0,
                 child: MovementPanel(
-                  isVisible: true,
-                  onLogoColorChanged: _onLogoColorChanged,
+                  isVisible: isMovementPanelVisible,
                   onDirectionPressed: (String direction) {
                     const double moveAmount = 5.0;
                     Offset delta;
-
                     switch (direction) {
                       case 'up':
                         delta = const Offset(0, -moveAmount);
@@ -565,7 +758,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
                         delta = Offset.zero;
                     }
                     setState(() {});
-
                     _updateElementPosition(selectedElement!, delta);
                   },
                   onDuplicatePressed: () {
@@ -576,8 +768,10 @@ class _DownloadLogoState extends State<DownloadLogo> {
                       () => bringToFront(selectedElement!, _currentLogoState),
                   onSendToBackPressed:
                       () => sendToBack(selectedElement!, _currentLogoState),
-
                   selectedElementId: selectedElement,
+                  onClose: () {
+                    
+                  },
                 ),
               ),
           ],
@@ -587,6 +781,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
           onItemSelected: _handleBottomNavTap,
           hasTapped: true,
         ),
+        
       ),
     );
   }
@@ -913,8 +1108,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
     colorProvider.updateLogoState(_currentLogoState);
 
     final currentState = colorProvider.captureCurrentState();
-    currentState['selectedShapeName'] =
-        selectedShapeName; 
+    currentState['selectedShapeName'] = selectedShapeName;
 
     undoProvider.saveState(action: action, state: currentState);
 
@@ -1039,7 +1233,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
         context,
       ).push<String>(_createSlideRoute());
       if (result != null && result.isNotEmpty) {
-        _saveUndoState('Add text element'); 
+        _saveUndoState('Add text element');
         setState(() {
           final newTextElement = CustomTextElement(
             text: result,
@@ -1446,6 +1640,134 @@ class _DownloadLogoState extends State<DownloadLogo> {
   //     });
   //   }
 
+  void _showGridPropertiesDialog(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Theme.of(context).dialogBackgroundColor,
+          title: Text(
+            'Grid Properties',
+            style: TextStyle(
+              color: Theme.of(context).textTheme.titleLarge?.color,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // ✅ Grid Density Slider
+              Text(
+                'Grid Density',
+                style: TextStyle(
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Slider(
+                value: 4.0, // Default 4x4 grid
+                min: 2.0,
+                max: 8.0,
+                divisions: 6,
+                label: '4x4',
+                activeColor: Colors.orange,
+                onChanged: (value) {
+                  // TODO: Implement grid density change
+                  print('Grid density changed to: $value');
+                },
+              ),
+
+              const SizedBox(height: 16),
+
+              // ✅ Grid Color Picker
+              Text(
+                'Grid Color',
+                style: TextStyle(
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildColorOption(Colors.white, 'White'),
+                  _buildColorOption(Colors.black, 'Black'),
+                  _buildColorOption(Colors.grey, 'Grey'),
+                  _buildColorOption(Colors.blue, 'Blue'),
+                  _buildColorOption(Colors.red, 'Red'),
+                ],
+              ),
+
+              const SizedBox(height: 16),
+
+              Text(
+                'Grid Opacity',
+                style: TextStyle(
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Slider(
+                value: 0.3,
+                min: 0.1,
+                max: 1.0,
+                divisions: 9,
+                label: '30%',
+                activeColor: Colors.orange,
+                onChanged: (value) {
+                  // TODO: Implement grid opacity change
+                  print('Grid opacity changed to: ${(value * 100).round()}%');
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'Close',
+                style: TextStyle(
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildColorOption(Color color, String label) {
+    return GestureDetector(
+      onTap: () {
+        print('Grid color changed to: $label');
+      },
+      child: Column(
+        children: [
+          Container(
+            width: 30,
+            height: 30,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.grey.shade400, width: 1),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 10,
+              color: Theme.of(context).textTheme.bodySmall?.color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _onPanStart(int id, DragStartDetails details) {
     if (_isElementLocked(id)) return;
     _saveUndoState('Move element $id');
@@ -1709,7 +2031,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
   //   _clearGridAlignment();
   // }
 
-
   Offset? _getCanvasCenter() {
     final RenderBox? renderBox =
         _canvasKey.currentContext?.findRenderObject() as RenderBox?;
@@ -1912,7 +2233,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
         return Offset.zero;
       }
     }
-    
+
     switch (id) {
       case 0:
         return logoState.logoPosition;
@@ -2000,7 +2321,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
   void _updateElementSize(int id, double newSize) {
     if (id >= 100 && id < 200) {
-
       final index = id - 100;
       if (index < _currentLogoState.customTexts.length) {
         final updatedTexts = List<CustomTextElement>.from(
@@ -2055,7 +2375,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
   void _updateElementRotation(int id, double newRotation) {
     if (id >= 100 && id < 200) {
-      
       final index = id - 100;
       if (index < _currentLogoState.customTexts.length) {
         final updatedTexts = List<CustomTextElement>.from(
@@ -2462,6 +2781,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
         palette: null,
         opacity: 1.0,
       );
+
+      // Reset UI state
       selectedElement = null;
       selectedElementId = null;
       tabToolbarIndex = 0;
@@ -2478,56 +2799,76 @@ class _DownloadLogoState extends State<DownloadLogo> {
       _highlightedHorizontalGridLineIndex = null;
       _highlightedVerticalGridLineIndex = null;
 
-      // Reset local state for palette, effects, backgrounds, etc.
-      // selectedPalette = null;
-      // selectedEffect = null;
-      // selectedBackgroundImage = null;
-      // selectedTexture = null;
-      // selectedGradient = null;
-      // selectedBackgroundColor = Colors.white;
+      selectedShapeName = "";
     });
 
     final colorProvider = Provider.of<SelectedColorProvider>(
       context,
       listen: false,
     );
+
     colorProvider.resetAllEditorState();
+
+    colorProvider.resetElementGradients();
+
     colorProvider.updateLogoState(_currentLogoState);
 
     final undoProvider = Provider.of<UndoProvider>(context, listen: false);
     undoProvider.clear();
+
+    print('✅ Editor reset to default including gradients');
   }
 }
 
 Future<bool> _showDiscardChangesDialog(BuildContext context) async {
-  final result = await ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: const Text('Are you sure you want to discard your changes?'),
-      action: SnackBarAction(
-        label: 'Discard',
-        onPressed: () {
-          Navigator.of(context).pop(true);
-        },
-      ),
-      duration: const Duration(seconds: 3),
-    ),
-  );
+  final theme = Theme.of(context);
+  final isDark = theme.brightness == Brightness.dark;
+
   return await showDialog<bool>(
         context: context,
+        barrierDismissible: false,
         builder:
             (context) => AlertDialog(
-              title: const Text('Discard Changes?'),
-              content: const Text(
-                'Are you sure you want to discard your edits?',
+              backgroundColor: theme.dialogBackgroundColor,
+              title: Text(
+                'Discard Changes?',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.onBackground,
+                ),
+              ),
+              content: Text(
+                'Are you sure you want to discard all your edits including colors, gradients, and modifications?',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onBackground,
+                ),
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text('Cancel'),
+                  child: Text(
+                    'Cancel',
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
                 ),
                 TextButton(
-                  onPressed: () => Navigator.of(context).pop(true),
-                  child: const Text('Discard'),
+                  onPressed: () {
+                    final colorProvider = Provider.of<SelectedColorProvider>(
+                      context,
+                      listen: false,
+                    );
+                    colorProvider.resetElementGradients();
+
+                    Navigator.of(context).pop(true);
+                  },
+                  child: Text(
+                    'Discard',
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: theme.colorScheme.error,
+                    ),
+                  ),
                 ),
               ],
             ),

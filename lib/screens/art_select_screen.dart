@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:logo_app_flutter/fragments/theme_toggle_widget.dart';
 
 class ArtSelectScreen extends StatelessWidget {
   final List<String> images; // ✅ Pass image paths here (e.g., assets/icons/...)
@@ -6,21 +7,28 @@ class ArtSelectScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return DefaultTabController(
-      length: 5, 
+      length: 5,
       child: Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+
         appBar: AppBar(
-          backgroundColor: Colors.white,
-          title: const Text(
+          backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+          title: Text(
             'Art Select',
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.black,
+              color: Theme.of(context).appBarTheme.foregroundColor,
             ),
           ),
+          actions: [const ThemeToggleWidget(), const SizedBox(width: 8)],
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            icon: Icon(
+              Icons.arrow_back,
+              color: Theme.of(context).appBarTheme.foregroundColor,
+            ),
             onPressed: () => Navigator.pop(context),
           ),
           elevation: 0,
@@ -45,7 +53,7 @@ class ArtSelectScreen extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: isDark ? Colors.grey[850] : Colors.white,
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: const [
                             BoxShadow(
@@ -57,7 +65,10 @@ class ArtSelectScreen extends StatelessWidget {
                         ),
                         child: GestureDetector(
                           onTap: () {
-                            Navigator.pop(context, images[index]); // ✅ Return selected image path
+                            Navigator.pop(
+                              context,
+                              images[index],
+                            ); // ✅ Return selected image path
                           },
                           child: Image.asset(
                             images[index],
@@ -82,8 +93,8 @@ class ArtSelectScreen extends StatelessWidget {
             );
           }),
         ),
-        bottomNavigationBar:  Container(
-            height: 100,
+        bottomNavigationBar: Container(
+          height: 100,
           color: Colors.white,
           child: TabBar(
             isScrollable: true,
@@ -103,4 +114,3 @@ class ArtSelectScreen extends StatelessWidget {
     );
   }
 }
-
