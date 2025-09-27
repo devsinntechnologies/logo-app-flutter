@@ -103,26 +103,27 @@ class _MovementPanelState extends State<MovementPanel>
     try {
       if (!widget.isVisible) return const SizedBox.shrink();
 
+      final theme = Theme.of(context);
       final isDark = Theme.of(context).brightness == Brightness.dark;
       return Align(
         alignment: Alignment.bottomCenter,
         child: Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: Container(
-            height: MediaQuery.sizeOf(context).width * 0.69,
-            width: MediaQuery.sizeOf(context).width * 1,
-            decoration: BoxDecoration(
-              color:
-                  isDark
-                      ? const Color(0xFF2C2C2C)
-                      : const Color.fromARGB(255, 72, 70, 70),
+          padding: const EdgeInsets.only(bottom: 5),
+          child: Material(
+            elevation: 10,
+            child: Container(
+              height: MediaQuery.sizeOf(context).height * 0.25,
+              width: MediaQuery.sizeOf(context).width * 1,
+              decoration: BoxDecoration(
+                color: theme.cardColor.withOpacity(0.95),
+              ),
+              child:
+                  _isMoreSelected
+                      ? _buildMoreTab(context)
+                      : _isArtElement
+                      ? _buildArtMainView()
+                      : _buildMainView(),
             ),
-            child:
-                _isMoreSelected
-                    ? _buildMoreTab(context)
-                    : _isArtElement
-                    ? _buildArtMainView()
-                    : _buildMainView(),
           ),
         ),
       );
@@ -141,9 +142,11 @@ class _MovementPanelState extends State<MovementPanel>
         mainAxisSize: MainAxisSize.min,
         children: [
           TabBar(
-            indicatorColor: Color.fromARGB(255, 255, 255, 255),
-            labelColor: Color.fromARGB(115, 255, 255, 255),
-            unselectedLabelColor: Color.fromARGB(255, 255, 255, 255),
+            indicatorColor: Theme.of(context).indicatorColor,
+            labelColor: Theme.of(context).textTheme.bodyLarge?.color,
+            unselectedLabelColor: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.color?.withOpacity(0.7),
             onTap: (index) {
               if (index == 3) {
                 setState(() {
@@ -185,9 +188,11 @@ class _MovementPanelState extends State<MovementPanel>
         mainAxisSize: MainAxisSize.min,
         children: [
           TabBar(
-            indicatorColor: Colors.white,
-            labelColor: Colors.grey,
-            unselectedLabelColor: Colors.white,
+            indicatorColor: Theme.of(context).indicatorColor,
+            labelColor: Theme.of(context).textTheme.bodyLarge?.color,
+            unselectedLabelColor: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.color?.withOpacity(0.7),
             tabs: [
               Tab(text: 'Controls'),
               Tab(text: 'Size'),
@@ -209,6 +214,8 @@ class _MovementPanelState extends State<MovementPanel>
   }
 
   Widget _buildSizeTab() {
+    final theme = Theme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Consumer<SelectedColorProvider>(
       builder: (context, provider, _) {
         if (widget.selectedElementId == null) {
@@ -230,10 +237,10 @@ class _MovementPanelState extends State<MovementPanel>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text(
+              Text(
                 "Resize",
                 style: TextStyle(
-                  color: Colors.white,
+                  color: theme.textTheme.bodyLarge?.color,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -242,6 +249,7 @@ class _MovementPanelState extends State<MovementPanel>
                 min: 1,
                 max: 100,
                 divisions: 99,
+                activeColor: theme.colorScheme.primary,
                 onChanged: (uiValue) {
                   double actualValue = provider.mapUIToActual(
                     uiValue,
@@ -257,7 +265,7 @@ class _MovementPanelState extends State<MovementPanel>
               ),
               Text(
                 uiValue.toInt().toString(),
-                style: const TextStyle(color: Colors.white),
+                style: TextStyle(color: theme.textTheme.bodyMedium?.color),
               ),
             ],
           ),
@@ -267,132 +275,137 @@ class _MovementPanelState extends State<MovementPanel>
   }
 
   Widget _buildControlsTab() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        SizedBox(height: MediaQuery.sizeOf(context).width * 0.08),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Column(
-              children: [
-                _buildDirectionButton(
-                  icon: Icons.keyboard_arrow_up,
-                  direction: 'up',
-                  tooltip: 'Up',
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildDirectionButton(
-                      icon: Icons.keyboard_arrow_left,
-                      direction: 'left',
-                      tooltip: 'Left',
+    final theme = Theme.of(context);
+
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(height: MediaQuery.sizeOf(context).width * 0.05),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Column(
+                children: [
+                  _buildDirectionButton(
+                    icon: Icons.keyboard_arrow_up,
+                    direction: 'up',
+                    tooltip: 'Up',
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildDirectionButton(
+                        icon: Icons.keyboard_arrow_left,
+                        direction: 'left',
+                        tooltip: 'Left',
+                      ),
+                      const SizedBox(width: 16),
+                      _buildDirectionButton(
+                        icon: Icons.keyboard_arrow_right,
+                        direction: 'right',
+                        tooltip: 'Right',
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  _buildDirectionButton(
+                    icon: Icons.keyboard_arrow_down,
+                    direction: 'down',
+                    tooltip: 'Down',
+                  ),
+                ],
+              ),
+              Column(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      _saveUndoState(
+                        'Bring element ${widget.selectedElementId} to front',
+                      );
+                      widget.onBringToFrontPressed();
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surface,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: theme.dividerColor, width: 1),
+                      ),
+                      padding: const EdgeInsets.all(8),
+                      child: Icon(
+                        Icons.layers_outlined,
+                        color: theme.iconTheme.color,
+                      ),
                     ),
-                    const SizedBox(width: 16),
-                    _buildDirectionButton(
-                      icon: Icons.keyboard_arrow_right,
-                      direction: 'right',
-                      tooltip: 'Right',
+                  ),
+                  Text(
+                    "Up Layer",
+                    style: TextStyle(color: theme.textTheme.bodySmall?.color),
+                  ),
+                  const SizedBox(height: 20),
+                  GestureDetector(
+                    onTap: () {
+                      _saveUndoState(
+                        'Send element ${widget.selectedElementId} to back',
+                      );
+                      widget.onSendToBackPressed();
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surface,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: theme.dividerColor, width: 1),
+                      ),
+                      padding: const EdgeInsets.all(8),
+                      child: Icon(
+                        Icons.layers_outlined,
+                        color: theme.iconTheme.color,
+                      ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                _buildDirectionButton(
-                  icon: Icons.keyboard_arrow_down,
-                  direction: 'down',
-                  tooltip: 'Down',
-                ),
-              ],
-            ),
-            Column(
-              children: [
-                GestureDetector(
-                  onTap: () {
+                  ),
+                  Text(
+                    "Down Layer",
+                    style: TextStyle(color: theme.textTheme.bodySmall?.color),
+                  ),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: ElevatedButton(
+                  onPressed: () {
                     _saveUndoState(
-                      'Bring element ${widget.selectedElementId} to front',
+                      'Duplicate element ${widget.selectedElementId}',
                     );
-                    widget.onBringToFrontPressed();
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.black, width: 1),
-                    ),
-                    padding: const EdgeInsets.all(8),
-                    child: const Icon(
-                      Icons.layers_outlined,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
-                const Text(
-                  "Up Layer",
-                  style: TextStyle(color: Color.fromARGB(255, 251, 251, 251)),
-                ),
-                const SizedBox(height: 20),
-                GestureDetector(
-                  onTap: () {
-                    _saveUndoState(
-                      'Send element ${widget.selectedElementId} to back',
+                    _trackButtonClick('duplicate');
+                    debugPrint(
+                      'Duplicate button pressed for element ${widget.selectedElementId ?? "null"}',
                     );
-                    widget.onSendToBackPressed();
+                    widget.onDuplicatePressed();
                   },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.black, width: 1),
-                    ),
-                    padding: const EdgeInsets.all(8),
-                    child: const Icon(
-                      Icons.layers_outlined,
-                      color: Colors.black,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.colorScheme.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
                     ),
                   ),
-                ),
-                const Text(
-                  "Down Layer",
-                  style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
-                ),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  _saveUndoState(
-                    'Duplicate element ${widget.selectedElementId}',
-                  );
-                  _trackButtonClick('duplicate');
-                  debugPrint(
-                    'Duplicate button pressed for element ${widget.selectedElementId ?? "null"}',
-                  );
-                  widget.onDuplicatePressed();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
+                  child: const Text(
+                    "Duplicate",
+                    style: TextStyle(color: Colors.white),
                   ),
-                ),
-                child: const Text(
-                  "Duplicate",
-                  style: TextStyle(color: Colors.white),
                 ),
               ),
-            ),
-          ],
-        ),
-      ],
+            ],
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildGenericMoreView() {
     if (!mounted) return const SizedBox.shrink();
+    final theme = Theme.of(context);
     return DefaultTabController(
       length: 3,
       child: Column(
@@ -405,13 +418,14 @@ class _MovementPanelState extends State<MovementPanel>
                     () => setState(() {
                       _isMoreSelected = false;
                     }),
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                icon: Icon(Icons.arrow_back, color: theme.iconTheme.color),
               ),
               Expanded(
                 child: TabBar(
-                  labelColor: Colors.grey,
-                  indicatorColor: Colors.white,
-                  unselectedLabelColor: Colors.white,
+                  labelColor: theme.textTheme.bodyLarge?.color,
+                  indicatorColor: theme.indicatorColor,
+                  unselectedLabelColor: theme.textTheme.bodyMedium?.color
+                      ?.withOpacity(0.7),
                   tabs: [
                     Tab(text: 'Outlines'),
                     Tab(text: 'Rotate'),
@@ -551,8 +565,10 @@ class _MovementPanelState extends State<MovementPanel>
       child: Column(
         children: [
           TabBar(
-            labelColor: Colors.white,
-            unselectedLabelColor: Colors.grey,
+            labelColor: Theme.of(context).textTheme.bodyLarge?.color,
+            unselectedLabelColor: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.color?.withOpacity(0.7),
             indicatorColor: Colors.orange,
             tabs: [Tab(text: 'Colors'), Tab(text: 'Gradients')],
           ),
@@ -563,13 +579,15 @@ class _MovementPanelState extends State<MovementPanel>
                 Center(
                   child: Padding(
                     padding: EdgeInsets.all(8),
-                    child: Wrap(
-                      spacing: 10,
-                      runSpacing: 10,
-                      children:
-                          solidColors.map((color) {
-                            return _buildColorBox(context, color);
-                          }).toList(),
+                    child: SingleChildScrollView(
+                      child: Wrap(
+                        spacing: 10,
+                        runSpacing: 10,
+                        children:
+                            solidColors.map((color) {
+                              return _buildColorBox(context, color);
+                            }).toList(),
+                      ),
                     ),
                   ),
                 ),
@@ -630,6 +648,7 @@ class _MovementPanelState extends State<MovementPanel>
   }
 
   Widget _buildGradientBox(BuildContext context, Gradient gradient) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: () {
         _trackButtonClick('gradient_selection');
@@ -667,10 +686,10 @@ class _MovementPanelState extends State<MovementPanel>
         decoration: BoxDecoration(
           gradient: gradient,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.white, width: 2),
+          border: Border.all(color: theme.dividerColor, width: 1),
           boxShadow: [
             BoxShadow(
-              color: Colors.black26,
+              color: theme.shadowColor.withOpacity(0.2),
               blurRadius: 2,
               offset: Offset(0, 1),
             ),
@@ -725,6 +744,7 @@ class _MovementPanelState extends State<MovementPanel>
   }
 
   Widget _buildMoreTab(BuildContext context) {
+    final theme = Theme.of(context);
     final int? selectedId = widget.selectedElementId;
     // print('DEBUG: selectedId in _buildMoreTab: $selectedId');
     print('DEBUG: selectedElementId = ${widget.selectedElementId}');
@@ -745,13 +765,15 @@ class _MovementPanelState extends State<MovementPanel>
               children: [
                 IconButton(
                   onPressed: () => setState(() => _isMoreSelected = false),
-                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  icon: Icon(Icons.arrow_back, color: theme.iconTheme.color),
                 ),
                 Expanded(
                   child: TabBar(
-                    labelColor: Colors.grey,
-                    indicatorColor: Colors.white,
-                    unselectedLabelColor: Colors.white,
+                    labelColor: Theme.of(context).textTheme.bodyLarge?.color,
+                    indicatorColor: Theme.of(context).indicatorColor,
+                    unselectedLabelColor: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.color?.withOpacity(0.7),
                     onTap: (index) {
                       if (index == 3) {
                         setState(() {
@@ -931,12 +953,13 @@ class _MovementPanelState extends State<MovementPanel>
   // }
 
   Widget _buildColorBox(BuildContext context, Color color) {
+    final theme = Theme.of(context);
+
     return GestureDetector(
       onTap: () {
         _trackButtonClick('color_selection');
 
         if (widget.selectedElementId != null) {
-          // ✅ Add undo tracking BEFORE making changes:
           _saveUndoState(
             'Change color of element ${widget.selectedElementId} to $color',
           );
@@ -974,7 +997,7 @@ class _MovementPanelState extends State<MovementPanel>
         decoration: BoxDecoration(
           color: color,
           borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: Colors.black),
+          border: Border.all(color: theme.dividerColor),
         ),
       ),
     );
@@ -1040,6 +1063,8 @@ class _MovementPanelState extends State<MovementPanel>
   }
 
   Widget _buildOutlinesTab() {
+    final theme = Theme.of(context);
+
     return Consumer<SelectedColorProvider>(
       builder: (context, provider, _) {
         if (widget.selectedElementId == null) {
@@ -1070,18 +1095,18 @@ class _MovementPanelState extends State<MovementPanel>
             children: [
               Row(
                 children: [
-                  const Text(
+                  Text(
                     "Outline",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: theme.textTheme.bodyLarge?.color,
                     ),
                   ),
                   Expanded(
                     child: SliderTheme(
                       data: SliderTheme.of(context).copyWith(
-                        activeTrackColor: Colors.orange,
-                        thumbColor: Colors.orange,
+                        activeTrackColor: theme.colorScheme.primary,
+                        thumbColor: theme.colorScheme.primary,
                       ),
                       child: Slider(
                         min: 0,
@@ -1104,7 +1129,10 @@ class _MovementPanelState extends State<MovementPanel>
                     child: Text(
                       outlineThickness.toStringAsFixed(0),
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: theme.textTheme.bodyMedium?.color,
+                      ),
                     ),
                   ),
                 ],
@@ -1136,7 +1164,7 @@ class _MovementPanelState extends State<MovementPanel>
                               border: Border.all(
                                 color:
                                     outlineColor == color
-                                        ? Colors.black
+                                        ? theme.colorScheme.primary
                                         : Colors.transparent,
                                 width: 2,
                               ),
@@ -1157,6 +1185,7 @@ class _MovementPanelState extends State<MovementPanel>
     final provider = Provider.of<SelectedColorProvider>(context);
     final int id = widget.selectedElementId!;
     final styleState = provider.getFontStyleForElement(id);
+    final theme = Theme.of(context);
 
     Widget fontStyleBar = Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -1164,7 +1193,10 @@ class _MovementPanelState extends State<MovementPanel>
         IconButton(
           icon: Icon(
             Icons.format_bold,
-            color: styleState.isBold ? Colors.orange : Colors.white,
+            color:
+                styleState.isBold
+                    ? theme.colorScheme.primary
+                    : theme.iconTheme.color,
           ),
           onPressed: () {
             _saveUndoState('Toggle bold for element $id');
@@ -1180,7 +1212,10 @@ class _MovementPanelState extends State<MovementPanel>
         IconButton(
           icon: Icon(
             Icons.format_italic,
-            color: styleState.isItalic ? Colors.orange : Colors.white,
+            color:
+                styleState.isBold
+                    ? theme.colorScheme.primary
+                    : theme.iconTheme.color,
           ),
           onPressed: () {
             _saveUndoState('Toggle italic for element $id');
@@ -1190,7 +1225,10 @@ class _MovementPanelState extends State<MovementPanel>
         IconButton(
           icon: Icon(
             Icons.format_underline,
-            color: styleState.isUnderline ? Colors.orange : Colors.white,
+            color:
+                styleState.isBold
+                    ? theme.colorScheme.primary
+                    : theme.iconTheme.color,
           ),
           onPressed: () {
             _saveUndoState('Toggle underline for element $id');
@@ -1222,7 +1260,7 @@ class _MovementPanelState extends State<MovementPanel>
                   style: TextStyle(
                     fontFamily: font['name'],
                     fontSize: 32,
-                    color: Colors.white,
+                    color: theme.textTheme.bodyLarge?.color,
                   ),
                 ),
               ),
@@ -1242,6 +1280,7 @@ class _MovementPanelState extends State<MovementPanel>
 
   Widget _buildRotateTab() {
     if (!mounted) return const SizedBox.shrink();
+    final theme = Theme.of(context);
 
     return Consumer<SelectedColorProvider>(
       builder: (context, provider, _) {
@@ -1264,64 +1303,66 @@ class _MovementPanelState extends State<MovementPanel>
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                "Rotate",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "Rotate",
+                  style: TextStyle(
+                    color: theme.textTheme.bodyLarge?.color,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              Slider(
-                value: _localRotation.clamp(0.0, 360.0),
-                min: 0,
-                max: 360,
-                divisions: 360,
-                activeColor: Colors.orange,
-                inactiveColor: Colors.grey,
-                onChanged: (value) {
-                  _trackButtonClick('size_adjustment');
-                  if (mounted) {
+                const SizedBox(height: 16),
+                Slider(
+                  value: _localRotation.clamp(0.0, 360.0),
+                  min: 0,
+                  max: 360,
+                  divisions: 360,
+                  activeColor: theme.colorScheme.primary,
+                  inactiveColor: theme.dividerColor,
+                  onChanged: (value) {
+                    _trackButtonClick('size_adjustment');
+                    if (mounted) {
+                      setState(() {
+                        _localRotation = value;
+                      });
+                    }
+                  },
+                  onChangeEnd: (value) {
+                    _saveUndoState(
+                      'Rotate element $elementId to ${value.toInt()}°',
+                    );
+                    provider.setRotationForElement(elementId, value);
+                  },
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "${_localRotation.toInt()}°",
+                  style: TextStyle(
+                    color: theme.textTheme.bodyMedium?.color,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    _saveUndoState('Reset rotation of element $elementId');
                     setState(() {
-                      _localRotation = value;
+                      _localRotation = 0.0;
                     });
-                  }
-                },
-                onChangeEnd: (value) {
-                  _saveUndoState(
-                    'Rotate element $elementId to ${value.toInt()}°',
-                  );
-                  provider.setRotationForElement(elementId, value);
-                },
-              ),
-              const SizedBox(height: 8),
-              Text(
-                "${_localRotation.toInt()}°",
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
+                    provider.setRotationForElement(elementId, 0.0);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.colorScheme.primary,
+                    foregroundColor: theme.colorScheme.onPrimary,
+                  ),
+                  child: const Text("Reset Rotation"),
                 ),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                  _saveUndoState('Reset rotation of element $elementId');
-                  setState(() {
-                    _localRotation = 0.0;
-                  });
-                  provider.setRotationForElement(elementId, 0.0);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text("Reset Rotation"),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
@@ -1331,6 +1372,7 @@ class _MovementPanelState extends State<MovementPanel>
   Widget _buildShadowTab(BuildContext context) {
     final provider = Provider.of<SelectedColorProvider>(context);
     final int id = widget.selectedElementId!;
+    final theme = Theme.of(context);
 
     return Padding(
       padding: const EdgeInsets.all(12.0),
@@ -1338,7 +1380,10 @@ class _MovementPanelState extends State<MovementPanel>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Shadow Offset X', style: TextStyle(color: Colors.white)),
+            Text(
+              'Shadow Offset X',
+              style: TextStyle(color: theme.textTheme.bodyLarge?.color),
+            ),
             Slider(
               value: provider.getShadowOffsetXForElement(id),
               min: -10,
@@ -1353,7 +1398,10 @@ class _MovementPanelState extends State<MovementPanel>
               },
             ),
 
-            Text('Shadow Offset Y', style: TextStyle(color: Colors.white)),
+            Text(
+              'Shadow Offset Y',
+              style: TextStyle(color: theme.textTheme.bodyLarge?.color),
+            ),
             Slider(
               value: provider.getShadowOffsetYForElement(id),
               min: -10,
@@ -1367,7 +1415,10 @@ class _MovementPanelState extends State<MovementPanel>
                 );
               },
             ),
-            Text('Shadow Color', style: TextStyle(color: Colors.white)),
+            Text(
+              'Shadow Color',
+              style: TextStyle(color: theme.textTheme.bodyLarge?.color),
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -1389,7 +1440,7 @@ class _MovementPanelState extends State<MovementPanel>
                       margin: const EdgeInsets.all(4),
                       decoration: BoxDecoration(
                         color: color,
-                        border: Border.all(color: Colors.grey),
+                        border: Border.all(color: theme.dividerColor),
                       ),
                     ),
                   ),
@@ -1402,6 +1453,7 @@ class _MovementPanelState extends State<MovementPanel>
   }
 
   Widget _build3DTab() {
+    final theme = Theme.of(context);
     return Consumer<SelectedColorProvider>(
       builder: (context, provider, _) {
         if (widget.selectedElementId == null) {
@@ -1437,36 +1489,40 @@ class _MovementPanelState extends State<MovementPanel>
                     Text(
                       "$label Axis",
                       style: TextStyle(
-                        color: Colors.white,
+                        color:
+                            theme.textTheme.bodyLarge?.color, 
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
                       ),
                     ),
-                    SliderTheme(
-                      data: SliderTheme.of(context).copyWith(
-                        activeTrackColor: Colors.orange,
-                        inactiveTrackColor:
-                            isDark ? Colors.grey[600] : Colors.grey[400],
-                        thumbColor: Colors.orange,
-                        overlayColor: Colors.orange.withOpacity(0.2),
-                        valueIndicatorColor: Colors.orange,
-                        valueIndicatorTextStyle: const TextStyle(
-                          color: Colors.white,
+                    Expanded(
+                      child: SliderTheme(
+                        data: SliderTheme.of(context).copyWith(
+                          activeTrackColor: theme.colorScheme.primary,
+                          inactiveTrackColor: theme.dividerColor,
+                          thumbColor: theme.colorScheme.primary,
+                          overlayColor: theme.colorScheme.primary.withOpacity(
+                            0.2,
+                          ),
+                          valueIndicatorColor: theme.colorScheme.primary,
+                          valueIndicatorTextStyle: TextStyle(
+                            color: theme.colorScheme.onPrimary,
+                          ),
                         ),
-                      ),
-                      child: Slider(
-                        value: value,
-                        min: -180.0,
-                        max: 180.0,
-                        divisions: 360,
-                        label: '${value.toStringAsFixed(1)}°',
-                        onChanged: onChanged,
+                        child: Slider(
+                          value: value,
+                          min: -180.0,
+                          max: 180.0,
+                          divisions: 360,
+                          label: '${value.toStringAsFixed(1)}°',
+                          onChanged: onChanged,
+                        ),
                       ),
                     ),
                     Text(
                       "${value.toStringAsFixed(1)}°",
                       style: TextStyle(
-                        color: isDark ? Colors.grey[300] : Colors.grey[200],
+                        color: theme.textTheme.bodyMedium?.color,
                         fontSize: 12,
                       ),
                     ),
@@ -1527,7 +1583,6 @@ class _MovementPanelState extends State<MovementPanel>
                   },
                 ),
 
-                const SizedBox(height: 20),
 
                 ElevatedButton.icon(
                   onPressed: () {
@@ -1558,12 +1613,12 @@ class _MovementPanelState extends State<MovementPanel>
                   ),
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 10),
 
                 Text(
                   "Tip: Combine X, Y, Z rotations for complex 3D effects",
                   style: TextStyle(
-                    color: isDark ? Colors.grey[400] : Colors.grey[300],
+                    color: theme.textTheme.bodySmall?.color, 
                     fontSize: 12,
                     fontStyle: FontStyle.italic,
                   ),

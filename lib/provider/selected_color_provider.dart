@@ -246,23 +246,16 @@ class SelectedColorProvider extends ChangeNotifier {
   }
 
   void discardChanges() {
-    // Reset colors
     _elementColors.clear();
     _elementFonts.clear();
     _elementSizes.clear();
     _elementRotations.clear();
     _elementFontStyles.clear();
-
-    // ✅ Reset gradients on discard
     resetElementGradients();
-
-    // Reset other properties
     _selectedElementId = null;
     _companyTextColor = Colors.black;
     _sloganColor = Colors.black;
     _selectedColor = Colors.blue;
-
-    print('✅ All changes discarded including gradients');
     notifyListeners();
   }
 
@@ -1098,30 +1091,81 @@ class SelectedColorProvider extends ChangeNotifier {
     }
   }
 
+  void toggleLock(int elementId) {
+    final state = _currentLogoState;
+    if (state == null) return;
+
+    _saveUndoState('Toggle lock for element $elementId');
+    final newLockedSet = Set<int>.from(state.lockedElements);
+    if (newLockedSet.contains(elementId)) {
+      newLockedSet.remove(elementId);
+    } else {
+      newLockedSet.add(elementId);
+    }
+    _currentLogoState = state.copyWith(lockedElements: newLockedSet);
+    notifyListeners();
+  }
+
+  // ✅ ADD THIS METHOD
+  void toggleLockAll(bool shouldLock) {
+    final state = _currentLogoState;
+    if (state == null) return;
+
+    _saveUndoState(shouldLock ? 'Lock all elements' : 'Unlock all elements');
+    if (shouldLock) {
+      _currentLogoState = state.copyWith(
+        lockedElements: state.visibleElementIds.toSet(),
+      );
+    } else {
+      _currentLogoState = state.copyWith(lockedElements: {});
+    }
+    notifyListeners();
+  }
+
   void moveElementUp(int elementId) {
     final state = _currentLogoState;
     if (state == null) return;
-    final idx = state.elementOrder.indexOf(elementId);
-    if (idx > 0) {
-      final newOrder = List<int>.from(state.elementOrder);
-      newOrder.removeAt(idx);
-      newOrder.insert(idx - 1, elementId);
-      _currentLogoState = state.copyWith(elementOrder: newOrder);
-      notifyListeners();
-    }
+
+    final visible = state.visibleElementIds.toList();
+    final vIdx = visible.indexOf(elementId);
+    if (vIdx <= 0) return;
+
+    final swapWith = visible[vIdx - 1];
+
+    final order = List<int>.from(state.elementOrder);
+    final i = order.indexOf(elementId);
+    final j = order.indexOf(swapWith);
+    if (i == -1 || j == -1) return;
+
+    order.removeAt(i);
+    final jAfter = i < j ? j - 1 : j;
+    order.insert(jAfter, elementId);
+
+    _currentLogoState = state.copyWith(elementOrder: order);
+    notifyListeners();
   }
 
   void moveElementDown(int elementId) {
     final state = _currentLogoState;
     if (state == null) return;
-    final idx = state.elementOrder.indexOf(elementId);
-    if (idx >= 0 && idx < state.elementOrder.length - 1) {
-      final newOrder = List<int>.from(state.elementOrder);
-      newOrder.removeAt(idx);
-      newOrder.insert(idx + 1, elementId);
-      _currentLogoState = state.copyWith(elementOrder: newOrder);
-      notifyListeners();
-    }
+
+    final visible = state.visibleElementIds.toList();
+    final vIdx = visible.indexOf(elementId);
+    if (vIdx == -1 || vIdx >= visible.length - 1) return;
+
+    final swapWith = visible[vIdx + 1];
+
+    final order = List<int>.from(state.elementOrder);
+    final i = order.indexOf(elementId);
+    final j = order.indexOf(swapWith);
+    if (i == -1 || j == -1) return;
+
+    order.removeAt(i);
+    final jAfter = i < j ? j : j + 1;
+    order.insert(jAfter, elementId);
+
+    _currentLogoState = state.copyWith(elementOrder: order);
+    notifyListeners();
   }
 
   void updateLogoPosition(Offset newPosition) {

@@ -83,120 +83,130 @@ class _DropUpPanelState extends State<DropUpPanel> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Material(
       elevation: 8,
-      color: const ui.Color.fromARGB(255, 72, 70, 70),
+      color: theme.scaffoldBackgroundColor,
       child: Container(
-        height: double.infinity,
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          mainAxisSize: MainAxisSize.max,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Stack(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _TopOption(
-                  label: options[0],
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => ColorScreen()),
-                    );
-                  },
-                ),
-                _TopOption(
-                  label: options[1],
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => GradientPickerScreen(),
-                      ),
-                    );
-                  },
-                ),
-                _TopOption(
-                  label: options[2],
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => SelectBgImages()),
-                    );
-                  },
-                ),
-                _TopOption(
-                  label: options[3],
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SelectTextureImages(),
-                      ),
-                    );
-                  },
-                ),
-                _TopOption(
-                  label: options[4],
-                  onTap: () {
-                    pickImageFromDevice(context);
-                  },
-                ),
-              ],
-            ),
-            Divider(),
-            const SizedBox(height: 13),
-
-            // Opacity slider
-            Row(
-              children: [
-                const Icon(
-                  Icons.opacity,
-                  color: ui.Color.fromARGB(255, 255, 255, 255),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Slider(
-                    activeColor: Colors.yellow,
-                    value: _opacityValue,
-                    min: 0,
-                    max: 1,
-                    onChanged: (val) {
-                      setState(() {
-                        _opacityValue = val;
-                      });
-                      widget.onOpacityChanged(_opacityValue);
-                    },
-                  ),
-                ),
-                Text(
-                  "${(_opacityValue * 100).round()}%",
-                  style: const TextStyle(
-                    color: ui.Color.fromARGB(255, 255, 255, 255),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Divider(),
-            // Shape selector
-            SizedBox(
-              height: 100,
+            SingleChildScrollView(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text("Logo Shape", style: TextStyle(color: Colors.white)),
-                  ShapeSelectorWidget(
-                    onShapeSelected: (shapeName) {
-                      if (shapeName == "Transparent") {
-                        widget.onToggleCheckerboard(true);
-                      } else if (shapeName == "TransparentOff") {
-                        widget.onToggleCheckerboard(false);
-                      } else {
-                        widget.onToggleCheckerboard(true);
-                        widget.onShapeSelected(shapeName);
-                      }
-                    },
+                  const SizedBox(height: 30),
+              
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _TopOption(
+                        label: options[0],
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ColorScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      _TopOption(
+                        label: options[1],
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => GradientPickerScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      _TopOption(
+                        label: options[2],
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => SelectBgImages(),
+                            ),
+                          );
+                        },
+                      ),
+                      _TopOption(
+                        label: options[3],
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => SelectTextureImages(),
+                            ),
+                          );
+                        },
+                      ),
+                      _TopOption(
+                        label: options[4],
+                        onTap: () {
+                          pickImageFromDevice(context);
+                        },
+                      ),
+                    ],
+                  ),
+                  Divider(color: theme.dividerColor),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(Icons.opacity, color: theme.iconTheme.color),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Slider(
+                          activeColor: theme.colorScheme.primary,
+                          value: _opacityValue,
+                          min: 0,
+                          max: 1,
+                          onChanged: (val) {
+                            setState(() {
+                              _opacityValue = val;
+                            });
+                            widget.onOpacityChanged(_opacityValue);
+                          },
+                        ),
+                      ),
+                      Text(
+                        "${(_opacityValue * 100).round()}%",
+                        style: TextStyle(color: theme.textTheme.bodyLarge?.color),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Divider(color: theme.dividerColor),
+                  SizedBox(
+                    height: 80,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Logo Shape",
+                          style: TextStyle(
+                            color: theme.textTheme.bodyLarge?.color,
+                          ),
+                        ),
+                        ShapeSelectorWidget(
+                          onShapeSelected: (shapeName) {
+                            if (shapeName == "Transparent") {
+                              widget.onToggleCheckerboard(true);
+                            } else if (shapeName == "TransparentOff") {
+                              widget.onToggleCheckerboard(false);
+                            } else {
+                              widget.onToggleCheckerboard(true);
+                              widget.onShapeSelected(shapeName);
+                            }
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -220,9 +230,9 @@ class _TopOption extends StatelessWidget {
       onTap: onTap,
       child: Text(
         label,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 12,
-          color: ui.Color.fromARGB(255, 255, 255, 255),
+          color: Theme.of(context).textTheme.bodyLarge?.color,
           fontWeight: FontWeight.normal,
         ),
       ),

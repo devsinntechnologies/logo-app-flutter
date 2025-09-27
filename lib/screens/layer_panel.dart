@@ -37,15 +37,21 @@ class LayersPanel extends StatelessWidget {
   }
 
   Widget _buildLayerPreview(BuildContext context, int id) {
+    final theme = Theme.of(context);
     Widget child;
     String text = '';
+
+    final textStyle = TextStyle(color: theme.colorScheme.onSurface);
 
     switch (id) {
       case 0:
       case 3:
         child = SvgPicture.string(
           svgLogo,
-          colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+          colorFilter: ColorFilter.mode(
+            theme.colorScheme.onSurface,
+            BlendMode.srcIn,
+          ),
         );
         text = 'Logo';
         break;
@@ -53,11 +59,7 @@ class LayersPanel extends StatelessWidget {
       case 4:
         child = Text(
           logoState.companyName ?? '',
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+          style: textStyle.copyWith(fontSize: 20, fontWeight: FontWeight.bold),
         );
         text = 'Company';
         break;
@@ -65,11 +67,7 @@ class LayersPanel extends StatelessWidget {
       case 5:
         child = Text(
           logoState.sloganName ?? '',
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontStyle: FontStyle.italic,
-          ),
+          style: textStyle.copyWith(fontSize: 18, fontStyle: FontStyle.italic),
         );
         text = 'Slogan';
         break;
@@ -80,15 +78,15 @@ class LayersPanel extends StatelessWidget {
             final customText = logoState.customTexts[index];
             child = Text(
               customText.text,
-              style: const TextStyle(fontSize: 18, color: Colors.white),
+              style: textStyle.copyWith(fontSize: 18),
             );
             text = customText.text;
           } else {
-            child = const Icon(Icons.error, color: Colors.red);
+            child = Icon(Icons.error, color: theme.colorScheme.error);
             text = 'Invalid CustomText';
           }
         } else {
-          child = const Icon(Icons.error);
+          child = Icon(Icons.error, color: theme.colorScheme.error);
           text = 'Unknown';
         }
     }
@@ -122,7 +120,7 @@ class LayersPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
     final orderedVisibleIds =
         logoState.elementOrder
             .where((id) => logoState.visibleElementIds.contains(id))
@@ -142,10 +140,14 @@ class LayersPanel extends StatelessWidget {
           width: 236,
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.grey.shade800.withOpacity(0.95),
+            color: theme.cardColor.withOpacity(0.95),
             borderRadius: BorderRadius.circular(0),
-            boxShadow: const [
-              BoxShadow(color: Colors.black38, blurRadius: 10, spreadRadius: 2),
+            boxShadow: [
+              BoxShadow(
+                color: theme.shadowColor.withOpacity(0.2),
+                blurRadius: 10,
+                spreadRadius: 2,
+              ),
             ],
           ),
           child: Column(
@@ -158,14 +160,16 @@ class LayersPanel extends StatelessWidget {
                       Checkbox(
                         value: areAllLocked,
                         onChanged: (val) => onToggleLockAll(val ?? false),
-                        checkColor: Colors.black,
-                        activeColor: Colors.white,
-                        side: const BorderSide(color: Colors.white),
+                        checkColor: theme.colorScheme.onPrimary,
+                        activeColor: theme.colorScheme.primary,
+                        side: BorderSide(
+                          color: theme.colorScheme.onSurface.withOpacity(0.6),
+                        ),
                       ),
-                      const Text(
+                      Text(
                         'Lock All',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: theme.textTheme.bodyLarge?.color,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -179,15 +183,18 @@ class LayersPanel extends StatelessWidget {
                 ],
               ),
 
-              const Divider(color: Colors.white54, height: 1),
-              // --- Layer List ---
+              Divider(color: theme.dividerColor, height: 1),
               if (orderedVisibleIds.isEmpty)
-                const Expanded(
+                Expanded(
                   // Use expanded to center the text vertically
                   child: Center(
                     child: Text(
                       'No layers found.',
-                      style: TextStyle(color: Colors.white70),
+                      style: TextStyle(
+                        color: theme.textTheme.bodyMedium?.color?.withOpacity(
+                          0.7,
+                        ),
+                      ),
                     ),
                   ),
                 )
@@ -211,7 +218,10 @@ class LayersPanel extends StatelessWidget {
                             IconButton(
                               icon: Icon(
                                 isLocked ? Icons.lock : Icons.lock_open,
-                                color: Colors.white,
+                                color:
+                                    isLocked
+                                        ? theme.colorScheme.primary
+                                        : theme.iconTheme.color,
                               ),
                               onPressed: () {
                                 _saveLayerState(context, 'Lock element $id');
@@ -219,9 +229,9 @@ class LayersPanel extends StatelessWidget {
                               },
                             ),
                             IconButton(
-                              icon: const Icon(
+                              icon: Icon(
                                 Icons.arrow_upward,
-                                color: Colors.white,
+                                color: theme.iconTheme.color,
                               ),
                               onPressed: () {
                                 Provider.of<SelectedColorProvider>(
@@ -231,9 +241,9 @@ class LayersPanel extends StatelessWidget {
                               },
                             ),
                             IconButton(
-                              icon: const Icon(
+                              icon: Icon(
                                 Icons.arrow_downward,
-                                color: Colors.white,
+                                color: theme.iconTheme.color,
                               ),
                               onPressed: () {
                                 Provider.of<SelectedColorProvider>(

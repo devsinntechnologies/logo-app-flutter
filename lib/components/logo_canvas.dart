@@ -16,6 +16,7 @@ import 'grid_painter.dart';
 class LogoCanvas extends StatefulWidget {
   final String selectedShapeName;
   final LogoStateData logoState;
+  final double gridOpacity;
   final String svgLogo;
   final String companyName;
   final String sloganName;
@@ -50,6 +51,7 @@ class LogoCanvas extends StatefulWidget {
 
   const LogoCanvas({
     super.key,
+    required this.gridOpacity,
     required this.selectedShapeName,
     required this.logoState,
     required this.svgLogo,
@@ -108,21 +110,6 @@ class _LogoCanvasState extends State<LogoCanvas> {
         final Size canvasSize = constraints.biggest;
         return Stack(
           children: [
-            if (widget.showGrid)
-              CustomPaint(
-                painter: GridPainter(
-                  gridColor:
-                      Theme.of(context).brightness == Brightness.dark
-                          ? Colors.white.withOpacity(0.4)
-                          : Colors.black.withOpacity(0.4),
-                  highlightedHorizontalLine:
-                      widget.highlightedHorizontalGridLineIndex,
-                  highlightedVerticalLine:
-                      widget.highlightedVerticalGridLineIndex,
-                ),
-                size: constraints.biggest,
-              ),
-
             if (widget.isCheckerboardVisible)
               Opacity(
                 opacity: 0.1,
@@ -136,7 +123,7 @@ class _LogoCanvasState extends State<LogoCanvas> {
 
             if (widget.isCheckerboardVisible && selectedShape == "Square")
               Opacity(
-                opacity: widget.checkerboardOpacity,
+                opacity: widget.checkerboardOpacity, // Controlled by slider
                 child: CustomPaint(
                   size: const Size(double.infinity, double.infinity),
                   painter: SquarePainter(shapeColor, gradient, bgImage),
@@ -228,6 +215,21 @@ class _LogoCanvasState extends State<LogoCanvas> {
                 ),
               ),
 
+            if (widget.showGrid)
+              CustomPaint(
+                painter: GridPainter(
+                  gridColor:
+                      Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white.withOpacity(widget.gridOpacity)
+                          : Colors.black.withOpacity(widget.gridOpacity),
+                  highlightedHorizontalLine:
+                      widget.highlightedHorizontalGridLineIndex,
+                  highlightedVerticalLine:
+                      widget.highlightedVerticalGridLineIndex,
+                ),
+                size: constraints.biggest,
+              ),
+
             ...(widget.elementOrder.isNotEmpty
                     ? widget.elementOrder
                     : widget.logoState.visibleElementIds)
@@ -293,6 +295,8 @@ class _LogoCanvasState extends State<LogoCanvas> {
   Widget? _buildElementById(int id, Size canvasSize) {
     final provider = Provider.of<SelectedColorProvider>(context, listen: true);
 
+    final currentLogoState = provider.getCurrentLogoState() ?? widget.logoState;
+    final isElementLocked = currentLogoState.lockedElements.contains(id);
     final bool isSelected = provider.selectedElementId == id;
     final outlineColor = provider.getOutlineColor(id) ?? Colors.transparent;
     final outlineWidth = provider.getOutlineWidth(id) ?? 0.0;
@@ -341,7 +345,7 @@ class _LogoCanvasState extends State<LogoCanvas> {
         id: elementId,
         position: topLeftPosition,
         rotation: rotation,
-        isLocked: widget.lockedElements.contains(elementId),
+        isLocked: isElementLocked,
         child: Transform(
           transform:
               Matrix4.identity()
