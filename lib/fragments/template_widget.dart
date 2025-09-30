@@ -41,76 +41,100 @@ class _TemplateWidgetState extends State<TemplateWidget> {
 
   TextStyle _getFontStyle(int index, {double fontSize = 14}) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textColor = isDark ? Colors.white : Colors.black87; 
-    
+    final textColor = isDark ? Colors.white : Colors.black87;
+
     switch (index) {
       case 0:
         return GoogleFonts.roboto(
           fontSize: fontSize,
-          color: textColor, 
+          color: textColor,
           fontWeight: FontWeight.bold,
           letterSpacing: 1.2,
         );
       case 1:
         return GoogleFonts.pacifico(
           fontSize: fontSize,
-          color: textColor, 
+          color: textColor,
           letterSpacing: 1.2,
         );
       case 2:
         return GoogleFonts.poppins(
           fontSize: fontSize,
-          color: textColor, 
+          color: textColor,
           fontWeight: FontWeight.normal,
           letterSpacing: 1.2,
         );
       case 3:
         return GoogleFonts.dancingScript(
           fontSize: fontSize,
-          color: textColor, 
+          color: textColor,
           letterSpacing: 1.2,
         );
       case 4:
         return GoogleFonts.satisfy(
           fontSize: fontSize,
-          color: textColor, 
+          color: textColor,
           letterSpacing: 1.2,
         );
       case 5:
         return GoogleFonts.lato(
           fontSize: fontSize,
-          color: textColor, 
+          color: textColor,
           letterSpacing: 1.2,
         );
       case 6:
         return GoogleFonts.orbitron(
           fontSize: fontSize,
-          color: textColor, 
+          color: textColor,
           letterSpacing: 1.2,
         );
       case 7:
         return GoogleFonts.openSans(
           fontSize: fontSize,
-          color: textColor, 
+          color: textColor,
           letterSpacing: 1.2,
         );
       case 8:
         return GoogleFonts.bebasNeue(
           fontSize: fontSize,
-          color: textColor, 
+          color: textColor,
           letterSpacing: 1.2,
         );
       case 9:
         return GoogleFonts.pressStart2p(
           fontSize: fontSize - 2,
-          color: textColor, 
+          color: textColor,
           letterSpacing: 1.2,
         );
       default:
-        return TextStyle(
-          fontSize: fontSize,
-          color: textColor, 
-        );
+        return TextStyle(fontSize: fontSize, color: textColor);
+    }
+  }
+
+  String _fontFamilyForIndex(int index) {
+    switch (index) {
+      case 0:
+        return 'Roboto';
+      case 1:
+        return 'Pacifico';
+      case 2:
+        return 'Poppins';
+      case 3:
+        return 'Dancing Script';
+      case 4:
+        return 'Satisfy';
+      case 5:
+        return 'Lato';
+      case 6:
+        return 'Orbitron';
+      case 7:
+        return 'Open Sans';
+      case 8:
+        return 'Bebas Neue';
+      case 9:
+        return 'Press Start 2P';
+      default:
+        return 'Roboto';
     }
   }
 
@@ -120,14 +144,14 @@ class _TemplateWidgetState extends State<TemplateWidget> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor, 
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: FutureBuilder<List<String>>(
         future: _futureSvgList,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
               child: CircularProgressIndicator(
-                color: isDark ? Colors.white : Colors.black, 
+                color: isDark ? Colors.white : Colors.black,
               ),
             );
           } else if (snapshot.hasError) {
@@ -135,7 +159,7 @@ class _TemplateWidgetState extends State<TemplateWidget> {
               child: Text(
                 'Error: ${snapshot.error}',
                 style: TextStyle(
-                  color: Theme.of(context).textTheme.bodyLarge?.color, 
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
               ),
             );
@@ -144,7 +168,7 @@ class _TemplateWidgetState extends State<TemplateWidget> {
               child: Text(
                 'No logos found.',
                 style: TextStyle(
-                  color: Theme.of(context).textTheme.bodyLarge?.color, 
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
               ),
             );
@@ -164,26 +188,13 @@ class _TemplateWidgetState extends State<TemplateWidget> {
               ),
               itemBuilder: (context, index) {
                 final isSelected = selectedIndex == index;
-                
-                return InkWell(
+
+                return GestureDetector(
                   onTap: () {
-                    if (selectedIndex == index) {
-                      final selectedSvg = svgList[index];
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DownloadLogo(
-                            svgLogo: selectedSvg,
-                            companyName: widget.companyName,
-                            sloganName: widget.slogan,
-                          ),
-                        ),
-                      );
-                    } else {
-                      setState(() {
-                        selectedIndex = index;
-                      });
-                    }
+                    // Select card to reveal the "Edit" button
+                    setState(() {
+                      selectedIndex = isSelected ? null : index;
+                    });
                   },
                   child: Stack(
                     alignment: Alignment.center,
@@ -194,17 +205,21 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                         decoration: BoxDecoration(
                           color: isDark ? Colors.grey[850] : Colors.white,
                           border: Border.all(
-                            color: isSelected
-                                ? Colors.orange
-                                : (isDark ? Colors.grey[600]! : Colors.grey.shade300),
+                            color:
+                                isSelected
+                                    ? Colors.orange
+                                    : (isDark
+                                        ? Colors.grey[600]!
+                                        : Colors.grey.shade300),
                             width: isSelected ? 2.5 : 1,
                           ),
                           borderRadius: BorderRadius.circular(5),
                           boxShadow: [
                             BoxShadow(
-                              color: isDark 
-                                  ? Colors.black.withOpacity(0.5) 
-                                  : Colors.black.withOpacity(0.1),
+                              color:
+                                  isDark
+                                      ? Colors.black.withOpacity(0.5)
+                                      : Colors.black.withOpacity(0.1),
                               blurRadius: 4,
                               offset: Offset(0, 2),
                             ),
@@ -214,11 +229,13 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                           children: [
                             SvgPicture.string(
                               svgList[index],
-                              placeholderBuilder: (context) => Center(
-                                child: CircularProgressIndicator(
-                                  color: isDark ? Colors.white : Colors.black,
-                                ),
-                              ),
+                              placeholderBuilder:
+                                  (context) => Center(
+                                    child: CircularProgressIndicator(
+                                      color:
+                                          isDark ? Colors.white : Colors.black,
+                                    ),
+                                  ),
                               height: 80,
                               width: 80,
                             ),
@@ -257,7 +274,10 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                   fontSize: 11,
-                                  color: isDark ? Colors.grey[400] : Colors.grey, // ✅ Theme-aware grey
+                                  color:
+                                      isDark
+                                          ? Colors.grey[400]
+                                          : Colors.grey, // ✅ Theme-aware grey
                                 ),
                               ),
                             ),
@@ -280,14 +300,22 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                               ),
                               onPressed: () {
                                 final selectedSvg = svgList[index];
+                                final family = _fontFamilyForIndex(
+                                  widget.selectedFontIndex,
+                                );
+
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => DownloadLogo(
-                                      svgLogo: selectedSvg,
-                                      companyName: widget.companyName,
-                                      sloganName: widget.slogan,
-                                    ),
+                                    builder:
+                                        (context) => DownloadLogo(
+                                          svgLogo: selectedSvg,
+                                          companyName: widget.companyName,
+                                          sloganName: widget.slogan,
+                                          // pass the chosen font to the editor
+                                          companyFontFamily: family,
+                                          sloganFontFamily: family,
+                                        ),
                                   ),
                                 );
                               },

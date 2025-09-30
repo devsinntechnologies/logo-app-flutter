@@ -11,7 +11,7 @@ class LayersPanel extends StatelessWidget {
   final VoidCallback onClose;
   final ValueChanged<int> onToggleLock;
   final ValueChanged<bool> onToggleLockAll;
-  final Function(int, bool) onReorder; // id, moveUp
+  final Function(int, bool) onReorder; 
 
   const LayersPanel({
     super.key,

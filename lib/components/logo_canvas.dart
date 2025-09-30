@@ -5,6 +5,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:logo_app_flutter/components/logoBottomNavbarItems/shape_selector_widget.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
 import 'package:provider/provider.dart';
@@ -29,8 +30,8 @@ class LogoCanvas extends StatefulWidget {
   final bool isCheckerboardActive;
   final bool isCheckerboardVisible;
   final double checkerboardOpacity;
-  final List<int> elementOrder;
-  final Set<int> lockedElements;
+  final List<int> elementOrder; // <- already passed from DownloadLogo
+  final Set<int> lockedElements; // <- already passed
 
   final VoidCallback onToggleGrid;
   final VoidCallback onToggleLayersRibbon;
@@ -91,6 +92,72 @@ class LogoCanvas extends StatefulWidget {
 }
 
 class _LogoCanvasState extends State<LogoCanvas> {
+  List<Widget> _buildChildrenInOrder(Size canvasSize) {
+    // last in the list paints on top in a Stack
+    final ids =
+        widget.elementOrder.isNotEmpty
+            ? widget.elementOrder
+            : widget.logoState.visibleElementIds;
+
+    final out = <Widget>[];
+    for (final id in ids) {
+      final w = _buildElementById(id, canvasSize);
+      if (w != null) out.add(w);
+    }
+    return out;
+  }
+
+  TextStyle _applyFont(String? family, TextStyle base) {
+    if (family == null || family.isEmpty) return base;
+    try {
+      return GoogleFonts.getFont(family, textStyle: base);
+    } catch (e) {
+      debugPrint('Unknown font family "$family": $e');
+      return base.copyWith(fontFamily: family);
+    }
+  }
+
+  Widget wrap(
+    Widget child, {
+    required Offset position,
+    required double rotation,
+    required Size childSize,
+    required int elementId,
+  }) {
+    final provider = Provider.of<SelectedColorProvider>(context, listen: false);
+    final rotationX = provider.getRotationXForElement(elementId) ?? 0.0;
+    final rotationY = provider.getRotationYForElement(elementId) ?? 0.0;
+    final rotationZ = provider.getRotationZForElement(elementId) ?? 0.0;
+
+    return _buildEditableWrapper(
+      id: elementId,
+      position: position,
+      rotation: rotation,
+      isLocked: (provider.getCurrentLogoState() ?? widget.logoState)
+          .lockedElements
+          .contains(elementId),
+      child: Transform(
+        alignment: Alignment.center,
+        transform:
+            Matrix4.identity()
+              ..rotateX(rotationX * pi / 180)
+              ..rotateY(rotationY * pi / 180)
+              ..rotateZ(rotationZ * pi / 180),
+        child: child,
+      ),
+      canvasSize: _lastCanvasSize ?? const Size(0, 0),
+    );
+  }
+
+  Offset _centerTopLeft(Size canvasSize, Size childSize) {
+    return Offset(
+      (canvasSize.width - childSize.width) / 2,
+      (canvasSize.height - childSize.height) / 2,
+    );
+  }
+
+  Size? _lastCanvasSize;
+
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<SelectedColorProvider>(context);
@@ -107,8 +174,13 @@ class _LogoCanvasState extends State<LogoCanvas> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final Size canvasSize = constraints.biggest;
+        final canvasSize = constraints.biggest;
+
+  
+        print('Canvas elementOrder: ${widget.elementOrder}');
+
         return Stack(
+          clipBehavior: Clip.none,
           children: [
             if (widget.isCheckerboardVisible)
               Opacity(
@@ -229,12 +301,7 @@ class _LogoCanvasState extends State<LogoCanvas> {
                 ),
                 size: constraints.biggest,
               ),
-
-            ...(widget.elementOrder.isNotEmpty
-                    ? widget.elementOrder
-                    : widget.logoState.visibleElementIds)
-                .map((id) => _buildElementById(id, canvasSize))
-                .whereType<Widget>(),
+            ..._buildChildrenInOrder(canvasSize),
           ],
         );
       },
@@ -323,16 +390,11 @@ class _LogoCanvasState extends State<LogoCanvas> {
 
     Widget wrap(
       Widget child, {
-      required Offset centerPosition,
+      required Offset position,
       required double rotation,
       required Size childSize,
       required int elementId,
     }) {
-      final topLeftPosition = Offset(
-        centerPosition.dx - childSize.width / 2,
-        centerPosition.dy - childSize.height / 2,
-      );
-
       final provider = Provider.of<SelectedColorProvider>(
         context,
         listen: false,
@@ -343,19 +405,21 @@ class _LogoCanvasState extends State<LogoCanvas> {
 
       return _buildEditableWrapper(
         id: elementId,
-        position: topLeftPosition,
+        position: position,
         rotation: rotation,
-        isLocked: isElementLocked,
+        isLocked: (provider.getCurrentLogoState() ?? widget.logoState)
+            .lockedElements
+            .contains(elementId),
         child: Transform(
+          alignment: Alignment.center,
           transform:
               Matrix4.identity()
                 ..rotateX(rotationX * pi / 180)
                 ..rotateY(rotationY * pi / 180)
                 ..rotateZ(rotationZ * pi / 180),
-          alignment: Alignment.center,
           child: child,
         ),
-        canvasSize: canvasSize,
+        canvasSize: _lastCanvasSize ?? const Size(0, 0),
       );
     }
 
@@ -366,50 +430,65 @@ class _LogoCanvasState extends State<LogoCanvas> {
     // ✅ Custom Text (100–199)
     if (id >= 100 && id < 200) {
       final index = id - 100;
-      if (index < 0 || index >= widget.logoState.customTexts.length) {
-        return null;
-      }
-      final customText = widget.logoState.customTexts[index];
-      if (!customText.isVisible) return null;
+      if (index < widget.logoState.customTexts.length) {
+        final customText = widget.logoState.customTexts[index];
 
-      final styleState = provider.getFontStyleForElement(id);
-      final textStyle = TextStyle(
-        fontSize: provider.getSizeForElement(id) ?? customText.size,
-        color: provider.getElementColor(id) ?? customText.color,
-        fontWeight: styleState.isBold ? FontWeight.bold : FontWeight.normal,
-        fontStyle: styleState.isItalic ? FontStyle.italic : FontStyle.normal,
-        decoration:
-            styleState.isUnderline
-                ? TextDecoration.underline
-                : TextDecoration.none,
-        fontFamily: provider.getFontForElement(id) ?? customText.fontFamily,
-      );
+        final provider = Provider.of<SelectedColorProvider>(
+          context,
+          listen: false,
+        );
 
-      final measuredSize = _calculateTextSize(customText.text, textStyle);
-      final textSize = Size(
-        measuredSize.width * scaleFactor,
-        measuredSize.height * scaleFactor,
-      );
+        final String? family =
+            provider.getFontForElement(id) ??
+            customText.fontFamily ??
+            provider.getFontForElement(1) ??
+            widget.logoState.companyNameFont ??
+            'Roboto';
 
-      return wrap(
-        Center(
-          child: Opacity(
-            opacity: (customText.opacity ?? 1.0).clamp(0.0, 1.0),
-            child: _buildTextWithGradient(
-              text: customText.text,
-              style: textStyle,
-              elementId: id,
-              provider: provider,
+        final styleState = provider.getFontStyleForElement(id);
+        final textStyle = _applyFont(
+          family,
+          TextStyle(
+            fontSize: provider.getSizeForElement(id) ?? customText.size,
+            color:
+                provider.getElementColor(id) ??
+                customText.color ??
+                Colors.black,
+            fontWeight: styleState.isBold ? FontWeight.bold : FontWeight.normal,
+            fontStyle:
+                styleState.isItalic ? FontStyle.italic : FontStyle.normal,
+            decoration:
+                styleState.isUnderline
+                    ? TextDecoration.underline
+                    : TextDecoration.none,
+          ),
+        );
+
+        final measuredSize = _calculateTextSize(customText.text, textStyle);
+        final topLeft =
+            customText.position == Offset.zero
+                ? _centerTopLeft(canvasSize, measuredSize)
+                : customText.position;
+
+        return wrap(
+          Center(
+            child: Opacity(
+              opacity: (customText.opacity ?? 1.0).clamp(0.0, 1.0),
+              child: _buildTextWithGradient(
+                text: customText.text,
+                style: textStyle,
+                elementId: id,
+                provider: provider,
+              ),
             ),
           ),
-        ),
-        centerPosition: customText.position,
-        rotation: customText.rotation,
-        childSize: textSize,
-        elementId: id,
-      );
+          position: topLeft,
+          rotation: customText.rotation,
+          childSize: measuredSize,
+          elementId: id,
+        );
+      }
     }
-
     // ✅ Custom Images (200–299)
     if (id >= 200 && id < 300) {
       final index = id - 200;
@@ -421,6 +500,10 @@ class _LogoCanvasState extends State<LogoCanvas> {
 
       final double size = provider.getSizeForElement(id) ?? image.size ?? 100;
       final imageSize = Size(size, size);
+      final topLeft =
+          image.position == Offset.zero
+              ? _centerTopLeft(canvasSize, imageSize)
+              : image.position;
 
       Widget imageWidget;
 
@@ -478,7 +561,7 @@ class _LogoCanvasState extends State<LogoCanvas> {
             child: imageWidget,
           ),
         ),
-        centerPosition: image.position,
+        position: topLeft,
         rotation: image.rotation,
         childSize: imageSize,
         elementId: id,
@@ -494,6 +577,10 @@ class _LogoCanvasState extends State<LogoCanvas> {
 
       final double size = provider.getSizeForElement(id) ?? svgElement.size;
       final svgSize = Size(size, size);
+      final topLeft =
+          svgElement.position == Offset.zero
+              ? _centerTopLeft(canvasSize, svgSize)
+              : svgElement.position;
 
       return wrap(
         Consumer<SelectedColorProvider>(
@@ -511,7 +598,7 @@ class _LogoCanvasState extends State<LogoCanvas> {
             );
           },
         ),
-        centerPosition: svgElement.position,
+        position: topLeft,
         rotation: svgElement.rotation,
         childSize: svgSize,
         elementId: id,
@@ -525,15 +612,14 @@ class _LogoCanvasState extends State<LogoCanvas> {
       case 0: // Shape (Main Logo SVG)
         final logoSize =
             provider.getSizeForElement(0) ?? widget.logoState.logoSize;
-        final shapeSize = Size(logoSize, logoSize) * 0.9;
-        final centerPosition =
+        final shapeSize = Size(logoSize, logoSize); // no 0.9 shrink
+        final topLeft =
             (widget.logoState.logoPosition == Offset.zero)
-                ? _centerAlign(canvasSize, shapeSize)
+                ? _centerTopLeft(canvasSize, shapeSize)
                 : widget.logoState.logoPosition;
 
         return widget.logoState.isLogoVisible
             ? wrap(
-              elementId: id,
               Consumer<SelectedColorProvider>(
                 builder: (context, provider, _) {
                   return Opacity(
@@ -556,11 +642,12 @@ class _LogoCanvasState extends State<LogoCanvas> {
                   );
                 },
               ),
-              centerPosition: centerPosition,
+              position: topLeft,
               rotation:
                   provider.getRotationForElement(id) ??
                   widget.logoState.logoRotation,
               childSize: shapeSize,
+              elementId: id,
             )
             : null;
 
@@ -569,34 +656,37 @@ class _LogoCanvasState extends State<LogoCanvas> {
         final nameSize =
             provider.getSizeForElement(id) ?? widget.logoState.companyNameSize;
         final styleState = provider.getFontStyleForElement(id);
-        final textStyle = TextStyle(
-          fontSize: nameSize,
-          fontWeight: styleState.isBold ? FontWeight.bold : FontWeight.normal,
-          fontStyle: styleState.isItalic ? FontStyle.italic : FontStyle.normal,
-          decoration:
-              styleState.isUnderline
-                  ? TextDecoration.underline
-                  : TextDecoration.none,
-          color: provider.getElementColor(id) ?? companyColor,
-          fontFamily:
-              provider.getFontForElement(id) ??
-              widget.logoState.companyNameFont,
+
+        final String? family =
+            provider.getFontForElement(id) ?? widget.logoState.companyNameFont;
+
+        final textStyle = _applyFont(
+          family,
+          TextStyle(
+            fontSize: nameSize,
+            fontWeight: styleState.isBold ? FontWeight.bold : FontWeight.normal,
+            fontStyle:
+                styleState.isItalic ? FontStyle.italic : FontStyle.normal,
+            decoration:
+                styleState.isUnderline
+                    ? TextDecoration.underline
+                    : TextDecoration.none,
+            color: provider.getElementColor(id) ?? companyColor,
+          ),
         );
-        final textSize = _calculateTextSize(nameText, textStyle) * 1.09;
-        final centerPosition =
+        final textSize = _calculateTextSize(nameText, textStyle); // no 1.09
+        final topLeft =
             (widget.logoState.companyNamePosition == Offset.zero)
-                ? _centerAlign(canvasSize, textSize)
+                ? _centerTopLeft(canvasSize, textSize)
                 : widget.logoState.companyNamePosition;
 
         return widget.logoState.isCompanyNameVisible
             ? wrap(
-              elementId: id,
               Consumer<SelectedColorProvider>(
                 builder: (context, provider, _) {
                   return Opacity(
                     opacity: provider.opacity,
                     child: _buildTextWithGradient(
-                      // ✅ Use gradient method
                       text: nameText,
                       style: textStyle,
                       elementId: 1,
@@ -605,11 +695,12 @@ class _LogoCanvasState extends State<LogoCanvas> {
                   );
                 },
               ),
-              centerPosition: centerPosition,
+              position: topLeft,
               rotation:
                   provider.getRotationForElement(id) ??
                   widget.logoState.companyNameRotation,
               childSize: textSize,
+              elementId: id,
             )
             : null;
 
@@ -618,48 +709,51 @@ class _LogoCanvasState extends State<LogoCanvas> {
         final sloganSize =
             provider.getSizeForElement(id) ?? widget.logoState.sloganSize;
         final styleState = provider.getFontStyleForElement(id);
-        final sloganStyle = TextStyle(
-          fontSize: sloganSize,
-          fontWeight: styleState.isBold ? FontWeight.bold : FontWeight.normal,
-          fontStyle: styleState.isItalic ? FontStyle.italic : FontStyle.normal,
-          decoration:
-              styleState.isUnderline
-                  ? TextDecoration.underline
-                  : TextDecoration.none,
-          color: provider.getElementColor(id) ?? sloganColor,
-          fontFamily:
-              provider.getFontForElement(id) ?? widget.logoState.sloganFont,
+
+        final String? family =
+            provider.getFontForElement(id) ?? widget.logoState.sloganFont;
+
+        final sloganStyle = _applyFont(
+          family,
+          TextStyle(
+            fontSize: sloganSize,
+            fontWeight: styleState.isBold ? FontWeight.bold : FontWeight.normal,
+            fontStyle:
+                styleState.isItalic ? FontStyle.italic : FontStyle.normal,
+            decoration:
+                styleState.isUnderline
+                    ? TextDecoration.underline
+                    : TextDecoration.none,
+            color: provider.getElementColor(id) ?? sloganColor,
+          ),
         );
-        final sloganMeasured =
-            _calculateTextSize(sloganText, sloganStyle) * scaleFactor;
-        final centerPosition =
+        final sloganMeasured = _calculateTextSize(sloganText, sloganStyle);
+        final topLeft =
             (widget.logoState.sloganPosition == Offset.zero)
-                ? _centerAlign(canvasSize, sloganMeasured)
+                ? _centerTopLeft(canvasSize, sloganMeasured)
                 : widget.logoState.sloganPosition;
 
         return widget.logoState.isSloganVisible
             ? wrap(
-              elementId: id,
               Consumer<SelectedColorProvider>(
                 builder: (context, provider, _) {
                   return Opacity(
                     opacity: provider.opacity,
-                    child: Center(
-                      child: _buildTextWithGradient(
-                        text: sloganText,
-                        style: sloganStyle,
-                        elementId: 2,
-                        provider: provider,
-                      ),
+                    child: _buildTextWithGradient(
+                      text: sloganText,
+                      style: sloganStyle,
+                      elementId: 2,
+                      provider: provider,
                     ),
                   );
                 },
               ),
-              centerPosition: centerPosition,
+              position: topLeft,
               rotation:
                   provider.getRotationForElement(id) ??
                   widget.logoState.sloganRotation,
               childSize: sloganMeasured,
+              elementId: id,
             )
             : null;
     }
@@ -671,31 +765,61 @@ class _LogoCanvasState extends State<LogoCanvas> {
     required int elementId,
     required SelectedColorProvider provider,
   }) {
-    final hasGradient = provider.hasGradientForElement(elementId);
+    final double outlineWidth = provider.getOutlineWidth(elementId);
+    final Color outlineColor = provider.getOutlineColor(elementId);
+    final double sx = provider.getShadowOffsetXForElement(elementId);
+    final double sy = provider.getShadowOffsetYForElement(elementId);
+    final Color shadowColor = provider.getShadowColorForElement(elementId);
+    final bool hasShadow = (sx != 0 || sy != 0);
 
-    if (hasGradient) {
-      final gradient = provider.getGradientForElement(elementId);
+    final gradient = provider.getGradientForElement(elementId);
 
-      return ShaderMask(
-        shaderCallback: (bounds) {
-          if (gradient is LinearGradient) {
-            return gradient.createShader(bounds);
-          } else if (gradient is RadialGradient) {
-            return gradient.createShader(bounds);
-          } else if (gradient is SweepGradient) {
-            return gradient.createShader(bounds);
-          }
-          return LinearGradient(
-            colors: gradient!.colors,
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ).createShader(bounds);
-        },
-        child: Text(text, style: style.copyWith(color: Colors.white)),
+    if (gradient == null) {
+      return StrokedText(
+        text: text,
+        style: style,
+        strokeColor: outlineColor,
+        strokeWidth: outlineWidth,
+        showShadow: hasShadow,
+        shadowOffset: Offset(sx, sy),
+        shadowColor: shadowColor,
+        shadowBlur: 8,
       );
     }
 
-    return Text(text, style: style);
+    final strokeAndShadow = StrokedText(
+      text: text,
+      style: style.copyWith(color: Colors.transparent),
+      strokeColor: outlineColor,
+      strokeWidth: outlineWidth,
+      showShadow: hasShadow,
+      shadowOffset: Offset(sx, sy),
+      shadowColor: shadowColor,
+      shadowBlur: 8,
+    );
+
+    final gradientFill = ShaderMask(
+      shaderCallback: (bounds) {
+        if (gradient is LinearGradient) return gradient.createShader(bounds);
+        if (gradient is RadialGradient) return gradient.createShader(bounds);
+        if (gradient is SweepGradient) return gradient.createShader(bounds);
+        return LinearGradient(
+          colors: gradient.colors,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ).createShader(bounds);
+      },
+      blendMode: BlendMode.srcIn,
+      child: Text(
+        text,
+        style: style.copyWith(color: Colors.white, foreground: null),
+      ),
+    );
+
+    return Stack(
+      alignment: Alignment.topLeft,
+      children: [strokeAndShadow, gradientFill],
+    );
   }
 
   Widget _buildElementWithGradient(int elementId, Widget child) {
@@ -864,7 +988,6 @@ class StrokedText extends StatelessWidget {
                     ..color = strokeColor,
             ),
           ),
-        // Fill
         Text(text, style: style),
       ],
     );
@@ -894,7 +1017,6 @@ class StrokedSvg extends StatelessWidget {
     return Stack(
       alignment: Alignment.center,
       children: [
-        // Stroke layer: draw multiple slightly offset copies
         if (strokeWidth > 0)
           for (final offset in [
             Offset(-strokeWidth, 0),

@@ -113,6 +113,156 @@ class SelectedColorProvider extends ChangeNotifier {
   final Map<int, double> _elementRotationY = {};
   final Map<int, double> _elementRotationZ = {};
 
+  String? getFontForElement(int id) => _elementFonts[id];
+
+  LogoStateData? _currentLogoState;
+
+  LogoStateData? getCurrentLogoState() => _currentLogoState;
+
+  void updateLogoState(LogoStateData state) {
+    _currentLogoState = state;
+    notifyListeners();
+  }
+
+  void _applyOrder(List<int> order) {
+    if (_currentLogoState == null) return;
+    _currentLogoState = _currentLogoState!.copyWith(elementOrder: order);
+    notifyListeners();
+  }
+
+  void moveElementUp(int id) {
+    if (_currentLogoState == null) return;
+    final order = List<int>.from(_currentLogoState!.elementOrder);
+    final i = order.indexOf(id);
+    if (i == -1 || i == order.length - 1) return; // already at top
+    order.removeAt(i);
+    order.insert(i + 1, id); // Up = toward front/top
+    _applyOrder(order);
+  }
+
+  void moveElementDown(int id) {
+    if (_currentLogoState == null) return;
+    final order = List<int>.from(_currentLogoState!.elementOrder);
+    final i = order.indexOf(id);
+    if (i <= 0) return; // already at back
+    order.removeAt(i);
+    order.insert(i - 1, id); // Down = toward back
+    _applyOrder(order);
+  }
+
+  void bringToFront(int id) {
+    if (_currentLogoState == null) return;
+    final order = List<int>.from(_currentLogoState!.elementOrder);
+    if (!order.remove(id)) return;
+    order.add(id);
+    _applyOrder(order);
+  }
+
+  void sendToBack(int id) {
+    if (_currentLogoState == null) return;
+    final order = List<int>.from(_currentLogoState!.elementOrder);
+    if (!order.remove(id)) return;
+    order.insert(0, id);
+    _applyOrder(order);
+  }
+
+  // Optional debug
+  void debugPrintOrder([String tag = '']) {
+    if (_currentLogoState == null) return;
+    // ignore: avoid_print
+    print('$tag elementOrder: ${_currentLogoState!.elementOrder}');
+  }
+
+  void setFontForElement(int id, String family) {
+    _elementFonts[id] = family;
+    notifyListeners();
+  }
+
+  void cloneElementStyles(int fromId, int toId) {
+    if (_elementColors.containsKey(fromId)) {
+      _elementColors[toId] = _elementColors[fromId]!;
+    }
+    if (_overrideColors.containsKey(fromId)) {
+      _overrideColors[toId] = _overrideColors[fromId]!;
+    }
+
+    if (_elementSizes.containsKey(fromId)) {
+      _elementSizes[toId] = _elementSizes[fromId]!;
+    }
+
+    if (_elementRotations.containsKey(fromId)) {
+      _elementRotations[toId] = _elementRotations[fromId]!;
+    }
+
+    if (_elementRotationX.containsKey(fromId)) {
+      _elementRotationX[toId] = _elementRotationX[fromId]!;
+    }
+    if (_elementRotationY.containsKey(fromId)) {
+      _elementRotationY[toId] = _elementRotationY[fromId]!;
+    }
+    if (_elementRotationZ.containsKey(fromId)) {
+      _elementRotationZ[toId] = _elementRotationZ[fromId]!;
+    }
+
+    if (_elementFonts.containsKey(fromId)) {
+      _elementFonts[toId] = _elementFonts[fromId]!;
+    }
+    if (_fontStyles.containsKey(fromId)) {
+      _fontStyles[toId] = _fontStyles[fromId]!;
+    }
+    if (_elementFontStyles.containsKey(fromId)) {
+      _elementFontStyles[toId] = _elementFontStyles[fromId]!;
+    }
+
+    if (_elementOutlineColors.containsKey(fromId)) {
+      _elementOutlineColors[toId] = _elementOutlineColors[fromId]!;
+    }
+    if (_elementOutlineWidths.containsKey(fromId)) {
+      _elementOutlineWidths[toId] = _elementOutlineWidths[fromId]!;
+    }
+
+    if (_elementShadowColors.containsKey(fromId)) {
+      _elementShadowColors[toId] = _elementShadowColors[fromId]!;
+    }
+    if (_elementShadowOffsetsX.containsKey(fromId)) {
+      _elementShadowOffsetsX[toId] = _elementShadowOffsetsX[fromId]!;
+    }
+    if (_elementShadowOffsetsY.containsKey(fromId)) {
+      _elementShadowOffsetsY[toId] = _elementShadowOffsetsY[fromId]!;
+    }
+
+    _cloneGradient(fromId, toId);
+
+    notifyListeners();
+  }
+
+  void _cloneGradient(int fromId, int toId) {
+    final g = getGradientForElement(fromId);
+    if (g == null) return;
+    if (toId == 1) {
+      _companyTextGradient = g;
+    } else if (toId == 2) {
+      _sloganGradient = g;
+    } else {
+      _elementGradients[toId] = g;
+    }
+  }
+
+  void seedInitialFonts({String? company, String? slogan}) {
+    bool changed = false;
+    if (company != null &&
+        (_elementFonts[1] == null || _elementFonts[1]!.isEmpty)) {
+      _elementFonts[1] = company;
+      changed = true;
+    }
+    if (slogan != null &&
+        (_elementFonts[2] == null || _elementFonts[2]!.isEmpty)) {
+      _elementFonts[2] = slogan;
+      changed = true;
+    }
+    if (changed) notifyListeners();
+  }
+
   double? getRotationXForElement(int id) => _elementRotationX[id] ?? 0.0;
   void setRotationXForElement(int id, double value) {
     _saveUndoState('Set X rotation for element $id to ${value.toInt()}°');
@@ -698,10 +848,6 @@ class SelectedColorProvider extends ChangeNotifier {
     _throttledNotify();
   }
 
-  String getFontForElement(int id, {String fallback = 'Roboto'}) {
-    return _elementFonts[id] ?? fallback;
-  }
-
   double getShadowOffsetYForElement(int id, {double fallback = 0.0}) {
     return _elementShadowOffsetsY[id] ?? fallback;
   }
@@ -731,6 +877,16 @@ class SelectedColorProvider extends ChangeNotifier {
   void setSelectedElement(int id) {
     _selectedElementId = id;
     _throttledNotify();
+  }
+
+  void setInitialFonts({String? companyFontFamily, String? sloganFontFamily}) {
+    if (companyFontFamily != null && companyFontFamily.isNotEmpty) {
+      _elementFonts[1] = companyFontFamily;
+    }
+    if (sloganFontFamily != null && sloganFontFamily.isNotEmpty) {
+      _elementFonts[2] = sloganFontFamily;
+    }
+    notifyListeners();
   }
 
   void setInitialColorsFromPalette(
@@ -815,11 +971,6 @@ class SelectedColorProvider extends ChangeNotifier {
     _undoProvider = undoProvider;
   }
 
-  void updateLogoState(LogoStateData logoState) {
-    _currentLogoState = logoState;
-    notifyListeners();
-  }
-
   Map<String, dynamic> captureCurrentState() {
     return {
       'logoState': _currentLogoState?.toJson() ?? {},
@@ -889,12 +1040,6 @@ class SelectedColorProvider extends ChangeNotifier {
     _saveUndoState('Change color for element $id');
     _elementColors[id] = color;
     notifyListeners();
-  }
-
-  void setFontForElement(int id, String font) {
-    _saveUndoState('Change font of element $id');
-    _elementFonts[id] = font;
-    _throttledNotify();
   }
 
   void setOutlineColor(int elementId, Color color) {
@@ -1016,12 +1161,6 @@ class SelectedColorProvider extends ChangeNotifier {
     return _overrideColors[id] ?? _elementColors[id];
   }
 
-  LogoStateData? _currentLogoState;
-
-  LogoStateData? getCurrentLogoState() {
-    return _currentLogoState;
-  }
-
   List<int> getCurrentElementOrder() {
     if (_currentLogoState != null) {
       return _currentLogoState!.elementOrder;
@@ -1122,51 +1261,50 @@ class SelectedColorProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void moveElementUp(int elementId) {
-    final state = _currentLogoState;
-    if (state == null) return;
+  // void moveElementUp(int elementId) {
+  //   final state = _currentLogoState;
+  //   if (state == null) return;
 
-    final visible = state.visibleElementIds.toList();
-    final vIdx = visible.indexOf(elementId);
-    if (vIdx <= 0) return;
+  //   final visible = state.visibleElementIds.toList();
+  //   final vIdx = visible.indexOf(elementId);
+  //   if (vIdx <= 0) return;
 
-    final swapWith = visible[vIdx - 1];
+  //   final swapWith = visible[vIdx - 1];
 
-    final order = List<int>.from(state.elementOrder);
-    final i = order.indexOf(elementId);
-    final j = order.indexOf(swapWith);
-    if (i == -1 || j == -1) return;
+  //   final order = List<int>.from(state.elementOrder);
+  //   final i = order.indexOf(elementId);
+  //   final j = order.indexOf(swapWith);
+  //   if (i == -1 || j == -1) return;
 
-    order.removeAt(i);
-    final jAfter = i < j ? j - 1 : j;
-    order.insert(jAfter, elementId);
+  //   order.removeAt(i);
+  //   final jAfter = i < j ? j - 1 : j;
+  //   order.insert(jAfter, elementId);
 
-    _currentLogoState = state.copyWith(elementOrder: order);
-    notifyListeners();
-  }
+  //   _currentLogoState = state.copyWith(elementOrder: order);
+  //   notifyListeners();
+  // }
+  // void moveElementDown(int elementId) {
+  //   final state = _currentLogoState;
+  //   if (state == null) return;
 
-  void moveElementDown(int elementId) {
-    final state = _currentLogoState;
-    if (state == null) return;
+  //   final visible = state.visibleElementIds.toList();
+  //   final vIdx = visible.indexOf(elementId);
+  //   if (vIdx == -1 || vIdx >= visible.length - 1) return;
 
-    final visible = state.visibleElementIds.toList();
-    final vIdx = visible.indexOf(elementId);
-    if (vIdx == -1 || vIdx >= visible.length - 1) return;
+  //   final swapWith = visible[vIdx + 1];
 
-    final swapWith = visible[vIdx + 1];
+  //   final order = List<int>.from(state.elementOrder);
+  //   final i = order.indexOf(elementId);
+  //   final j = order.indexOf(swapWith);
+  //   if (i == -1 || j == -1) return;
 
-    final order = List<int>.from(state.elementOrder);
-    final i = order.indexOf(elementId);
-    final j = order.indexOf(swapWith);
-    if (i == -1 || j == -1) return;
+  //   order.removeAt(i);
+  //   final jAfter = i < j ? j : j + 1;
+  //   order.insert(jAfter, elementId);
 
-    order.removeAt(i);
-    final jAfter = i < j ? j : j + 1;
-    order.insert(jAfter, elementId);
-
-    _currentLogoState = state.copyWith(elementOrder: order);
-    notifyListeners();
-  }
+  //   _currentLogoState = state.copyWith(elementOrder: order);
+  //   notifyListeners();
+  // }
 
   void updateLogoPosition(Offset newPosition) {
     if (_currentLogoState == null) return;
