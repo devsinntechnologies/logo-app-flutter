@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'dart:math' as math;
+import 'package:flutter/services.dart';
 import 'package:logo_app_flutter/fragments/theme_toggle_widget.dart';
 import 'package:logo_app_flutter/provider/interestitial_ad.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
@@ -155,14 +156,22 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
   double _gridOpacity = 0.4;
 
-  final List<Color> colorList = [
-    Colors.red,
-    Colors.blue,
-    Colors.orange,
-    Colors.green,
-    Colors.purple,
-    Colors.teal,
-    Colors.black,
+  final List<String> imageList = [
+    "assets/EffectGrad/1.jpg",
+    "assets/EffectGrad/2.jpg",
+    "assets/EffectGrad/3.jpg",
+    "assets/EffectGrad/4.jpg",
+    "assets/EffectGrad/5.jpg",
+    "assets/EffectGrad/6.jpg",
+    "assets/EffectGrad/7.jpg",
+    "assets/EffectGrad/8.jpg",
+    "assets/EffectGrad/9.jpg",
+    "assets/EffectGrad/10.jpeg",
+    "assets/EffectGrad/11.jpg",
+    "assets/EffectGrad/12.jpg",
+    "assets/EffectGrad/13.jpg",
+    "assets/EffectGrad/14.jpg",
+    "assets/EffectGrad/15.jpg",
   ];
 
   // --- UI Toggles ---
@@ -490,6 +499,12 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
   @override
   void dispose() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
     super.dispose();
   }
 
@@ -505,7 +520,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return WillPopScope(
       onWillPop: () async {
         final shouldDiscard = await _showDiscardChangesDialog(context);
@@ -552,455 +566,11 @@ class _DownloadLogoState extends State<DownloadLogo> {
           ],
         ),
         body: OrientationBuilder(
-          builder: (context, orientation) => orientation == Orientation.portrait ? buildPortrait() : build,
-          child: Stack(
-            children: [
-              SizedBox(height: 700, width: double.infinity),
-              Column(
-                children: [
-                  Expanded(
-                    child: Stack(
-                      children: [
-                        RepaintBoundary(
-                          key: _canvasKey,
-                          child: GestureDetector(
-                            behavior: HitTestBehavior.translucent,
-                            onTap: () {
-                              setState(() {
-                                selectedElement = null;
-                                isMovementPanelVisible = false;
-                              });
-                            },
-                            child: Consumer<SelectedColorProvider>(
-                              builder: (context, provider, _) {
-                                final logoState =
-                                    provider.getCurrentLogoState() ??
-                                    _currentLogoState;
-                                return LogoCanvas(
-                                  selectedShapeName: selectedShapeName,
-                                  logoState: logoState,
-                                  svgLogo: widget.svgLogo,
-                                  companyName: widget.companyName,
-                                  sloganName: widget.sloganName,
-                                  showGrid: _showGrid,
-                                  gridOpacity: _gridOpacity,
-                                  isEditingMode: true,
-                                  selectedElementId: selectedElement,
-                                  highlightedHorizontalGridLineIndex:
-                                      _highlightedHorizontalGridLineIndex,
-                                  highlightedVerticalGridLineIndex:
-                                      _highlightedVerticalGridLineIndex,
-                                  isLayersRibbonExtended: _isLayersPanelVisible,
-                                  onToggleGrid:
-                                      () =>
-                                          setState(() => _showGrid = !_showGrid),
-                                  onToggleLayersRibbon:
-                                      () => setState(
-                                        () =>
-                                            _isLayersPanelVisible =
-                                                !_isLayersPanelVisible,
-                                      ),
-                                  onElementPanStart: _onPanStart,
-                                  onElementPanUpdate: _updateElementPosition,
-                                  onElementPanEnd: _onPanEnd,
-                                  onElementTap: _elementSelect,
-                                  onElementDelete: _deleteElement,
-                                  onElementSplit: _splitElement,
-                                  onElementRotateTap: _rotateElementByTap,
-                                  onElementRotatePanStart: _onRotatePanStart,
-                                  onElementRotatePanUpdate: _onRotatePanUpdate,
-                                  onElementRotatePanEnd: _onPanEnd,
-                                  onElementResizeTap: _resizeElementByTap,
-                                  onElementResizePanStart: _onResizePanStart,
-                                  onElementResizePanUpdate: _onResizePanUpdate,
-                                  onElementResizePanEnd: _onPanEnd,
-                                  isCheckerboardActive: true,
-                                  checkerboardOpacity: checkerboardOpacity,
-                                  isCheckerboardVisible: isCheckerboardVisible,
-                                  lockedElements: logoState.lockedElements,
-                                  elementOrder: logoState.elementOrder,
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-          
-                        Positioned(
-                          top: 20,
-                          right: 0,
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _showGrid = !_showGrid;
-                              });
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    _showGrid ? 'Grid enabled' : 'Grid disabled',
-                                  ),
-                                  duration: const Duration(milliseconds: 1000),
-                                ),
-                              );
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                              decoration: BoxDecoration(
-                                color:
-                                    Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? Colors.grey[800]
-                                        : Colors.grey[300],
-                                borderRadius: const BorderRadius.only(
-                                  topLeft: Radius.circular(25.0),
-                                  bottomLeft: Radius.circular(25.0),
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color:
-                                        Theme.of(context).brightness ==
-                                                Brightness.dark
-                                            ? Colors.black.withOpacity(0.5)
-                                            : Colors.black.withOpacity(0.2),
-                                    blurRadius: 8,
-                                    offset: const Offset(-2, 2),
-                                  ),
-                                ],
-                              ),
-                              child: Icon(
-                                _showGrid ? Icons.grid_off : Icons.grid_on,
-                                color:
-                                    Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? Colors.white
-                                        : Colors.black87,
-                                size: 28,
-                              ),
-                            ),
-                          ),
-                        ),
-          
-                        Positioned(
-                          top: 20,
-                          left: 0,
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _isLayersPanelVisible = !_isLayersPanelVisible;
-                              });
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                              decoration: BoxDecoration(
-                                color:
-                                    Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? Colors.grey[800]
-                                        : Colors.grey[300],
-                                borderRadius: const BorderRadius.only(
-                                  topRight: Radius.circular(25.0),
-                                  bottomRight: Radius.circular(25.0),
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color:
-                                        Theme.of(context).brightness ==
-                                                Brightness.dark
-                                            ? Colors.black.withOpacity(0.5)
-                                            : Colors.black.withOpacity(0.2),
-                                    blurRadius: 8,
-                                    offset: const Offset(2, 2),
-                                  ),
-                                ],
-                              ),
-                              child: Icon(
-                                Icons.layers,
-                                color:
-                                    Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? Colors.white
-                                        : Colors.black87,
-                                size: 28,
-                              ),
-                            ),
-                          ),
-                        ),
-          
-                        if (_isLayersPanelVisible)
-                          Positioned(
-                            top: 30,
-                            right: 70,
-                            child: Container(
-                              height: 40,
-                              width: 100,
-                              decoration: BoxDecoration(
-                                color:
-                                    Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? Colors.grey[800]!.withOpacity(0.95)
-                                        : Colors.grey[200]!.withOpacity(0.95),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  IconButton(
-                                    icon: Icon(
-                                      Icons.arrow_back_ios_new,
-                                      size: 20,
-                                      color:
-                                          Theme.of(context).brightness ==
-                                                  Brightness.dark
-                                              ? Colors.white
-                                              : Colors.black87,
-                                    ),
-                                    onPressed: () {
-                                      setState(() {
-                                        _isLayersPanelVisible =
-                                            !_isLayersPanelVisible;
-                                      });
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-          
-                        AnimatedPositioned(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                          top: 20,
-                          left: _isLayersPanelVisible ? 0 : -300,
-                          child: Consumer<SelectedColorProvider>(
-                            builder: (context, provider, _) {
-                              final logoState =
-                                  provider.getCurrentLogoState() ??
-                                  _currentLogoState;
-                              return LayersPanel(
-                                logoState: logoState,
-                                svgLogo: widget.svgLogo,
-                                onClose:
-                                    () => setState(
-                                      () => _isLayersPanelVisible = false,
-                                    ),
-                                onToggleLock: (id) => provider.toggleLock(id),
-                                onToggleLockAll:
-                                    (shouldLock) =>
-                                        provider.toggleLockAll(shouldLock),
-                                onReorder: (id, moveUp) {
-                                  if (moveUp) {
-                                    provider.moveElementUp(id);
-                                  } else {
-                                    provider.moveElementDown(id);
-                                  }
-                                  final s = provider.getCurrentLogoState();
-                                  if (s != null)
-                                    setState(() => _currentLogoState = s);
-                                },
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Column(
-                    children: [
-                      Container(
-                        height: 300,
-                        color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-          
-              if (tabToolbarIndex != -1 &&
-                  (!isMovementPanelVisible || selectedElement == null))
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: kBottomNavigationBarHeight - 44,
-                  top: MediaQuery.sizeOf(context).height.toDouble() * 0.52,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SingleChildScrollView(
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          height: 200,
-                          child: _buildToolbarForTabs(tabToolbarIndex),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              if (tabToolbarIndex != -1 &&
-                  (!isMovementPanelVisible || selectedElement == null))
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  top: MediaQuery.sizeOf(context).height * 0.48 - 30,
-                  child: Center(
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          tabToolbarIndex = -1;
-                        });
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black26,
-                              blurRadius: 4,
-                              offset: Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 4,
-                        ),
-                        child: Icon(
-                          Icons.keyboard_arrow_down,
-                          size: 32,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-          
-              if (tabToolbarIndex == -1 &&
-                  (selectedElement == null || !isMovementPanelVisible))
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: kBottomNavigationBarHeight + 8,
-                  child: Center(
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          tabToolbarIndex = selectedIndex;
-                        });
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.blue,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black26,
-                              blurRadius: 4,
-                              offset: Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 4,
-                        ),
-                        child: Icon(
-                          Icons.keyboard_arrow_up,
-                          size: 32,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              if (selectedElement != null && isMovementPanelVisible)
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: MediaQuery.of(context).size.width * 0.52 + 30,
-                  child: Center(
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          isMovementPanelVisible = false;
-                          selectedElement = null;
-                        });
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black26,
-                              blurRadius: 4,
-                              offset: Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 4,
-                        ),
-                        child: Icon(
-                          Icons.keyboard_arrow_down,
-                          size: 32,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-          
-              if (selectedElement != null && isMovementPanelVisible)
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: MovementPanel(
-                    isVisible: isMovementPanelVisible,
-                    onDirectionPressed: (String direction) {
-                      const double moveAmount = 5.0;
-                      Offset delta;
-                      switch (direction) {
-                        case 'up':
-                          delta = const Offset(0, -moveAmount);
-                          break;
-                        case 'down':
-                          delta = const Offset(0, moveAmount);
-                          break;
-                        case 'left':
-                          delta = const Offset(-moveAmount, 0);
-                          break;
-                        case 'right':
-                          delta = const Offset(moveAmount, 0);
-                          break;
-                        default:
-                          delta = Offset.zero;
-                      }
-                      setState(() {});
-                      _updateElementPosition(selectedElement!, delta);
-                    },
-                    onDuplicatePressed: () {
-                      print('Duplicate called for $selectedElement');
-                      duplicateSelectedElement(selectedElement!);
-                    },
-                    onBringToFrontPressed:
-                        () => bringToFront(selectedElement!, _currentLogoState),
-                    onSendToBackPressed:
-                        () => sendToBack(selectedElement!, _currentLogoState),
-                    selectedElementId: selectedElement,
-                    onClose: () {},
-                  ),
-                ),
-            ],
-          ),
-        
-        
+          builder:
+              (context, orientation) =>
+                  orientation == Orientation.portrait
+                      ? buildPortrait()
+                      : buildLandscape(),
         ),
         bottomNavigationBar: LogoBottomNavBar(
           selectedIndex: selectedIndex,
@@ -1008,6 +578,1242 @@ class _DownloadLogoState extends State<DownloadLogo> {
           hasTapped: true,
         ),
       ),
+    );
+  }
+
+  // Widget buildLandscape() {
+  //   final theme = Theme.of(context);
+  //   return Row(
+  //     children: [
+  //       SizedBox(width: 100),
+  //       Expanded(
+  //         child: Stack(
+  //           children: [
+  //             RepaintBoundary(
+  //               key: _canvasKey,
+  //               child: GestureDetector(
+  //                 behavior: HitTestBehavior.translucent,
+  //                 onTap: () {
+  //                   setState(() {
+  //                     selectedElement = null;
+  //                     isMovementPanelVisible = false;
+  //                   });
+  //                 },
+  //                 child: Consumer<SelectedColorProvider>(
+  //                   builder: (context, provider, _) {
+  //                     final logoState =
+  //                         provider.getCurrentLogoState() ?? _currentLogoState;
+  //                     return LogoCanvas(
+  //                       selectedShapeName: selectedShapeName,
+  //                       logoState: logoState,
+  //                       svgLogo: widget.svgLogo,
+  //                       companyName: widget.companyName,
+  //                       sloganName: widget.sloganName,
+  //                       showGrid: _showGrid,
+  //                       gridOpacity: _gridOpacity,
+  //                       isEditingMode: true,
+  //                       selectedElementId: selectedElement,
+  //                       highlightedHorizontalGridLineIndex:
+  //                           _highlightedHorizontalGridLineIndex,
+  //                       highlightedVerticalGridLineIndex:
+  //                           _highlightedVerticalGridLineIndex,
+  //                       isLayersRibbonExtended: _isLayersPanelVisible,
+  //                       onToggleGrid:
+  //                           () => setState(() => _showGrid = !_showGrid),
+  //                       onToggleLayersRibbon:
+  //                           () => setState(
+  //                             () =>
+  //                                 _isLayersPanelVisible =
+  //                                     !_isLayersPanelVisible,
+  //                           ),
+  //                       onElementPanStart: _onPanStart,
+  //                       onElementPanUpdate: _updateElementPosition,
+  //                       onElementPanEnd: _onPanEnd,
+  //                       onElementTap: _elementSelect,
+  //                       onElementDelete: _deleteElement,
+  //                       onElementSplit: _splitElement,
+  //                       onElementRotateTap: _rotateElementByTap,
+  //                       onElementRotatePanStart: _onRotatePanStart,
+  //                       onElementRotatePanUpdate: _onRotatePanUpdate,
+  //                       onElementRotatePanEnd: _onPanEnd,
+  //                       onElementResizeTap: _resizeElementByTap,
+  //                       onElementResizePanStart: _onResizePanStart,
+  //                       onElementResizePanUpdate: _onResizePanUpdate,
+  //                       onElementResizePanEnd: _onPanEnd,
+  //                       isCheckerboardActive: true,
+  //                       checkerboardOpacity: checkerboardOpacity,
+  //                       isCheckerboardVisible: isCheckerboardVisible,
+  //                       lockedElements: logoState.lockedElements,
+  //                       elementOrder: logoState.elementOrder,
+  //                     );
+  //                   },
+  //                 ),
+  //               ),
+  //             ),
+
+  //             Positioned(
+  //               top: 20,
+  //               right: 0,
+  //               child: GestureDetector(
+  //                 onTap: () {
+  //                   setState(() {
+  //                     _showGrid = !_showGrid;
+  //                   });
+  //                   ScaffoldMessenger.of(context).showSnackBar(
+  //                     SnackBar(
+  //                       content: Text(
+  //                         _showGrid ? 'Grid enabled' : 'Grid disabled',
+  //                       ),
+  //                       duration: const Duration(milliseconds: 1000),
+  //                     ),
+  //                   );
+  //                 },
+  //                 child: Container(
+  //                   padding: const EdgeInsets.symmetric(
+  //                     horizontal: 16,
+  //                     vertical: 8,
+  //                   ),
+  //                   decoration: BoxDecoration(
+  //                     color:
+  //                         Theme.of(context).brightness == Brightness.dark
+  //                             ? Colors.grey[800]
+  //                             : Colors.grey[300],
+  //                     borderRadius: const BorderRadius.only(
+  //                       topLeft: Radius.circular(25.0),
+  //                       bottomLeft: Radius.circular(25.0),
+  //                     ),
+  //                     boxShadow: [
+  //                       BoxShadow(
+  //                         color:
+  //                             Theme.of(context).brightness == Brightness.dark
+  //                                 ? Colors.black.withOpacity(0.5)
+  //                                 : Colors.black.withOpacity(0.2),
+  //                         blurRadius: 8,
+  //                         offset: const Offset(-2, 2),
+  //                       ),
+  //                     ],
+  //                   ),
+  //                   child: Icon(
+  //                     _showGrid ? Icons.grid_off : Icons.grid_on,
+  //                     color:
+  //                         Theme.of(context).brightness == Brightness.dark
+  //                             ? Colors.white
+  //                             : Colors.black87,
+  //                     size: 28,
+  //                   ),
+  //                 ),
+  //               ),
+  //             ),
+
+  //             Positioned(
+  //               top: 20,
+  //               left: 0,
+  //               child: GestureDetector(
+  //                 onTap: () {
+  //                   setState(() {
+  //                     _isLayersPanelVisible = !_isLayersPanelVisible;
+  //                   });
+  //                 },
+  //                 child: Container(
+  //                   padding: const EdgeInsets.symmetric(
+  //                     horizontal: 16,
+  //                     vertical: 8,
+  //                   ),
+  //                   decoration: BoxDecoration(
+  //                     color:
+  //                         Theme.of(context).brightness == Brightness.dark
+  //                             ? Colors.grey[800]
+  //                             : Colors.grey[300],
+  //                     borderRadius: const BorderRadius.only(
+  //                       topRight: Radius.circular(25.0),
+  //                       bottomRight: Radius.circular(25.0),
+  //                     ),
+  //                     boxShadow: [
+  //                       BoxShadow(
+  //                         color:
+  //                             Theme.of(context).brightness == Brightness.dark
+  //                                 ? Colors.black.withOpacity(0.5)
+  //                                 : Colors.black.withOpacity(0.2),
+  //                         blurRadius: 8,
+  //                         offset: const Offset(2, 2),
+  //                       ),
+  //                     ],
+  //                   ),
+  //                   child: Icon(
+  //                     Icons.layers,
+  //                     color:
+  //                         Theme.of(context).brightness == Brightness.dark
+  //                             ? Colors.white
+  //                             : Colors.black87,
+  //                     size: 28,
+  //                   ),
+  //                 ),
+  //               ),
+  //             ),
+
+  //             if (_isLayersPanelVisible)
+  //               Positioned(
+  //                 top: 30,
+  //                 right: 70,
+  //                 child: Container(
+  //                   height: 40,
+  //                   width: 100,
+  //                   decoration: BoxDecoration(
+  //                     color:
+  //                         Theme.of(context).brightness == Brightness.dark
+  //                             ? Colors.grey[800]!.withOpacity(0.95)
+  //                             : Colors.grey[200]!.withOpacity(0.95),
+  //                     borderRadius: BorderRadius.circular(20),
+  //                   ),
+  //                   child: Row(
+  //                     mainAxisAlignment: MainAxisAlignment.end,
+  //                     children: [
+  //                       IconButton(
+  //                         icon: Icon(
+  //                           Icons.arrow_back_ios_new,
+  //                           size: 20,
+  //                           color:
+  //                               Theme.of(context).brightness == Brightness.dark
+  //                                   ? Colors.white
+  //                                   : Colors.black87,
+  //                         ),
+  //                         onPressed: () {
+  //                           setState(() {
+  //                             _isLayersPanelVisible = !_isLayersPanelVisible;
+  //                           });
+  //                         },
+  //                       ),
+  //                     ],
+  //                   ),
+  //                 ),
+  //               ),
+
+  //             AnimatedPositioned(
+  //               duration: const Duration(milliseconds: 300),
+  //               curve: Curves.easeInOut,
+  //               top: 20,
+  //               left: _isLayersPanelVisible ? 0 : -300,
+  //               child: Consumer<SelectedColorProvider>(
+  //                 builder: (context, provider, _) {
+  //                   final logoState =
+  //                       provider.getCurrentLogoState() ?? _currentLogoState;
+  //                   return LayersPanel(
+  //                     logoState: logoState,
+  //                     svgLogo: widget.svgLogo,
+  //                     onClose:
+  //                         () => setState(() => _isLayersPanelVisible = false),
+  //                     onToggleLock: (id) => provider.toggleLock(id),
+  //                     onToggleLockAll:
+  //                         (shouldLock) => provider.toggleLockAll(shouldLock),
+  //                     onReorder: (id, moveUp) {
+  //                       if (moveUp) {
+  //                         provider.moveElementUp(id);
+  //                       } else {
+  //                         provider.moveElementDown(id);
+  //                       }
+  //                       final s = provider.getCurrentLogoState();
+  //                       if (s != null) setState(() => _currentLogoState = s);
+  //                     },
+  //                   );
+  //                 },
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //       ),
+  //       Column(
+  //         children: [
+  //           Container(
+  //             height: 300,
+  //             color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+  //           ),
+  //         ],
+  //       ),
+
+  //       if (tabToolbarIndex != -1 &&
+  //           (!isMovementPanelVisible || selectedElement == null))
+  //         Positioned(
+  //           left: 0,
+  //           right: 0,
+  //           bottom: kBottomNavigationBarHeight - 44,
+  //           top: MediaQuery.sizeOf(context).height.toDouble() * 0.52,
+  //           child: Column(
+  //             mainAxisSize: MainAxisSize.min,
+  //             children: [
+  //               SingleChildScrollView(
+  //                 child: AnimatedContainer(
+  //                   duration: const Duration(milliseconds: 300),
+  //                   height: 200,
+  //                   child: _buildToolbarForTabs(tabToolbarIndex),
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       if (tabToolbarIndex != -1 &&
+  //           (!isMovementPanelVisible || selectedElement == null))
+  //         Positioned(
+  //           left: 0,
+  //           right: 0,
+  //           top: MediaQuery.sizeOf(context).height * 0.48 - 30,
+  //           child: Center(
+  //             child: GestureDetector(
+  //               onTap: () {
+  //                 setState(() {
+  //                   tabToolbarIndex = -1;
+  //                 });
+  //               },
+  //               child: Container(
+  //                 decoration: BoxDecoration(
+  //                   color: Colors.white,
+  //                   borderRadius: BorderRadius.circular(16),
+  //                   boxShadow: [
+  //                     BoxShadow(
+  //                       color: Colors.black26,
+  //                       blurRadius: 4,
+  //                       offset: Offset(0, 2),
+  //                     ),
+  //                   ],
+  //                 ),
+  //                 padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+  //                 child: Icon(
+  //                   Icons.keyboard_arrow_down,
+  //                   size: 32,
+  //                   color: Colors.black87,
+  //                 ),
+  //               ),
+  //             ),
+  //           ),
+  //         ),
+
+  //       if (tabToolbarIndex == -1 &&
+  //           (selectedElement == null || !isMovementPanelVisible))
+  //         Positioned(
+  //           left: 0,
+  //           right: 0,
+  //           bottom: kBottomNavigationBarHeight + 8,
+  //           child: Center(
+  //             child: GestureDetector(
+  //               onTap: () {
+  //                 setState(() {
+  //                   tabToolbarIndex = selectedIndex;
+  //                 });
+  //               },
+  //               child: Container(
+  //                 decoration: BoxDecoration(
+  //                   color: Colors.blue,
+  //                   borderRadius: BorderRadius.circular(16),
+  //                   boxShadow: [
+  //                     BoxShadow(
+  //                       color: Colors.black26,
+  //                       blurRadius: 4,
+  //                       offset: Offset(0, 2),
+  //                     ),
+  //                   ],
+  //                 ),
+  //                 padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+  //                 child: Icon(
+  //                   Icons.keyboard_arrow_up,
+  //                   size: 32,
+  //                   color: Colors.white,
+  //                 ),
+  //               ),
+  //             ),
+  //           ),
+  //         ),
+  //       if (selectedElement != null && isMovementPanelVisible)
+  //         Positioned(
+  //           left: 0,
+  //           right: 0,
+  //           bottom: MediaQuery.of(context).size.width * 0.52 + 30,
+  //           child: Center(
+  //             child: GestureDetector(
+  //               onTap: () {
+  //                 setState(() {
+  //                   isMovementPanelVisible = false;
+  //                   selectedElement = null;
+  //                 });
+  //               },
+  //               child: Container(
+  //                 decoration: BoxDecoration(
+  //                   color: Colors.white,
+  //                   borderRadius: BorderRadius.circular(16),
+  //                   boxShadow: [
+  //                     BoxShadow(
+  //                       color: Colors.black26,
+  //                       blurRadius: 4,
+  //                       offset: Offset(0, 2),
+  //                     ),
+  //                   ],
+  //                 ),
+  //                 padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+  //                 child: Icon(
+  //                   Icons.keyboard_arrow_down,
+  //                   size: 32,
+  //                   color: Colors.black87,
+  //                 ),
+  //               ),
+  //             ),
+  //           ),
+  //         ),
+
+  //       if (selectedElement != null && isMovementPanelVisible)
+  //         Positioned(
+  //           bottom: 0,
+  //           left: 0,
+  //           right: 0,
+  //           child: MovementPanel(
+  //             isVisible: isMovementPanelVisible,
+  //             onDirectionPressed: (String direction) {
+  //               const double moveAmount = 5.0;
+  //               Offset delta;
+  //               switch (direction) {
+  //                 case 'up':
+  //                   delta = const Offset(0, -moveAmount);
+  //                   break;
+  //                 case 'down':
+  //                   delta = const Offset(0, moveAmount);
+  //                   break;
+  //                 case 'left':
+  //                   delta = const Offset(-moveAmount, 0);
+  //                   break;
+  //                 case 'right':
+  //                   delta = const Offset(moveAmount, 0);
+  //                   break;
+  //                 default:
+  //                   delta = Offset.zero;
+  //               }
+  //               setState(() {});
+  //               _updateElementPosition(selectedElement!, delta);
+  //             },
+  //             onDuplicatePressed: () {
+  //               print('Duplicate called for $selectedElement');
+  //               duplicateSelectedElement(selectedElement!);
+  //             },
+  //             onBringToFrontPressed:
+  //                 () => bringToFront(selectedElement!, _currentLogoState),
+  //             onSendToBackPressed:
+  //                 () => sendToBack(selectedElement!, _currentLogoState),
+  //             selectedElementId: selectedElement,
+  //             onClose: () {},
+  //           ),
+  //         ),
+  //     ],
+  //   );
+  // }
+
+  Widget buildLandscape() {
+    final theme = Theme.of(context);
+    return Row(
+      children: [
+        Container(
+          width: 80,
+          color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+          child: Column(
+            children: [
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildToolbarButton(Icons.grid_on, 'Grid', () {
+                      setState(() => _showGrid = !_showGrid);
+                    }),
+                    _buildToolbarButton(Icons.layers, 'Layers', () {
+                      setState(
+                        () => _isLayersPanelVisible = !_isLayersPanelVisible,
+                      );
+                    }),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        Expanded(
+          flex: 3,
+          child: Stack(
+            children: [
+              // Canvas
+              RepaintBoundary(
+                key: _canvasKey,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: () {
+                    setState(() {
+                      selectedElement = null;
+                      isMovementPanelVisible = false;
+                      tabToolbarIndex = selectedIndex;
+                    });
+                  },
+                  child: Consumer<SelectedColorProvider>(
+                    builder: (context, provider, _) {
+                      final logoState =
+                          provider.getCurrentLogoState() ?? _currentLogoState;
+                      return LogoCanvas(
+                        selectedShapeName: selectedShapeName,
+                        logoState: logoState,
+                        svgLogo: widget.svgLogo,
+                        companyName: widget.companyName,
+                        sloganName: widget.sloganName,
+                        showGrid: _showGrid,
+                        gridOpacity: _gridOpacity,
+                        isEditingMode: true,
+                        selectedElementId: selectedElement,
+                        highlightedHorizontalGridLineIndex:
+                            _highlightedHorizontalGridLineIndex,
+                        highlightedVerticalGridLineIndex:
+                            _highlightedVerticalGridLineIndex,
+                        isLayersRibbonExtended: _isLayersPanelVisible,
+                        onToggleGrid:
+                            () => setState(() => _showGrid = !_showGrid),
+                        onToggleLayersRibbon:
+                            () => setState(
+                              () =>
+                                  _isLayersPanelVisible =
+                                      !_isLayersPanelVisible,
+                            ),
+                        onElementPanStart: _onPanStart,
+                        onElementPanUpdate: _updateElementPosition,
+                        onElementPanEnd: _onPanEnd,
+                        onElementTap: _elementSelect,
+                        onElementDelete: _deleteElement,
+                        onElementSplit: _splitElement,
+                        onElementRotateTap: _rotateElementByTap,
+                        onElementRotatePanStart: _onRotatePanStart,
+                        onElementRotatePanUpdate: _onRotatePanUpdate,
+                        onElementRotatePanEnd: _onPanEnd,
+                        onElementResizeTap: _resizeElementByTap,
+                        onElementResizePanStart: _onResizePanStart,
+                        onElementResizePanUpdate: _onResizePanUpdate,
+                        onElementResizePanEnd: _onPanEnd,
+                        isCheckerboardActive: isCheckerboardActive,
+                        checkerboardOpacity: checkerboardOpacity,
+                        isCheckerboardVisible: isCheckerboardVisible,
+                        lockedElements: logoState.lockedElements,
+                        elementOrder: logoState.elementOrder,
+                      );
+                    },
+                  ),
+                ),
+              ),
+
+              if (_isLayersPanelVisible)
+                Positioned(
+                  top: 20,
+                  left: 20,
+                  width: 280,
+                  height: MediaQuery.of(context).size.height - 120,
+                  child: Consumer<SelectedColorProvider>(
+                    builder: (context, provider, _) {
+                      final logoState =
+                          provider.getCurrentLogoState() ?? _currentLogoState;
+                      return LayersPanel(
+                        logoState: logoState,
+                        svgLogo: widget.svgLogo,
+                        onClose:
+                            () => setState(() => _isLayersPanelVisible = false),
+                        onToggleLock: (id) => provider.toggleLock(id),
+                        onToggleLockAll:
+                            (shouldLock) => provider.toggleLockAll(shouldLock),
+                        onReorder: (id, moveUp) {
+                          if (moveUp) {
+                            provider.moveElementUp(id);
+                          } else {
+                            provider.moveElementDown(id);
+                          }
+                          final s = provider.getCurrentLogoState();
+                          if (s != null) setState(() => _currentLogoState = s);
+                        },
+                      );
+                    },
+                  ),
+                ),
+            ],
+          ),
+        ),
+
+        Container(
+          width: 400,
+          height: double.infinity,
+          color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+          child: Column(
+            children: [
+              if (selectedElement != null && isMovementPanelVisible)
+                Container(
+                  height: 300,
+                  child: Column(
+                    children: [
+                      Container(
+                        height: 60,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surface,
+                          border: Border(
+                            bottom: BorderSide(
+                              color: theme.dividerColor,
+                              width: 1,
+                            ),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.control_camera,
+                                  size: 20,
+                                  color: theme.colorScheme.primary,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Element Controls',
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: theme.colorScheme.onSurface,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            IconButton(
+                              icon: Icon(
+                                Icons.close,
+                                size: 20,
+                                color: theme.colorScheme.onSurface.withOpacity(
+                                  0.7,
+                                ),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  selectedElement = null;
+                                  isMovementPanelVisible = false;
+                                  tabToolbarIndex = selectedIndex;
+                                });
+                              },
+                              tooltip: 'Close Controls',
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      Expanded(
+                        child: MovementPanel(
+                          isVisible: true,
+                          onDirectionPressed: (String direction) {
+                            const double moveAmount = 5.0;
+                            Offset delta;
+                            switch (direction) {
+                              case 'up':
+                                delta = const Offset(0, -moveAmount);
+                                break;
+                              case 'down':
+                                delta = const Offset(0, moveAmount);
+                                break;
+                              case 'left':
+                                delta = const Offset(-moveAmount, 0);
+                                break;
+                              case 'right':
+                                delta = const Offset(moveAmount, 0);
+                                break;
+                              default:
+                                delta = Offset.zero;
+                            }
+                            _updateElementPosition(selectedElement!, delta);
+                          },
+                          onDuplicatePressed:
+                              () => duplicateSelectedElement(selectedElement!),
+                          onBringToFrontPressed:
+                              () => bringToFront(
+                                selectedElement!,
+                                _currentLogoState,
+                              ),
+                          onSendToBackPressed:
+                              () => sendToBack(
+                                selectedElement!,
+                                _currentLogoState,
+                              ),
+                          selectedElementId: selectedElement,
+                          onClose:
+                              () => setState(() {
+                                isMovementPanelVisible = false;
+                                selectedElement = null;
+                                tabToolbarIndex = selectedIndex;
+                              }),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+              if (selectedElement == null && tabToolbarIndex != -1)
+                Container(
+                  height: 350,
+                  child: Column(
+                    children: [
+                      Container(
+                        height: 60,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surface,
+                          border: Border(
+                            bottom: BorderSide(
+                              color: theme.dividerColor,
+                              width: 1,
+                            ),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  _getToolbarIcon(tabToolbarIndex),
+                                  size: 20,
+                                  color: theme.colorScheme.primary,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  _getToolbarTitle(tabToolbarIndex),
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: theme.colorScheme.onSurface,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            IconButton(
+                              icon: Icon(
+                                Icons.close,
+                                size: 20,
+                                color: theme.colorScheme.onSurface.withOpacity(
+                                  0.7,
+                                ),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  tabToolbarIndex = -1;
+                                });
+                              },
+                              tooltip: 'Close Panel',
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      Expanded(
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.all(12),
+                          child: _buildToolbarForTabs(tabToolbarIndex),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+              if (selectedElement == null && tabToolbarIndex == -1)
+                Expanded(
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.touch_app,
+                          size: 48,
+                          color: theme.colorScheme.onSurface.withOpacity(0.5),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Tap an element to edit\nor use bottom toolbar',
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            color: theme.colorScheme.onSurface.withOpacity(0.7),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  IconData _getToolbarIcon(int index) {
+    switch (index) {
+      case 0:
+        return Icons.layers;
+      case 3:
+        return Icons.auto_awesome;
+      case 4:
+        return Icons.palette;
+      default:
+        return Icons.build;
+    }
+  }
+
+  Widget _buildToolbarButton(IconData icon, String label, VoidCallback onTap) {
+    final theme = Theme.of(context);
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: theme.dividerColor),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 24, color: theme.iconTheme.color),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: theme.textTheme.bodySmall,
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildPortrait() {
+    final theme = Theme.of(context);
+
+    return Stack(
+      children: [
+        SizedBox(height: 700, width: double.infinity),
+        Column(
+          children: [
+            Expanded(
+              child: Stack(
+                children: [
+                  RepaintBoundary(
+                    key: _canvasKey,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      onTap: () {
+                        setState(() {
+                          selectedElement = null;
+                          isMovementPanelVisible = false;
+                        });
+                      },
+                      child: Consumer<SelectedColorProvider>(
+                        builder: (context, provider, _) {
+                          final logoState =
+                              provider.getCurrentLogoState() ??
+                              _currentLogoState;
+                          return LogoCanvas(
+                            selectedShapeName: selectedShapeName,
+                            logoState: logoState,
+                            svgLogo: widget.svgLogo,
+                            companyName: widget.companyName,
+                            sloganName: widget.sloganName,
+                            showGrid: _showGrid,
+                            gridOpacity: _gridOpacity,
+                            isEditingMode: true,
+                            selectedElementId: selectedElement,
+                            highlightedHorizontalGridLineIndex:
+                                _highlightedHorizontalGridLineIndex,
+                            highlightedVerticalGridLineIndex:
+                                _highlightedVerticalGridLineIndex,
+                            isLayersRibbonExtended: _isLayersPanelVisible,
+                            onToggleGrid:
+                                () => setState(() => _showGrid = !_showGrid),
+                            onToggleLayersRibbon:
+                                () => setState(
+                                  () =>
+                                      _isLayersPanelVisible =
+                                          !_isLayersPanelVisible,
+                                ),
+                            onElementPanStart: _onPanStart,
+                            onElementPanUpdate: _updateElementPosition,
+                            onElementPanEnd: _onPanEnd,
+                            onElementTap: _elementSelect,
+                            onElementDelete: _deleteElement,
+                            onElementSplit: _splitElement,
+                            onElementRotateTap: _rotateElementByTap,
+                            onElementRotatePanStart: _onRotatePanStart,
+                            onElementRotatePanUpdate: _onRotatePanUpdate,
+                            onElementRotatePanEnd: _onPanEnd,
+                            onElementResizeTap: _resizeElementByTap,
+                            onElementResizePanStart: _onResizePanStart,
+                            onElementResizePanUpdate: _onResizePanUpdate,
+                            onElementResizePanEnd: _onPanEnd,
+                            isCheckerboardActive: true,
+                            checkerboardOpacity: checkerboardOpacity,
+                            isCheckerboardVisible: isCheckerboardVisible,
+                            lockedElements: logoState.lockedElements,
+                            elementOrder: logoState.elementOrder,
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+
+                  Positioned(
+                    top: 20,
+                    right: 0,
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _showGrid = !_showGrid;
+                        });
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              _showGrid ? 'Grid enabled' : 'Grid disabled',
+                            ),
+                            duration: const Duration(milliseconds: 1000),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color:
+                              Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.grey[800]
+                                  : Colors.grey[300],
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(25.0),
+                            bottomLeft: Radius.circular(25.0),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color:
+                                  Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Colors.black.withOpacity(0.5)
+                                      : Colors.black.withOpacity(0.2),
+                              blurRadius: 8,
+                              offset: const Offset(-2, 2),
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          _showGrid ? Icons.grid_off : Icons.grid_on,
+                          color:
+                              Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.white
+                                  : Colors.black87,
+                          size: 28,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  Positioned(
+                    top: 20,
+                    left: 0,
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _isLayersPanelVisible = !_isLayersPanelVisible;
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color:
+                              Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.grey[800]
+                                  : Colors.grey[300],
+                          borderRadius: const BorderRadius.only(
+                            topRight: Radius.circular(25.0),
+                            bottomRight: Radius.circular(25.0),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color:
+                                  Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Colors.black.withOpacity(0.5)
+                                      : Colors.black.withOpacity(0.2),
+                              blurRadius: 8,
+                              offset: const Offset(2, 2),
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          Icons.layers,
+                          color:
+                              Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.white
+                                  : Colors.black87,
+                          size: 28,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  if (_isLayersPanelVisible)
+                    Positioned(
+                      top: 30,
+                      right: 70,
+                      child: Container(
+                        height: 40,
+                        width: 100,
+                        decoration: BoxDecoration(
+                          color:
+                              Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.grey[800]!.withOpacity(0.95)
+                                  : Colors.grey[200]!.withOpacity(0.95),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            IconButton(
+                              icon: Icon(
+                                Icons.arrow_back_ios_new,
+                                size: 20,
+                                color:
+                                    Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? Colors.white
+                                        : Colors.black87,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _isLayersPanelVisible =
+                                      !_isLayersPanelVisible;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                  AnimatedPositioned(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                    top: 20,
+                    left: _isLayersPanelVisible ? 0 : -300,
+                    child: Consumer<SelectedColorProvider>(
+                      builder: (context, provider, _) {
+                        final logoState =
+                            provider.getCurrentLogoState() ?? _currentLogoState;
+                        return LayersPanel(
+                          logoState: logoState,
+                          svgLogo: widget.svgLogo,
+                          onClose:
+                              () =>
+                                  setState(() => _isLayersPanelVisible = false),
+                          onToggleLock: (id) => provider.toggleLock(id),
+                          onToggleLockAll:
+                              (shouldLock) =>
+                                  provider.toggleLockAll(shouldLock),
+                          onReorder: (id, moveUp) {
+                            if (moveUp) {
+                              provider.moveElementUp(id);
+                            } else {
+                              provider.moveElementDown(id);
+                            }
+                            final s = provider.getCurrentLogoState();
+                            if (s != null)
+                              setState(() => _currentLogoState = s);
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Column(
+              children: [
+                Container(
+                  height: 300,
+                  color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+                ),
+              ],
+            ),
+          ],
+        ),
+
+        if (tabToolbarIndex != -1 &&
+            (!isMovementPanelVisible || selectedElement == null))
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: kBottomNavigationBarHeight - 44,
+            top: MediaQuery.sizeOf(context).height.toDouble() * 0.52,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SingleChildScrollView(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    height: 200,
+                    child: _buildToolbarForTabs(tabToolbarIndex),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        if (tabToolbarIndex != -1 &&
+            (!isMovementPanelVisible || selectedElement == null))
+          Positioned(
+            left: 0,
+            right: 0,
+            top: MediaQuery.sizeOf(context).height * 0.48 - 30,
+            child: Center(
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    tabToolbarIndex = -1;
+                  });
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 4,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  child: Icon(
+                    Icons.keyboard_arrow_down,
+                    size: 32,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+        if (tabToolbarIndex == -1 &&
+            (selectedElement == null || !isMovementPanelVisible))
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: kBottomNavigationBarHeight + 8,
+            child: Center(
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    tabToolbarIndex = selectedIndex;
+                  });
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 4,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  child: Icon(
+                    Icons.keyboard_arrow_up,
+                    size: 32,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        if (selectedElement != null && isMovementPanelVisible)
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: MediaQuery.of(context).size.width * 0.52 + 30,
+            child: Center(
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    isMovementPanelVisible = false;
+                    selectedElement = null;
+                  });
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 4,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  child: Icon(
+                    Icons.keyboard_arrow_down,
+                    size: 32,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+        if (selectedElement != null && isMovementPanelVisible)
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: MovementPanel(
+              isVisible: isMovementPanelVisible,
+              onDirectionPressed: (String direction) {
+                const double moveAmount = 5.0;
+                Offset delta;
+                switch (direction) {
+                  case 'up':
+                    delta = const Offset(0, -moveAmount);
+                    break;
+                  case 'down':
+                    delta = const Offset(0, moveAmount);
+                    break;
+                  case 'left':
+                    delta = const Offset(-moveAmount, 0);
+                    break;
+                  case 'right':
+                    delta = const Offset(moveAmount, 0);
+                    break;
+                  default:
+                    delta = Offset.zero;
+                }
+                setState(() {});
+                _updateElementPosition(selectedElement!, delta);
+              },
+              onDuplicatePressed: () {
+                print('Duplicate called for $selectedElement');
+                duplicateSelectedElement(selectedElement!);
+              },
+              onBringToFrontPressed:
+                  () => bringToFront(selectedElement!, _currentLogoState),
+              onSendToBackPressed:
+                  () => sendToBack(selectedElement!, _currentLogoState),
+              selectedElementId: selectedElement,
+              onClose: () {},
+            ),
+          ),
+      ],
     );
   }
 
@@ -1055,6 +1861,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
   }
 
   Widget _buildToolbarForTabs(int index) {
+    final theme = Theme.of(context);
+
     switch (index) {
       case 0:
         return DropUpPanel(
@@ -1086,6 +1894,19 @@ class _DownloadLogoState extends State<DownloadLogo> {
         return _buildPaletteSelection();
       default:
         return SizedBox.shrink();
+    }
+  }
+
+  String _getToolbarTitle(int index) {
+    switch (index) {
+      case 0:
+        return 'Background & Shape';
+      case 3:
+        return 'Effects';
+      case 4:
+        return 'Color Palettes';
+      default:
+        return 'Tools';
     }
   }
 
@@ -1213,6 +2034,48 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
   Widget _buildEffectPanel() {
     final theme = Theme.of(context);
+
+    Future<ui.Image> loadUiImageFromAsset(String assetPath) async {
+      final ByteData data = await rootBundle.load(assetPath);
+      final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
+      final frame = await codec.getNextFrame();
+      return frame.image;
+    }
+
+    void _onEffectImageSelectedWithUndo(String imagePath) {
+      final colorProvider = Provider.of<SelectedColorProvider>(
+        context,
+        listen: false,
+      );
+      final undoProvider = Provider.of<UndoProvider>(context, listen: false);
+
+      final currentState = colorProvider.captureCurrentState();
+      undoProvider.saveState(
+        action: 'Set effect background: ${imagePath.split('/').last}',
+        state: currentState,
+      );
+
+      loadUiImageFromAsset(imagePath).then((uiImage) {
+        colorProvider.setBackgroundImage(uiImage, null);
+      });
+    }
+
+    void _onEffectImageRemovedWithUndo() {
+      final colorProvider = Provider.of<SelectedColorProvider>(
+        context,
+        listen: false,
+      );
+      final undoProvider = Provider.of<UndoProvider>(context, listen: false);
+
+      final currentState = colorProvider.captureCurrentState();
+      undoProvider.saveState(
+        action: 'Remove effect background',
+        state: currentState,
+      );
+
+      colorProvider.setBackgroundImage(null, null);
+    }
+
     return Container(
       decoration: BoxDecoration(
         color: theme.colorScheme.surface.withOpacity(0.8),
@@ -1233,21 +2096,22 @@ class _DownloadLogoState extends State<DownloadLogo> {
                 child: Consumer<SelectedColorProvider>(
                   builder: (context, provider, _) {
                     return Slider(
-                      value: provider.opacity,
+                      value: provider.backgroundOpacity,
                       min: 0.0,
                       max: 1.0,
                       divisions: 10,
-                      label: (provider.opacity * 100).round().toString(),
+                      label:
+                          (provider.backgroundOpacity * 100).round().toString(),
                       activeColor: theme.colorScheme.primary,
                       onChanged: (value) {
-                        provider.setOpacity(value);
+                        provider.setBackgroundOpacity(value);
                       },
                       onChangeStart: (value) {
-                        _saveUndoState('Change opacity');
+                        _saveUndoState('Change background opacity');
                       },
                       onChangeEnd: (value) {
                         _saveUndoState(
-                          'Set opacity to ${(value * 100).round()}%',
+                          'Set background opacity to ${(value * 100).round()}%',
                         );
                       },
                     );
@@ -1259,7 +2123,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
                 child: Consumer<SelectedColorProvider>(
                   builder: (context, provider, _) {
                     return Text(
-                      "${(provider.opacity * 100).round()}%",
+                      "${(provider.backgroundOpacity * 100).round()}%",
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.white),
                     );
@@ -1269,28 +2133,16 @@ class _DownloadLogoState extends State<DownloadLogo> {
             ],
           ),
 
-          const SizedBox(height: 10),
-          Text(
-            "Background Color",
-            style: TextStyle(color: theme.textTheme.bodyLarge?.color),
-          ),
-
           SizedBox(
-            height: 50,
+            height: 40,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
-              itemCount: colorList.length + 1,
+              itemCount: imageList.length + 1,
               separatorBuilder: (_, __) => const SizedBox(width: 10),
               itemBuilder: (context, index) {
                 if (index == 0) {
                   return GestureDetector(
-                    onTap: () {
-                      _saveUndoState('Reset background color');
-                      Provider.of<SelectedColorProvider>(
-                        context,
-                        listen: false,
-                      ).resetColor();
-                    },
+                    onTap: _onEffectImageRemovedWithUndo,
                     child: Container(
                       width: 60,
                       decoration: BoxDecoration(
@@ -1306,26 +2158,18 @@ class _DownloadLogoState extends State<DownloadLogo> {
                   );
                 }
 
-                final color = colorList[index - 1];
+                final imagePath = imageList[index - 1];
                 return GestureDetector(
-                  onTap: () {
-                    _saveUndoState('Change element color');
-                    final provider = Provider.of<SelectedColorProvider>(
-                      context,
-                      listen: false,
-                    );
-                    if (selectedElement != null) {
-                      provider.setElementColor(selectedElement!, color);
-                    } else {
-                      provider.setBackgroundColor(color);
-                    }
-                  },
+                  onTap: () => _onEffectImageSelectedWithUndo(imagePath),
                   child: Container(
-                    width: 50,
+                    width: 40,
                     decoration: BoxDecoration(
-                      color: color,
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(20),
                       border: Border.all(color: Colors.grey.shade400),
+                      image: DecorationImage(
+                        image: AssetImage(imagePath),
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                 );
@@ -1621,6 +2465,9 @@ class _DownloadLogoState extends State<DownloadLogo> {
     setState(() {
       selectedElement = id;
       isMovementPanelVisible = true;
+      if (MediaQuery.of(context).orientation == Orientation.landscape) {
+        tabToolbarIndex = -1;
+      }
     });
   }
 
@@ -2205,7 +3052,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
     }
   }
 
-
   Size _getElementRenderedSize(int id) {
     final provider = Provider.of<SelectedColorProvider>(context, listen: false);
     final logoState = provider.getCurrentLogoState() ?? _currentLogoState;
@@ -2270,7 +3116,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
     final sizeValue = _getElementSize(id);
     return Size(sizeValue, sizeValue);
   }
-
 
   double _getElementRotation(int id) {
     if (id >= 100 && id < 200) {

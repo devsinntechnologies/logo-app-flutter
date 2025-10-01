@@ -158,14 +158,21 @@ class _LogoCanvasState extends State<LogoCanvas> {
 
   Size? _lastCanvasSize;
 
+  // Helper: apply bg image opacity when image is present, otherwise use checkerboard opacity
+  Widget _withBackgroundOpacity(Widget child) {
+    final p = Provider.of<SelectedColorProvider>(context, listen: false);
+    final hasImage = p.backgroundImage != null;
+    final double opacity =
+        hasImage ? p.backgroundOpacity : widget.checkerboardOpacity;
+    return Opacity(opacity: opacity.clamp(0.0, 1.0), child: child);
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<SelectedColorProvider>(context);
     final gradient = provider.selectedGradient;
-    final providers = Provider.of<SelectedColorProvider>(context);
-    final bgImage = providers.backgroundImage;
-    final shapeColor =
-        Provider.of<SelectedColorProvider>(context).selectedColor;
+    final bgImage = provider.backgroundImage; // <— use same provider
+    final shapeColor = provider.selectedColor;
 
     final String selectedShape =
         (widget.selectedShapeName.isEmpty)
@@ -176,7 +183,6 @@ class _LogoCanvasState extends State<LogoCanvas> {
       builder: (context, constraints) {
         final canvasSize = constraints.biggest;
 
-  
         print('Canvas elementOrder: ${widget.elementOrder}');
 
         return Stack(
@@ -193,19 +199,19 @@ class _LogoCanvasState extends State<LogoCanvas> {
                 ),
               ),
 
+            // Square (checkerboard on)
             if (widget.isCheckerboardVisible && selectedShape == "Square")
-              Opacity(
-                opacity: widget.checkerboardOpacity, // Controlled by slider
-                child: CustomPaint(
+              _withBackgroundOpacity(
+                CustomPaint(
                   size: const Size(double.infinity, double.infinity),
                   painter: SquarePainter(shapeColor, gradient, bgImage),
                 ),
               ),
 
+            // Rounded Rect
             if (widget.isCheckerboardVisible && selectedShape == "Rounded Rect")
-              Opacity(
-                opacity: widget.checkerboardOpacity,
-                child: Center(
+              _withBackgroundOpacity(
+                Center(
                   child: CustomPaint(
                     size: const Size(280, 100),
                     painter: SquarePainter(shapeColor, gradient, bgImage),
@@ -213,80 +219,83 @@ class _LogoCanvasState extends State<LogoCanvas> {
                 ),
               ),
 
+            // Diamond
             if (widget.isCheckerboardVisible && selectedShape == "Diamond")
-              Opacity(
-                opacity: widget.checkerboardOpacity,
-                child: CustomPaint(
+              _withBackgroundOpacity(
+                CustomPaint(
                   size: const Size(double.infinity, double.infinity),
                   painter: DiamondPainter(shapeColor, gradient, bgImage),
                 ),
               ),
 
+            // Triangle
             if (widget.isCheckerboardVisible && selectedShape == "Triangle")
-              Opacity(
-                opacity: widget.checkerboardOpacity,
-                child: CustomPaint(
+              _withBackgroundOpacity(
+                CustomPaint(
                   size: const Size(double.infinity, double.infinity),
                   painter: TrianglePainter(shapeColor, gradient, bgImage),
                 ),
               ),
 
+            // Pentagon
             if (widget.isCheckerboardVisible && selectedShape == "Pentagon")
-              Opacity(
-                opacity: widget.checkerboardOpacity,
-                child: CustomPaint(
+              _withBackgroundOpacity(
+                CustomPaint(
                   size: const Size(double.infinity, double.infinity),
                   painter: PentagonPainter(shapeColor, gradient, bgImage),
                 ),
               ),
 
+            // Hexagon
             if (widget.isCheckerboardVisible && selectedShape == "Hexagon")
-              Opacity(
-                opacity: widget.checkerboardOpacity,
-                child: CustomPaint(
+              _withBackgroundOpacity(
+                CustomPaint(
                   size: const Size(double.infinity, double.infinity),
                   painter: HexagonPainter(shapeColor, gradient, bgImage),
                 ),
               ),
 
+            // Star
             if (widget.isCheckerboardVisible && selectedShape == "Star")
-              Opacity(
-                opacity: widget.checkerboardOpacity,
-                child: CustomPaint(
+              _withBackgroundOpacity(
+                CustomPaint(
                   size: const Size(double.infinity, double.infinity),
                   painter: StarPainter(shapeColor, gradient, bgImage),
                 ),
               ),
 
+            // Arrow
             if (widget.isCheckerboardVisible && selectedShape == "Arrow")
-              Opacity(
-                opacity: widget.checkerboardOpacity,
-                child: CustomPaint(
+              _withBackgroundOpacity(
+                CustomPaint(
                   size: const Size(double.infinity, double.infinity),
                   painter: ArrowPainter(shapeColor, gradient, bgImage),
                 ),
               ),
 
+            // Heart
             if (widget.isCheckerboardVisible && selectedShape == "Heart")
-              Opacity(
-                opacity: widget.checkerboardOpacity,
-                child: CustomPaint(
-                  size: const Size(200, 200),
-                  painter: HeartPainter(shapeColor, gradient, bgImage),
+              _withBackgroundOpacity(
+                Center(
+                  child: CustomPaint(
+                    size: const Size(200, 200),
+                    painter: HeartPainter(shapeColor, gradient, bgImage),
+                  ),
                 ),
               ),
 
+            // Default background (checkerboard off OR no shape selected)
             if (widget.isCheckerboardActive == false ||
                 widget.isCheckerboardVisible == false ||
                 selectedShape.isEmpty)
-              Opacity(
-                opacity: widget.checkerboardOpacity,
-                child: CustomPaint(
+              _withBackgroundOpacity(
+                CustomPaint(
                   size: const Size(double.infinity, double.infinity),
                   painter: SquarePainter(shapeColor, gradient, bgImage),
                 ),
               ),
 
+            // Grid + elements
             if (widget.showGrid)
               CustomPaint(
                 painter: GridPainter(

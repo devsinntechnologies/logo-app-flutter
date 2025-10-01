@@ -119,6 +119,15 @@ class SelectedColorProvider extends ChangeNotifier {
 
   LogoStateData? getCurrentLogoState() => _currentLogoState;
 
+  double _backgroundOpacity = 1.0;
+
+  double get backgroundOpacity => _backgroundOpacity;
+
+  void setBackgroundOpacity(double value) {
+    _backgroundOpacity = value;
+    notifyListeners();
+  }
+
   void updateLogoState(LogoStateData state) {
     _currentLogoState = state;
     notifyListeners();
@@ -652,6 +661,24 @@ class SelectedColorProvider extends ChangeNotifier {
     }
     //!
     notifyListeners();
+  }
+
+  void setElementTextureFromAsset(int elementId, String assetPath) {
+    _elementTextures[elementId] = assetPath;
+    notifyListeners();
+  }
+
+  void resetElementColor(int elementId) {
+    _elementColors.remove(elementId);
+    _elementTextures.remove(elementId);
+    _elementGradients.remove(elementId);
+    notifyListeners();
+  }
+
+  Map<int, String> _elementTextures = {};
+
+  String? getElementTexture(int elementId) {
+    return _elementTextures[elementId];
   }
 
   void clearOverrides() {

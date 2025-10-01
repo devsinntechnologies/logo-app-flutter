@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:async';
 
+import 'package:google_fonts/google_fonts.dart';
 import 'package:logo_app_flutter/provider/undo_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
@@ -42,6 +43,23 @@ class _MovementPanelState extends State<MovementPanel>
   bool _isMoreSelected = false;
   double _localRotation = 0.0;
   int? _lastElementId;
+
+  Color _getCategoryColor(String category) {
+    switch (category) {
+      case 'Sans Serif':
+        return Colors.blue;
+      case 'Serif':
+        return Colors.green;
+      case 'Display':
+        return Colors.orange;
+      case 'Handwriting':
+        return Colors.purple;
+      case 'Monospace':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
 
   void _startMoving(String direction) {
     _moveTimer?.cancel(); // Pehle koi purana timer stop karo
@@ -1199,13 +1217,6 @@ class _MovementPanelState extends State<MovementPanel>
                     : theme.iconTheme.color,
           ),
           onPressed: () {
-            _saveUndoState('Toggle bold for element $id');
-            _trackButtonClick('bold_toggle');
-            final adManager = Provider.of<SmartInterstitialManager>(
-              context,
-              listen: false,
-            );
-            adManager.onFontChanged();
             provider.toggleBold(id);
           },
         ),
@@ -1213,12 +1224,11 @@ class _MovementPanelState extends State<MovementPanel>
           icon: Icon(
             Icons.format_italic,
             color:
-                styleState.isBold
+                styleState.isItalic
                     ? theme.colorScheme.primary
                     : theme.iconTheme.color,
           ),
           onPressed: () {
-            _saveUndoState('Toggle italic for element $id');
             provider.toggleItalic(id);
           },
         ),
@@ -1226,12 +1236,11 @@ class _MovementPanelState extends State<MovementPanel>
           icon: Icon(
             Icons.format_underline,
             color:
-                styleState.isBold
+                styleState.isUnderline
                     ? theme.colorScheme.primary
                     : theme.iconTheme.color,
           ),
           onPressed: () {
-            _saveUndoState('Toggle underline for element $id');
             provider.toggleUnderline(id);
           },
         ),
@@ -1239,41 +1248,147 @@ class _MovementPanelState extends State<MovementPanel>
     );
 
     final fonts = [
-      {'name': 'Roboto', 'display': 'Roboto'},
-      {'name': 'Montserrat', 'display': 'Montserrat'},
-      {'name': 'Lobster', 'display': 'Lobster'},
+      {'name': 'Roboto', 'preview': 'AaBbYyZz'},
+      {'name': 'Montserrat', 'preview': 'AaBbYyZz'},
+      {'name': 'Open Sans', 'preview': 'AaBbYyZz'},
+      {'name': 'Poppins', 'preview': 'AaBbYyZz'},
+      {'name': 'Raleway', 'preview': 'AaBbYyZz'},
+      {'name': 'Lato', 'preview': 'AaBbYyZz'},
+      {'name': 'Nunito', 'preview': 'AaBbYyZz'},
+      {'name': 'Inter', 'preview': 'AaBbYyZz'},
+      {'name': 'Ubuntu', 'preview': 'AaBbYyZz'},
+      {'name': 'Work Sans', 'preview': 'AaBbYyZz'},
+      {'name': 'Hind', 'preview': 'AaBbYyZz'},
+      {'name': 'Karla', 'preview': 'AaBbYyZz'},
+      {'name': 'Exo 2', 'preview': 'AaBbYyZz'},
+      {'name': 'Barlow', 'preview': 'AaBbYyZz'},
+      {'name': 'Merriweather', 'preview': 'AaBbYyZz'},
+      {'name': 'Lora', 'preview': 'AaBbYyZz'},
+      {'name': 'PT Serif', 'preview': 'AaBbYyZz'},
+      {'name': 'Crimson Text', 'preview': 'AaBbYyZz'},
+      {'name': 'Spectral', 'preview': 'AaBbYyZz'},
+      {'name': 'Cormorant Garamond', 'preview': 'AaBbYyZz'},
+      {'name': 'Bitter', 'preview': 'AaBbYyZz'},
+      {'name': 'Noto Serif', 'preview': 'AaBbYyZz'},
+      {'name': 'Bebas Neue', 'preview': 'SAMPLE TEXT'},
+      {'name': 'Anton', 'preview': 'SAMPLE TEXT'},
+      {'name': 'Oswald', 'preview': 'SAMPLE TEXT'},
+      {'name': 'Righteous', 'preview': 'AaBbYyZz'},
+      {'name': 'Comfortaa', 'preview': 'AaBbYyZz'},
+      {'name': 'Alfa Slab One', 'preview': 'SAMPLE'},
+      {'name': 'Abril Fatface', 'preview': 'Sample'},
+      {'name': 'Chewy', 'preview': 'Sample'},
+      {'name': 'Luckiest Guy', 'preview': 'Sample'},
+      {'name': 'Lobster', 'preview': 'Sample Text'},
+      {'name': 'Dancing Script', 'preview': 'Sample Text'},
+      {'name': 'Pacifico', 'preview': 'Sample Text'},
+      {'name': 'Great Vibes', 'preview': 'Sample Text'},
+      {'name': 'Sacramento', 'preview': 'Sample Text'},
+      {'name': 'Shadows Into Light', 'preview': 'Sample Text'},
+      {'name': 'Cookie', 'preview': 'Sample Text'},
+      {'name': 'Amatic SC', 'preview': 'Sample Text'},
+      {'name': 'Handlee', 'preview': 'Sample Text'},
+      {'name': 'Caveat', 'preview': 'Sample Text'},
+      {'name': 'Fira Code', 'preview': 'Code 123'},
+      {'name': 'Source Code Pro', 'preview': 'Code 123'},
+      {'name': 'JetBrains Mono', 'preview': 'Code 123'},
+      {'name': 'Inconsolata', 'preview': 'Code 123'},
+      {'name': 'Cousine', 'preview': 'Code 123'},
+      {'name': 'Titillium Web', 'preview': 'AaBbYyZz'},
+      {'name': 'Asap', 'preview': 'AaBbYyZz'},
+      {'name': 'Mulish', 'preview': 'AaBbYyZz'},
+      {'name': 'Overpass', 'preview': 'AaBbYyZz'},
+      {'name': 'Prompt', 'preview': 'AaBbYyZz'},
+      {'name': 'Questrial', 'preview': 'AaBbYyZz'},
+      {'name': 'Archivo', 'preview': 'AaBbYyZz'},
+      {'name': 'Signika', 'preview': 'AaBbYyZz'},
+      {'name': 'Rubik', 'preview': 'AaBbYyZz'},
+      {'name': 'Heebo', 'preview': 'AaBbYyZz'},
+      {'name': 'Teko', 'preview': 'AaBbYyZz'},
+      {'name': 'Chivo', 'preview': 'AaBbYyZz'},
+      {'name': 'Encode Sans', 'preview': 'AaBbYyZz'},
+      {'name': 'Manrope', 'preview': 'AaBbYyZz'},
+      {'name': 'Urbanist', 'preview': 'AaBbYyZz'},
+      {'name': 'DM Serif Display', 'preview': 'AaBbYyZz'},
+      {'name': 'Prata', 'preview': 'AaBbYyZz'},
+      {'name': 'Rozha One', 'preview': 'AaBbYyZz'},
+      {'name': 'Slabo 27px', 'preview': 'AaBbYyZz'},
+      {'name': 'Alegreya', 'preview': 'AaBbYyZz'},
+      {'name': 'Domine', 'preview': 'AaBbYyZz'},
+      {'name': 'Nanum Myeongjo', 'preview': 'AaBbYyZz'},
+      {'name': 'Tinos', 'preview': 'AaBbYyZz'},
+      {'name': 'Volkhov', 'preview': 'AaBbYyZz'},
+      {'name': 'Zilla Slab', 'preview': 'AaBbYyZz'},
+      {'name': 'Staatliches', 'preview': 'SAMPLE TEXT'},
+      {'name': 'Kanit', 'preview': 'SAMPLE TEXT'},
+      {'name': 'Patua One', 'preview': 'SAMPLE TEXT'},
+      {'name': 'Bangers', 'preview': 'SAMPLE TEXT'},
+      {'name': 'Changa One', 'preview': 'SAMPLE TEXT'},
+      {'name': 'Passion One', 'preview': 'SAMPLE TEXT'},
+      {'name': 'Kaushan Script', 'preview': 'Sample Text'},
+      {'name': 'Yellowtail', 'preview': 'Sample Text'},
+      {'name': 'Allura', 'preview': 'Sample Text'},
+      {'name': 'Satisfy', 'preview': 'Sample Text'},
+      {'name': 'Marck Script', 'preview': 'Sample Text'},
+      {'name': 'Gloria Hallelujah', 'preview': 'Sample Text'},
+      {'name': 'Courgette', 'preview': 'Sample Text'},
+      {'name': 'Patrick Hand', 'preview': 'Sample Text'},
+      {'name': 'Covered By Your Grace', 'preview': 'Sample Text'},
+      {'name': 'Anonymous Pro', 'preview': 'Code 123'},
+      {'name': 'PT Mono', 'preview': 'Code 123'},
+      {'name': 'Oxygen Mono', 'preview': 'Code 123'},
+      {'name': 'Share Tech Mono', 'preview': 'Code 123'},
+      {'name': 'Major Mono Display', 'preview': 'Code 123'},
     ];
 
-    Widget fontList = ListView(
-      scrollDirection: Axis.horizontal,
-      children:
-          fonts.map((font) {
-            return GestureDetector(
-              onTap: () {
-                _saveUndoState('Change font of element $id to ${font['name']}');
-                provider.setFontForElement(id, font['name']!);
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  'Aa',
-                  style: TextStyle(
-                    fontFamily: font['name'],
-                    fontSize: 32,
-                    color: theme.textTheme.bodyLarge?.color,
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
-    );
+    String? currentFont = provider.getFontForElement(id);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         fontStyleBar,
-        SizedBox(height: 10),
-        SizedBox(height: 50, child: fontList),
+
+        const SizedBox(height: 4),
+
+        Expanded(
+          child: GridView.builder(
+            padding: const EdgeInsets.all(8),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              childAspectRatio: 2,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 14,
+            ),
+            itemCount: fonts.length,
+            itemBuilder: (context, index) {
+              final font = fonts[index];
+              final fontName = font['name']!;
+              final previewText = font['preview']!;
+
+              return GestureDetector(
+                onTap: () {
+                  provider.setFontForElement(id, fontName);
+                },
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      previewText,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.getFont(fontName, fontSize: 18),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      fontName,
+                      style: const TextStyle(fontSize: 14),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
       ],
     );
   }
@@ -1489,8 +1604,7 @@ class _MovementPanelState extends State<MovementPanel>
                     Text(
                       "$label Axis",
                       style: TextStyle(
-                        color:
-                            theme.textTheme.bodyLarge?.color, 
+                        color: theme.textTheme.bodyLarge?.color,
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
                       ),
@@ -1583,7 +1697,6 @@ class _MovementPanelState extends State<MovementPanel>
                   },
                 ),
 
-
                 ElevatedButton.icon(
                   onPressed: () {
                     _saveUndoState(
@@ -1618,7 +1731,7 @@ class _MovementPanelState extends State<MovementPanel>
                 Text(
                   "Tip: Combine X, Y, Z rotations for complex 3D effects",
                   style: TextStyle(
-                    color: theme.textTheme.bodySmall?.color, 
+                    color: theme.textTheme.bodySmall?.color,
                     fontSize: 12,
                     fontStyle: FontStyle.italic,
                   ),

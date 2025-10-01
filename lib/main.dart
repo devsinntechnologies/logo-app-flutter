@@ -1,3 +1,5 @@
+import 'package:device_preview/device_preview.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logo_app_flutter/provider/banner_ad_provider.dart';
 import 'package:logo_app_flutter/provider/interestitial_ad.dart';
@@ -22,9 +24,10 @@ void main() async {
   //? Google Mobile Ads SDK initalizer
   await MobileAds.instance.initialize();
   runApp(
-    // DevicePreview(builder: (context) =>
+    // DevicePreview(
+      // builder: (context) =>
     MyApp(),
-    // enabled: !kReleaseMode)
+    // enabled: !kReleaseMode )
   );
 }
 
