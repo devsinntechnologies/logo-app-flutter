@@ -30,8 +30,8 @@ class LogoCanvas extends StatefulWidget {
   final bool isCheckerboardActive;
   final bool isCheckerboardVisible;
   final double checkerboardOpacity;
-  final List<int> elementOrder; // <- already passed from DownloadLogo
-  final Set<int> lockedElements; // <- already passed
+  final List<int> elementOrder; 
+  final Set<int> lockedElements; 
 
   final VoidCallback onToggleGrid;
   final VoidCallback onToggleLayersRibbon;

@@ -134,18 +134,23 @@ class UndoRedoWidget extends StatelessWidget {
     return button;
   }
 
-  void _performUndo(BuildContext context) {
+  void _performUndo(BuildContext context) async {
     final undoProvider = Provider.of<UndoProvider>(context, listen: false);
-    final colorProvider = Provider.of<SelectedColorProvider>(
+    final dynamic colorProvider = Provider.of<SelectedColorProvider>(
       context,
       listen: false,
     );
 
     final previousState = undoProvider.undo();
     if (previousState != null) {
-      colorProvider.restoreFromState(previousState.data);
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
-      // Show feedback
+      try {
+        await colorProvider.restoreFromStateAsync(previousState.data);
+      } catch (_) {
+        colorProvider.restoreFromState(previousState.data);
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Undid: ${previousState.action}'),
@@ -158,18 +163,23 @@ class UndoRedoWidget extends StatelessWidget {
     }
   }
 
-  void _performRedo(BuildContext context) {
+  void _performRedo(BuildContext context) async {
     final undoProvider = Provider.of<UndoProvider>(context, listen: false);
-    final colorProvider = Provider.of<SelectedColorProvider>(
+    final dynamic colorProvider = Provider.of<SelectedColorProvider>(
       context,
       listen: false,
     );
 
     final redoState = undoProvider.redo();
     if (redoState != null) {
-      colorProvider.restoreFromState(redoState.data);
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
-      // Show feedback
+      try {
+        await colorProvider.restoreFromStateAsync(redoState.data);
+      } catch (_) {
+        colorProvider.restoreFromState(redoState.data);
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Redid: ${redoState.action}'),

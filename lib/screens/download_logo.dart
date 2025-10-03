@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'dart:math' as math;
 import 'package:flutter/services.dart';
+import 'package:image/image.dart' as img;
 import 'package:logo_app_flutter/fragments/theme_toggle_widget.dart';
 import 'package:logo_app_flutter/provider/interestitial_ad.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
@@ -147,6 +148,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
     return path;
   }
+
+  String _selectedSaveFormat = 'png';
 
   String selectedShapeName = ""; // 👈 Add this
   // --- State Management ---
@@ -381,63 +384,82 @@ class _DownloadLogoState extends State<DownloadLogo> {
     showDialog(
       barrierDismissible: true,
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: theme.dialogBackgroundColor,
-          title: const Text('Save Logo'),
-          content: Text(
-            'Do you want to save this logo to your gallery$shapeText?',
-            style: theme.textTheme.bodyMedium,
-          ),
-          actions: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text(
-                    'Cancel',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: theme.colorScheme.primary,
+      builder: (dialogCtx) {
+        return StatefulBuilder(
+          builder:
+              (ctx, setStateDialog) => AlertDialog(
+                backgroundColor: theme.dialogBackgroundColor,
+                title: const Text('Save Logo'),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    RadioListTile<String>(
+                      value: 'png',
+                      groupValue: _selectedSaveFormat,
+                      onChanged:
+                          (v) => setStateDialog(() {
+                            _selectedSaveFormat = v!;
+                          }),
+                      title: const Text('PNG'),
+                      secondary: const Icon(Icons.image_outlined),
+                      dense: true,
                     ),
-                  ),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    final adManager = Provider.of<SmartInterstitialManager>(
-                      context,
-                      listen: false,
-                    );
-                    adManager.onDownloadAttempted();
-                    adManager.onButtonClick('save_logo');
-
-                    await _saveLogoCleanly(canvasKey);
-
-                    Navigator.of(context).pop();
-
-                    Provider.of<InterestitialAdProvider>(
-                      context,
-                      listen: false,
-                    ).showAd();
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Logo saved to gallery$shapeText!'),
+                    RadioListTile<String>(
+                      value: 'jpg',
+                      groupValue: _selectedSaveFormat,
+                      onChanged:
+                          (v) => setStateDialog(() {
+                            _selectedSaveFormat = v!;
+                          }),
+                      title: const Text('JPG'),
+                      secondary: const Icon(
+                        Icons.photo_size_select_actual_outlined,
                       ),
-                    );
-                  },
-                  child: Text(
-                    'Save',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: theme.colorScheme.primary,
+                      dense: true,
+                    ),
+                  ],
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(dialogCtx).pop(),
+                    child: Text(
+                      'Cancel',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: theme.colorScheme.primary,
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                  TextButton(
+                    onPressed: () async {
+                      final adManager = Provider.of<SmartInterstitialManager>(
+                        context,
+                        listen: false,
+                      );
+                      adManager.onDownloadAttempted();
+                      adManager.onButtonClick('save_logo');
+
+                      await _saveLogoAsFormat(_selectedSaveFormat); // png | jpg
+
+                      if (context.mounted) {
+                        Navigator.of(dialogCtx).pop();
+                      }
+
+                      Provider.of<InterestitialAdProvider>(
+                        context,
+                        listen: false,
+                      ).showAd();
+                    },
+                    child: Text(
+                      'Save',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
         );
       },
     );
@@ -1858,6 +1880,128 @@ class _DownloadLogoState extends State<DownloadLogo> {
         );
       },
     );
+  }
+
+  void _showSaveSnackBar() {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        duration: const Duration(seconds: 8),
+        content: Row(
+          children: [
+            const Text('Save as:'),
+            const SizedBox(width: 12),
+            TextButton(
+              onPressed: () => _saveLogoAsFormat('png'),
+              child: const Text('PNG'),
+            ),
+            const SizedBox(width: 8),
+            TextButton(
+              onPressed: () => _saveLogoAsFormat('jpg'),
+              child: const Text('JPG'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _saveLogoAsFormat(String format) async {
+    final wasMovementPanelVisible = isMovementPanelVisible;
+    final previousSelectedElement = selectedElement;
+    final wasGridVisible = _showGrid;
+
+    try {
+      setState(() {
+        selectedElement = null;
+        isMovementPanelVisible = false;
+        _showGrid = false;
+      });
+      Provider.of<SelectedColorProvider>(
+        context,
+        listen: false,
+      ).clearSelection();
+      await Future.delayed(const Duration(milliseconds: 120));
+      await WidgetsBinding.instance.endOfFrame;
+
+      final isGranted = await _requestGalleryPermission();
+      if (!isGranted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Storage permission denied')),
+        );
+        return;
+      }
+
+      final ui.Image captured = await _captureCanvasImage(_canvasKey);
+
+      final ui.Image finalImage =
+          (selectedShapeName.isNotEmpty && selectedShapeName != 'none')
+              ? await _applyShapeMask(captured, selectedShapeName)
+              : captured;
+
+      final Uint8List bytes = await _encodeImageBytes(finalImage, format);
+
+      final directory = await getTemporaryDirectory();
+      final path =
+          '${directory.path}/logo_${DateTime.now().millisecondsSinceEpoch}.$format';
+      final file = await File(path).writeAsBytes(bytes);
+      final saved = await GallerySaver.saveImage(
+        file.path,
+        albumName: 'LogoMaker',
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(saved == true ? 'Saved as .$format' : 'Save failed'),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Save failed: $e')));
+    } finally {
+      setState(() {
+        selectedElement = previousSelectedElement;
+        isMovementPanelVisible = wasMovementPanelVisible;
+        _showGrid = wasGridVisible;
+      });
+      if (previousSelectedElement != null) {
+        Provider.of<SelectedColorProvider>(
+          context,
+          listen: false,
+        ).setSelectedElement(previousSelectedElement);
+      }
+    }
+  }
+
+  Future<ui.Image> _captureCanvasImage(GlobalKey key) async {
+    final boundary =
+        key.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+    if (boundary == null) {
+      throw Exception('Canvas not ready');
+    }
+    return await boundary.toImage(pixelRatio: 3.0);
+  }
+
+  Future<Uint8List> _encodeImageBytes(ui.Image image, String format) async {
+    final ByteData? pngData = await image.toByteData(
+      format: ui.ImageByteFormat.png,
+    );
+    if (pngData == null) throw Exception('Failed to get bytes from canvas');
+    final Uint8List pngBytes = pngData.buffer.asUint8List();
+
+    if (format.toLowerCase() == 'png') return pngBytes;
+
+    final img.Image? decoded = img.decodeImage(pngBytes);
+    if (decoded == null)
+      throw Exception('Failed to decode PNG for JPG conversion');
+    final img.Image whiteBg = img.Image(
+      width: decoded.width,
+      height: decoded.height,
+    );
+    img.fill(whiteBg, color: img.ColorUint8.rgb(255, 255, 255));
+    img.compositeImage(whiteBg, decoded);
+    return Uint8List.fromList(img.encodeJpg(whiteBg, quality: 92));
   }
 
   Widget _buildToolbarForTabs(int index) {
