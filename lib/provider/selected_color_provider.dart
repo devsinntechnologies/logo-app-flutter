@@ -1028,8 +1028,8 @@ class SelectedColorProvider extends ChangeNotifier {
         _currentLogoState = LogoStateData.fromJson(state['logoState']);
       }
       if (state['opacity'] != null) {
-        _opacity = state['opacity']; // Restore opacity value
-      }
+        _opacity = state['opacity']; 
+      } 
       if (state['selectedShapeName'] != null) {
         _selectedShapeName = state['selectedShapeName'];
       }

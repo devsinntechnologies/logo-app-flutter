@@ -2058,106 +2058,116 @@ class _DownloadLogoState extends State<DownloadLogo> {
     final theme = Theme.of(context);
     return Container(
       color: theme.colorScheme.surface.withOpacity(0.8),
-      height: 50,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        separatorBuilder: (_, __) => const SizedBox(width: 10),
-        itemCount: paletteList.length,
-        itemBuilder: (context, index) {
-          final colors = paletteList[index];
-          final isSelected = selectedPaletteIndex == index;
-          return GestureDetector(
-            onTap: () {
-              _saveUndoState('Apply color palette ${index + 1}');
-              final provider = Provider.of<SelectedColorProvider>(
-                context,
-                listen: false,
-              );
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        children: [
+          Text(
+            "Color Palettes",
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: theme.textTheme.bodyLarge?.color,
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 80,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              separatorBuilder: (_, __) => const SizedBox(width: 10),
+              itemCount: paletteList.length,
+              itemBuilder: (context, index) {
+                final colors = paletteList[index];
+                final isSelected = selectedPaletteIndex == index;
 
-              setState(() {
-                selectedPaletteIndex = index;
-              });
+                return GestureDetector(
+                  onTap: () {
+                    _saveUndoState('Apply color palette ${index + 1}');
 
-              provider.setInitialColorsFromPalette(
-                colors,
-                _currentLogoState.elementOrder,
-              );
+                    final provider = Provider.of<SelectedColorProvider>(
+                      context,
+                      listen: false,
+                    );
 
-              provider.updateLogoState(_currentLogoState);
-            },
-            child: Container(
-              height: 10,
-              width: 50,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color:
-                      isSelected
-                          ? theme.colorScheme.primary
-                          : theme.dividerColor,
-                  width: isSelected ? 2 : 1,
-                ),
-              ),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Column(
-                      children:
-                          colors
-                              .map(
-                                (color) => Container(
-                                  height: 65.2,
-                                  width: double.infinity,
-                                  color: color,
-                                ),
-                              )
-                              .toList(),
-                    ),
-                  ),
-                  if (isSelected)
-                    Positioned.fill(
-                      child: Align(
-                        alignment: Alignment.center,
-                        child: InkWell(
-                          onTap: () {
-                            _saveUndoState('Rotate palette colors');
-                            final provider = Provider.of<SelectedColorProvider>(
-                              context,
-                              listen: false,
-                            );
-                            provider.setColorsRotated(
-                              colors,
-                              allElementIds: _currentLogoState.elementOrder,
-                            );
-                            // CRITICAL: Sync logo state back to provider
-                            provider.updateLogoState(_currentLogoState);
+                    setState(() {
+                      selectedPaletteIndex = index;
+                    });
+
+                    provider.setInitialColorsFromPalette(
+                      colors,
+                      _currentLogoState.elementOrder,
+                    );
+
+                    provider.updateLogoState(_currentLogoState);
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Applied palette ${index + 1}'),
+                        action: SnackBarAction(
+                          label: 'Undo',
+                          onPressed: () {
+                            if (context.read<UndoProvider>().canUndo) _undo();
                           },
-                          child: Container(
+                        ),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    height: 80,
+                    width: 60,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color:
+                            isSelected
+                                ? theme.colorScheme.primary
+                                : theme.dividerColor,
+                        width: isSelected ? 3 : 1,
+                      ),
+                    ),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Column(
+                            children:
+                                colors
+                                    .map(
+                                      (color) => Container(
+                                        height: 25,
+                                        width: double.infinity,
+                                        color: color,
+                                      ),
+                                    )
+                                    .toList(),
+                          ),
+                        ),
+                        if (isSelected)
+                          Container(
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: theme.cardColor,
                               border: Border.all(
                                 color: theme.colorScheme.primary,
-                                width: 1,
+                                width: 2,
                               ),
                             ),
-                            padding: const EdgeInsets.all(2),
+                            padding: const EdgeInsets.all(4),
                             child: Icon(
-                              Icons.refresh,
-                              size: 10,
+                              Icons.check,
+                              size: 16,
                               color: theme.colorScheme.primary,
                             ),
                           ),
-                        ),
-                      ),
+                      ],
                     ),
-                ],
-              ),
+                  ),
+                );
+              },
             ),
-          );
-        },
+          ),
+        ],
       ),
     );
   }
@@ -2187,16 +2197,11 @@ class _DownloadLogoState extends State<DownloadLogo> {
     }
 
     void _onEffectImageSelectedWithUndo(String imagePath) {
+      _saveUndoState('Apply effect: ${imagePath.split('/').last}');
+
       final colorProvider = Provider.of<SelectedColorProvider>(
         context,
         listen: false,
-      );
-      final undoProvider = Provider.of<UndoProvider>(context, listen: false);
-
-      final currentState = colorProvider.captureCurrentState();
-      undoProvider.saveState(
-        action: 'Set effect background: ${imagePath.split('/').last}',
-        state: currentState,
       );
 
       loadUiImageFromAsset(imagePath).then((uiImage) {
@@ -2205,18 +2210,12 @@ class _DownloadLogoState extends State<DownloadLogo> {
     }
 
     void _onEffectImageRemovedWithUndo() {
+      _saveUndoState('Remove background effect');
+
       final colorProvider = Provider.of<SelectedColorProvider>(
         context,
         listen: false,
       );
-      final undoProvider = Provider.of<UndoProvider>(context, listen: false);
-
-      final currentState = colorProvider.captureCurrentState();
-      undoProvider.saveState(
-        action: 'Remove effect background',
-        state: currentState,
-      );
-
       colorProvider.setBackgroundImage(null, null);
     }
 
@@ -2228,6 +2227,15 @@ class _DownloadLogoState extends State<DownloadLogo> {
         mainAxisAlignment: MainAxisAlignment.center,
         spacing: 10,
         children: [
+          Text(
+            "Background Effects",
+            style: TextStyle(
+              color: theme.textTheme.bodyLarge?.color,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
           Text(
             "Opacity",
             style: TextStyle(color: theme.textTheme.bodyLarge?.color),
@@ -2247,11 +2255,11 @@ class _DownloadLogoState extends State<DownloadLogo> {
                       label:
                           (provider.backgroundOpacity * 100).round().toString(),
                       activeColor: theme.colorScheme.primary,
+                      onChangeStart: (value) {
+                        _saveUndoState('Start changing background opacity');
+                      },
                       onChanged: (value) {
                         provider.setBackgroundOpacity(value);
-                      },
-                      onChangeStart: (value) {
-                        _saveUndoState('Change background opacity');
                       },
                       onChangeEnd: (value) {
                         _saveUndoState(
@@ -2269,16 +2277,23 @@ class _DownloadLogoState extends State<DownloadLogo> {
                     return Text(
                       "${(provider.backgroundOpacity * 100).round()}%",
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(
+                        color: theme.textTheme.bodyMedium?.color,
+                        fontWeight: FontWeight.w600,
+                      ),
                     );
                   },
                 ),
               ),
             ],
           ),
-
+          const SizedBox(height: 16),
+          Text(
+            "Effect Images",
+            style: TextStyle(color: theme.textTheme.bodyLarge?.color),
+          ),
           SizedBox(
-            height: 40,
+            height: 60,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: imageList.length + 1,
@@ -2289,9 +2304,11 @@ class _DownloadLogoState extends State<DownloadLogo> {
                     onTap: _onEffectImageRemovedWithUndo,
                     child: Container(
                       width: 60,
+                      height: 60,
                       decoration: BoxDecoration(
                         color: theme.cardColor,
                         borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: theme.dividerColor),
                       ),
                       child: Icon(
                         Icons.close,
@@ -2306,9 +2323,10 @@ class _DownloadLogoState extends State<DownloadLogo> {
                 return GestureDetector(
                   onTap: () => _onEffectImageSelectedWithUndo(imagePath),
                   child: Container(
-                    width: 40,
+                    width: 60,
+                    height: 60,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(10),
                       border: Border.all(color: Colors.grey.shade400),
                       image: DecorationImage(
                         image: AssetImage(imagePath),
@@ -2332,16 +2350,19 @@ class _DownloadLogoState extends State<DownloadLogo> {
     );
     final undoProvider = Provider.of<UndoProvider>(context, listen: false);
 
-    colorProvider.updateLogoState(_currentLogoState);
+    if (!undoProvider.isUndoRedoInProgress) {
+      colorProvider.updateLogoState(_currentLogoState);
+      final currentState = colorProvider.captureCurrentState();
+      currentState['selectedShapeName'] = selectedShapeName;
+      currentState['selectedElement'] = selectedElement;
+      currentState['tabToolbarIndex'] = tabToolbarIndex;
+      currentState['selectedIndex'] = selectedIndex;
+      currentState['isMovementPanelVisible'] = isMovementPanelVisible;
 
-    final currentState = colorProvider.captureCurrentState();
-    currentState['selectedShapeName'] = selectedShapeName;
+      undoProvider.saveState(action: action, state: currentState);
 
-    undoProvider.saveState(action: action, state: currentState);
-
-    print('✅ Saved undo state: $action');
-    print('   Opacity: ${colorProvider.opacity}');
-    print('   Shape: $selectedShapeName');
+      print('✅ Saved undo state: $action');
+    }
   }
 
   void _undo() {
@@ -2357,35 +2378,51 @@ class _DownloadLogoState extends State<DownloadLogo> {
       listen: false,
     );
 
-    if (undoProvider.canUndo) {
-      final previousState = undoProvider.undo();
-      if (previousState != null) {
-        colorProvider.restoreFromState(previousState.data);
-
-        final restoredLogoState = colorProvider.getCurrentLogoState();
-        if (restoredLogoState != null) {
-          setState(() {
-            _currentLogoState = restoredLogoState;
-            selectedElement = null;
-            _clearGridAlignment();
-            if (previousState.data['selectedShapeName'] != null) {
-              selectedShapeName = previousState.data['selectedShapeName'];
-            }
-          });
-        }
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Undo: ${previousState.action}'),
-            duration: const Duration(milliseconds: 800),
-          ),
-        );
-      }
-    } else {
+    if (!undoProvider.canUndo) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Nothing to undo!'),
           duration: Duration(milliseconds: 800),
+        ),
+      );
+      return;
+    }
+
+    final currentState = colorProvider.captureCurrentState();
+    currentState['selectedShapeName'] = selectedShapeName;
+    currentState['selectedElement'] = selectedElement;
+    currentState['tabToolbarIndex'] = tabToolbarIndex;
+    currentState['selectedIndex'] = selectedIndex;
+    currentState['isMovementPanelVisible'] = isMovementPanelVisible;
+
+    final previousState = undoProvider.undo();
+
+    if (previousState != null) {
+      colorProvider.restoreFromState(previousState.data);
+
+      final restoredLogoState = colorProvider.getCurrentLogoState();
+
+      if (restoredLogoState != null) {
+        setState(() {
+          _currentLogoState = restoredLogoState;
+
+          selectedElement = previousState.data['selectedElement'];
+          selectedShapeName = previousState.data['selectedShapeName'] ?? '';
+          tabToolbarIndex = previousState.data['tabToolbarIndex'] ?? 0;
+          selectedIndex = previousState.data['selectedIndex'] ?? 0;
+          isMovementPanelVisible =
+              previousState.data['isMovementPanelVisible'] ?? false;
+
+          _clearGridAlignment();
+        });
+
+        colorProvider.notifyListeners();
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Undo: ${previousState.action}'),
+          duration: const Duration(milliseconds: 800),
         ),
       );
     }
@@ -2404,35 +2441,51 @@ class _DownloadLogoState extends State<DownloadLogo> {
       listen: false,
     );
 
-    if (undoProvider.canRedo) {
-      final redoState = undoProvider.redo();
-      if (redoState != null) {
-        colorProvider.restoreFromState(redoState.data);
-
-        final restoredLogoState = colorProvider.getCurrentLogoState();
-        if (restoredLogoState != null) {
-          setState(() {
-            _currentLogoState = restoredLogoState;
-            selectedElement = null;
-            _clearGridAlignment();
-            if (redoState.data['selectedShapeName'] != null) {
-              selectedShapeName = redoState.data['selectedShapeName'];
-            }
-          });
-        }
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Redo: ${redoState.action}'),
-            duration: const Duration(milliseconds: 800),
-          ),
-        );
-      }
-    } else {
+    if (!undoProvider.canRedo) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Nothing to redo!'),
           duration: Duration(milliseconds: 800),
+        ),
+      );
+      return;
+    }
+
+    final currentState = colorProvider.captureCurrentState();
+    currentState['selectedShapeName'] = selectedShapeName;
+    currentState['selectedElement'] = selectedElement;
+    currentState['tabToolbarIndex'] = tabToolbarIndex;
+    currentState['selectedIndex'] = selectedIndex;
+    currentState['isMovementPanelVisible'] = isMovementPanelVisible;
+
+    final nextState = undoProvider.redo();
+
+    if (nextState != null) {
+      colorProvider.restoreFromState(nextState.data);
+
+      final restoredLogoState = colorProvider.getCurrentLogoState();
+
+      if (restoredLogoState != null) {
+        setState(() {
+          _currentLogoState = restoredLogoState;
+
+          selectedElement = nextState.data['selectedElement'];
+          selectedShapeName = nextState.data['selectedShapeName'] ?? '';
+          tabToolbarIndex = nextState.data['tabToolbarIndex'] ?? 0;
+          selectedIndex = nextState.data['selectedIndex'] ?? 0;
+          isMovementPanelVisible =
+              nextState.data['isMovementPanelVisible'] ?? false;
+
+          _clearGridAlignment();
+        });
+
+        colorProvider.notifyListeners();
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Redo: ${nextState.action}'),
+          duration: const Duration(milliseconds: 800),
         ),
       );
     }
@@ -2447,11 +2500,13 @@ class _DownloadLogoState extends State<DownloadLogo> {
     });
 
     if (index == 2) {
+      // Text addition
       final result = await Navigator.of(
         context,
       ).push<String>(_createSlideRoute());
+
       if (result != null && result.isNotEmpty) {
-        _saveUndoState('Add text element');
+        _saveUndoState('Add text element: "$result"');
 
         final provider = Provider.of<SelectedColorProvider>(
           context,
@@ -2491,9 +2546,23 @@ class _DownloadLogoState extends State<DownloadLogo> {
           context,
           listen: false,
         ).updateLogoState(_currentLogoState);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Added text: "$result"'),
+            action: SnackBarAction(
+              label: 'Undo',
+              onPressed: () {
+                if (context.read<UndoProvider>().canUndo) _undo();
+              },
+            ),
+          ),
+        );
       }
     }
+
     if (index == 1) {
+      // Art selection
       final selectedImagePath = await Navigator.push(
         context,
         MaterialPageRoute(
@@ -2514,13 +2583,28 @@ class _DownloadLogoState extends State<DownloadLogo> {
               ),
         ),
       );
+
       if (selectedImagePath != null && mounted) {
-        _saveUndoState('Add art element');
+        final fileName = selectedImagePath.split('/').last;
+        _saveUndoState('Add art: $fileName');
         _addImageToCanvas(selectedImagePath);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Added $fileName'),
+            action: SnackBarAction(
+              label: 'Undo',
+              onPressed: () {
+                if (context.read<UndoProvider>().canUndo) _undo();
+              },
+            ),
+          ),
+        );
       }
     }
 
     if (index == 5) {
+      // Custom image from camera/gallery
       final picker = ImagePicker();
       final selectedSource = await showDialog<ImageSource>(
         context: context,
@@ -2544,6 +2628,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
       if (selectedSource != null) {
         final pickedFile = await picker.pickImage(source: selectedSource);
         if (pickedFile != null) {
+          _saveUndoState('Add custom image');
+
           final imageIndex = _currentLogoState.customImages.length;
           final newImage = CustomImageElement(
             path: pickedFile.path,
@@ -2551,7 +2637,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
             size: 100,
             rotation: 0,
           );
-          _saveUndoState('Add custom image');
+
           setState(() {
             _currentLogoState = _currentLogoState.copyWith(
               customImages: [..._currentLogoState.customImages, newImage],
@@ -2561,10 +2647,24 @@ class _DownloadLogoState extends State<DownloadLogo> {
               ],
             );
           });
+
           Provider.of<SelectedColorProvider>(
             context,
             listen: false,
           ).updateLogoState(_currentLogoState);
+
+          final pickedName = pickedFile.path.split('/').last;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Added $pickedName'),
+              action: SnackBarAction(
+                label: 'Undo',
+                onPressed: () {
+                  if (context.read<UndoProvider>().canUndo) _undo();
+                },
+              ),
+            ),
+          );
         }
       }
     }
@@ -2605,7 +2705,9 @@ class _DownloadLogoState extends State<DownloadLogo> {
   }
 
   void _elementSelect(int id) {
-    print("Selected Element Id: $id ");
+    print("Selected Element Id: $id");
+    _saveUndoState('Select element $id');
+
     setState(() {
       selectedElement = id;
       isMovementPanelVisible = true;
@@ -2617,6 +2719,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
   void _deleteElement(int id) {
     _saveUndoState('Delete element $id');
+
     setState(() {
       String message = 'Element deleted!';
       LogoStateData newState = _currentLogoState;
@@ -2628,7 +2731,9 @@ class _DownloadLogoState extends State<DownloadLogo> {
         lockedElements: newLocked,
       );
 
-      if (id >= 100) {
+      // Handle different element types
+      if (id >= 100 && id < 200) {
+        // Custom text elements
         final index = id - 100;
         if (index < _currentLogoState.customTexts.length) {
           final updatedCustomTexts = List<CustomTextElement>.from(
@@ -2636,20 +2741,39 @@ class _DownloadLogoState extends State<DownloadLogo> {
           )..removeAt(index);
           newState = newState.copyWith(customTexts: updatedCustomTexts);
         }
-      } else if (id == 0) {
-        newState = newState.copyWith(isLogoVisible: false);
-      } else if (id == 1) {
-        newState = newState.copyWith(isCompanyNameVisible: false);
-      } else if (id == 2) {
-        newState = newState.copyWith(isSloganVisible: false);
-      } else if (id == 3) {
-        newState = newState.copyWith(isLogo2Visible: false);
-      } else if (id == 4) {
-        newState = newState.copyWith(isCompanyName2Visible: false);
-      } else if (id == 5) {
-        newState = newState.copyWith(isSlogan2Visible: false);
+      } else if (id >= 200 && id < 300) {
+        // Custom image elements
+        final index = id - 200;
+        if (index < _currentLogoState.customImages.length) {
+          final updatedCustomImages = List<CustomImageElement>.from(
+            _currentLogoState.customImages,
+          )..removeAt(index);
+          newState = newState.copyWith(customImages: updatedCustomImages);
+        }
+      } else if (id >= 300 && id < 400) {
+        // Custom SVG elements
+        final index = id - 300;
+        if (index < _currentLogoState.customSVGs.length) {
+          final updatedCustomSVGs = List<CustomSvgElement>.from(
+            _currentLogoState.customSVGs,
+          )..removeAt(index);
+          newState = newState.copyWith(customSVGs: updatedCustomSVGs);
+        }
       } else {
-        message = 'No element selected to delete.';
+        // Built-in elements
+        switch (id) {
+          case 0:
+            newState = newState.copyWith(isLogoVisible: false);
+            break;
+          case 1:
+            newState = newState.copyWith(isCompanyNameVisible: false);
+            break;
+          case 2:
+            newState = newState.copyWith(isSloganVisible: false);
+            break;
+          default:
+            message = 'Cannot delete this element.';
+        }
       }
 
       _currentLogoState = newState;
@@ -2831,8 +2955,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
       );
       return;
     }
-    _saveUndoState('Move element $id');
-    debugPrint('Pan started for id=$id');
+
+    _saveUndoState('Start moving element $id');
     setState(() {
       selectedElement = id;
     });
@@ -2859,7 +2983,9 @@ class _DownloadLogoState extends State<DownloadLogo> {
     );
 
     setState(() {
+      // Update position based on element type
       if (id >= 100 && id < 200) {
+        // Custom text elements
         final index = id - 100;
         if (index >= 0 && index < _currentLogoState.customTexts.length) {
           final updatedTexts = List<CustomTextElement>.from(
@@ -2873,6 +2999,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
           );
         }
       } else if (id >= 200 && id < 300) {
+        // Custom image elements
         final index = id - 200;
         if (index >= 0 && index < _currentLogoState.customImages.length) {
           final updatedImages = List<CustomImageElement>.from(
@@ -2886,7 +3013,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
           );
         }
       } else if (id >= 300 && id < 400) {
-        // ✅ Custom SVGs (DUPLICATE LOGOS)
+        // Custom SVG elements
         final index = id - 300;
         if (index >= 0 && index < _currentLogoState.customSVGs.length) {
           final updatedSVGs = List<CustomSvgElement>.from(
@@ -2900,6 +3027,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
           );
         }
       } else {
+        // Built-in elements
         switch (id) {
           case 0:
             _currentLogoState = _currentLogoState.copyWith(
@@ -2916,21 +3044,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
               sloganPosition: newPosition,
             );
             break;
-          case 3:
-            _currentLogoState = _currentLogoState.copyWith(
-              logo2Position: newPosition,
-            );
-            break;
-          case 4:
-            _currentLogoState = _currentLogoState.copyWith(
-              companyName2Position: newPosition,
-            );
-            break;
-          case 5:
-            _currentLogoState = _currentLogoState.copyWith(
-              slogan2Position: newPosition,
-            );
-            break;
         }
       }
 
@@ -2945,6 +3058,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
   }
 
   void _onPanEnd(int id) {
+    _saveUndoState('Finish moving element $id');
     _initialDragPoint = null;
     _initialElementValue = null;
     _clearGridAlignment();
@@ -3423,6 +3537,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
   void duplicateSelectedElement(int id) {
     _saveUndoState('Duplicate element $id');
+
     setState(() {
       final logoState = _currentLogoState;
       final provider = Provider.of<SelectedColorProvider>(
@@ -3444,44 +3559,32 @@ class _DownloadLogoState extends State<DownloadLogo> {
       final color = provider.getElementColor(id);
       final opacity = provider.opacity;
       final size = provider.getSizeForElement(id) ?? _getElementSize(id);
-      final rotation = provider.getRotationForElement(id);
+      final rotation =
+          provider.getRotationForElement(id) ?? _getElementRotation(id);
 
       if (id >= 100 && id < 200) {
         final index = id - 100;
         if (index >= 0 && index < logoState.customTexts.length) {
           final original = logoState.customTexts[index];
-
-          final currentSize = provider.getSizeForElement(id) ?? original.size;
-          final currentRotation =
-              provider.getRotationForElement(id) ?? original.rotation;
-          final currentColor = provider.getElementColor(id) ?? original.color;
-          final fontStyle = provider.getFontStyleForElement(id);
-          final currentFont =
-              provider.getFontForElement(id) ?? original.fontFamily;
-
           final duplicated = CustomTextElement(
             text: original.text,
             position: original.position + const Offset(20, 20),
-            size: currentSize,
-            rotation: currentRotation,
-            color: currentColor,
-            fontFamily: currentFont,
+            size: size,
+            rotation: rotation,
+            color: color ?? original.color ?? Colors.black,
+            fontFamily: fontFamily,
             isBold: fontStyle.isBold,
             isItalic: fontStyle.isItalic,
             isUnderline: fontStyle.isUnderline,
-            outlineColor: provider.getOutlineColor(id) ?? original.outlineColor,
-            outlineWidth: provider.getOutlineWidth(id) ?? original.outlineWidth,
-            shadowColor:
-                provider.getShadowColorForElement(id) ?? original.shadowColor,
-            shadowOffsetX:
-                provider.getShadowOffsetXForElement(id) ??
-                original.shadowOffsetX,
-            shadowOffsetY:
-                provider.getShadowOffsetYForElement(id) ??
-                original.shadowOffsetY,
+            outlineColor: outlineColor ?? original.outlineColor,
+            outlineWidth: outlineWidth ?? original.outlineWidth,
+            shadowColor: shadowColor ?? original.shadowColor,
+            shadowOffsetX: shadowOffsetX ?? original.shadowOffsetX,
+            shadowOffsetY: shadowOffsetY ?? original.shadowOffsetY,
             opacity: opacity,
             isVisible: true,
           );
+
           final newCustomTexts = List<CustomTextElement>.from(
             logoState.customTexts,
           )..add(duplicated);
@@ -3489,41 +3592,40 @@ class _DownloadLogoState extends State<DownloadLogo> {
           final newElementOrder = List<int>.from(logoState.elementOrder)
             ..add(newElementId);
 
-          final newState = logoState.copyWith(
+          _currentLogoState = logoState.copyWith(
             customTexts: newCustomTexts,
             elementOrder: newElementOrder,
           );
 
-          _currentLogoState = newState;
-
           provider.cloneElementStyles(id, newElementId);
+          provider.updateLogoState(_currentLogoState);
 
-          provider.updateLogoState(newState);
-          return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Duplicated text element'),
+              action: SnackBarAction(
+                label: 'Undo',
+                onPressed: () {
+                  if (context.read<UndoProvider>().canUndo) _undo();
+                },
+              ),
+            ),
+          );
         }
-        return;
-      }
-
-      if (id >= 200 && id < 300) {
+      } else if (id >= 200 && id < 300) {
         final index = id - 200;
         if (index >= 0 && index < logoState.customImages.length) {
           final original = logoState.customImages[index];
-
-          final currentSize =
-              provider.getSizeForElement(id) ?? original.size ?? 100.0;
-          final currentRotation =
-              provider.getRotationForElement(id) ?? original.rotation;
-          final currentOpacity = provider.opacity;
-
           final duplicated = CustomImageElement(
             path: original.path,
             position: original.position + const Offset(20, 20),
-            size: currentSize,
-            rotation: currentRotation,
-            isAsset: original.isAsset,
+            size: size,
+            rotation: rotation,
+            isAsset: original.isAsset ?? false,
             isVisible: true,
-            opacity: currentOpacity,
+            opacity: opacity,
           );
+
           final newCustomImages = List<CustomImageElement>.from(
             logoState.customImages,
           )..add(duplicated);
@@ -3531,34 +3633,42 @@ class _DownloadLogoState extends State<DownloadLogo> {
           final newElementOrder = List<int>.from(logoState.elementOrder)
             ..add(newElementId);
 
-          final newState = logoState.copyWith(
+          _currentLogoState = logoState.copyWith(
             customImages: newCustomImages,
             elementOrder: newElementOrder,
           );
 
-          _currentLogoState = newState;
           provider.cloneElementStyles(id, newElementId);
-          provider.updateLogoState(newState);
-          return;
-        }
-        return;
-      }
+          provider.updateLogoState(_currentLogoState);
 
-      if (id >= 300 && id < 400) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Duplicated image element'),
+              action: SnackBarAction(
+                label: 'Undo',
+                onPressed: () {
+                  if (context.read<UndoProvider>().canUndo) _undo();
+                },
+              ),
+            ),
+          );
+        }
+      } else if (id >= 300 && id < 400) {
         final index = id - 300;
         if (index >= 0 && index < logoState.customSVGs.length) {
           final original = logoState.customSVGs[index];
           final duplicated = CustomSvgElement(
             svgString: original.svgString,
             position: original.position + const Offset(20, 20),
-            size: original.size,
-            rotation: original.rotation,
-            color: original.color,
-            opacity: original.opacity,
-            isVisible: original.isVisible,
-            outlineColor: original.outlineColor,
-            outlineWidth: original.outlineWidth,
+            size: size,
+            rotation: rotation,
+            color: color ?? original.color,
+            opacity: opacity,
+            isVisible: true,
+            outlineColor: outlineColor ?? original.outlineColor,
+            outlineWidth: outlineWidth ?? original.outlineWidth,
           );
+
           final newCustomSVGs = List<CustomSvgElement>.from(
             logoState.customSVGs,
           )..add(duplicated);
@@ -3566,121 +3676,315 @@ class _DownloadLogoState extends State<DownloadLogo> {
           final newElementOrder = List<int>.from(logoState.elementOrder)
             ..add(newElementId);
 
-          final newState = logoState.copyWith(
+          _currentLogoState = logoState.copyWith(
             customSVGs: newCustomSVGs,
             elementOrder: newElementOrder,
           );
 
-          _currentLogoState = newState;
           provider.cloneElementStyles(id, newElementId);
-          provider.updateLogoState(newState);
-          return;
+          provider.updateLogoState(_currentLogoState);
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Duplicated SVG element'),
+              action: SnackBarAction(
+                label: 'Undo',
+                onPressed: () {
+                  if (context.read<UndoProvider>().canUndo) _undo();
+                },
+              ),
+            ),
+          );
         }
-        return;
-      }
+      } else if (id == 0) {
+        if (logoState.svgLogo != null && logoState.isLogoVisible) {
+          final duplicated = CustomSvgElement(
+            svgString: logoState.svgLogo!,
+            position: logoState.logoPosition + const Offset(20, 20),
+            size: size,
+            color: color ?? logoState.logoColor,
+            rotation: rotation,
+            opacity: opacity,
+            isVisible: true,
+            outlineColor: outlineColor,
+            outlineWidth: outlineWidth,
+          );
 
-      if (id == 0) {
-        final duplicated = CustomSvgElement(
-          svgString: logoState.svgLogo!,
-          position: logoState.logoPosition + const Offset(20, 20),
-          size: size,
-          color: provider.getElementColor(0) ?? color,
-          rotation: rotation,
-          opacity: opacity,
-          isVisible: true,
-          outlineColor: provider.getOutlineColor(id),
-          outlineWidth: provider.getOutlineWidth(id),
+          final newCustomSVGs = List<CustomSvgElement>.from(
+            logoState.customSVGs,
+          )..add(duplicated);
+          final newElementId = 300 + newCustomSVGs.length - 1;
+          final newElementOrder = List<int>.from(logoState.elementOrder)
+            ..add(newElementId);
+
+          _currentLogoState = logoState.copyWith(
+            customSVGs: newCustomSVGs,
+            elementOrder: newElementOrder,
+          );
+
+          provider.cloneElementStyles(id, newElementId);
+          provider.updateLogoState(_currentLogoState);
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Duplicated main logo'),
+              action: SnackBarAction(
+                label: 'Undo',
+                onPressed: () {
+                  if (context.read<UndoProvider>().canUndo) _undo();
+                },
+              ),
+            ),
+          );
+        }
+      } else if (id == 1) {
+        if (logoState.companyName != null && logoState.isCompanyNameVisible) {
+          final duplicated = CustomTextElement(
+            text: logoState.companyName!,
+            position: logoState.companyNamePosition + const Offset(20, 20),
+            size: size,
+            rotation: rotation,
+            color: color ?? Colors.black,
+            fontFamily: fontFamily,
+            isBold: fontStyle.isBold,
+            isItalic: fontStyle.isItalic,
+            isUnderline: fontStyle.isUnderline,
+            outlineColor: outlineColor,
+            outlineWidth: outlineWidth,
+            shadowColor: shadowColor,
+            shadowOffsetX: shadowOffsetX,
+            shadowOffsetY: shadowOffsetY,
+            opacity: opacity,
+            isVisible: true,
+          );
+
+          final newCustomTexts = List<CustomTextElement>.from(
+            logoState.customTexts,
+          )..add(duplicated);
+          final newElementId = 100 + newCustomTexts.length - 1;
+          final newElementOrder = List<int>.from(logoState.elementOrder)
+            ..add(newElementId);
+
+          _currentLogoState = logoState.copyWith(
+            customTexts: newCustomTexts,
+            elementOrder: newElementOrder,
+          );
+
+          provider.cloneElementStyles(id, newElementId);
+          provider.updateLogoState(_currentLogoState);
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Duplicated company name'),
+              action: SnackBarAction(
+                label: 'Undo',
+                onPressed: () {
+                  if (context.read<UndoProvider>().canUndo) _undo();
+                },
+              ),
+            ),
+          );
+        }
+      } else if (id == 2) {
+        if (logoState.sloganName != null && logoState.isSloganVisible) {
+          final duplicated = CustomTextElement(
+            text: logoState.sloganName!,
+            position: logoState.sloganPosition + const Offset(20, 20),
+            size: size,
+            rotation: rotation,
+            color: color ?? Colors.black,
+            fontFamily: fontFamily,
+            isBold: fontStyle.isBold,
+            isItalic: fontStyle.isItalic,
+            isUnderline: fontStyle.isUnderline,
+            outlineColor: outlineColor,
+            outlineWidth: outlineWidth,
+            shadowColor: shadowColor,
+            shadowOffsetX: shadowOffsetX,
+            shadowOffsetY: shadowOffsetY,
+            opacity: opacity,
+            isVisible: true,
+          );
+
+          final newCustomTexts = List<CustomTextElement>.from(
+            logoState.customTexts,
+          )..add(duplicated);
+          final newElementId = 100 + newCustomTexts.length - 1;
+          final newElementOrder = List<int>.from(logoState.elementOrder)
+            ..add(newElementId);
+
+          _currentLogoState = logoState.copyWith(
+            customTexts: newCustomTexts,
+            elementOrder: newElementOrder,
+          );
+
+          provider.cloneElementStyles(id, newElementId);
+          provider.updateLogoState(_currentLogoState);
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Duplicated slogan'),
+              action: SnackBarAction(
+                label: 'Undo',
+                onPressed: () {
+                  if (context.read<UndoProvider>().canUndo) _undo();
+                },
+              ),
+            ),
+          );
+        }
+      } else if (id == 3) {
+        if (logoState.svgLogo != null && logoState.isLogo2Visible) {
+          final duplicated = CustomSvgElement(
+            svgString: logoState.svgLogo!,
+            position:
+                (logoState.logo2Position ?? logoState.logoPosition) +
+                const Offset(20, 20),
+            size: logoState.logo2Size ?? size,
+            color: color ?? logoState.logoColor,
+            rotation: logoState.logo2Rotation ?? 0,
+            opacity: opacity,
+            isVisible: true,
+            outlineColor: outlineColor,
+            outlineWidth: outlineWidth,
+          );
+
+          final newCustomSVGs = List<CustomSvgElement>.from(
+            logoState.customSVGs,
+          )..add(duplicated);
+          final newElementId = 300 + newCustomSVGs.length - 1;
+          final newElementOrder = List<int>.from(logoState.elementOrder)
+            ..add(newElementId);
+
+          _currentLogoState = logoState.copyWith(
+            customSVGs: newCustomSVGs,
+            elementOrder: newElementOrder,
+          );
+
+          provider.cloneElementStyles(id, newElementId);
+          provider.updateLogoState(_currentLogoState);
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Duplicated secondary logo'),
+              action: SnackBarAction(
+                label: 'Undo',
+                onPressed: () {
+                  if (context.read<UndoProvider>().canUndo) _undo();
+                },
+              ),
+            ),
+          );
+        }
+      } else if (id == 4) {
+        if (logoState.companyName != null && logoState.isCompanyName2Visible) {
+          final duplicated = CustomTextElement(
+            text: logoState.companyName!,
+            position:
+                (logoState.companyName2Position ??
+                    logoState.companyNamePosition) +
+                const Offset(20, 20),
+            size: logoState.companyName2Size ?? size,
+            rotation: logoState.companyName2Rotation ?? 0,
+            color: color ?? Colors.black,
+            fontFamily: fontFamily,
+            isBold: fontStyle.isBold,
+            isItalic: fontStyle.isItalic,
+            isUnderline: fontStyle.isUnderline,
+            outlineColor: outlineColor,
+            outlineWidth: outlineWidth,
+            shadowColor: shadowColor,
+            shadowOffsetX: shadowOffsetX,
+            shadowOffsetY: shadowOffsetY,
+            opacity: opacity,
+            isVisible: true,
+          );
+
+          final newCustomTexts = List<CustomTextElement>.from(
+            logoState.customTexts,
+          )..add(duplicated);
+          final newElementId = 100 + newCustomTexts.length - 1;
+          final newElementOrder = List<int>.from(logoState.elementOrder)
+            ..add(newElementId);
+
+          _currentLogoState = logoState.copyWith(
+            customTexts: newCustomTexts,
+            elementOrder: newElementOrder,
+          );
+
+          provider.cloneElementStyles(id, newElementId);
+          provider.updateLogoState(_currentLogoState);
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Duplicated secondary company name'),
+              action: SnackBarAction(
+                label: 'Undo',
+                onPressed: () {
+                  if (context.read<UndoProvider>().canUndo) _undo();
+                },
+              ),
+            ),
+          );
+        }
+      } else if (id == 5) {
+        if (logoState.sloganName != null && logoState.isSlogan2Visible) {
+          final duplicated = CustomTextElement(
+            text: logoState.sloganName!,
+            position:
+                (logoState.slogan2Position ?? logoState.sloganPosition) +
+                const Offset(20, 20),
+            size: logoState.slogan2Size ?? size,
+            rotation: logoState.slogan2Rotation ?? 0,
+            color: color ?? Colors.black,
+            fontFamily: fontFamily,
+            isBold: fontStyle.isBold,
+            isItalic: fontStyle.isItalic,
+            isUnderline: fontStyle.isUnderline,
+            outlineColor: outlineColor,
+            outlineWidth: outlineWidth,
+            shadowColor: shadowColor,
+            shadowOffsetX: shadowOffsetX,
+            shadowOffsetY: shadowOffsetY,
+            opacity: opacity,
+            isVisible: true,
+          );
+
+          final newCustomTexts = List<CustomTextElement>.from(
+            logoState.customTexts,
+          )..add(duplicated);
+          final newElementId = 100 + newCustomTexts.length - 1;
+          final newElementOrder = List<int>.from(logoState.elementOrder)
+            ..add(newElementId);
+
+          _currentLogoState = logoState.copyWith(
+            customTexts: newCustomTexts,
+            elementOrder: newElementOrder,
+          );
+
+          provider.cloneElementStyles(id, newElementId);
+          provider.updateLogoState(_currentLogoState);
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Duplicated secondary slogan'),
+              action: SnackBarAction(
+                label: 'Undo',
+                onPressed: () {
+                  if (context.read<UndoProvider>().canUndo) _undo();
+                },
+              ),
+            ),
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Cannot duplicate this element (ID: $id)'),
+            backgroundColor: Colors.orange,
+          ),
         );
-        final newCustomSVGs = List<CustomSvgElement>.from(logoState.customSVGs)
-          ..add(duplicated);
-        final newElementId = 300 + newCustomSVGs.length - 1;
-        final newElementOrder = List<int>.from(logoState.elementOrder)
-          ..add(newElementId);
-
-        final newState = logoState.copyWith(
-          customSVGs: newCustomSVGs,
-          elementOrder: newElementOrder,
-        );
-
-        _currentLogoState = newState;
-        provider.cloneElementStyles(id, newElementId);
-        provider.updateLogoState(newState);
-        return;
-      }
-
-      if (id == 1) {
-        final duplicated = CustomTextElement(
-          text: logoState.companyName!,
-          position: logoState.companyNamePosition + const Offset(20, 20),
-          size: size,
-          rotation: rotation,
-          color: color ?? Colors.black,
-          fontFamily: fontFamily,
-          isBold: fontStyle.isBold,
-          isItalic: fontStyle.isItalic,
-          isUnderline: fontStyle.isUnderline,
-          outlineColor: outlineColor,
-          outlineWidth: outlineWidth,
-          shadowColor: shadowColor,
-          shadowOffsetX: shadowOffsetX,
-          shadowOffsetY: shadowOffsetY,
-          opacity: opacity,
-          isVisible: true,
-        );
-        final newCustomTexts = List<CustomTextElement>.from(
-          logoState.customTexts,
-        )..add(duplicated);
-        final newElementId = 100 + newCustomTexts.length - 1;
-        final newElementOrder = List<int>.from(logoState.elementOrder)
-          ..add(newElementId);
-
-        final newState = logoState.copyWith(
-          customTexts: newCustomTexts,
-          elementOrder: newElementOrder,
-        );
-
-        _currentLogoState = newState;
-        provider.cloneElementStyles(id, newElementId);
-        provider.updateLogoState(newState);
-        return;
-      }
-
-      // --- Slogan (id == 2) as CustomTextElement ---
-      if (id == 2) {
-        final duplicated = CustomTextElement(
-          text: logoState.sloganName!,
-          position: logoState.sloganPosition + const Offset(20, 20),
-          size: size,
-          rotation: rotation,
-          color: color ?? Colors.black,
-          fontFamily: fontFamily,
-          isBold: fontStyle.isBold,
-          isItalic: fontStyle.isItalic,
-          isUnderline: fontStyle.isUnderline,
-          outlineColor: outlineColor,
-          outlineWidth: outlineWidth,
-          shadowColor: shadowColor,
-          shadowOffsetX: shadowOffsetX,
-          shadowOffsetY: shadowOffsetY,
-          opacity: opacity,
-          isVisible: true,
-        );
-        final newCustomTexts = List<CustomTextElement>.from(
-          logoState.customTexts,
-        )..add(duplicated);
-        final newElementId = 100 + newCustomTexts.length - 1;
-        final newElementOrder = List<int>.from(logoState.elementOrder)
-          ..add(newElementId);
-
-        final newState = logoState.copyWith(
-          customTexts: newCustomTexts,
-          elementOrder: newElementOrder,
-        );
-
-        _currentLogoState = newState;
-        provider.cloneElementStyles(id, newElementId);
-        provider.updateLogoState(newState);
-        return;
+        print('Attempted to duplicate unsupported element ID: $id');
       }
     });
   }

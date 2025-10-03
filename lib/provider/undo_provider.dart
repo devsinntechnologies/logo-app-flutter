@@ -6,8 +6,11 @@ class UndoRedoState {
   final Map<String, dynamic> data;
   final DateTime timestamp;
 
-  UndoRedoState({required this.action, required this.data, DateTime? timestamp})
-    : timestamp = timestamp ?? DateTime.now();
+  UndoRedoState({
+    required this.action,
+    required this.data,
+    DateTime? timestamp,
+  }) : timestamp = timestamp ?? DateTime.now();
 }
 
 class UndoProvider extends ChangeNotifier {
@@ -16,15 +19,14 @@ class UndoProvider extends ChangeNotifier {
   static const int maxUndoStates = 50;
   bool _isUndoRedoInProgress = false;
 
-  // Getters
-  bool get canUndo => _undoStack.isNotEmpty;
+  bool get canUndo => _undoStack.length > 1;
   bool get canRedo => _redoStack.isNotEmpty;
   bool get isUndoRedoInProgress => _isUndoRedoInProgress;
   int get currentStateIndex => _undoStack.length;
   int get totalStates => _undoStack.length + _redoStack.length + 1;
 
   String? getLastAction() {
-    return _undoStack.isNotEmpty ? _undoStack.last.action : null;
+    return _undoStack.length > 1 ? _undoStack[_undoStack.length - 2].action : null;
   }
 
   String? getNextAction() {
@@ -37,13 +39,13 @@ class UndoProvider extends ChangeNotifier {
   }) {
     if (_isUndoRedoInProgress) return;
 
-    // Clear redo stack when new action is performed
     _redoStack.clear();
 
-    // Add current state to undo stack
-    _undoStack.add(UndoRedoState(action: action, data: Map.from(state)));
+    _undoStack.add(UndoRedoState(
+      action: action,
+      data: _deepCopyState(state),
+    ));
 
-    // Limit undo stack size
     if (_undoStack.length > maxUndoStates) {
       _undoStack.removeAt(0);
     }
@@ -56,17 +58,15 @@ class UndoProvider extends ChangeNotifier {
 
     _isUndoRedoInProgress = true;
 
-    // Move current state to redo stack
     final currentState = _undoStack.removeLast();
     _redoStack.add(currentState);
 
-    // Get previous state
-    final previousState = _undoStack.isNotEmpty ? _undoStack.last : null;
+    final stateToRestore = _undoStack.last;
 
     _isUndoRedoInProgress = false;
     notifyListeners();
 
-    return previousState;
+    return stateToRestore;
   }
 
   UndoRedoState? redo() {
@@ -74,14 +74,24 @@ class UndoProvider extends ChangeNotifier {
 
     _isUndoRedoInProgress = true;
 
-    // Move state from redo to undo stack
-    final redoState = _redoStack.removeLast();
-    _undoStack.add(redoState);
+    final stateToRestore = _redoStack.removeLast();
+    _undoStack.add(stateToRestore);
 
     _isUndoRedoInProgress = false;
     notifyListeners();
 
-    return redoState;
+    return stateToRestore;
+  }
+
+  Map<String, dynamic> _deepCopyState(Map<String, dynamic> state) {
+    return Map<String, dynamic>.from(state.map((key, value) {
+      if (value is Map) {
+        return MapEntry(key, Map<String, dynamic>.from(value));
+      } else if (value is List) {
+        return MapEntry(key, List.from(value));
+      }
+      return MapEntry(key, value);
+    }));
   }
 
   void clear() {
