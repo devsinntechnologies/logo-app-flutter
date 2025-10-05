@@ -3596,6 +3596,14 @@ class _DownloadLogoState extends State<DownloadLogo> {
             customTexts: newCustomTexts,
             elementOrder: newElementOrder,
           );
+          _applyCurrentStateToNewElement(
+            provider,
+            id,
+            newElementId,
+            color,
+            rotation,
+            size,
+          );
 
           provider.cloneElementStyles(id, newElementId);
           provider.updateLogoState(_currentLogoState);
@@ -3681,6 +3689,15 @@ class _DownloadLogoState extends State<DownloadLogo> {
             elementOrder: newElementOrder,
           );
 
+          _applyCurrentStateToNewElement(
+            provider,
+            id,
+            newElementId,
+            color,
+            rotation,
+            size,
+          );
+
           provider.cloneElementStyles(id, newElementId);
           provider.updateLogoState(_currentLogoState);
 
@@ -3720,6 +3737,15 @@ class _DownloadLogoState extends State<DownloadLogo> {
           _currentLogoState = logoState.copyWith(
             customSVGs: newCustomSVGs,
             elementOrder: newElementOrder,
+          );
+
+          _applyCurrentStateToNewElement(
+            provider,
+            id,
+            newElementId,
+            color,
+            rotation,
+            size,
           );
 
           provider.cloneElementStyles(id, newElementId);
@@ -3770,6 +3796,15 @@ class _DownloadLogoState extends State<DownloadLogo> {
             elementOrder: newElementOrder,
           );
 
+          _applyCurrentStateToNewElement(
+            provider,
+            id,
+            newElementId,
+            color,
+            rotation,
+            size,
+          );
+
           provider.cloneElementStyles(id, newElementId);
           provider.updateLogoState(_currentLogoState);
 
@@ -3818,6 +3853,15 @@ class _DownloadLogoState extends State<DownloadLogo> {
             elementOrder: newElementOrder,
           );
 
+          _applyCurrentStateToNewElement(
+            provider,
+            id,
+            newElementId,
+            color,
+            rotation,
+            size,
+          );
+
           provider.cloneElementStyles(id, newElementId);
           provider.updateLogoState(_currentLogoState);
 
@@ -3859,6 +3903,15 @@ class _DownloadLogoState extends State<DownloadLogo> {
           _currentLogoState = logoState.copyWith(
             customSVGs: newCustomSVGs,
             elementOrder: newElementOrder,
+          );
+
+          _applyCurrentStateToNewElement(
+            provider,
+            id,
+            newElementId,
+            color,
+            rotation,
+            size,
           );
 
           provider.cloneElementStyles(id, newElementId);
@@ -3987,6 +4040,47 @@ class _DownloadLogoState extends State<DownloadLogo> {
         print('Attempted to duplicate unsupported element ID: $id');
       }
     });
+  }
+
+  void _applyCurrentStateToNewElement(
+    SelectedColorProvider provider,
+    int sourceId,
+    int newId,
+    Color? color,
+    double rotation,
+    double size,
+  ) {
+    // Apply color if it exists
+    if (color != null) {
+      provider.setColorForElement(newId, color);
+    }
+
+    // Apply rotation
+    provider.setRotationForElement(newId, rotation);
+
+    provider.setSizeForElement(newId, size);
+
+    final gradient = provider.getGradientForElement(sourceId);
+    if (gradient != null) {
+      provider.setGradientForElement(newId, gradient);
+    }
+
+    final rotX = provider.getRotationXForElement(sourceId);
+    final rotY = provider.getRotationYForElement(sourceId);
+    final rotZ = provider.getRotationZForElement(sourceId);
+    if (rotX != null && rotX != 0) provider.setRotationXForElement(newId, rotX);
+    if (rotY != null && rotY != 0) provider.setRotationYForElement(newId, rotY);
+    if (rotZ != null && rotZ != 0) provider.setRotationZForElement(newId, rotZ);
+
+    final font = provider.getFontForElement(sourceId);
+    if (font != null) provider.setFontForElement(newId, font);
+
+    final fontStyle = provider.getFontStyleForElement(sourceId);
+    provider.setFontStyleForElement(newId, fontStyle);
+
+    print(
+      '✅ Applied current state from element $sourceId to new element $newId',
+    );
   }
 
   void _testUndoRedo() {

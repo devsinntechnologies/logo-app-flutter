@@ -378,7 +378,6 @@ class _MovementPanelState extends State<MovementPanel>
                 ],
               ),
 
-              // Layer Controls
               Column(
                 children: [
                   GestureDetector(
@@ -414,20 +413,6 @@ class _MovementPanelState extends State<MovementPanel>
                     ),
                     child: const Text(
                       "Duplicate",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  ElevatedButton(
-                    onPressed: () => _handleAction('delete'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                    child: const Text(
-                      "Delete",
                       style: TextStyle(color: Colors.white),
                     ),
                   ),
@@ -1254,11 +1239,12 @@ class _MovementPanelState extends State<MovementPanel>
                 SizedBox(
                   height: 60,
                   child: GridView.builder(
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 6,
-                      crossAxisSpacing: 8,
-                      mainAxisSpacing: 8,
-                    ),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 6,
+                          crossAxisSpacing: 8,
+                          mainAxisSpacing: 8,
+                        ),
                     itemCount: colors.length,
                     itemBuilder: (context, index) {
                       final color = colors[index];
