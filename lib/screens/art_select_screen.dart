@@ -2,17 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:logo_app_flutter/fragments/theme_toggle_widget.dart';
 
 class ArtSelectScreen extends StatelessWidget {
-  final List<String> images; // ✅ Pass image paths here (e.g., assets/icons/...)
+  final List<String> images;
+
   const ArtSelectScreen({super.key, required this.images});
 
   @override
   Widget build(BuildContext context) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
+
     return DefaultTabController(
       length: 5,
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-
         appBar: AppBar(
           backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
           title: Text(
@@ -32,8 +33,6 @@ class ArtSelectScreen extends StatelessWidget {
             onPressed: () => Navigator.pop(context),
           ),
           elevation: 0,
-          // Remove the bottom TabBar from here
-          // bottom: ...
         ),
         body: TabBarView(
           children: List.generate(5, (_) {
@@ -65,10 +64,19 @@ class ArtSelectScreen extends StatelessWidget {
                         ),
                         child: GestureDetector(
                           onTap: () {
-                            Navigator.pop(
-                              context,
-                              images[index],
-                            ); // ✅ Return selected image path
+                            // ✅ Return with feedback
+                            Navigator.pop(context, images[index]);
+
+                            // ✅ Show brief confirmation
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Selected: ${images[index].split('/').last}',
+                                ),
+                                duration: const Duration(milliseconds: 500),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
                           },
                           child: Image.asset(
                             images[index],
@@ -76,7 +84,7 @@ class ArtSelectScreen extends StatelessWidget {
                           ),
                         ),
                       ),
-                      if (index.isEven) // crown icon for demo
+                      if (index.isEven)
                         const Positioned(
                           top: 6,
                           right: 6,
@@ -95,13 +103,13 @@ class ArtSelectScreen extends StatelessWidget {
         ),
         bottomNavigationBar: Container(
           height: 100,
-          color: Colors.white,
+          color: isDark ? Colors.grey[900] : Colors.white,
           child: TabBar(
             isScrollable: true,
             indicatorColor: Colors.orange,
-            labelColor: Colors.black,
+            labelColor: isDark ? Colors.white : Colors.black,
             unselectedLabelColor: Colors.grey,
-            tabs: [
+            tabs: const [
               Tab(text: 'ANIMAL'),
               Tab(text: 'ARCHITECTURE'),
               Tab(text: 'BEAUTY'),

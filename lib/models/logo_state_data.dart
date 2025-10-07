@@ -311,8 +311,8 @@ class LogoStateData {
   final Set<int> lockedElements;
   final List<int> elementOrder;
 
-  String companyNameFont; // <-- Add this
-  String sloganFont; // <-- Add this
+  String companyNameFont; 
+  String sloganFont; 
 
   LogoStateData({
     List<CustomTextElement>? customTexts,
@@ -320,7 +320,7 @@ class LogoStateData {
     List<CustomSvgElement>? customSVGs,
     Set<int>? lockedElements,
     List<int>? elementOrder,
-    this.backgroundColor = Colors.white,
+    this.backgroundColor = Colors.transparent,
     this.logoColor,
     this.backgroundGradient,
     this.backgroundTexture,

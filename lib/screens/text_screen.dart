@@ -13,36 +13,31 @@ class TextScreen extends StatefulWidget {
 class _TextScreenState extends State<TextScreen> {
   final TextEditingController _controller = TextEditingController();
   String _initialText = '';
+  Map<String, dynamic>? _stateBeforeNavigation;
 
   @override
   void initState() {
     super.initState();
     _initialText = _controller.text;
-  }
 
-  void _saveTextChange() {
-    if (_controller.text != _initialText) {
-      final undoProvider = Provider.of<UndoProvider>(context, listen: false);
+    // ✅ Capture state when text screen opens
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       final colorProvider = Provider.of<SelectedColorProvider>(
         context,
         listen: false,
       );
-
-      final currentState = colorProvider.captureCurrentState();
-      undoProvider.saveState(
-        action: 'Change text from "$_initialText" to "${_controller.text}"',
-        state: currentState,
-      );
-    }
+      _stateBeforeNavigation = colorProvider.captureCurrentState();
+    });
   }
 
   void _confirmText() {
     final trimmedText = _controller.text.trim();
     if (trimmedText.isNotEmpty) {
-      Navigator.pop(
-        context,
-        trimmedText,
-      ); // Return to previous screen with text
+      // ✅ Return with both text and pre-state for undo tracking
+      Navigator.pop(context, {
+        'text': trimmedText,
+        'stateBeforeNavigation': _stateBeforeNavigation,
+      });
     } else {
       Navigator.pop(context); // Return without doing anything
     }
@@ -67,7 +62,11 @@ class _TextScreenState extends State<TextScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
-          IconButton(icon: const Icon(Icons.check), onPressed: _confirmText),
+          IconButton(
+            icon: const Icon(Icons.check),
+            onPressed: _confirmText,
+            tooltip: 'Add Text',
+          ),
         ],
       ),
       body: Padding(
@@ -80,7 +79,7 @@ class _TextScreenState extends State<TextScreen> {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Theme.of(context).textTheme.bodyLarge?.color, 
+                color: Theme.of(context).textTheme.bodyLarge?.color,
               ),
             ),
             const SizedBox(height: 16),
@@ -88,7 +87,7 @@ class _TextScreenState extends State<TextScreen> {
               controller: _controller,
               maxLines: 3,
               style: TextStyle(
-                color: Theme.of(context).textTheme.bodyLarge?.color, 
+                color: Theme.of(context).textTheme.bodyLarge?.color,
                 fontSize: 16,
               ),
               decoration: InputDecoration(
@@ -97,7 +96,7 @@ class _TextScreenState extends State<TextScreen> {
                   color: isDark ? Colors.grey[400] : Colors.grey[600],
                 ),
                 filled: true,
-                fillColor: isDark ? Colors.grey[850] : Colors.white, 
+                fillColor: isDark ? Colors.grey[850] : Colors.white,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
@@ -112,13 +111,15 @@ class _TextScreenState extends State<TextScreen> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(
-                    color: Colors.orange,
-                    width: 2,
-                  ),
+                  borderSide: const BorderSide(color: Colors.orange, width: 2),
                 ),
               ),
               autofocus: true,
+              onSubmitted: (value) {
+                if (value.trim().isNotEmpty) {
+                  _confirmText();
+                }
+              },
             ),
             const SizedBox(height: 24),
             SizedBox(
@@ -127,10 +128,13 @@ class _TextScreenState extends State<TextScreen> {
                 onPressed: () {
                   final text = _controller.text.trim();
                   if (text.isNotEmpty) {
-                    Navigator.pop(context, text);
+                    _confirmText();
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Please enter some text')),
+                      const SnackBar(
+                        content: Text('Please enter some text'),
+                        duration: Duration(milliseconds: 1500),
+                      ),
                     );
                   }
                 },
@@ -144,10 +148,7 @@ class _TextScreenState extends State<TextScreen> {
                 ),
                 child: const Text(
                   'Add Text',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -155,5 +156,11 @@ class _TextScreenState extends State<TextScreen> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 }

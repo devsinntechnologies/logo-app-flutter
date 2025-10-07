@@ -40,6 +40,8 @@ class FontStyleState {
 class SelectedColorProvider extends ChangeNotifier {
   UndoProvider? _undoProvider;
 
+  bool _isUndoRedoInProgress = false;
+
   dynamic _backgroundTexture;
 
   Color? _backgroundColor;
@@ -49,6 +51,7 @@ class SelectedColorProvider extends ChangeNotifier {
 
   String? _selectedShape;
   String? _selectedShapeName;
+  bool get isUndoRedoInProgress => _isUndoRedoInProgress;
 
   final Map<int, double> _elementTextSizes = {};
   double _companyTextSize = 28.0;
@@ -108,7 +111,6 @@ class SelectedColorProvider extends ChangeNotifier {
 
   bool get isSvgColorOverridden => _isSvgColorOverridden;
 
-  // ✅ Add these for 3D rotations
   final Map<int, double> _elementRotationX = {};
   final Map<int, double> _elementRotationY = {};
   final Map<int, double> _elementRotationZ = {};
@@ -143,9 +145,9 @@ class SelectedColorProvider extends ChangeNotifier {
     if (_currentLogoState == null) return;
     final order = List<int>.from(_currentLogoState!.elementOrder);
     final i = order.indexOf(id);
-    if (i == -1 || i == order.length - 1) return; // already at top
+    if (i == -1 || i == order.length - 1) return;
     order.removeAt(i);
-    order.insert(i + 1, id); // Up = toward front/top
+    order.insert(i + 1, id);
     _applyOrder(order);
   }
 
@@ -153,9 +155,9 @@ class SelectedColorProvider extends ChangeNotifier {
     if (_currentLogoState == null) return;
     final order = List<int>.from(_currentLogoState!.elementOrder);
     final i = order.indexOf(id);
-    if (i <= 0) return; // already at back
+    if (i <= 0) return;
     order.removeAt(i);
-    order.insert(i - 1, id); // Down = toward back
+    order.insert(i - 1, id);
     _applyOrder(order);
   }
 
@@ -175,10 +177,8 @@ class SelectedColorProvider extends ChangeNotifier {
     _applyOrder(order);
   }
 
-  // Optional debug
   void debugPrintOrder([String tag = '']) {
     if (_currentLogoState == null) return;
-    // ignore: avoid_print
     print('$tag elementOrder: ${_currentLogoState!.elementOrder}');
   }
 
@@ -277,6 +277,22 @@ class SelectedColorProvider extends ChangeNotifier {
     _saveUndoState('Set X rotation for element $id to ${value.toInt()}°');
     _elementRotationX[id] = value;
     notifyListeners();
+  }
+
+  Future<void> restoreFromStateAsync(Map<String, dynamic> state) async {
+    _isUndoRedoInProgress = true;
+    print('Restoring state asynchronously for text operations...');
+
+    try {
+      restoreFromState(state);
+
+      await Future.delayed(const Duration(milliseconds: 10));
+    } catch (e) {
+      print('Error in async restore: $e');
+    } finally {
+      _isUndoRedoInProgress = false;
+      notifyListeners();
+    }
   }
 
   double? getRotationYForElement(int id) => _elementRotationY[id] ?? 0.0;
@@ -538,8 +554,6 @@ class SelectedColorProvider extends ChangeNotifier {
 
   void setRotationForElement(int id, double rotation) {
     if (_currentLogoState == null) return;
-
-    _saveUndoState('Rotate element $id to ${rotation.toInt()}°');
 
     if (id >= 100 && id < 200) {
       final index = id - 100;
@@ -1005,11 +1019,19 @@ class SelectedColorProvider extends ChangeNotifier {
       'backgroundColor': _backgroundColor?.value,
       'selectedGradient': _selectedGradient?.toString(),
       'backgroundImage': _backgroundImage?.toString(),
+      'backgroundOpacity': _backgroundOpacity,
       'elementColors': _elementColors.map(
+        (k, v) => MapEntry(k.toString(), v.value),
+      ),
+      'overrideColors': _overrideColors.map(
+        (k, v) => MapEntry(k.toString(), v.value),
+      ),
+      'individualElementColors': _individualElementColors.map(
         (k, v) => MapEntry(k.toString(), v.value),
       ),
       'opacity': _opacity,
       'selectedElementId': _selectedElementId,
+      'selectedShapeName': _selectedShapeName,
       'elementRotationX': _elementRotationX.map(
         (k, v) => MapEntry(k.toString(), v),
       ),
@@ -1019,41 +1041,418 @@ class SelectedColorProvider extends ChangeNotifier {
       'elementRotationZ': _elementRotationZ.map(
         (k, v) => MapEntry(k.toString(), v),
       ),
+      'elementSizes': _elementSizes.map((k, v) => MapEntry(k.toString(), v)),
+      'elementRotations': _elementRotations.map(
+        (k, v) => MapEntry(k.toString(), v),
+      ),
+      'elementFonts': Map<String, String>.from(
+        _elementFonts.map((k, v) => MapEntry(k.toString(), v)),
+      ),
+      'fontStyles': _fontStyles.map(
+        (k, v) => MapEntry(k.toString(), v.toJson()),
+      ),
+      'elementFontStyles': _elementFontStyles.map(
+        (k, v) => MapEntry(k.toString(), v.toJson()),
+      ),
+      'elementOutlineColors': _elementOutlineColors.map(
+        (k, v) => MapEntry(k.toString(), v.value),
+      ),
+      'elementOutlineWidths': _elementOutlineWidths.map(
+        (k, v) => MapEntry(k.toString(), v),
+      ),
+      'elementShadowColors': _elementShadowColors.map(
+        (k, v) => MapEntry(k.toString(), v.value),
+      ),
+      'elementShadowOffsetsX': _elementShadowOffsetsX.map(
+        (k, v) => MapEntry(k.toString(), v),
+      ),
+      'elementShadowOffsetsY': _elementShadowOffsetsY.map(
+        (k, v) => MapEntry(k.toString(), v),
+      ),
+      'elementTextures': Map<String, String>.from(
+        _elementTextures.map((k, v) => MapEntry(k.toString(), v)),
+      ),
+      'elementGradients': _elementGradients.map(
+        (k, v) => MapEntry(k.toString(), v.toString()),
+      ),
+      'companyTextGradient': _companyTextGradient?.toString(),
+      'sloganGradient': _sloganGradient?.toString(),
+      'elementTextSizes': _elementTextSizes.map(
+        (k, v) => MapEntry(k.toString(), v),
+      ),
+      'companyTextSize': _companyTextSize,
+      'sloganTextSize': _sloganTextSize,
+      'companyTextColor': _companyTextColor.value,
+      'sloganColor': _sloganColor.value,
+      'shapeColor': _shapeColor.value,
+      'rotateIndex': _rotateIndex,
+      'isColorManuallySelected': _isColorManuallySelected,
+      'isSvgColorOverridden': _isSvgColorOverridden,
+      'baseColor': _baseColor.value,
+      'brightness': _brightness,
+      'logoPosition':
+          _currentLogoState?.logoPosition != null
+              ? {
+                'dx': _currentLogoState!.logoPosition.dx,
+                'dy': _currentLogoState!.logoPosition.dy,
+              }
+              : null,
+      'companyNamePosition':
+          _currentLogoState?.companyNamePosition != null
+              ? {
+                'dx': _currentLogoState!.companyNamePosition.dx,
+                'dy': _currentLogoState!.companyNamePosition.dy,
+              }
+              : null,
+      'sloganPosition':
+          _currentLogoState?.sloganPosition != null
+              ? {
+                'dx': _currentLogoState!.sloganPosition.dx,
+                'dy': _currentLogoState!.sloganPosition.dy,
+              }
+              : null,
+      'elementGradients': _elementGradients.map(
+        (k, v) => MapEntry(k.toString(), _gradientToMap(v)),
+      ),
+      'companyTextGradient':
+          _companyTextGradient != null
+              ? _gradientToMap(_companyTextGradient!)
+              : null,
+      'sloganGradient':
+          _sloganGradient != null ? _gradientToMap(_sloganGradient!) : null,
+
+      'customImagesCount': _currentLogoState?.customImages.length ?? 0,
+      'customSVGsCount': _currentLogoState?.customSVGs.length ?? 0,
+      'customTextsCount': _currentLogoState?.customTexts.length ?? 0,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
     };
   }
 
+  Map<String, dynamic> _gradientToMap(Gradient gradient) {
+    if (gradient is LinearGradient) {
+      return {
+        'type': 'linear',
+        'colors': gradient.colors.map((c) => c.value).toList(),
+        'begin':
+            '${(gradient.begin as Alignment).x},${(gradient.begin as Alignment).y}',
+        'end':
+            '${(gradient.end as Alignment).x},${(gradient.end as Alignment).y}',
+      };
+    } else if (gradient is RadialGradient) {
+      return {
+        'type': 'radial',
+        'colors': gradient.colors.map((c) => c.value).toList(),
+        'stops': gradient.stops?.toList() ?? [],
+      };
+    } else if (gradient is SweepGradient) {
+      return {
+        'type': 'sweep',
+        'colors': gradient.colors.map((c) => c.value).toList(),
+      };
+    }
+    return {'type': 'unknown'};
+  }
+
   void restoreFromState(Map<String, dynamic> state) {
+    _isUndoRedoInProgress = true;
+    print('Restoring state...');
+
     try {
+      Offset? currentLogoPosition = _currentLogoState?.logoPosition;
+      Offset? currentCompanyPosition = _currentLogoState?.companyNamePosition;
+      Offset? currentSloganPosition = _currentLogoState?.sloganPosition;
+
       if (state['logoState'] != null) {
         _currentLogoState = LogoStateData.fromJson(state['logoState']);
       }
+
+      if (state['logoPosition'] != null && _currentLogoState != null) {
+        final posData = state['logoPosition'] as Map<String, dynamic>;
+        _currentLogoState = _currentLogoState!.copyWith(
+          logoPosition: Offset(posData['dx'], posData['dy']),
+        );
+      } else if (currentLogoPosition != null && _currentLogoState != null) {
+        _currentLogoState = _currentLogoState!.copyWith(
+          logoPosition: currentLogoPosition,
+        );
+      }
+
+      if (state['companyNamePosition'] != null && _currentLogoState != null) {
+        final posData = state['companyNamePosition'] as Map<String, dynamic>;
+        _currentLogoState = _currentLogoState!.copyWith(
+          companyNamePosition: Offset(posData['dx'], posData['dy']),
+        );
+      } else if (currentCompanyPosition != null && _currentLogoState != null) {
+        _currentLogoState = _currentLogoState!.copyWith(
+          companyNamePosition: currentCompanyPosition,
+        );
+      }
+
+      if (state['sloganPosition'] != null && _currentLogoState != null) {
+        final posData = state['sloganPosition'] as Map<String, dynamic>;
+        _currentLogoState = _currentLogoState!.copyWith(
+          sloganPosition: Offset(posData['dx'], posData['dy']),
+        );
+      } else if (currentSloganPosition != null && _currentLogoState != null) {
+        _currentLogoState = _currentLogoState!.copyWith(
+          sloganPosition: currentSloganPosition,
+        );
+      }
+
       if (state['opacity'] != null) {
-        _opacity = state['opacity']; 
-      } 
+        _opacity = (state['opacity'] as num).toDouble();
+      }
+      if (state['backgroundOpacity'] != null) {
+        _backgroundOpacity = (state['backgroundOpacity'] as num).toDouble();
+      }
+
       if (state['selectedShapeName'] != null) {
         _selectedShapeName = state['selectedShapeName'];
       }
+
+      if (state['selectedElementId'] != null) {
+        _selectedElementId = state['selectedElementId'];
+      }
+
+      if (state['selectedColor'] != null) {
+        _selectedColor = Color(state['selectedColor']);
+      }
+      if (state['backgroundColor'] != null) {
+        _backgroundColor = Color(state['backgroundColor']);
+      }
+      if (state['companyTextColor'] != null) {
+        _companyTextColor = Color(state['companyTextColor']);
+      }
+      if (state['sloganColor'] != null) {
+        _sloganColor = Color(state['sloganColor']);
+      }
+      if (state['shapeColor'] != null) {
+        _shapeColor = Color(state['shapeColor']);
+      }
+      if (state['baseColor'] != null) {
+        _baseColor = Color(state['baseColor']);
+      }
+
+      if (state['elementColors'] != null) {
+        _elementColors.clear();
+        (state['elementColors'] as Map<String, dynamic>).forEach((k, v) {
+          _elementColors[int.parse(k)] = Color(v);
+        });
+      }
+
+      if (state['elementGradients'] != null) {
+        _elementGradients.clear();
+        final gradientData = state['elementGradients'] as Map<String, dynamic>;
+        gradientData.forEach((key, value) {
+          final elementId = int.tryParse(key);
+          if (elementId != null && value is Map<String, dynamic>) {
+            final gradient = _mapToGradient(value);
+            if (gradient != null) {
+              _elementGradients[elementId] = gradient;
+            }
+          }
+        });
+      }
+
+      if (state['companyTextGradient'] != null) {
+        _companyTextGradient = _mapToGradient(state['companyTextGradient']);
+      }
+
+      if (state['sloganGradient'] != null) {
+        _sloganGradient = _mapToGradient(state['sloganGradient']);
+      }
+
+      if (state['overrideColors'] != null) {
+        _overrideColors.clear();
+        (state['overrideColors'] as Map<String, dynamic>).forEach((k, v) {
+          _overrideColors[int.parse(k)] = Color(v);
+        });
+      }
+
+      if (state['individualElementColors'] != null) {
+        _individualElementColors.clear();
+        (state['individualElementColors'] as Map<String, dynamic>).forEach((
+          k,
+          v,
+        ) {
+          _individualElementColors[int.parse(k)] = Color(v);
+        });
+      }
+
+      if (state['elementSizes'] != null) {
+        _elementSizes.clear();
+        (state['elementSizes'] as Map<String, dynamic>).forEach((k, v) {
+          _elementSizes[int.parse(k)] = (v as num).toDouble();
+        });
+      }
+
+      if (state['elementRotations'] != null) {
+        _elementRotations.clear();
+        (state['elementRotations'] as Map<String, dynamic>).forEach((k, v) {
+          _elementRotations[int.parse(k)] = (v as num).toDouble();
+        });
+      }
+
       if (state['elementRotationX'] != null) {
         _elementRotationX.clear();
         (state['elementRotationX'] as Map<String, dynamic>).forEach((k, v) {
-          _elementRotationX[int.parse(k)] = v as double;
+          _elementRotationX[int.parse(k)] = (v as num).toDouble();
         });
       }
       if (state['elementRotationY'] != null) {
         _elementRotationY.clear();
         (state['elementRotationY'] as Map<String, dynamic>).forEach((k, v) {
-          _elementRotationY[int.parse(k)] = v as double;
+          _elementRotationY[int.parse(k)] = (v as num).toDouble();
         });
       }
       if (state['elementRotationZ'] != null) {
         _elementRotationZ.clear();
         (state['elementRotationZ'] as Map<String, dynamic>).forEach((k, v) {
-          _elementRotationZ[int.parse(k)] = v as double;
+          _elementRotationZ[int.parse(k)] = (v as num).toDouble();
         });
       }
-      notifyListeners();
+
+      if (state['elementFonts'] != null) {
+        _elementFonts.clear();
+        (state['elementFonts'] as Map<String, dynamic>).forEach((k, v) {
+          _elementFonts[int.parse(k)] = v as String;
+        });
+      }
+
+      if (state['fontStyles'] != null) {
+        _fontStyles.clear();
+        (state['fontStyles'] as Map<String, dynamic>).forEach((k, v) {
+          _fontStyles[int.parse(k)] = FontStyleState.fromJson(v);
+        });
+      }
+      if (state['elementFontStyles'] != null) {
+        _elementFontStyles.clear();
+        (state['elementFontStyles'] as Map<String, dynamic>).forEach((k, v) {
+          _elementFontStyles[int.parse(k)] = FontStyleState.fromJson(v);
+        });
+      }
+
+      if (state['elementOutlineColors'] != null) {
+        _elementOutlineColors.clear();
+        (state['elementOutlineColors'] as Map<String, dynamic>).forEach((k, v) {
+          _elementOutlineColors[int.parse(k)] = Color(v);
+        });
+      }
+      if (state['elementOutlineWidths'] != null) {
+        _elementOutlineWidths.clear();
+        (state['elementOutlineWidths'] as Map<String, dynamic>).forEach((k, v) {
+          _elementOutlineWidths[int.parse(k)] = (v as num).toDouble();
+        });
+      }
+
+      if (state['elementShadowColors'] != null) {
+        _elementShadowColors.clear();
+        (state['elementShadowColors'] as Map<String, dynamic>).forEach((k, v) {
+          _elementShadowColors[int.parse(k)] = Color(v);
+        });
+      }
+      if (state['elementShadowOffsetsX'] != null) {
+        _elementShadowOffsetsX.clear();
+        (state['elementShadowOffsetsX'] as Map<String, dynamic>).forEach((
+          k,
+          v,
+        ) {
+          _elementShadowOffsetsX[int.parse(k)] = (v as num).toDouble();
+        });
+      }
+      if (state['elementShadowOffsetsY'] != null) {
+        _elementShadowOffsetsY.clear();
+        (state['elementShadowOffsetsY'] as Map<String, dynamic>).forEach((
+          k,
+          v,
+        ) {
+          _elementShadowOffsetsY[int.parse(k)] = (v as num).toDouble();
+        });
+      }
+
+      if (state['elementTextures'] != null) {
+        _elementTextures.clear();
+        (state['elementTextures'] as Map<String, dynamic>).forEach((k, v) {
+          _elementTextures[int.parse(k)] = v as String;
+        });
+      }
+
+      if (state['elementTextSizes'] != null) {
+        _elementTextSizes.clear();
+        (state['elementTextSizes'] as Map<String, dynamic>).forEach((k, v) {
+          _elementTextSizes[int.parse(k)] = (v as num).toDouble();
+        });
+      }
+      if (state['companyTextSize'] != null) {
+        _companyTextSize = (state['companyTextSize'] as num).toDouble();
+      }
+      if (state['sloganTextSize'] != null) {
+        _sloganTextSize = (state['sloganTextSize'] as num).toDouble();
+      }
+
+      if (state['rotateIndex'] != null) {
+        _rotateIndex = state['rotateIndex'];
+      }
+      if (state['isColorManuallySelected'] != null) {
+        _isColorManuallySelected = state['isColorManuallySelected'];
+      }
+      if (state['isSvgColorOverridden'] != null) {
+        _isSvgColorOverridden = state['isSvgColorOverridden'];
+      }
+      if (state['brightness'] != null) {
+        _brightness = (state['brightness'] as num).toDouble();
+      }
+
+      print('State restored successfully');
     } catch (e) {
       print('Error restoring state: $e');
+    } finally {
+      _isUndoRedoInProgress = false;
+      notifyListeners();
+    }
+  }
+
+  Gradient? _mapToGradient(Map<String, dynamic> map) {
+    final type = map['type'] as String?;
+    final colorValues = (map['colors'] as List?)?.cast<int>();
+
+    if (colorValues == null) return null;
+
+    final colors = colorValues.map((v) => Color(v)).toList();
+
+    switch (type) {
+      case 'linear':
+        final beginStr = map['begin'] as String?;
+        final endStr = map['end'] as String?;
+
+        Alignment begin = Alignment.topLeft;
+        Alignment end = Alignment.bottomRight;
+
+        if (beginStr != null) {
+          final parts = beginStr.split(',');
+          if (parts.length == 2) {
+            begin = Alignment(double.parse(parts[0]), double.parse(parts[1]));
+          }
+        }
+
+        if (endStr != null) {
+          final parts = endStr.split(',');
+          if (parts.length == 2) {
+            end = Alignment(double.parse(parts[0]), double.parse(parts[1]));
+          }
+        }
+
+        return LinearGradient(colors: colors, begin: begin, end: end);
+
+      case 'radial':
+        final stops = (map['stops'] as List?)?.cast<double>();
+        return RadialGradient(colors: colors, stops: stops);
+
+      case 'sweep':
+        return SweepGradient(colors: colors);
+
+      default:
+        return null;
     }
   }
 

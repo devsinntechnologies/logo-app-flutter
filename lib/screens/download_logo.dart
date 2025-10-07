@@ -2219,126 +2219,128 @@ class _DownloadLogoState extends State<DownloadLogo> {
       colorProvider.setBackgroundImage(null, null);
     }
 
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withOpacity(0.8),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        spacing: 10,
-        children: [
-          Text(
-            "Background Effects",
-            style: TextStyle(
-              color: theme.textTheme.bodyLarge?.color,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            "Opacity",
-            style: TextStyle(color: theme.textTheme.bodyLarge?.color),
-          ),
-          Row(
-            children: [
-              Icon(Icons.opacity, color: theme.iconTheme.color),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Consumer<SelectedColorProvider>(
-                  builder: (context, provider, _) {
-                    return Slider(
-                      value: provider.backgroundOpacity,
-                      min: 0.0,
-                      max: 1.0,
-                      divisions: 10,
-                      label:
-                          (provider.backgroundOpacity * 100).round().toString(),
-                      activeColor: theme.colorScheme.primary,
-                      onChangeStart: (value) {
-                        _saveUndoState('Start changing background opacity');
-                      },
-                      onChanged: (value) {
-                        provider.setBackgroundOpacity(value);
-                      },
-                      onChangeEnd: (value) {
-                        _saveUndoState(
-                          'Set background opacity to ${(value * 100).round()}%',
-                        );
-                      },
-                    );
-                  },
-                ),
+    return SingleChildScrollView(
+      child: Container(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface.withOpacity(0.8),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 10,
+          children: [
+            Text(
+              "Background Effects",
+              style: TextStyle(
+                color: theme.textTheme.bodyLarge?.color,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
               ),
-              SizedBox(
-                width: 40,
-                child: Consumer<SelectedColorProvider>(
-                  builder: (context, provider, _) {
-                    return Text(
-                      "${(provider.backgroundOpacity * 100).round()}%",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: theme.textTheme.bodyMedium?.color,
-                        fontWeight: FontWeight.w600,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "Opacity",
+              style: TextStyle(color: theme.textTheme.bodyLarge?.color),
+            ),
+            Row(
+              children: [
+                Icon(Icons.opacity, color: theme.iconTheme.color),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Consumer<SelectedColorProvider>(
+                    builder: (context, provider, _) {
+                      return Slider(
+                        value: provider.backgroundOpacity,
+                        min: 0.0,
+                        max: 1.0,
+                        divisions: 10,
+                        label:
+                            (provider.backgroundOpacity * 100).round().toString(),
+                        activeColor: theme.colorScheme.primary,
+                        onChangeStart: (value) {
+                          _saveUndoState('Start changing background opacity');
+                        },
+                        onChanged: (value) {
+                          provider.setBackgroundOpacity(value);
+                        },
+                        onChangeEnd: (value) {
+                          _saveUndoState(
+                            'Set background opacity to ${(value * 100).round()}%',
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+                SizedBox(
+                  width: 40,
+                  child: Consumer<SelectedColorProvider>(
+                    builder: (context, provider, _) {
+                      return Text(
+                        "${(provider.backgroundOpacity * 100).round()}%",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: theme.textTheme.bodyMedium?.color,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              "Effect Images",
+              style: TextStyle(color: theme.textTheme.bodyLarge?.color),
+            ),
+            SizedBox(
+              height: 60,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: imageList.length + 1,
+                separatorBuilder: (_, __) => const SizedBox(width: 10),
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    return GestureDetector(
+                      onTap: _onEffectImageRemovedWithUndo,
+                      child: Container(
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          color: theme.cardColor,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: theme.dividerColor),
+                        ),
+                        child: Icon(
+                          Icons.close,
+                          color: theme.iconTheme.color,
+                          size: 30,
+                        ),
                       ),
                     );
-                  },
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            "Effect Images",
-            style: TextStyle(color: theme.textTheme.bodyLarge?.color),
-          ),
-          SizedBox(
-            height: 60,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: imageList.length + 1,
-              separatorBuilder: (_, __) => const SizedBox(width: 10),
-              itemBuilder: (context, index) {
-                if (index == 0) {
+                  }
+      
+                  final imagePath = imageList[index - 1];
                   return GestureDetector(
-                    onTap: _onEffectImageRemovedWithUndo,
+                    onTap: () => _onEffectImageSelectedWithUndo(imagePath),
                     child: Container(
                       width: 60,
                       height: 60,
                       decoration: BoxDecoration(
-                        color: theme.cardColor,
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: theme.dividerColor),
-                      ),
-                      child: Icon(
-                        Icons.close,
-                        color: theme.iconTheme.color,
-                        size: 30,
+                        border: Border.all(color: Colors.grey.shade400),
+                        image: DecorationImage(
+                          image: AssetImage(imagePath),
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                   );
-                }
-
-                final imagePath = imageList[index - 1];
-                return GestureDetector(
-                  onTap: () => _onEffectImageSelectedWithUndo(imagePath),
-                  child: Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.grey.shade400),
-                      image: DecorationImage(
-                        image: AssetImage(imagePath),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                );
-              },
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

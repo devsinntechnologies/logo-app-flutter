@@ -44,6 +44,11 @@ class _MovementPanelState extends State<MovementPanel>
   double _localRotation = 0.0;
   int? _lastElementId;
 
+  // Add these variables for better undo management
+  Timer? _undoDebounceTimer;
+  bool _isSliderBeingDragged = false;
+  Map<String, dynamic>? _sliderStartState;
+
   Color _getCategoryColor(String category) {
     switch (category) {
       case 'Sans Serif':
@@ -103,6 +108,31 @@ class _MovementPanelState extends State<MovementPanel>
       final currentState = colorProvider.captureCurrentState();
       undoProvider.saveState(action: action, state: currentState);
     }
+  }
+
+  void _saveUndoStateDebounced(String action, {int delayMs = 500}) {
+    _undoDebounceTimer?.cancel();
+    _undoDebounceTimer = Timer(Duration(milliseconds: delayMs), () {
+      _saveUndoState(action);
+    });
+  }
+
+  void _captureSliderStartState(String sliderType) {
+    if (!_isSliderBeingDragged) {
+      final colorProvider = Provider.of<SelectedColorProvider>(
+        context,
+        listen: false,
+      );
+      _sliderStartState = colorProvider.captureCurrentState();
+      _isSliderBeingDragged = true;
+    }
+  }
+
+  void _handleSliderEnd(String action) {
+    _isSliderBeingDragged = false;
+    _undoDebounceTimer?.cancel();
+    _saveUndoState(action);
+    _sliderStartState = null;
   }
 
   @override
@@ -254,7 +284,7 @@ class _MovementPanelState extends State<MovementPanel>
                   divisions: 99,
                   activeColor: theme.colorScheme.primary,
                   onChangeStart: (value) {
-                    _saveUndoState('Start resizing element $elementId');
+                    _captureSliderStartState('size');
                   },
                   onChanged: (uiValue) {
                     double actualValue = provider.mapUIToActual(
@@ -264,7 +294,7 @@ class _MovementPanelState extends State<MovementPanel>
                     provider.setSizeForElement(elementId, actualValue);
                   },
                   onChangeEnd: (uiValue) {
-                    _saveUndoState(
+                    _handleSliderEnd(
                       'Resize element $elementId to ${uiValue.toInt()}%',
                     );
                   },
@@ -284,10 +314,7 @@ class _MovementPanelState extends State<MovementPanel>
                     ElevatedButton.icon(
                       onPressed: () {
                         _saveUndoState('Reset size of element $elementId');
-                        provider.setSizeForElement(
-                          elementId,
-                          50.0,
-                        ); // Default size
+                        provider.setSizeForElement(elementId, 50.0);
                       },
                       icon: Icon(
                         Icons.refresh,
@@ -400,7 +427,6 @@ class _MovementPanelState extends State<MovementPanel>
                 ],
               ),
 
-              // Action Buttons
               Column(
                 children: [
                   ElevatedButton(
@@ -429,16 +455,50 @@ class _MovementPanelState extends State<MovementPanel>
     if (widget.selectedElementId == null) return;
 
     final elementId = widget.selectedElementId!;
+    final colorProvider = Provider.of<SelectedColorProvider>(
+      context,
+      listen: false,
+    );
+    final undoProvider = Provider.of<UndoProvider>(context, listen: false);
 
-    switch (action) {
-      case 'bring_to_front':
-        _saveUndoState('Bring element $elementId to front');
-        widget.onBringToFrontPressed();
-        break;
-      case 'send_to_back':
-        _saveUndoState('Send element $elementId to back');
-        widget.onSendToBackPressed();
-        break;
+    if (!undoProvider.isUndoRedoInProgress) {
+      final stateBefore = colorProvider.captureCurrentState();
+
+      switch (action) {
+        case 'bring_to_front':
+          widget.onBringToFrontPressed();
+          break;
+        case 'send_to_back':
+          widget.onSendToBackPressed();
+          break;
+      }
+
+      Future.delayed(const Duration(milliseconds: 50), () {
+        if (mounted) {
+          final stateAfter = colorProvider.captureCurrentState();
+
+          if (_hasStateChanged(stateBefore, stateAfter)) {
+            String actionDescription;
+            switch (action) {
+              case 'bring_to_front':
+                actionDescription = 'Move element $elementId up one layer';
+                break;
+              case 'send_to_back':
+                actionDescription = 'Move element $elementId down one layer';
+                break;
+              default:
+                actionDescription = 'Layer action on element $elementId';
+            }
+
+            undoProvider.saveState(
+              action: actionDescription,
+              state: stateAfter,
+            );
+
+            _showActionFeedback(context, actionDescription);
+          }
+        }
+      });
     }
   }
 
@@ -446,17 +506,105 @@ class _MovementPanelState extends State<MovementPanel>
     if (widget.selectedElementId == null) return;
 
     final elementId = widget.selectedElementId!;
+    final colorProvider = Provider.of<SelectedColorProvider>(
+      context,
+      listen: false,
+    );
+    final undoProvider = Provider.of<UndoProvider>(context, listen: false);
 
     switch (action) {
       case 'duplicate':
-        _saveUndoState('Duplicate element $elementId');
-        _trackButtonClick('duplicate');
-        widget.onDuplicatePressed();
+        if (!undoProvider.isUndoRedoInProgress) {
+          final stateBefore = colorProvider.captureCurrentState();
+
+          _trackButtonClick('duplicate');
+          widget.onDuplicatePressed();
+
+          Future.delayed(const Duration(milliseconds: 100), () {
+            if (mounted) {
+              final stateAfter = colorProvider.captureCurrentState();
+
+              if (_hasStateChanged(stateBefore, stateAfter)) {
+                undoProvider.saveState(
+                  action: 'Duplicate element $elementId',
+                  state: stateAfter,
+                );
+
+                _showActionFeedback(context, 'Element $elementId duplicated');
+              }
+            }
+          });
+        }
         break;
+
       case 'delete':
-        _saveUndoState('Delete element $elementId');
+        if (!undoProvider.isUndoRedoInProgress) {
+          final stateBefore = colorProvider.captureCurrentState();
+
+
+          Future.delayed(const Duration(milliseconds: 50), () {
+            if (mounted) {
+              final stateAfter = colorProvider.captureCurrentState();
+              if (_hasStateChanged(stateBefore, stateAfter)) {
+                undoProvider.saveState(
+                  action: 'Delete element $elementId',
+                  state: stateAfter,
+                );
+                _showActionFeedback(context, 'Element $elementId deleted');
+              }
+            }
+          });
+        }
         break;
     }
+  }
+
+  bool _hasStateChanged(
+    Map<String, dynamic> stateBefore,
+    Map<String, dynamic> stateAfter,
+  ) {
+    final orderBefore = stateBefore['logoState']?['elementOrder'] as List?;
+    final orderAfter = stateAfter['logoState']?['elementOrder'] as List?;
+
+    if (orderBefore != null && orderAfter != null) {
+      if (orderBefore.length != orderAfter.length) return true;
+      for (int i = 0; i < orderBefore.length; i++) {
+        if (orderBefore[i] != orderAfter[i]) return true;
+      }
+    }
+
+    final customTextsBefore =
+        stateBefore['logoState']?['customTexts'] as List? ?? [];
+    final customTextsAfter =
+        stateAfter['logoState']?['customTexts'] as List? ?? [];
+    if (customTextsBefore.length != customTextsAfter.length) return true;
+
+    final customImagesBefore =
+        stateBefore['logoState']?['customImages'] as List? ?? [];
+    final customImagesAfter =
+        stateAfter['logoState']?['customImages'] as List? ?? [];
+    if (customImagesBefore.length != customImagesAfter.length) return true;
+
+    final customSVGsBefore =
+        stateBefore['logoState']?['customSVGs'] as List? ?? [];
+    final customSVGsAfter =
+        stateAfter['logoState']?['customSVGs'] as List? ?? [];
+    if (customSVGsBefore.length != customSVGsAfter.length) return true;
+
+    return false;
+  }
+
+  void _showActionFeedback(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(milliseconds: 800),
+        backgroundColor: Colors.blue.withOpacity(0.9),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(8),
+      ),
+    );
   }
 
   Widget _buildControlButton({
@@ -786,6 +934,10 @@ class _MovementPanelState extends State<MovementPanel>
         return IconButton(
           onPressed: () {
             if (widget.selectedElementId != null) {
+              _saveUndoState(
+                'Remove gradient from element ${widget.selectedElementId}',
+              );
+
               provider.clearGradientForElement(widget.selectedElementId!);
               ScaffoldMessenger.of(
                 context,
@@ -882,149 +1034,6 @@ class _MovementPanelState extends State<MovementPanel>
       return _buildGenericMoreView();
     }
   }
-
-  // Widget _buildOutlinesr() {
-  //   Color outlineColor = Colors.black;
-  //   double outlineThickness = 0.0;
-
-  //   return StatefulBuilder(
-  //     builder: (context, setState) {
-  //       final colors = [
-  //         Colors.orange,
-  //         Colors.black,
-  //         Colors.red,
-  //         Colors.green,
-  //         Colors.blue,
-  //         Colors.yellow,
-  //         Colors.lightBlue,
-  //         Colors.pink,
-  //         Colors.grey,
-  //       ];
-
-  //       return Padding(
-  //         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-  //         child: Column(
-  //           mainAxisSize: MainAxisSize.min,
-  //           children: [
-  //             // Slider on top
-  //             Padding(
-  //               padding: const EdgeInsets.symmetric(
-  //                 horizontal: 12.0,
-  //                 vertical: 10,
-  //               ),
-  //               child: Row(
-  //                 children: [
-  //                   const Text(
-  //                     "Outline",
-  //                     style: TextStyle(fontWeight: FontWeight.bold),
-  //                   ),
-  //                   SliderTheme(
-  //                     data: SliderTheme.of(context).copyWith(
-  //                       activeTrackColor: Colors.orange,
-  //                       // inactiveTrackColor: Colors.orange.withOpacity(0.3),
-  //                       thumbColor: Colors.orange,
-  //                       // overlayColor: Colors.orange.withOpacity(0.2),
-  //                     ),
-  //                     child: Expanded(
-  //                       child: Slider(
-  //                         min: 0,
-  //                         max: 10,
-  //                         divisions: 10,
-  //                         value: outlineThickness,
-  //                         onChanged: (value) {
-  //                           setState(() {
-  //                             outlineThickness = value;
-  //                           });
-  //                           print('Outline thickness: $outlineThickness');
-  //                         },
-  //                       ),
-  //                     ),
-  //                   ),
-  //                   SizedBox(
-  //                     width: 35,
-  //                     child: Text(
-  //                       outlineThickness.toStringAsFixed(0),
-  //                       textAlign: TextAlign.center,
-  //                       style: const TextStyle(fontWeight: FontWeight.bold),
-  //                     ),
-  //                   ),
-  //                 ],
-  //               ),
-  //             ),
-
-  //             const SizedBox(height: 15),
-
-  //             // Colors + Icons in one horizontal line
-  //             SizedBox(
-  //               height: 50,
-
-  //               child: ListView(
-  //                 scrollDirection: Axis.horizontal,
-  //                 children: [
-  //                   Container(
-  //                     decoration: BoxDecoration(
-  //                       color: Colors.orange,
-  //                       shape: BoxShape.circle,
-  //                     ),
-  //                     child: const Icon(
-  //                       Icons.edit,
-  //                       size: 30,
-  //                       color: Colors.white,
-  //                     ),
-  //                   ),
-
-  //                   SizedBox(width: 10),
-  //                   Container(
-  //                     decoration: BoxDecoration(
-  //                       color: Colors.orange,
-  //                       shape: BoxShape.circle,
-  //                     ),
-  //                     child: Icon(
-  //                       Icons.color_lens,
-  //                       size: 30,
-  //                       color: Colors.white,
-  //                     ),
-  //                   ),
-  //                   // Colors
-  //                   ...colors.map((color) {
-  //                     return GestureDetector(
-  //                       onTap: () {
-  //                         setState(() {
-  //                           outlineColor = color;
-  //                         });
-  //                         print('Selected outline color: $outlineColor');
-  //                       },
-  //                       child: Container(
-  //                         margin: const EdgeInsets.symmetric(horizontal: 6),
-  //                         width: 30,
-  //                         height: 30,
-  //                         decoration: BoxDecoration(
-  //                           color: color,
-  //                           shape: BoxShape.circle,
-  //                           border: Border.all(
-  //                             color:
-  //                                 outlineColor == color
-  //                                     ? Colors.black
-  //                                     : Colors.transparent,
-  //                             width: 2,
-  //                           ),
-  //                         ),
-  //                       ),
-  //                     );
-  //                   }).toList(),
-
-  //                   const SizedBox(width: 12),
-
-  //                   // Icons
-  //                 ],
-  //               ),
-  //             ),
-  //           ],
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
 
   Widget _buildColorBox(BuildContext context, Color color) {
     final theme = Theme.of(context);
@@ -1199,15 +1208,13 @@ class _MovementPanelState extends State<MovementPanel>
                           divisions: 10,
                           value: outlineThickness,
                           onChangeStart: (value) {
-                            _saveUndoState(
-                              'Start changing outline width for element $elementId',
-                            );
+                            _captureSliderStartState('outline_width');
                           },
                           onChanged: (value) {
                             provider.setOutlineWidth(elementId, value);
                           },
                           onChangeEnd: (value) {
-                            _saveUndoState(
+                            _handleSliderEnd(
                               'Change outline width of element $elementId to ${value.toInt()}',
                             );
                           },
@@ -1271,6 +1278,425 @@ class _MovementPanelState extends State<MovementPanel>
                       );
                     },
                   ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildRotateTab() {
+    if (!mounted) return const SizedBox.shrink();
+    final theme = Theme.of(context);
+
+    return Consumer<SelectedColorProvider>(
+      builder: (context, provider, _) {
+        if (widget.selectedElementId == null) {
+          return const Center(child: Text("Select an element first"));
+        }
+
+        final int elementId = widget.selectedElementId!;
+
+        if (_lastElementId != elementId) {
+          _lastElementId = elementId;
+          _localRotation =
+              (provider.getRotationForElement(elementId) ?? 0).toDouble();
+        }
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "Rotate Element",
+                  style: TextStyle(
+                    color: theme.textTheme.bodyLarge?.color,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Slider(
+                  value: _localRotation.clamp(0.0, 360.0),
+                  min: 0,
+                  max: 360,
+                  divisions: 360,
+                  activeColor: theme.colorScheme.primary,
+                  inactiveColor: theme.dividerColor,
+                  onChangeStart: (value) {
+                    _captureSliderStartState('rotation');
+                  },
+                  onChanged: (value) {
+                    if (mounted) {
+                      setState(() {
+                        _localRotation = value;
+                      });
+                    }
+                  },
+                  onChangeEnd: (value) {
+                    _handleSliderEnd(
+                      'Rotate element $elementId to ${value.toInt()}°',
+                    );
+                    provider.setRotationForElement(elementId, value);
+                  },
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "${_localRotation.toInt()}°",
+                  style: TextStyle(
+                    color: theme.textTheme.bodyMedium?.color,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        _saveUndoState('Reset rotation of element $elementId');
+                        setState(() {
+                          _localRotation = 0.0;
+                        });
+                        provider.setRotationForElement(elementId, 0.0);
+                      },
+                      icon: Icon(
+                        Icons.refresh,
+                        color: theme.scaffoldBackgroundColor,
+                      ),
+                      label: Text(
+                        "Reset",
+                        style: TextStyle(
+                          color: theme.textTheme.bodyMedium?.color,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: theme.colorScheme.secondary,
+                      ),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        _saveUndoState('Rotate element $elementId by 90°');
+                        setState(() {
+                          _localRotation = (_localRotation + 90) % 360;
+                        });
+                        provider.setRotationForElement(
+                          elementId,
+                          _localRotation,
+                        );
+                      },
+                      icon: Icon(
+                        Icons.rotate_90_degrees_ccw,
+                        color: theme.scaffoldBackgroundColor,
+                      ),
+                      label: Text(
+                        "90°",
+                        style: TextStyle(
+                          color: theme.textTheme.bodyMedium?.color,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: theme.colorScheme.primary,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildShadowTab(BuildContext context) {
+    final provider = Provider.of<SelectedColorProvider>(context);
+    final int id = widget.selectedElementId!;
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.all(12.0),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Shadow Settings',
+              style: TextStyle(
+                color: theme.textTheme.bodyLarge?.color,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Shadow Offset X',
+              style: TextStyle(color: theme.textTheme.bodyLarge?.color),
+            ),
+            Slider(
+              value: provider.getShadowOffsetXForElement(id),
+              min: -10,
+              max: 10,
+              onChangeStart: (value) {
+                _captureSliderStartState('shadow_x');
+              },
+              onChanged: (v) {
+                provider.setShadowOffsetXForElement(id, v);
+              },
+              onChangeEnd: (v) {
+                _handleSliderEnd(
+                  'Change shadow X offset of element $id to ${v.toInt()}',
+                );
+              },
+            ),
+            Text(
+              'Shadow Offset Y',
+              style: TextStyle(color: theme.textTheme.bodyLarge?.color),
+            ),
+            Slider(
+              value: provider.getShadowOffsetYForElement(id),
+              min: -10,
+              max: 10,
+              onChangeStart: (value) {
+                _captureSliderStartState('shadow_y');
+              },
+              onChanged: (v) {
+                provider.setShadowOffsetYForElement(id, v);
+              },
+              onChangeEnd: (v) {
+                _handleSliderEnd(
+                  'Change shadow Y offset of element $id to ${v.toInt()}',
+                );
+              },
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Shadow Color',
+              style: TextStyle(color: theme.textTheme.bodyLarge?.color),
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+                for (final color in [
+                  Colors.black,
+                  Colors.grey,
+                  Colors.red,
+                  Colors.green,
+                  Colors.blue,
+                  Colors.white,
+                  Colors.yellow,
+                  Colors.purple,
+                ])
+                  GestureDetector(
+                    onTap: () {
+                      _saveUndoState('Change shadow color of element $id');
+                      provider.setShadowColorForElement(id, color);
+                    },
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: color,
+                        border: Border.all(color: theme.dividerColor),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _build3DTab() {
+    final theme = Theme.of(context);
+    return Consumer<SelectedColorProvider>(
+      builder: (context, provider, _) {
+        if (widget.selectedElementId == null) {
+          return const Center(
+            child: Text(
+              "Select an element first",
+              style: TextStyle(color: Colors.white, fontSize: 16),
+            ),
+          );
+        }
+
+        final int elementId = widget.selectedElementId!;
+
+        double rotationX = provider.getRotationXForElement(elementId) ?? 0.0;
+        double rotationY = provider.getRotationYForElement(elementId) ?? 0.0;
+        double rotationZ = provider.getRotationZForElement(elementId) ?? 0.0;
+
+        Widget buildRotationSlider(
+          String label,
+          double value,
+          ValueChanged<double> onChanged,
+          VoidCallback onReset,
+          String axis,
+        ) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "$label Axis",
+                      style: TextStyle(
+                        color: theme.textTheme.bodyLarge?.color,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                    Expanded(
+                      child: SliderTheme(
+                        data: SliderTheme.of(context).copyWith(
+                          activeTrackColor: theme.colorScheme.primary,
+                          inactiveTrackColor: theme.dividerColor,
+                          thumbColor: theme.colorScheme.primary,
+                          overlayColor: theme.colorScheme.primary.withOpacity(
+                            0.2,
+                          ),
+                          valueIndicatorColor: theme.colorScheme.primary,
+                          valueIndicatorTextStyle: TextStyle(
+                            color: theme.colorScheme.onPrimary,
+                          ),
+                        ),
+                        child: Slider(
+                          value: value,
+                          min: -180.0,
+                          max: 180.0,
+                          divisions: 360,
+                          label: '${value.toStringAsFixed(1)}°',
+                          onChangeStart: (value) {
+                            _captureSliderStartState('3d_rotation_$axis');
+                          },
+                          onChanged: onChanged,
+                          onChangeEnd: (value) {
+                            _handleSliderEnd(
+                              'Change $label rotation of element $elementId to ${value.toStringAsFixed(1)}°',
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                    Text(
+                      "${value.toStringAsFixed(1)}°",
+                      style: TextStyle(
+                        color: theme.textTheme.bodyMedium?.color,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      onPressed: onReset,
+                      icon: Icon(Icons.refresh, color: Colors.orange, size: 18),
+                      tooltip: 'Reset $label',
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        }
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                buildRotationSlider(
+                  "X",
+                  rotationX,
+                  (value) {
+                    provider.setRotationXForElement(elementId, value);
+                  },
+                  () {
+                    _saveUndoState('Reset X rotation for element $elementId');
+                    provider.setRotationXForElement(elementId, 0.0);
+                  },
+                  'x',
+                ),
+
+                buildRotationSlider(
+                  "Y",
+                  rotationY,
+                  (value) {
+                    provider.setRotationYForElement(elementId, value);
+                  },
+                  () {
+                    _saveUndoState('Reset Y rotation for element $elementId');
+                    provider.setRotationYForElement(elementId, 0.0);
+                  },
+                  'y',
+                ),
+
+                buildRotationSlider(
+                  "Z",
+                  rotationZ,
+                  (value) {
+                    provider.setRotationZForElement(elementId, value);
+                  },
+                  () {
+                    _saveUndoState('Reset Z rotation for element $elementId');
+                    provider.setRotationZForElement(elementId, 0.0);
+                  },
+                  'z',
+                ),
+
+                ElevatedButton.icon(
+                  onPressed: () {
+                    _saveUndoState(
+                      'Reset all 3D rotations for element $elementId',
+                    );
+                    provider.setRotationXForElement(elementId, 0.0);
+                    provider.setRotationYForElement(elementId, 0.0);
+                    provider.setRotationZForElement(elementId, 0.0);
+                  },
+                  icon: const Icon(Icons.refresh, color: Colors.white),
+                  label: const Text(
+                    "Reset All",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.redAccent,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+
+                Text(
+                  "Tip: Combine X, Y, Z rotations for complex 3D effects",
+                  style: TextStyle(
+                    color: theme.textTheme.bodySmall?.color,
+                    fontSize: 12,
+                    fontStyle: FontStyle.italic,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
               ],
             ),
@@ -1489,418 +1915,6 @@ class _MovementPanelState extends State<MovementPanel>
     );
   }
 
-  Widget _buildRotateTab() {
-    if (!mounted) return const SizedBox.shrink();
-    final theme = Theme.of(context);
-
-    return Consumer<SelectedColorProvider>(
-      builder: (context, provider, _) {
-        if (widget.selectedElementId == null) {
-          return const Center(child: Text("Select an element first"));
-        }
-
-        final int elementId = widget.selectedElementId!;
-
-        if (_lastElementId != elementId) {
-          _lastElementId = elementId;
-          _localRotation =
-              (provider.getRotationForElement(elementId) ?? 0).toDouble();
-        }
-
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  "Rotate Element",
-                  style: TextStyle(
-                    color: theme.textTheme.bodyLarge?.color,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Slider(
-                  value: _localRotation.clamp(0.0, 360.0),
-                  min: 0,
-                  max: 360,
-                  divisions: 360,
-                  activeColor: theme.colorScheme.primary,
-                  inactiveColor: theme.dividerColor,
-                  onChangeStart: (value) {
-                    _saveUndoState('Start rotating element $elementId');
-                  },
-                  onChanged: (value) {
-                    if (mounted) {
-                      setState(() {
-                        _localRotation = value;
-                      });
-                    }
-                  },
-                  onChangeEnd: (value) {
-                    _saveUndoState(
-                      'Rotate element $elementId to ${value.toInt()}°',
-                    );
-                    provider.setRotationForElement(elementId, value);
-                  },
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "${_localRotation.toInt()}°",
-                  style: TextStyle(
-                    color: theme.textTheme.bodyMedium?.color,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        _saveUndoState('Reset rotation of element $elementId');
-                        setState(() {
-                          _localRotation = 0.0;
-                        });
-                        provider.setRotationForElement(elementId, 0.0);
-                      },
-                      icon: Icon(
-                        Icons.refresh,
-                        color: theme.scaffoldBackgroundColor,
-                      ),
-                      label: Text(
-                        "Reset",
-                        style: TextStyle(
-                          color: theme.textTheme.bodyMedium?.color,
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: theme.colorScheme.secondary,
-                      ),
-                    ),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        _saveUndoState('Rotate element $elementId by 90°');
-                        setState(() {
-                          _localRotation = (_localRotation + 90) % 360;
-                        });
-                        provider.setRotationForElement(
-                          elementId,
-                          _localRotation,
-                        );
-                      },
-                      icon: Icon(
-                        Icons.rotate_90_degrees_ccw,
-                        color: theme.scaffoldBackgroundColor,
-                      ),
-                      label: Text(
-                        "90°",
-                        style: TextStyle(
-                          color: theme.textTheme.bodyMedium?.color,
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: theme.colorScheme.primary,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildShadowTab(BuildContext context) {
-    final provider = Provider.of<SelectedColorProvider>(context);
-    final int id = widget.selectedElementId!;
-    final theme = Theme.of(context);
-
-    return Padding(
-      padding: const EdgeInsets.all(12.0),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Shadow Settings',
-              style: TextStyle(
-                color: theme.textTheme.bodyLarge?.color,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Shadow Offset X',
-              style: TextStyle(color: theme.textTheme.bodyLarge?.color),
-            ),
-            Slider(
-              value: provider.getShadowOffsetXForElement(id),
-              min: -10,
-              max: 10,
-              onChangeStart: (value) {
-                _saveUndoState(
-                  'Start changing shadow X offset for element $id',
-                );
-              },
-              onChanged: (v) {
-                provider.setShadowOffsetXForElement(id, v);
-              },
-              onChangeEnd: (v) {
-                _saveUndoState(
-                  'Change shadow X offset of element $id to ${v.toInt()}',
-                );
-              },
-            ),
-            Text(
-              'Shadow Offset Y',
-              style: TextStyle(color: theme.textTheme.bodyLarge?.color),
-            ),
-            Slider(
-              value: provider.getShadowOffsetYForElement(id),
-              min: -10,
-              max: 10,
-              onChangeStart: (value) {
-                _saveUndoState(
-                  'Start changing shadow Y offset for element $id',
-                );
-              },
-              onChanged: (v) {
-                provider.setShadowOffsetYForElement(id, v);
-              },
-              onChangeEnd: (v) {
-                _saveUndoState(
-                  'Change shadow Y offset of element $id to ${v.toInt()}',
-                );
-              },
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Shadow Color',
-              style: TextStyle(color: theme.textTheme.bodyLarge?.color),
-            ),
-            const SizedBox(height: 10),
-            Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: [
-                for (final color in [
-                  Colors.black,
-                  Colors.grey,
-                  Colors.red,
-                  Colors.green,
-                  Colors.blue,
-                  Colors.white,
-                  Colors.yellow,
-                  Colors.purple,
-                ])
-                  GestureDetector(
-                    onTap: () {
-                      _saveUndoState('Change shadow color of element $id');
-                      provider.setShadowColorForElement(id, color);
-                    },
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: color,
-                        border: Border.all(color: theme.dividerColor),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _build3DTab() {
-    final theme = Theme.of(context);
-    return Consumer<SelectedColorProvider>(
-      builder: (context, provider, _) {
-        if (widget.selectedElementId == null) {
-          return const Center(
-            child: Text(
-              "Select an element first",
-              style: TextStyle(color: Colors.white, fontSize: 16),
-            ),
-          );
-        }
-
-        final int elementId = widget.selectedElementId!;
-        final isDark = Theme.of(context).brightness == Brightness.dark;
-
-        double rotationX = provider.getRotationXForElement(elementId) ?? 0.0;
-        double rotationY = provider.getRotationYForElement(elementId) ?? 0.0;
-        double rotationZ = provider.getRotationZForElement(elementId) ?? 0.0;
-
-        Widget buildRotationSlider(
-          String label,
-          double value,
-          ValueChanged<double> onChanged,
-          VoidCallback onReset,
-        ) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "$label Axis",
-                      style: TextStyle(
-                        color: theme.textTheme.bodyLarge?.color,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
-                    ),
-                    Expanded(
-                      child: SliderTheme(
-                        data: SliderTheme.of(context).copyWith(
-                          activeTrackColor: theme.colorScheme.primary,
-                          inactiveTrackColor: theme.dividerColor,
-                          thumbColor: theme.colorScheme.primary,
-                          overlayColor: theme.colorScheme.primary.withOpacity(
-                            0.2,
-                          ),
-                          valueIndicatorColor: theme.colorScheme.primary,
-                          valueIndicatorTextStyle: TextStyle(
-                            color: theme.colorScheme.onPrimary,
-                          ),
-                        ),
-                        child: Slider(
-                          value: value,
-                          min: -180.0,
-                          max: 180.0,
-                          divisions: 360,
-                          label: '${value.toStringAsFixed(1)}°',
-                          onChanged: onChanged,
-                        ),
-                      ),
-                    ),
-                    Text(
-                      "${value.toStringAsFixed(1)}°",
-                      style: TextStyle(
-                        color: theme.textTheme.bodyMedium?.color,
-                        fontSize: 12,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      onPressed: onReset,
-                      icon: Icon(Icons.refresh, color: Colors.orange, size: 18),
-                      tooltip: 'Reset $label',
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          );
-        }
-
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                buildRotationSlider(
-                  "X",
-                  rotationX,
-                  (value) {
-                    provider.setRotationXForElement(elementId, value);
-                  },
-                  () {
-                    _saveUndoState('Reset X rotation for element $elementId');
-                    provider.setRotationXForElement(elementId, 0.0);
-                  },
-                ),
-
-                buildRotationSlider(
-                  "Y",
-                  rotationY,
-                  (value) {
-                    provider.setRotationYForElement(elementId, value);
-                  },
-                  () {
-                    _saveUndoState('Reset Y rotation for element $elementId');
-                    provider.setRotationYForElement(elementId, 0.0);
-                  },
-                ),
-
-                buildRotationSlider(
-                  "Z",
-                  rotationZ,
-                  (value) {
-                    provider.setRotationZForElement(elementId, value);
-                  },
-                  () {
-                    _saveUndoState('Reset Z rotation for element $elementId');
-                    provider.setRotationZForElement(elementId, 0.0);
-                  },
-                ),
-
-                ElevatedButton.icon(
-                  onPressed: () {
-                    _saveUndoState(
-                      'Reset all 3D rotations for element $elementId',
-                    );
-                    provider.setRotationXForElement(elementId, 0.0);
-                    provider.setRotationYForElement(elementId, 0.0);
-                    provider.setRotationZForElement(elementId, 0.0);
-                  },
-                  icon: const Icon(Icons.refresh, color: Colors.white),
-                  label: const Text(
-                    "Reset All",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.redAccent,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 12,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 10),
-
-                Text(
-                  "Tip: Combine X, Y, Z rotations for complex 3D effects",
-                  style: TextStyle(
-                    color: theme.textTheme.bodySmall?.color,
-                    fontSize: 12,
-                    fontStyle: FontStyle.italic,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   Widget _buildDirectionButton({
     required IconData icon,
     required String direction,
@@ -1938,6 +1952,7 @@ class _MovementPanelState extends State<MovementPanel>
   @override
   void dispose() {
     _stopMoving();
+    _undoDebounceTimer?.cancel();
     super.dispose();
   }
 }
