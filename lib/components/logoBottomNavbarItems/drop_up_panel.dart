@@ -1,4 +1,5 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first, use_super_parameters, use_build_context_synchronously
+import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -36,7 +37,14 @@ class DropUpPanel extends StatefulWidget {
 }
 
 class _DropUpPanelState extends State<DropUpPanel> {
+  Timer? _undoDebounceTimer;
+  bool _isSliderBeingDragged = false;
+  Map<String, dynamic>? _sliderStartState;
+
   Future<void> pickImageFromDevice(BuildContext context) async {
+    // Save state before picking image
+    _saveUndoState(context, 'Pick background image from device');
+
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
@@ -51,13 +59,18 @@ class _DropUpPanelState extends State<DropUpPanel> {
         context,
         listen: false,
       );
+
+      // Apply the change and save another undo state
       provider.setBackgroundImage(image, file);
+
+      // Save final state after the change is applied
+      _saveUndoStateDelayed(context, 'Set background image from device');
     }
   }
 
   String? selectedShapeName;
   int selectedIndex = 0;
-  final Color _baseColor = Colors.red; // Default palette color
+  final Color _baseColor = Colors.red;
 
   final List<String> options = [
     'Color',
@@ -67,6 +80,143 @@ class _DropUpPanelState extends State<DropUpPanel> {
     'Image',
   ];
   double _opacityValue = 1.0;
+
+  void _saveUndoStateDebounced(
+    BuildContext context,
+    String action, {
+    int delayMs = 400,
+  }) {
+    _undoDebounceTimer?.cancel();
+    _undoDebounceTimer = Timer(Duration(milliseconds: delayMs), () {
+      _saveUndoState(context, action);
+    });
+  }
+
+  void _saveUndoStateDelayed(
+    BuildContext context,
+    String action, {
+    int delayMs = 100,
+  }) {
+    Timer(Duration(milliseconds: delayMs), () {
+      if (mounted) {
+        _saveUndoState(context, action);
+      }
+    });
+  }
+
+  void _captureSliderStartState(BuildContext context) {
+    if (!_isSliderBeingDragged) {
+      final colorProvider = Provider.of<SelectedColorProvider>(
+        context,
+        listen: false,
+      );
+      _sliderStartState = colorProvider.captureCurrentState();
+      _isSliderBeingDragged = true;
+    }
+  }
+
+  void _handleSliderEndWithUndo(BuildContext context, String action) {
+    _isSliderBeingDragged = false;
+    _undoDebounceTimer?.cancel();
+    _saveUndoState(context, action);
+    _sliderStartState = null;
+  }
+
+  void _handleColorSelection(BuildContext context) {
+    // Save state before navigation
+    _saveUndoState(context, 'Open color picker');
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => ColorScreen()),
+    ).then((_) {
+      // Save state after returning from color screen
+      if (mounted) {
+        _saveUndoStateDelayed(context, 'Background color changed');
+      }
+    });
+  }
+
+  void _handleGradientSelection(BuildContext context) {
+    // Save state before navigation
+    _saveUndoState(context, 'Open gradient picker');
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => GradientPickerScreen()),
+    ).then((_) {
+      // Save state after returning from gradient screen
+      if (mounted) {
+        _saveUndoStateDelayed(context, 'Background gradient changed');
+      }
+    });
+  }
+
+  void _handleBackgroundSelection(BuildContext context) {
+    // Save state before navigation
+    _saveUndoState(context, 'Open background images');
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => SelectBgImages()),
+    ).then((_) {
+      // Save state after returning from background screen
+      if (mounted) {
+        _saveUndoStateDelayed(context, 'Background image changed');
+      }
+    });
+  }
+
+  void _handleTextureSelection(BuildContext context) {
+    // Save state before navigation
+    _saveUndoState(context, 'Open texture images');
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => SelectTextureImages()),
+    ).then((_) {
+      // Save state after returning from texture screen
+      if (mounted) {
+        _saveUndoStateDelayed(context, 'Background texture changed');
+      }
+    });
+  }
+
+  void _handleOpacityChange(double value) {
+    setState(() {
+      _opacityValue = value;
+    });
+
+    // Apply the opacity change immediately for smooth UI
+    widget.onOpacityChanged(_opacityValue);
+
+    // Save to provider with undo
+    final provider = Provider.of<SelectedColorProvider>(context, listen: false);
+    provider.setBackgroundOpacityWithUndo(value);
+  }
+
+  void _handleShapeSelection(String shapeName) {
+    // Save state before making shape changes
+    String actionDescription;
+
+    if (shapeName == "Transparent") {
+      actionDescription = 'Enable transparent background';
+      _saveUndoState(context, actionDescription);
+      widget.onToggleCheckerboard(true);
+    } else if (shapeName == "TransparentOff") {
+      actionDescription = 'Disable transparent background';
+      _saveUndoState(context, actionDescription);
+      widget.onToggleCheckerboard(false);
+    } else {
+      actionDescription = 'Change logo shape to $shapeName';
+      _saveUndoState(context, actionDescription);
+      widget.onToggleCheckerboard(true);
+      widget.onShapeSelected(shapeName);
+    }
+
+    // Save final state after shape change is applied
+    _saveUndoStateDelayed(context, actionDescription);
+  }
 
   void _saveUndoState(BuildContext context, String action) {
     final undoProvider = Provider.of<UndoProvider>(context, listen: false);
@@ -78,7 +228,14 @@ class _DropUpPanelState extends State<DropUpPanel> {
     if (!undoProvider.isUndoRedoInProgress) {
       final currentState = colorProvider.captureCurrentState();
       undoProvider.saveState(action: action, state: currentState);
+      print('✅ Saved undo state: $action');
     }
+  }
+
+  @override
+  void dispose() {
+    _undoDebounceTimer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -98,59 +255,29 @@ class _DropUpPanelState extends State<DropUpPanel> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const SizedBox(height: 30),
-              
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       _TopOption(
                         label: options[0],
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ColorScreen(),
-                            ),
-                          );
-                        },
+                        onTap: () => _handleColorSelection(context),
                       ),
                       _TopOption(
                         label: options[1],
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => GradientPickerScreen(),
-                            ),
-                          );
-                        },
+                        onTap: () => _handleGradientSelection(context),
                       ),
                       _TopOption(
                         label: options[2],
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => SelectBgImages(),
-                            ),
-                          );
-                        },
+                        onTap: () => _handleBackgroundSelection(context),
                       ),
                       _TopOption(
                         label: options[3],
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => SelectTextureImages(),
-                            ),
-                          );
-                        },
+                        onTap: () => _handleTextureSelection(context),
                       ),
                       _TopOption(
                         label: options[4],
-                        onTap: () {
-                          pickImageFromDevice(context);
-                        },
+                        onTap: () => pickImageFromDevice(context),
                       ),
                     ],
                   ),
@@ -166,17 +293,28 @@ class _DropUpPanelState extends State<DropUpPanel> {
                           value: _opacityValue,
                           min: 0,
                           max: 1,
+                          onChangeStart: (value) {
+                            _captureSliderStartState(context);
+                          },
                           onChanged: (val) {
                             setState(() {
                               _opacityValue = val;
                             });
                             widget.onOpacityChanged(_opacityValue);
                           },
+                          onChangeEnd: (val) {
+                            _handleSliderEndWithUndo(
+                              context,
+                              'Change background opacity to ${(val * 100).round()}%',
+                            );
+                          },
                         ),
                       ),
                       Text(
                         "${(_opacityValue * 100).round()}%",
-                        style: TextStyle(color: theme.textTheme.bodyLarge?.color),
+                        style: TextStyle(
+                          color: theme.textTheme.bodyLarge?.color,
+                        ),
                       ),
                     ],
                   ),
@@ -194,16 +332,8 @@ class _DropUpPanelState extends State<DropUpPanel> {
                           ),
                         ),
                         ShapeSelectorWidget(
-                          onShapeSelected: (shapeName) {
-                            if (shapeName == "Transparent") {
-                              widget.onToggleCheckerboard(true);
-                            } else if (shapeName == "TransparentOff") {
-                              widget.onToggleCheckerboard(false);
-                            } else {
-                              widget.onToggleCheckerboard(true);
-                              widget.onShapeSelected(shapeName);
-                            }
-                          },
+                          onShapeSelected:
+                              (shapeName) => _handleShapeSelection(shapeName),
                         ),
                       ],
                     ),

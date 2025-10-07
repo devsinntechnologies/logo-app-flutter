@@ -2004,32 +2004,32 @@ class _DownloadLogoState extends State<DownloadLogo> {
     return Uint8List.fromList(img.encodeJpg(whiteBg, quality: 92));
   }
 
-  Widget _buildToolbarForTabs(int index) {
+ Widget _buildToolbarForTabs(int index) {
     final theme = Theme.of(context);
 
     switch (index) {
       case 0:
         return DropUpPanel(
-          onClose: () => setState(() => showDropUp = false),
-          onToggleCheckerboard: (val) {
+          onClose: () => setState(() => tabToolbarIndex = -1),
+          onToggleCheckerboard: (enabled) {
+            // Optional: persist toggle intent if needed
+            _saveUndoState(enabled ? 'Enable transparent background' : 'Disable transparent background');
             setState(() {
-              isCheckerboardActive = val;
-              isCheckerboardVisible = val;
+              isCheckerboardVisible = enabled;
+              isCheckerboardActive = enabled;
             });
           },
-          onOpacityChanged: (val) => setState(() => checkerboardOpacity = val),
+          onOpacityChanged: (value) {
+            // Keep local overlay opacity and save via provider in panel
+            setState(() {
+              checkerboardOpacity = value;
+            });
+          },
           onShapeSelected: (shapeName) {
-            _saveUndoState('Change shape to $shapeName');
-
+            _saveUndoState('Change logo shape to $shapeName');
             setState(() {
               selectedShapeName = shapeName;
             });
-
-            final colorProvider = Provider.of<SelectedColorProvider>(
-              context,
-              listen: false,
-            );
-            colorProvider.updateLogoState(_currentLogoState);
           },
         );
       case 3:
@@ -2040,7 +2040,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
         return SizedBox.shrink();
     }
   }
-
+  
   String _getToolbarTitle(int index) {
     switch (index) {
       case 0:
@@ -2228,14 +2228,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
           mainAxisAlignment: MainAxisAlignment.center,
           spacing: 10,
           children: [
-            Text(
-              "Background Effects",
-              style: TextStyle(
-                color: theme.textTheme.bodyLarge?.color,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
             const SizedBox(height: 8),
             Text(
               "Opacity",
@@ -2289,10 +2281,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
               ],
             ),
             const SizedBox(height: 16),
-            Text(
-              "Effect Images",
-              style: TextStyle(color: theme.textTheme.bodyLarge?.color),
-            ),
             SizedBox(
               height: 60,
               child: ListView.separated(
@@ -2327,7 +2315,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
                       width: 60,
                       height: 60,
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(50),
                         border: Border.all(color: Colors.grey.shade400),
                         image: DecorationImage(
                           image: AssetImage(imagePath),

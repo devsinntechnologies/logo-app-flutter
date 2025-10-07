@@ -25,7 +25,7 @@ class SelectTextureImagesState extends State<SelectTextureImages> {
     'assets/texture_images/texture_1.jpg',
     'assets/texture_images/texture_2.jpg',
     'assets/texture_images/texture_3.jpg',
-    'assets/texture_images/texture_4.jpg',
+    'ztexture_images/texture_4.jpg',
     'assets/texture_images/texture_5.png',
     'assets/texture_images/texture_6.jpg',
     'assets/texture_images/texture_7.jpg',

@@ -130,6 +130,12 @@ class SelectedColorProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setBackgroundOpacityWithUndo(double value) {
+    _saveUndoState('Change background opacity to ${(value * 100).round()}%');
+    _backgroundOpacity = value;
+    notifyListeners();
+  }
+
   void updateLogoState(LogoStateData state) {
     _currentLogoState = state;
     notifyListeners();
@@ -639,6 +645,7 @@ class SelectedColorProvider extends ChangeNotifier {
   }
 
   void setGradient(Gradient gradient) {
+    _saveUndoState('Remove background gradient');
     _selectedGradient = gradient;
     _backgroundImage = null;
     _isColorManuallySelected = true;
@@ -646,6 +653,7 @@ class SelectedColorProvider extends ChangeNotifier {
   }
 
   void removeGradient() {
+    _saveUndoState('Remove background gradient');
     _selectedGradient = null;
     _backgroundImage = null;
     _isColorManuallySelected = true;
@@ -665,6 +673,9 @@ class SelectedColorProvider extends ChangeNotifier {
   }
 
   void setBackgroundImage(ui.Image? image, File? file) {
+    _saveUndoState(
+      image != null ? 'Set background image' : 'Remove background image',
+    );
     _backgroundImage = image;
     _selectedGradient = null;
     _imageFile = file;
@@ -1639,6 +1650,9 @@ class SelectedColorProvider extends ChangeNotifier {
   }
 
   void setBackgroundColor(Color? color) {
+    _saveUndoState(
+      color != null ? 'Change background color' : 'Clear background color',
+    );
     _backgroundColor = color;
     if (color != null) {
       _selectedGradient = null;
