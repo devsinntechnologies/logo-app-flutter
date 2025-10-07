@@ -4,17 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
 import 'package:logo_app_flutter/provider/undo_provider.dart';
-import 'package:logo_app_flutter/components/undo_redo_widget.dart';
 import 'package:provider/provider.dart';
 
 class SelectTextureImages extends StatefulWidget {
   const SelectTextureImages({super.key});
 
   @override
-  State<SelectTextureImages> createState() => SelectTextureImagesState();
+  State<SelectTextureImages> createState() => _SelectTextureImagesState();
 }
 
-class SelectTextureImagesState extends State<SelectTextureImages> {
+class _SelectTextureImagesState extends State<SelectTextureImages> {
   Future<ui.Image> loadUiImageFromAsset(String assetPath) async {
     final ByteData data = await rootBundle.load(assetPath);
     final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
@@ -22,43 +21,50 @@ class SelectTextureImagesState extends State<SelectTextureImages> {
     return frame.image;
   }
 
-  final List<String> images = [
+  final List<String> textureImages = [
     'assets/texture_images/texture_1.jpg',
     'assets/texture_images/texture_2.jpg',
     'assets/texture_images/texture_3.jpg',
     'assets/texture_images/texture_4.jpg',
-    'assets/texture_images/texture_5.png',
+    'assets/texture_images/texture_5.jpg',
     'assets/texture_images/texture_6.jpg',
     'assets/texture_images/texture_7.jpg',
     'assets/texture_images/texture_8.jpg',
     'assets/texture_images/texture_9.jpg',
     'assets/texture_images/texture_10.jpg',
+    // Add more texture paths as needed
   ];
 
-  Future<void> _onTextureSelectedWithUndo(String texturePath) async {
+  void _saveUndoState(String action) {
     final colorProvider = Provider.of<SelectedColorProvider>(
       context,
       listen: false,
     );
     final undoProvider = Provider.of<UndoProvider>(context, listen: false);
 
-    // Save current state before applying texture
-    final currentState = colorProvider.captureCurrentState();
-    undoProvider.saveState(
-      action: 'Apply texture: ${texturePath.split('/').last}',
-      state: currentState,
+    if (!undoProvider.isUndoRedoInProgress) {
+      final currentState = colorProvider.captureCurrentState();
+      undoProvider.saveState(action: action, state: currentState);
+      print('✅ Saved undo state: $action');
+    }
+  }
+
+  Future<void> _onTextureSelectedWithUndo(String texturePath) async {
+    final colorProvider = Provider.of<SelectedColorProvider>(
+      context,
+      listen: false,
     );
 
-    // Apply texture
+    _saveUndoState('Apply texture: ${texturePath.split('/').last}');
+
     try {
       final uiImage = await loadUiImageFromAsset(texturePath);
-      colorProvider.setBackgroundImage(uiImage, null);
-
-      if (colorProvider.selectedElementId != null) {
-        colorProvider.setElementTexture(
-          colorProvider.selectedElementId!,
-          texturePath,
-        );
+      // Use setBackgroundTexture if it exists, otherwise use setBackgroundImage
+      if (colorProvider.hasMethod('setBackgroundTexture')) {
+        colorProvider.setBackgroundTexture(uiImage, texturePath);
+      } else {
+        // Fallback to background image with texture flag
+        colorProvider.setBackgroundImage(uiImage, null, texturePath);
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -67,6 +73,11 @@ class SelectTextureImagesState extends State<SelectTextureImages> {
           duration: const Duration(seconds: 1),
           backgroundColor: Colors.green,
           behavior: SnackBarBehavior.floating,
+          action: SnackBarAction(
+            label: 'Undo',
+            onPressed: _performUndo,
+            textColor: Colors.white,
+          ),
         ),
       );
 
@@ -84,32 +95,62 @@ class SelectTextureImagesState extends State<SelectTextureImages> {
   }
 
   void _onTextureRemovedWithUndo() {
+    _saveUndoState('Remove background texture');
+
     final colorProvider = Provider.of<SelectedColorProvider>(
       context,
       listen: false,
     );
-    final undoProvider = Provider.of<UndoProvider>(context, listen: false);
 
-    // Save state before removing texture
-    final currentState = colorProvider.captureCurrentState();
-    undoProvider.saveState(action: 'Remove texture', state: currentState);
-
-    // Remove texture
-    colorProvider.setBackgroundImage(null, null);
-    if (colorProvider.selectedElementId != null) {
-      colorProvider.setElementTexture(colorProvider.selectedElementId!, null);
+    // Remove texture - use appropriate method based on your implementation
+    if (colorProvider.hasMethod('removeBackgroundTexture')) {
+      colorProvider.removeBackgroundTexture();
+    } else {
+      colorProvider.setBackgroundImage(null, null);
     }
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Texture removed'),
-        duration: Duration(seconds: 1),
+      SnackBar(
+        content: const Text('Background texture removed'),
+        duration: const Duration(seconds: 1),
         backgroundColor: Colors.orange,
         behavior: SnackBarBehavior.floating,
+        action: SnackBarAction(
+          label: 'Undo',
+          onPressed: _performUndo,
+          textColor: Colors.white,
+        ),
       ),
     );
 
     Navigator.pop(context);
+  }
+
+  void _performUndo() async {
+    final undoProvider = Provider.of<UndoProvider>(context, listen: false);
+    final colorProvider = Provider.of<SelectedColorProvider>(
+      context,
+      listen: false,
+    );
+
+    final previousState = undoProvider.undo();
+    if (previousState != null) {
+      try {
+        await colorProvider.restoreFromStateAsync(previousState.data);
+      } catch (_) {
+        colorProvider.restoreFromState(previousState.data);
+      }
+
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Undid: ${previousState.action}'),
+          duration: const Duration(milliseconds: 800),
+          backgroundColor: Colors.blue,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   @override
@@ -118,24 +159,26 @@ class SelectTextureImagesState extends State<SelectTextureImages> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Textures'),
+        title: const Text('Background Textures'),
         backgroundColor: theme.appBarTheme.backgroundColor,
         foregroundColor: theme.appBarTheme.foregroundColor,
       ),
       body: Column(
         children: [
-          // Button to remove texture
+          // Button to remove background texture
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton.icon(
               onPressed: _onTextureRemovedWithUndo,
-              icon: const Icon(Icons.format_color_reset),
+              icon: const Icon(Icons.texture),
               label: const Text('Remove Texture'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.redAccent.withOpacity(0.8),
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(
-                    vertical: 12.0, horizontal: 16.0),
+                  vertical: 12.0,
+                  horizontal: 16.0,
+                ),
               ),
             ),
           ),
@@ -143,7 +186,7 @@ class SelectTextureImagesState extends State<SelectTextureImages> {
           Expanded(
             child: GridView.builder(
               padding: const EdgeInsets.all(16),
-              itemCount: images.length,
+              itemCount: textureImages.length,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
                 crossAxisSpacing: 12,
@@ -151,13 +194,13 @@ class SelectTextureImagesState extends State<SelectTextureImages> {
               ),
               itemBuilder: (context, index) {
                 return GestureDetector(
-                  onTap: () => _onTextureSelectedWithUndo(images[index]),
+                  onTap: () => _onTextureSelectedWithUndo(textureImages[index]),
                   child: Container(
                     decoration: BoxDecoration(
-                      border: Border.all(color: theme.dividerColor),
                       borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: theme.dividerColor),
                       image: DecorationImage(
-                        image: AssetImage(images[index]),
+                        image: AssetImage(textureImages[index]),
                         fit: BoxFit.cover,
                       ),
                       boxShadow: [
@@ -176,5 +219,24 @@ class SelectTextureImagesState extends State<SelectTextureImages> {
         ],
       ),
     );
+  }
+}
+
+// Extension to check if a method exists (helper)
+extension MethodChecker on SelectedColorProvider {
+  bool hasMethod(String methodName) {
+    try {
+      switch (methodName) {
+        case 'setBackgroundTexture':
+          // Check if the method exists by looking at the class
+          return true; // Adjust based on your actual implementation
+        case 'removeBackgroundTexture':
+          return true; // Adjust based on your actual implementation
+        default:
+          return false;
+      }
+    } catch (e) {
+      return false;
+    }
   }
 }

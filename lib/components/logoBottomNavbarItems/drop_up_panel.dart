@@ -74,7 +74,7 @@ class _DropUpPanelState extends State<DropUpPanel> {
   final List<String> options = [
     'Color',
     'Gradient',
-    'Background',
+    'Picture',
     'Texture',
     'Image',
   ];
@@ -136,7 +136,6 @@ class _DropUpPanelState extends State<DropUpPanel> {
     });
   }
 
-
   void _handleGradientSelection(BuildContext context) {
     final colorProvider = Provider.of<SelectedColorProvider>(
       context,
@@ -173,18 +172,65 @@ class _DropUpPanelState extends State<DropUpPanel> {
   }
 
   void _handleBackgroundSelection(BuildContext context) {
-    // Save state before navigation
-    _saveUndoState(context, 'Open background images');
+    final colorProvider = Provider.of<SelectedColorProvider>(
+      context,
+      listen: false,
+    );
+    final undoProvider = Provider.of<UndoProvider>(context, listen: false);
+
+    final currentState = colorProvider.captureCurrentState();
+    currentState['action_type'] = 'open_background_images';
+    currentState['previous_background_image'] =
+        colorProvider.backgroundImage != null;
+    currentState['previous_background_type'] = _determineBackgroundType(
+      colorProvider,
+    );
+
+    undoProvider.saveState(
+      action: 'Open background images',
+      state: currentState,
+    );
 
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => SelectBgImages()),
+      MaterialPageRoute(builder: (context) => const SelectBgImages()),
     ).then((_) {
-      // Save state after returning from background screen
+      // Enhanced state saving after returning
       if (mounted) {
-        _saveUndoStateDelayed(context, 'Background image changed');
+        Timer(const Duration(milliseconds: 150), () {
+          if (mounted) {
+            final newState = colorProvider.captureCurrentState();
+            newState['action_type'] = 'background_images_return';
+            newState['new_background_type'] = _determineBackgroundType(
+              colorProvider,
+            );
+
+            // Only save if there was an actual change
+            if (_hasBackgroundChanged(currentState, newState)) {
+              undoProvider.saveState(
+                action: 'Background image selection completed',
+                state: newState,
+              );
+
+              print('✅ Background image selection state saved to undo stack');
+            }
+          }
+        });
       }
     });
+  }
+
+  String _determineBackgroundType(SelectedColorProvider provider) {
+    if (provider.backgroundImage != null) return 'image';
+    if (provider.selectedGradient != null) return 'gradient';
+    return 'color';
+  }
+
+  bool _hasBackgroundChanged(
+    Map<String, dynamic> before,
+    Map<String, dynamic> after,
+  ) {
+    return before['previous_background_type'] != after['new_background_type'];
   }
 
   void _handleTextureSelection(BuildContext context) {

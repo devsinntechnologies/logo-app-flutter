@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:async';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:logo_app_flutter/models/logo_state_data.dart';
 import 'package:logo_app_flutter/provider/undo_provider.dart';
 
@@ -41,6 +42,25 @@ class SelectedColorProvider extends ChangeNotifier {
   UndoProvider? _undoProvider;
 
   bool _isUndoRedoInProgress = false;
+  String? _backgroundImagePath;
+
+  void setBackgroundImage(ui.Image? image, File? file, [String? assetPath]) {
+    _saveUndoState(
+      image != null ? 'Set background image' : 'Remove background image',
+    );
+    _backgroundImage = image;
+    _selectedGradient = null;
+    _imageFile = file;
+    _backgroundImagePath = assetPath ?? file?.path;
+    _isColorManuallySelected = true;
+
+    //! Updated
+    if (file != null && file.existsSync()) {
+      file.delete();
+    }
+    //!
+    notifyListeners();
+  }
 
   dynamic _backgroundTexture;
 
@@ -287,17 +307,125 @@ class SelectedColorProvider extends ChangeNotifier {
 
   Future<void> restoreFromStateAsync(Map<String, dynamic> state) async {
     _isUndoRedoInProgress = true;
-    print('Restoring state asynchronously for text operations...');
+    print('🔄 Restoring state asynchronously...');
 
     try {
-      restoreFromState(state);
+      // Restore logo state first
+      if (state['logoState'] != null) {
+        _currentLogoState = LogoStateData.fromJson(state['logoState']);
+      }
 
-      await Future.delayed(const Duration(milliseconds: 10));
+      // Handle background image restoration
+      if (state.containsKey('backgroundImage')) {
+        if (state['backgroundImage'] == 'set' &&
+            state.containsKey('backgroundImagePath')) {
+          // Restore from asset path
+          final imagePath = state['backgroundImagePath'] as String?;
+          if (imagePath != null) {
+            try {
+              final ByteData data = await rootBundle.load(imagePath);
+              final codec = await ui.instantiateImageCodec(
+                data.buffer.asUint8List(),
+              );
+              final frame = await codec.getNextFrame();
+              _backgroundImage = frame.image;
+              print('✅ Restored background image from: $imagePath');
+            } catch (e) {
+              print('❌ Error loading background image: $e');
+              _backgroundImage = null;
+            }
+          } else {
+            _backgroundImage = null;
+          }
+        } else {
+          _backgroundImage = null;
+        }
+      }
+
+      if (state.containsKey('backgroundColor') &&
+          state['backgroundColor'] != null) {
+        _backgroundColor = Color(state['backgroundColor'] as int);
+      } else {
+        _backgroundColor = null;
+      }
+
+      if (state.containsKey('backgroundOpacity')) {
+        _backgroundOpacity = (state['backgroundOpacity'] as num).toDouble();
+      }
+
+      if (state.containsKey('selectedGradient') &&
+          state['selectedGradient'] != null) {
+        _selectedGradient = _mapToGradient(
+          state['selectedGradient'] as Map<String, dynamic>,
+        );
+      } else {
+        _selectedGradient = null;
+      }
+
+      if (state['logoPosition'] != null && _currentLogoState != null) {
+        final posData = state['logoPosition'] as Map<String, dynamic>;
+        _currentLogoState = _currentLogoState!.copyWith(
+          logoPosition: Offset(posData['dx'], posData['dy']),
+        );
+      }
+
+      if (state['companyNamePosition'] != null && _currentLogoState != null) {
+        final posData = state['companyNamePosition'] as Map<String, dynamic>;
+        _currentLogoState = _currentLogoState!.copyWith(
+          companyNamePosition: Offset(posData['dx'], posData['dy']),
+        );
+      }
+
+      if (state['sloganPosition'] != null && _currentLogoState != null) {
+        final posData = state['sloganPosition'] as Map<String, dynamic>;
+        _currentLogoState = _currentLogoState!.copyWith(
+          sloganPosition: Offset(posData['dx'], posData['dy']),
+        );
+      }
+
+      // Restore other properties
+      _restoreElementProperties(state);
+
+      print('✅ Async state restoration completed');
     } catch (e) {
-      print('Error in async restore: $e');
+      print('❌ Error in async state restoration: $e');
     } finally {
       _isUndoRedoInProgress = false;
       notifyListeners();
+    }
+  }
+
+  void _restoreElementProperties(Map<String, dynamic> state) {
+    if (state['overrideColors'] != null) {
+      _overrideColors.clear();
+      final colors = state['overrideColors'] as Map<String, dynamic>;
+      colors.forEach((key, value) {
+        _overrideColors[int.parse(key)] = Color(value as int);
+      });
+    }
+
+    if (state['elementSizes'] != null) {
+      _elementSizes.clear();
+      final sizes = state['elementSizes'] as Map<String, dynamic>;
+      sizes.forEach((key, value) {
+        _elementSizes[int.parse(key)] = (value as num).toDouble();
+      });
+    }
+
+    if (state['elementRotations'] != null) {
+      _elementRotations.clear();
+      final rotations = state['elementRotations'] as Map<String, dynamic>;
+      rotations.forEach((key, value) {
+        _elementRotations[int.parse(key)] = (value as num).toDouble();
+      });
+    }
+
+    if (state['elementFonts'] != null) {
+      _elementFonts.clear();
+      final fonts = state['elementFonts'] as Map<String, dynamic>;
+      fonts.forEach((key, value) {
+        _elementFonts[int.parse(key)] = value as String;
+      });
     }
   }
 
@@ -672,27 +800,6 @@ class SelectedColorProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setBackgroundImage(ui.Image? image, File? file) {
-    _saveUndoState(
-      image != null ? 'Set background image' : 'Remove background image',
-    );
-    _backgroundImage = image;
-    _selectedGradient = null;
-    _imageFile = file;
-    _isColorManuallySelected = true;
-    //! Updated
-    if (file != null && file.existsSync()) {
-      file.delete();
-    }
-    //!
-    notifyListeners();
-  }
-
-  void setElementTextureFromAsset(int elementId, String assetPath) {
-    _elementTextures[elementId] = assetPath;
-    notifyListeners();
-  }
-
   void resetElementColor(int elementId) {
     _elementColors.remove(elementId);
     _elementTextures.remove(elementId);
@@ -1029,12 +1136,16 @@ class SelectedColorProvider extends ChangeNotifier {
       'backgroundColor': _backgroundColor?.value,
       'backgroundOpacity': _backgroundOpacity,
       'backgroundTexture': _backgroundTexture,
-      'backgroundImage': _backgroundImage != null ? true : false,
-      'elementTextures': _captureElementTextures(),
+      'backgroundImagePath': _backgroundImagePath, // Add this line
+      'backgroundImage':
+          _backgroundImage != null ? 'set' : null, // Update this line
       'logoState': _currentLogoState?.toJson() ?? {},
       'selectedColor': _selectedColor.value,
       'elementColors': _elementColors.map(
         (k, v) => MapEntry(k.toString(), v.value),
+      ),
+      'elementTextures': Map<String, String?>.from(
+        _elementTextures.map((k, v) => MapEntry(k.toString(), v)),
       ),
       'overrideColors': _overrideColors.map(
         (k, v) => MapEntry(k.toString(), v.value),
@@ -1212,6 +1323,24 @@ class SelectedColorProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setElementTexture(int elementId, String? texturePath) {
+    _saveUndoState('Set texture for element $elementId');
+
+    if (texturePath != null) {
+      _elementTextures[elementId] = texturePath;
+    } else {
+      _elementTextures.remove(elementId);
+    }
+
+    notifyListeners();
+  }
+
+  void removeElementTexture(int elementId) {
+    _saveUndoState('Remove texture from element $elementId');
+    _elementTextures.remove(elementId);
+    notifyListeners();
+  }
+
   Alignment _parseAlignment(String alignmentString) {
     // Simple alignment parsing - you can enhance this
     switch (alignmentString) {
@@ -1263,7 +1392,7 @@ class SelectedColorProvider extends ChangeNotifier {
     return {'type': 'unknown'};
   }
 
-  void restoreFromState(Map<String, dynamic> state) {
+  Future<void> restoreFromState(Map<String, dynamic> state) async {
     _isUndoRedoInProgress = true;
     print('Restoring state...');
 
@@ -1290,6 +1419,17 @@ class SelectedColorProvider extends ChangeNotifier {
         restoreGradientFromState(
           state['selectedGradient'] as Map<String, dynamic>,
         );
+      }
+
+      if (state['elementTextures'] != null) {
+        _elementTextures.clear();
+        final textureData = state['elementTextures'] as Map<String, dynamic>;
+        textureData.forEach((key, value) {
+          final elementId = int.tryParse(key);
+          if (elementId != null && value is String) {
+            _elementTextures[elementId] = value;
+          }
+        });
       }
 
       if (state['companyNamePosition'] != null && _currentLogoState != null) {
@@ -1425,6 +1565,30 @@ class SelectedColorProvider extends ChangeNotifier {
         (state['elementRotationZ'] as Map<String, dynamic>).forEach((k, v) {
           _elementRotationZ[int.parse(k)] = (v as num).toDouble();
         });
+      }
+
+      if (state['backgroundImage'] != null) {
+        final imagePath = state['backgroundImagePath'] as String?;
+        if (imagePath != null) {
+          try {
+            final file = File(imagePath);
+            if (await file.exists()) {
+              final ui.Image image = await loadImage(file);
+              _backgroundImage = image;
+              _imageFile = file;
+            } else {
+              _backgroundImage = null;
+              _imageFile = null;
+            }
+          } catch (e) {
+            print('Error loading image: $e');
+            _backgroundImage = null;
+            _imageFile = null;
+          }
+        } else {
+          _backgroundImage = null;
+          _imageFile = null;
+        }
       }
 
       if (state['elementFonts'] != null) {
@@ -1766,8 +1930,6 @@ class SelectedColorProvider extends ChangeNotifier {
 
   Color? get backgroundColor => _backgroundColor;
 
-  void setElementTexture(int i, param1) {}
-
   void _saveUndoState(String action) {
     if (_undoProvider != null) {
       _undoProvider!.saveState(action: action, state: captureCurrentState());
@@ -1909,5 +2071,12 @@ class SelectedColorProvider extends ChangeNotifier {
     _elementRotationY.clear();
     _elementRotationZ.clear();
     notifyListeners();
+  }
+
+  Future<ui.Image> loadImage(File file) async {
+    final bytes = await file.readAsBytes();
+    final codec = await ui.instantiateImageCodec(bytes);
+    final frame = await codec.getNextFrame();
+    return frame.image;
   }
 }

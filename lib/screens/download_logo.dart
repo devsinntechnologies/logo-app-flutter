@@ -2004,7 +2004,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
     return Uint8List.fromList(img.encodeJpg(whiteBg, quality: 92));
   }
 
- Widget _buildToolbarForTabs(int index) {
+  Widget _buildToolbarForTabs(int index) {
     final theme = Theme.of(context);
 
     switch (index) {
@@ -2013,7 +2013,11 @@ class _DownloadLogoState extends State<DownloadLogo> {
           onClose: () => setState(() => tabToolbarIndex = -1),
           onToggleCheckerboard: (enabled) {
             // Optional: persist toggle intent if needed
-            _saveUndoState(enabled ? 'Enable transparent background' : 'Disable transparent background');
+            _saveUndoState(
+              enabled
+                  ? 'Enable transparent background'
+                  : 'Disable transparent background',
+            );
             setState(() {
               isCheckerboardVisible = enabled;
               isCheckerboardActive = enabled;
@@ -2040,7 +2044,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
         return SizedBox.shrink();
     }
   }
-  
+
   String _getToolbarTitle(int index) {
     switch (index) {
       case 0:
@@ -2246,7 +2250,9 @@ class _DownloadLogoState extends State<DownloadLogo> {
                         max: 1.0,
                         divisions: 10,
                         label:
-                            (provider.backgroundOpacity * 100).round().toString(),
+                            (provider.backgroundOpacity * 100)
+                                .round()
+                                .toString(),
                         activeColor: theme.colorScheme.primary,
                         onChangeStart: (value) {
                           _saveUndoState('Start changing background opacity');
@@ -2307,7 +2313,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
                       ),
                     );
                   }
-      
+
                   final imagePath = imageList[index - 1];
                   return GestureDetector(
                     onTap: () => _onEffectImageSelectedWithUndo(imagePath),
@@ -2343,14 +2349,21 @@ class _DownloadLogoState extends State<DownloadLogo> {
     if (!undoProvider.isUndoRedoInProgress) {
       colorProvider.updateLogoState(_currentLogoState);
       final currentState = colorProvider.captureCurrentState();
+
       currentState['selectedShapeName'] = selectedShapeName;
       currentState['selectedElement'] = selectedElement;
       currentState['tabToolbarIndex'] = tabToolbarIndex;
       currentState['selectedIndex'] = selectedIndex;
       currentState['isMovementPanelVisible'] = isMovementPanelVisible;
 
-      undoProvider.saveState(action: action, state: currentState);
+      currentState['backgroundImage'] =
+          colorProvider.backgroundImage != null ? 'set' : null;
+      currentState['backgroundGradient'] =
+          colorProvider.selectedGradient != null ? 'set' : null;
+      currentState['backgroundColor'] = colorProvider.backgroundColor?.value;
+      currentState['backgroundOpacity'] = colorProvider.backgroundOpacity;
 
+      undoProvider.saveState(action: action, state: currentState);
       print('✅ Saved undo state: $action');
     }
   }
@@ -2371,50 +2384,69 @@ class _DownloadLogoState extends State<DownloadLogo> {
     if (!undoProvider.canUndo) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Nothing to undo!'),
+          content: Text('Nothing to undo'),
           duration: Duration(milliseconds: 800),
         ),
       );
       return;
     }
 
-    final currentState = colorProvider.captureCurrentState();
-    currentState['selectedShapeName'] = selectedShapeName;
-    currentState['selectedElement'] = selectedElement;
-    currentState['tabToolbarIndex'] = tabToolbarIndex;
-    currentState['selectedIndex'] = selectedIndex;
-    currentState['isMovementPanelVisible'] = isMovementPanelVisible;
-
     final previousState = undoProvider.undo();
 
     if (previousState != null) {
-      colorProvider.restoreFromState(previousState.data);
+      // Restore provider state first (this handles background images/gradients)
+      _restoreProviderState(colorProvider, previousState.data);
 
-      final restoredLogoState = colorProvider.getCurrentLogoState();
-
-      if (restoredLogoState != null) {
-        setState(() {
-          _currentLogoState = restoredLogoState;
-
-          selectedElement = previousState.data['selectedElement'];
-          selectedShapeName = previousState.data['selectedShapeName'] ?? '';
-          tabToolbarIndex = previousState.data['tabToolbarIndex'] ?? 0;
-          selectedIndex = previousState.data['selectedIndex'] ?? 0;
-          isMovementPanelVisible =
-              previousState.data['isMovementPanelVisible'] ?? false;
-
-          _clearGridAlignment();
-        });
-
-        colorProvider.notifyListeners();
-      }
+      // Then restore UI state
+      _restoreUIState(previousState.data, colorProvider);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Undo: ${previousState.action}'),
+          content: Text('Undid: ${previousState.action}'),
           duration: const Duration(milliseconds: 800),
+          backgroundColor: Colors.blue,
+          behavior: SnackBarBehavior.floating,
         ),
       );
+    }
+  }
+
+  Future<void> _restoreProviderState(
+    SelectedColorProvider colorProvider,
+    Map<String, dynamic> stateData,
+  ) async {
+    try {
+      // Use async restoration for background images
+      if (stateData.containsKey('backgroundImage') ||
+          stateData.containsKey('backgroundGradient')) {
+        await colorProvider.restoreFromStateAsync(stateData);
+      } else {
+        colorProvider.restoreFromState(stateData);
+      }
+    } catch (e) {
+      print('Error restoring provider state: $e');
+      colorProvider.restoreFromState(stateData);
+    }
+  }
+
+  void _restoreUIState(
+    Map<String, dynamic> stateData,
+    SelectedColorProvider colorProvider,
+  ) {
+    final restoredLogoState = colorProvider.getCurrentLogoState();
+
+    if (restoredLogoState != null) {
+      setState(() {
+        _currentLogoState = restoredLogoState;
+        selectedElement = stateData['selectedElement'];
+        tabToolbarIndex = stateData['tabToolbarIndex'] ?? 0;
+        selectedIndex = stateData['selectedIndex'] ?? 0;
+        isMovementPanelVisible = stateData['isMovementPanelVisible'] ?? false;
+        selectedShapeName = stateData['selectedShapeName'] ?? '';
+        _clearGridAlignment();
+      });
+
+      colorProvider.notifyListeners();
     }
   }
 
@@ -2434,48 +2466,28 @@ class _DownloadLogoState extends State<DownloadLogo> {
     if (!undoProvider.canRedo) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Nothing to redo!'),
+          content: Text('Nothing to redo'),
           duration: Duration(milliseconds: 800),
         ),
       );
       return;
     }
 
-    final currentState = colorProvider.captureCurrentState();
-    currentState['selectedShapeName'] = selectedShapeName;
-    currentState['selectedElement'] = selectedElement;
-    currentState['tabToolbarIndex'] = tabToolbarIndex;
-    currentState['selectedIndex'] = selectedIndex;
-    currentState['isMovementPanelVisible'] = isMovementPanelVisible;
-
     final nextState = undoProvider.redo();
 
     if (nextState != null) {
-      colorProvider.restoreFromState(nextState.data);
+      // Restore provider state first
+      _restoreProviderState(colorProvider, nextState.data);
 
-      final restoredLogoState = colorProvider.getCurrentLogoState();
-
-      if (restoredLogoState != null) {
-        setState(() {
-          _currentLogoState = restoredLogoState;
-
-          selectedElement = nextState.data['selectedElement'];
-          selectedShapeName = nextState.data['selectedShapeName'] ?? '';
-          tabToolbarIndex = nextState.data['tabToolbarIndex'] ?? 0;
-          selectedIndex = nextState.data['selectedIndex'] ?? 0;
-          isMovementPanelVisible =
-              nextState.data['isMovementPanelVisible'] ?? false;
-
-          _clearGridAlignment();
-        });
-
-        colorProvider.notifyListeners();
-      }
+      // Then restore UI state
+      _restoreUIState(nextState.data, colorProvider);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Redo: ${nextState.action}'),
+          content: Text('Redid: ${nextState.action}'),
           duration: const Duration(milliseconds: 800),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
         ),
       );
     }

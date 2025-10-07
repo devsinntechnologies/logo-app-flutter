@@ -34,87 +34,177 @@ class _SelectBgImagesState extends State<SelectBgImages> {
     'assets/bg_images/bg_10.jpg',
   ];
 
-  void _onBackgroundImageSelectedWithUndo(String imagePath) {
+  void _saveUndoState(String action) {
     final colorProvider = Provider.of<SelectedColorProvider>(
       context,
       listen: false,
     );
     final undoProvider = Provider.of<UndoProvider>(context, listen: false);
 
-    // Save current state before applying background image
-    final currentState = colorProvider.captureCurrentState();
-    undoProvider.saveState(
-      action: 'Set background image: ${imagePath.split('/').last}',
-      state: currentState,
+    if (!undoProvider.isUndoRedoInProgress) {
+      final currentState = colorProvider.captureCurrentState();
+      undoProvider.saveState(action: action, state: currentState);
+      print('✅ Saved undo state: $action');
+    }
+  }
+
+  Future<void> _onBackgroundImageSelectedWithUndo(String imagePath) async {
+    final colorProvider = Provider.of<SelectedColorProvider>(
+      context,
+      listen: false,
     );
 
-    // Apply background image
-    loadUiImageFromAsset(imagePath).then((uiImage) {
-      colorProvider.setBackgroundImage(uiImage, null);
-    });
+    _saveUndoState('Apply background image: ${imagePath.split('/').last}');
+
+    try {
+      final uiImage = await loadUiImageFromAsset(imagePath);
+      colorProvider.setBackgroundImage(uiImage, null, imagePath);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Background applied: ${imagePath.split('/').last}'),
+          duration: const Duration(seconds: 1),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          action: SnackBarAction(
+            label: 'Undo',
+            onPressed: _performUndo,
+            textColor: Colors.white,
+          ),
+        ),
+      );
+
+      Navigator.pop(context);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to load background image: $e'),
+          duration: const Duration(seconds: 2),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   void _onBackgroundImageRemovedWithUndo() {
+    _saveUndoState('Remove background image');
+
     final colorProvider = Provider.of<SelectedColorProvider>(
       context,
       listen: false,
     );
-    final undoProvider = Provider.of<UndoProvider>(context, listen: false);
+    colorProvider.setBackgroundImage(null, null);
 
-    // Save state before removing background image
-    final currentState = colorProvider.captureCurrentState();
-    undoProvider.saveState(
-      action: 'Remove background image',
-      state: currentState,
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Background image removed'),
+        duration: const Duration(seconds: 1),
+        backgroundColor: Colors.orange,
+        behavior: SnackBarBehavior.floating,
+        action: SnackBarAction(
+          label: 'Undo',
+          onPressed: _performUndo,
+          textColor: Colors.white,
+        ),
+      ),
     );
 
-    // Remove background image
-    colorProvider.setBackgroundImage(null, null);
+    Navigator.pop(context);
   }
 
+  void _performUndo() async {
+    final undoProvider = Provider.of<UndoProvider>(context, listen: false);
+    final colorProvider = Provider.of<SelectedColorProvider>(
+      context,
+      listen: false,
+    );
+
+    final previousState = undoProvider.undo();
+    if (previousState != null) {
+      try {
+        await colorProvider.restoreFromStateAsync(previousState.data);
+      } catch (_) {
+        colorProvider.restoreFromState(previousState.data);
+      }
+
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Undid: ${previousState.action}'),
+          duration: const Duration(milliseconds: 800),
+          backgroundColor: Colors.blue,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Background Images'),
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        foregroundColor: theme.appBarTheme.foregroundColor,
       ),
-      body: GridView.builder(
-        padding: EdgeInsets.all(16),
-        itemCount: images.length,
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-        ),
-        itemBuilder: (context, index) {
-          return GestureDetector(
-            onTap: () async {
-              final provider = Provider.of<SelectedColorProvider>(
-                context,
-                listen: false,
-              );
-              final uiImage = await loadUiImageFromAsset(images[index]);
-
-              provider.setBackgroundImage(
-                uiImage,
-                null,
-              ); // You can pass `null` for File since it's an asset
-              Navigator.pop(context);
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                image: DecorationImage(
-                  image: AssetImage(images[index]),
-                  fit: BoxFit.cover,
+      body: Column(
+        children: [
+          // Button to remove background image
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ElevatedButton.icon(
+              onPressed: _onBackgroundImageRemovedWithUndo,
+              icon: const Icon(Icons.format_color_reset),
+              label: const Text('Remove Background'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent.withOpacity(0.8),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12.0,
+                  horizontal: 16.0,
                 ),
               ),
             ),
-          );
-        },
+          ),
+          // Background image grid
+          Expanded(
+            child: GridView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: images.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+              ),
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onTap:
+                      () => _onBackgroundImageSelectedWithUndo(images[index]),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: theme.dividerColor),
+                      image: DecorationImage(
+                        image: AssetImage(images[index]),
+                        fit: BoxFit.cover,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
