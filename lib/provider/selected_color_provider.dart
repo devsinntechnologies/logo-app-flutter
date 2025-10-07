@@ -1025,12 +1025,14 @@ class SelectedColorProvider extends ChangeNotifier {
 
   Map<String, dynamic> captureCurrentState() {
     return {
+      'selectedGradient': captureGradientState(),
+      'backgroundColor': _backgroundColor?.value,
+      'backgroundOpacity': _backgroundOpacity,
+      'backgroundTexture': _backgroundTexture,
+      'backgroundImage': _backgroundImage != null ? true : false,
+      'elementTextures': _captureElementTextures(),
       'logoState': _currentLogoState?.toJson() ?? {},
       'selectedColor': _selectedColor.value,
-      'backgroundColor': _backgroundColor?.value,
-      'selectedGradient': _selectedGradient?.toString(),
-      'backgroundImage': _backgroundImage?.toString(),
-      'backgroundOpacity': _backgroundOpacity,
       'elementColors': _elementColors.map(
         (k, v) => MapEntry(k.toString(), v.value),
       ),
@@ -1139,6 +1141,103 @@ class SelectedColorProvider extends ChangeNotifier {
     };
   }
 
+  Map<String, dynamic> captureGradientState() {
+    final gradientData = <String, dynamic>{};
+
+    if (_selectedGradient != null) {
+      gradientData['hasGradient'] = true;
+      gradientData['gradientType'] = _selectedGradient.runtimeType.toString();
+
+      if (_selectedGradient is LinearGradient) {
+        final linear = _selectedGradient as LinearGradient;
+        gradientData['colors'] = linear.colors.map((c) => c.value).toList();
+        gradientData['begin'] = '${linear.begin}';
+        gradientData['end'] = '${linear.end}';
+
+        if (linear.transform is GradientRotation) {
+          final rotation = linear.transform as GradientRotation;
+          gradientData['rotation'] = rotation.radians;
+        }
+      } else if (_selectedGradient is RadialGradient) {
+        final radial = _selectedGradient as RadialGradient;
+        gradientData['colors'] = radial.colors.map((c) => c.value).toList();
+        gradientData['center'] = '${radial.center}';
+        gradientData['radius'] = radial.radius;
+      }
+    } else {
+      gradientData['hasGradient'] = false;
+    }
+
+    return gradientData;
+  }
+
+  // Enhanced gradient restoration
+  void restoreGradientFromState(Map<String, dynamic> gradientData) {
+    if (gradientData['hasGradient'] == true) {
+      final colors =
+          (gradientData['colors'] as List<dynamic>)
+              .map((colorValue) => Color(colorValue as int))
+              .toList();
+
+      if (gradientData['gradientType'] == 'LinearGradient') {
+        Gradient restoredGradient = LinearGradient(
+          colors: colors,
+          begin: _parseAlignment(
+            gradientData['begin'] ?? 'Alignment.topCenter',
+          ),
+          end: _parseAlignment(gradientData['end'] ?? 'Alignment.bottomCenter'),
+        );
+
+        if (gradientData.containsKey('rotation')) {
+          restoredGradient = LinearGradient(
+            colors: colors,
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            transform: GradientRotation(gradientData['rotation'] as double),
+          );
+        }
+
+        _selectedGradient = restoredGradient;
+      } else if (gradientData['gradientType'] == 'RadialGradient') {
+        _selectedGradient = RadialGradient(
+          colors: colors,
+          center: _parseAlignment(gradientData['center'] ?? 'Alignment.center'),
+          radius: gradientData['radius'] as double? ?? 1.0,
+        );
+      }
+    } else {
+      _selectedGradient = null;
+    }
+
+    notifyListeners();
+  }
+
+  Alignment _parseAlignment(String alignmentString) {
+    // Simple alignment parsing - you can enhance this
+    switch (alignmentString) {
+      case 'Alignment.topCenter':
+        return Alignment.topCenter;
+      case 'Alignment.bottomCenter':
+        return Alignment.bottomCenter;
+      case 'Alignment.centerLeft':
+        return Alignment.centerLeft;
+      case 'Alignment.centerRight':
+        return Alignment.centerRight;
+      case 'Alignment.center':
+        return Alignment.center;
+      default:
+        return Alignment.center;
+    }
+  }
+
+  Map<int, String?> _captureElementTextures() {
+    final Map<int, String?> textures = {};
+    _elementTextures.forEach((key, value) {
+      textures[key] = value;
+    });
+    return textures;
+  }
+
   Map<String, dynamic> _gradientToMap(Gradient gradient) {
     if (gradient is LinearGradient) {
       return {
@@ -1185,6 +1284,11 @@ class SelectedColorProvider extends ChangeNotifier {
       } else if (currentLogoPosition != null && _currentLogoState != null) {
         _currentLogoState = _currentLogoState!.copyWith(
           logoPosition: currentLogoPosition,
+        );
+      }
+      if (state.containsKey('selectedGradient')) {
+        restoreGradientFromState(
+          state['selectedGradient'] as Map<String, dynamic>,
         );
       }
 

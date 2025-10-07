@@ -42,7 +42,6 @@ class _DropUpPanelState extends State<DropUpPanel> {
   Map<String, dynamic>? _sliderStartState;
 
   Future<void> pickImageFromDevice(BuildContext context) async {
-    // Save state before picking image
     _saveUndoState(context, 'Pick background image from device');
 
     final picker = ImagePicker();
@@ -137,17 +136,38 @@ class _DropUpPanelState extends State<DropUpPanel> {
     });
   }
 
+
   void _handleGradientSelection(BuildContext context) {
-    // Save state before navigation
-    _saveUndoState(context, 'Open gradient picker');
+    final colorProvider = Provider.of<SelectedColorProvider>(
+      context,
+      listen: false,
+    );
+    final undoProvider = Provider.of<UndoProvider>(context, listen: false);
+
+    final currentState = colorProvider.captureCurrentState();
+    currentState['action_type'] = 'open_gradient_picker';
+    currentState['previous_gradient'] = colorProvider.selectedGradient != null;
+
+    undoProvider.saveState(action: 'Open gradient picker', state: currentState);
 
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => GradientPickerScreen()),
+      MaterialPageRoute(builder: (context) => const GradientPickerScreen()),
     ).then((_) {
-      // Save state after returning from gradient screen
       if (mounted) {
-        _saveUndoStateDelayed(context, 'Background gradient changed');
+        Timer(const Duration(milliseconds: 150), () {
+          if (mounted) {
+            final newState = colorProvider.captureCurrentState();
+            newState['action_type'] = 'gradient_picker_return';
+
+            undoProvider.saveState(
+              action: 'Background gradient updated',
+              state: newState,
+            );
+
+            print('✅ Gradient picker state saved to undo stack');
+          }
+        });
       }
     });
   }
