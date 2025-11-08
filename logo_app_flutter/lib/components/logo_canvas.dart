@@ -112,7 +112,7 @@ class _LogoCanvasState extends State<LogoCanvas> {
             if (widget.showGrid)
               CustomPaint(
                 painter: GridPainter(
-                  gridColor: Colors.black,
+                  gridColor: Colors.blue,
                   highlightedHorizontalLine:
                       widget.highlightedHorizontalGridLineIndex,
                   highlightedVerticalLine:
