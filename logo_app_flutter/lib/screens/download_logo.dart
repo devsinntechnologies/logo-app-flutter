@@ -372,6 +372,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
                         ),
                       ),
                     ),
+                   
                     Positioned(
                       top: 20,
                       left: 0,
@@ -412,7 +413,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
                     
                       Positioned(
                         top: 30,
-                        right: 70,
+                        left: 190,
                         child: Container(
                           height: 40,
                           width: 100,
