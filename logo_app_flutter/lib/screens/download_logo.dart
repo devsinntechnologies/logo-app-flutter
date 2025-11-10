@@ -46,15 +46,13 @@ class DownloadLogo extends StatefulWidget {
 }
 
 class _DownloadLogoState extends State<DownloadLogo> {
-  // final _noScreenshot = NoScreenshot.instance;
-
   String selectedShapeName = ""; // 👈 Add this
   // --- State Management ---
   late LogoStateData _currentLogoState;
   //  int? _selectedElementId;
   int? selectedElementId;
-
   final List<LogoStateData> _undoStack = [];
+  final List<LogoStateData> _redoStack = [];
   final int _maxUndoHistory = 10;
   //   List<LogoElement> customTextElements = [];
   //   List<LogoElement> customImageElements = [];
@@ -110,7 +108,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
     [Colors.blueGrey, Colors.white, Colors.grey.shade300],
   ];
 
- 
   Offset? _initialDragPoint;
   double? _initialElementValue;
 
@@ -123,7 +120,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
     }
 
     try {
-     
       RenderRepaintBoundary boundary =
           canvasKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
       ui.Image image = await boundary.toImage(pixelRatio: 3.0);
@@ -221,7 +217,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
   void initState() {
     super.initState();
     selectedElement = selectedElementId;
-  
+
     _currentLogoState = LogoStateData(
       logoPosition: const Offset(150, 100),
       logoSize: 100,
@@ -252,10 +248,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
   @override
   void dispose() {
-  
     super.dispose();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -267,11 +261,16 @@ class _DownloadLogoState extends State<DownloadLogo> {
           style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.undo, size: 40),
-            onPressed: _undo,
-            tooltip: 'Undo last change',
-          ),
+          // IconButton(
+          //   icon: const Icon(Icons.redo, size: 30),
+          //   onPressed: _redo,
+          //   tooltip: 'redo last change',
+          // ),
+          // IconButton(
+          //   icon: const Icon(Icons.undo, size: 30),
+          //   onPressed: _undo,
+          //   tooltip: 'Undo last change',
+          // ),
           IconButton(
             icon: const Icon(Icons.save, size: 40),
             onPressed: () => _showSaveConfirmationDialog(context, _canvasKey),
@@ -291,7 +290,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
                       key: _canvasKey,
                       child: LogoCanvas(
                         selectedShapeName: selectedShapeName,
-                      
+
                         logoState: _currentLogoState,
                         svgLogo: widget.svgLogo,
                         companyName: widget.companyName,
@@ -329,13 +328,12 @@ class _DownloadLogoState extends State<DownloadLogo> {
                         isCheckerboardActive: true,
                         checkerboardOpacity: checkerboardOpacity,
                         isCheckerboardVisible: isCheckerboardVisible,
-                     
+
                         lockedElements: _currentLogoState.lockedElements,
                         elementOrder: _currentLogoState.elementOrder,
                       ),
                     ),
 
-              
                     Positioned(
                       top: 20,
                       right: 0,
@@ -372,7 +370,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
                         ),
                       ),
                     ),
-                   
+
                     Positioned(
                       top: 20,
                       left: 0,
@@ -410,7 +408,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
                       ),
                     ),
                     if (_isLayersPanelVisible)
-                    
                       Positioned(
                         top: 30,
                         left: 190,
@@ -462,7 +459,52 @@ class _DownloadLogoState extends State<DownloadLogo> {
               ),
 
               Column(
-                children: [Container(height: 300, color: Colors.grey.shade200)],
+                children: [
+                  Container(
+                    height: 300,
+                    color: Colors.grey.shade200,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Align(
+                        alignment: Alignment.topRight,
+                        child: Row(
+                          children: [
+                            Tooltip(
+                              message: "undo last change",
+                              child: InkWell(
+                                onTap: _undo,
+                                child: CircleAvatar(
+                                  radius: 18,
+                                  backgroundColor: Colors.white,
+                                  child: Icon(Icons.replay, color:
+                                  //  _undoStack.isNotEmpty? Colors.black: 
+                                   Colors.grey),
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 6),
+                            Tooltip(
+                              message: "redo last change",
+                              child: InkWell(
+                                onTap: _redo,
+                                child: CircleAvatar(
+                                  radius: 18,
+                                  backgroundColor: Colors.white,
+                                  child: Icon(
+                                    Icons.refresh,
+                                    color:
+                                    // _redoStack.isNotEmpty? Colors.black: 
+                                    Colors.grey
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -716,7 +758,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
                       label: (provider.opacity * 100).round().toString(),
                       activeColor: Colors.orange,
                       onChanged: (value) {
-                        provider.setOpacity(value); 
+                        provider.setOpacity(value);
                       },
                     );
                   },
@@ -802,30 +844,74 @@ class _DownloadLogoState extends State<DownloadLogo> {
     if (mounted) setState(() {});
   }
 
+  DateTime? _lastEmptyUndoTime;
+
   void _undo() {
-    if (_undoStack.length > 1) {
-      setState(() {
-        _undoStack.removeLast();
-        _currentLogoState = _undoStack.last;
-        selectedElement = null;
-        _clearGridAlignment();
-      });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Undo successful!')));
+    if (_undoStack.isNotEmpty) {
+      _redoStack.add(_currentLogoState);
+      _currentLogoState = _undoStack.removeLast();
+      setState(() {});
+
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text('Undo successful!'),
+            duration: Duration(seconds: 2),
+          ),
+        );
     } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Nothing to undo!')));
+      final now = DateTime.now();
+      if (_lastEmptyUndoTime == null ||
+          now.difference(_lastEmptyUndoTime!) > const Duration(seconds: 2)) {
+        _lastEmptyUndoTime = now;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Nothing to undo!'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
+
+  DateTime? _lastEmptyRedoTime;
+
+  void _redo() {
+    if (_redoStack.isNotEmpty) {
+      _undoStack.add(_currentLogoState);
+
+      _currentLogoState = _redoStack.removeLast();
+      setState(() {});
+
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text('Redo successful!'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+    } else {
+      final now = DateTime.now();
+      if (_lastEmptyRedoTime == null ||
+          now.difference(_lastEmptyRedoTime!) > const Duration(seconds: 2)) {
+        _lastEmptyRedoTime = now;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Nothing to redo!'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
     }
   }
 
   void _handleBottomNavTap(int index) async {
-
     setState(() {
       selectedIndex = index;
     });
-
 
     Future.delayed(Duration.zero, () {
       setState(() {
@@ -1069,7 +1155,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
           rotation: _currentLogoState.logoRotation,
           opacity: 1.0,
           isVisible: true,
-          color: Colors.black, 
+          color: Colors.black,
         );
 
         final updatedSVGs = [..._currentLogoState.customSVGs, newSvgElement];

@@ -1,6 +1,3 @@
-
-
-
 import 'dart:ui';
 
 class CustomTextElement {
@@ -90,7 +87,7 @@ class CustomImageElement {
 class CustomSvgElement {
   final String svgString;
   final Offset position;
-   final Color color; //
+  final Color color; //
   final double size;
   final double rotation;
   final double opacity;
@@ -136,8 +133,7 @@ class LogoStateData {
   final double logoSize;
   final double logoRotation;
   final bool isLogoVisible;
-  final String? svgLogo; 
-
+  final String? svgLogo;
 
   final Offset companyNamePosition;
   final double companyNameSize;
@@ -207,10 +203,10 @@ class LogoStateData {
     this.slogan2Rotation,
     required this.isSlogan2Visible,
   }) : customTexts = customTexts ?? [],
-        customImages = customImages ?? [],
-        customSVGs = customSVGs ?? [],
-        lockedElements = lockedElements ?? {},
-        elementOrder = elementOrder ?? [];
+       customImages = customImages ?? [],
+       customSVGs = customSVGs ?? [],
+       lockedElements = lockedElements ?? {},
+       elementOrder = elementOrder ?? [];
 
   Set<int> get visibleElementIds {
     final ids = <int>{};
@@ -231,8 +227,6 @@ class LogoStateData {
     }
     return ids;
   }
-
-  
 
   LogoStateData copyWith({
     Offset? logoPosition,
@@ -291,7 +285,8 @@ class LogoStateData {
       companyName2Position: companyName2Position ?? this.companyName2Position,
       companyName2Size: companyName2Size ?? this.companyName2Size,
       companyName2Rotation: companyName2Rotation ?? this.companyName2Rotation,
-      isCompanyName2Visible: isCompanyName2Visible ?? this.isCompanyName2Visible,
+      isCompanyName2Visible:
+          isCompanyName2Visible ?? this.isCompanyName2Visible,
       slogan2Position: slogan2Position ?? this.slogan2Position,
       slogan2Size: slogan2Size ?? this.slogan2Size,
       slogan2Rotation: slogan2Rotation ?? this.slogan2Rotation,
@@ -304,4 +299,3 @@ class LogoStateData {
     );
   }
 }
-
