@@ -77,7 +77,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
   bool showEffectPanel = false;
 
   bool showPaletteBar = false;
-  int selectedPaletteIndex = 0;
+  int selectedPaletteIndex = -1;
 
   // --- Movement Panel Toggle ---
   bool isMovementPanelVisible = true;
@@ -90,7 +90,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
   // --- Editing State ---
   bool isEditing = false;
   int? selectedElement;
-  int selectedIndex = 0;
+  int selectedIndex = -1;
+  bool hasTapped = false;
 
   // --- Grid & Canvas Keys for Coordinates ---
   int? _highlightedHorizontalGridLineIndex;
@@ -243,7 +244,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
       elementOrder: [0, 1, 2],
     );
 
-    _saveState();
+    // _saveState();
   }
 
   @override
@@ -279,58 +280,64 @@ class _DownloadLogoState extends State<DownloadLogo> {
         ],
       ),
       body: Stack(
+        alignment: Alignment.center,
         children: [
-          SizedBox(height: 700, width: double.infinity),
           Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
                 child: Stack(
+                  alignment: Alignment.center,
                   children: [
-                    RepaintBoundary(
-                      key: _canvasKey,
-                      child: LogoCanvas(
-                        selectedShapeName: selectedShapeName,
+                    Center(
+                      child: RepaintBoundary(
+                        key: _canvasKey,
+                        child: Center(
+                          child: LogoCanvas(
+                            selectedShapeName: selectedShapeName,
 
-                        logoState: _currentLogoState,
-                        svgLogo: widget.svgLogo,
-                        companyName: widget.companyName,
-                        sloganName: widget.sloganName,
-                        showGrid: _showGrid,
-                        isEditingMode: true,
-                        selectedElementId: selectedElement,
-                        highlightedHorizontalGridLineIndex:
-                            _highlightedHorizontalGridLineIndex,
-                        highlightedVerticalGridLineIndex:
-                            _highlightedVerticalGridLineIndex,
-                        isLayersRibbonExtended: _isLayersPanelVisible,
-                        onToggleGrid:
-                            () => setState(() => _showGrid = !_showGrid),
-                        onToggleLayersRibbon:
-                            () => setState(
-                              () =>
-                                  _isLayersPanelVisible =
-                                      !_isLayersPanelVisible,
-                            ),
-                        onElementPanStart: _onPanStart,
-                        onElementPanUpdate: _updateElementPosition,
-                        onElementPanEnd: _onPanEnd,
-                        onElementTap: _elementSelect,
-                        onElementDelete: _deleteElement,
-                        onElementSplit: _splitElement,
-                        onElementRotateTap: _rotateElementByTap,
-                        onElementRotatePanStart: _onRotatePanStart,
-                        onElementRotatePanUpdate: _onRotatePanUpdate,
-                        onElementRotatePanEnd: _onPanEnd,
-                        onElementResizeTap: _resizeElementByTap,
-                        onElementResizePanStart: _onResizePanStart,
-                        onElementResizePanUpdate: _onResizePanUpdate,
-                        onElementResizePanEnd: _onPanEnd,
-                        isCheckerboardActive: true,
-                        checkerboardOpacity: checkerboardOpacity,
-                        isCheckerboardVisible: isCheckerboardVisible,
+                            logoState: _currentLogoState,
+                            svgLogo: widget.svgLogo,
+                            companyName: widget.companyName,
+                            sloganName: widget.sloganName,
+                            showGrid: _showGrid,
+                            isEditingMode: true,
+                            selectedElementId: selectedElement,
+                            highlightedHorizontalGridLineIndex:
+                                _highlightedHorizontalGridLineIndex,
+                            highlightedVerticalGridLineIndex:
+                                _highlightedVerticalGridLineIndex,
+                            isLayersRibbonExtended: _isLayersPanelVisible,
+                            onToggleGrid:
+                                () => setState(() => _showGrid = !_showGrid),
+                            onToggleLayersRibbon:
+                                () => setState(
+                                  () =>
+                                      _isLayersPanelVisible =
+                                          !_isLayersPanelVisible,
+                                ),
+                            onElementPanStart: _onPanStart,
+                            onElementPanUpdate: _updateElementPosition,
+                            onElementPanEnd: _onPanEnd,
+                            onElementTap: _elementSelect,
+                            onElementDelete: _deleteElement,
+                            onElementSplit: _splitElement,
+                            onElementRotateTap: _rotateElementByTap,
+                            onElementRotatePanStart: _onRotatePanStart,
+                            onElementRotatePanUpdate: _onRotatePanUpdate,
+                            onElementRotatePanEnd: _onPanEnd,
+                            onElementResizeTap: _resizeElementByTap,
+                            onElementResizePanStart: _onResizePanStart,
+                            onElementResizePanUpdate: _onResizePanUpdate,
+                            onElementResizePanEnd: _onPanEnd,
+                            isCheckerboardActive: true,
+                            checkerboardOpacity: checkerboardOpacity,
+                            isCheckerboardVisible: isCheckerboardVisible,
 
-                        lockedElements: _currentLogoState.lockedElements,
-                        elementOrder: _currentLogoState.elementOrder,
+                            lockedElements: _currentLogoState.lockedElements,
+                            elementOrder: _currentLogoState.elementOrder,
+                          ),
+                        ),
                       ),
                     ),
 
@@ -407,10 +414,32 @@ class _DownloadLogoState extends State<DownloadLogo> {
                         ),
                       ),
                     ),
-                    if (_isLayersPanelVisible)
-                      Positioned(
-                        top: 30,
-                        left: 190,
+
+                    AnimatedPositioned(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                      top: 20,
+                      left: _isLayersPanelVisible ? 0 : -300,
+                      child: LayersPanel(
+                        logoState: _currentLogoState,
+                        svgLogo: widget.svgLogo,
+                        onClose:
+                            () => setState(() => _isLayersPanelVisible = false),
+                        onToggleLock: _toggleLock,
+                        onToggleLockAll: _toggleLockAll,
+                        onReorder: _reorderLayer,
+                      ),
+                    ),
+
+                    AnimatedPositioned(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                      top: 30,
+                      // moves left when closing instead of right
+                      left: _isLayersPanelVisible ? 160 : -110,
+                      child: AnimatedOpacity(
+                        duration: const Duration(milliseconds: 200),
+                        opacity: _isLayersPanelVisible ? 1 : 0,
                         child: Container(
                           height: 40,
                           width: 100,
@@ -429,29 +458,13 @@ class _DownloadLogoState extends State<DownloadLogo> {
                                 ),
                                 onPressed: () {
                                   setState(() {
-                                    _isLayersPanelVisible =
-                                        !_isLayersPanelVisible;
+                                    _isLayersPanelVisible = false;
                                   });
                                 },
                               ),
                             ],
                           ),
                         ),
-                      ),
-
-                    AnimatedPositioned(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                      top: 20,
-                      left: _isLayersPanelVisible ? 0 : -300,
-                      child: LayersPanel(
-                        logoState: _currentLogoState,
-                        svgLogo: widget.svgLogo,
-                        onClose:
-                            () => setState(() => _isLayersPanelVisible = false),
-                        onToggleLock: _toggleLock,
-                        onToggleLockAll: _toggleLockAll,
-                        onReorder: _reorderLayer,
                       ),
                     ),
                   ],
@@ -476,9 +489,13 @@ class _DownloadLogoState extends State<DownloadLogo> {
                                 child: CircleAvatar(
                                   radius: 18,
                                   backgroundColor: Colors.white,
-                                  child: Icon(Icons.replay, color:
-                                  //  _undoStack.isNotEmpty? Colors.black: 
-                                   Colors.grey),
+                                  child: Icon(
+                                    Icons.replay,
+                                    color:
+                                        _undoStack.isNotEmpty
+                                            ? Colors.black
+                                            : Colors.grey,
+                                  ),
                                 ),
                               ),
                             ),
@@ -493,8 +510,9 @@ class _DownloadLogoState extends State<DownloadLogo> {
                                   child: Icon(
                                     Icons.refresh,
                                     color:
-                                    // _redoStack.isNotEmpty? Colors.black: 
-                                    Colors.grey
+                                        _redoStack.isNotEmpty
+                                            ? Colors.black
+                                            : Colors.grey,
                                   ),
                                 ),
                               ),
@@ -509,10 +527,9 @@ class _DownloadLogoState extends State<DownloadLogo> {
             ],
           ),
 
-          if (selectedElement != null && isMovementPanelVisible)
+          if (selectedElement != null)
             Positioned(
               bottom: -100,
-
               child: MovementPanel(
                 onDirectionPressed: (String direction) {
                   const double moveAmount = 5.0;
@@ -534,20 +551,26 @@ class _DownloadLogoState extends State<DownloadLogo> {
                     default:
                       delta = Offset.zero;
                   }
+
                   setState(() {});
                   _updateElementPosition(selectedElement!, delta);
                 },
+
                 onDuplicatePressed: () {
                   print('Duplicate called for $selectedElement');
                   duplicateSelectedElement(selectedElement!);
                 },
+
                 onBringToFrontPressed:
                     () => bringToFront(selectedElement!, _currentLogoState),
                 onSendToBackPressed:
                     () => sendToBack(selectedElement!, _currentLogoState),
 
+                logoState: _currentLogoState,
+
                 selectedElementId: selectedElement,
                 isVisible: true,
+                onClose: () => setState(() => selectedElement = null),
               ),
             ),
 
@@ -571,7 +594,12 @@ class _DownloadLogoState extends State<DownloadLogo> {
                       children: [
                         if (showDropUp)
                           DropUpPanel(
-                            onClose: () => setState(() => showDropUp = false),
+                            onClose:
+                                () => setState(() {
+                                  showDropUp = false;
+                                  selectedIndex = -1;
+                                }),
+
                             onToggleCheckerboard: (val) {
                               setState(() {
                                 isCheckerboardActive = val;
@@ -588,116 +616,183 @@ class _DownloadLogoState extends State<DownloadLogo> {
                             },
                           ),
                         if (showPaletteBar)
-                          SizedBox(
-                            height: 50,
+                          Column(
+                            children: [
+                              Container(
+                                height: 30,
+                                color: Colors.grey.shade200,
+                                child: Align(
+                                  alignment: Alignment.topRight,
+                                  child: InkWell(
+                                    onTap: () {
+                                      setState(() {
+                                        showPaletteBar = false;
 
-                            child: ListView.separated(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: paletteList.length,
-                              separatorBuilder:
-                                  (_, __) => const SizedBox(width: 10),
-                              itemBuilder: (context, index) {
-                                final colors = paletteList[index];
-                                final isSelected =
-                                    selectedPaletteIndex == index;
+                                        selectedIndex = -1;
+                                      });
+                                    },
 
-                                return GestureDetector(
-                                  onTap: () {
-                                    final provider =
-                                        Provider.of<SelectedColorProvider>(
-                                          context,
-                                          listen: false,
-                                        );
-                                    setState(() {
-                                      selectedPaletteIndex = index;
-                                      provider.setInitialColorsFromPalette(
-                                        colors,
-                                        _currentLogoState.elementOrder,
-                                      );
-                                    });
-                                  },
-                                  child: Container(
-                                    height: 35,
-                                    width: 50,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(
-                                        color:
-                                            isSelected
-                                                ? Colors.orange
-                                                : Colors.grey.shade400,
-                                        width: isSelected ? 2 : 1,
+                                    child: Container(
+                                      width: 25,
+                                      height: 30,
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.shade100,
+                                        borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(9),
+                                          topRight: Radius.circular(9),
+                                        ),
+                                      ),
+
+                                      child: Icon(
+                                        Icons.keyboard_double_arrow_down_sharp,
+                                        size: 25,
+                                        color: Colors.indigo,
                                       ),
                                     ),
-                                    child: Stack(
-                                      alignment: Alignment.center,
-                                      children: [
-                                        ClipRRect(
-                                          borderRadius: BorderRadius.circular(
-                                            10,
-                                          ),
-                                          child: Column(
-                                            children:
-                                                colors
-                                                    .map(
-                                                      (color) => Container(
-                                                        height: 15,
-                                                        width: double.infinity,
-                                                        color: color,
-                                                      ),
-                                                    )
-                                                    .toList(),
-                                          ),
-                                        ),
+                                  ),
+                                ),
+                              ),
 
-                                        if (isSelected)
-                                          Positioned.fill(
-                                            child: Align(
-                                              alignment: Alignment.center,
-                                              child: InkWell(
-                                                onTap: () {
-                                                  Provider.of<
-                                                    SelectedColorProvider
-                                                  >(
-                                                    context,
-                                                    listen: false,
-                                                  ).setColorsRotated(
-                                                    colors,
-                                                    allElementIds:
-                                                        _currentLogoState
-                                                            .elementOrder,
-                                                  );
-                                                },
-                                                child: Container(
-                                                  decoration: BoxDecoration(
-                                                    shape: BoxShape.circle,
-                                                    color: Colors.white,
-                                                    border: Border.all(
-                                                      color: Colors.orange,
-                                                      width: 1,
-                                                    ),
-                                                  ),
-                                                  padding: const EdgeInsets.all(
-                                                    2,
-                                                  ),
-                                                  child: const Icon(
-                                                    Icons.refresh,
-                                                    size: 10,
-                                                    color: Colors.orange,
-                                                  ),
-                                                ),
-                                              ),
+                              Container(
+                                color: Colors.grey.shade100,
+                                height: 65,
+
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                    left: 10,
+                                    top: 7,
+                                    bottom: 7,
+                                  ),
+                                  child: ListView.separated(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: paletteList.length,
+                                    separatorBuilder:
+                                        (_, __) => const SizedBox(width: 7),
+                                    itemBuilder: (context, index) {
+                                      final colors = paletteList[index];
+                                      final isSelected =
+                                          selectedPaletteIndex == index;
+
+                                      return GestureDetector(
+                                        onTap: () {
+                                          final provider = Provider.of<
+                                            SelectedColorProvider
+                                          >(context, listen: false);
+                                          setState(() {
+                                            selectedPaletteIndex = index;
+                                            provider
+                                                .setInitialColorsFromPalette(
+                                                  colors,
+                                                  _currentLogoState
+                                                      .elementOrder,
+                                                );
+                                          });
+                                        },
+                                        child: Container(
+                                          height: 35,
+                                          width: 50,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
+                                            border: Border.all(
+                                              color:
+                                                  isSelected
+                                                      ? Colors.orange
+                                                      : Colors.grey.shade400,
+                                              width: isSelected ? 2 : 1,
                                             ),
                                           ),
-                                      ],
-                                    ),
+                                          child: Stack(
+                                            alignment: Alignment.center,
+                                            children: [
+                                              ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                                child: Column(
+                                                  children:
+                                                      colors
+                                                          .map(
+                                                            (
+                                                              color,
+                                                            ) => Container(
+                                                              height: 15,
+                                                              width:
+                                                                  double
+                                                                      .infinity,
+                                                              color: color,
+                                                            ),
+                                                          )
+                                                          .toList(),
+                                                ),
+                                              ),
+
+                                              if (isSelected)
+                                                Positioned.fill(
+                                                  child: Align(
+                                                    alignment: Alignment.center,
+                                                    child: InkWell(
+                                                      onTap: () {
+                                                        Provider.of<
+                                                          SelectedColorProvider
+                                                        >(
+                                                          context,
+                                                          listen: false,
+                                                        ).setColorsRotated(
+                                                          colors,
+                                                          allElementIds:
+                                                              _currentLogoState
+                                                                  .elementOrder,
+                                                        );
+                                                      },
+                                                      child: Container(
+                                                        decoration:
+                                                            BoxDecoration(
+                                                              shape:
+                                                                  BoxShape
+                                                                      .circle,
+                                                              color:
+                                                                  Colors.white,
+                                                              border: Border.all(
+                                                                color:
+                                                                    Colors
+                                                                        .orange,
+                                                                width: 1,
+                                                              ),
+                                                            ),
+                                                        padding:
+                                                            const EdgeInsets.all(
+                                                              2,
+                                                            ),
+                                                        child: const Icon(
+                                                          Icons.refresh,
+                                                          size: 10,
+                                                          color: Colors.orange,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    },
                                   ),
-                                );
-                              },
-                            ),
+                                ),
+                              ),
+                            ],
                           ),
 
-                        if (showEffectPanel) _buildEffectPanel(),
+                        if (showEffectPanel)
+                          _buildEffectPanel(
+                            onClose: () {
+                              setState(() {
+                                showEffectPanel = false;
+                                selectedIndex = -1;
+                              });
+                            },
+                          ),
                       ],
                     ),
                   ),
@@ -707,10 +802,11 @@ class _DownloadLogoState extends State<DownloadLogo> {
           ),
         ],
       ),
+
       bottomNavigationBar: LogoBottomNavBar(
         selectedIndex: selectedIndex,
+        hasTapped: selectedIndex != -1,
         onItemSelected: _handleBottomNavTap,
-        hasTapped: true,
       ),
     );
   }
@@ -733,110 +829,146 @@ class _DownloadLogoState extends State<DownloadLogo> {
     }
   }
 
-  Widget _buildEffectPanel() {
-    return Container(
-      // padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.opacity, color: Colors.grey),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Consumer<SelectedColorProvider>(
-                  builder: (context, provider, _) {
-                    return Slider(
-                      value: provider.opacity,
-                      min: 0.0,
-                      max: 1.0,
-                      divisions: 10,
-                      label: (provider.opacity * 100).round().toString(),
-                      activeColor: Colors.orange,
-                      onChanged: (value) {
-                        provider.setOpacity(value);
-                      },
-                    );
-                  },
-                ),
-              ),
-              SizedBox(
-                width: 40,
-                child: Consumer<SelectedColorProvider>(
-                  builder: (context, provider, _) {
-                    return Text(
-                      "${(provider.opacity * 100).round()}%",
-                      textAlign: TextAlign.center,
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
+  Widget _buildEffectPanel({required VoidCallback onClose}) {
+    return Column(
+      children: [
+        Container(
+          height: 30,
+          color: Colors.grey.shade200,
+          child: Align(
+            alignment: Alignment.topRight,
+            child: InkWell(
+              onTap: onClose,
 
-          SizedBox(
-            height: 50,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: colorList.length + 1,
-              separatorBuilder: (_, __) => const SizedBox(width: 10),
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  return GestureDetector(
-                    onTap: () {
-                      Provider.of<SelectedColorProvider>(
-                        context,
-                        listen: false,
-                      ).resetColor();
-                      // setState(() => showEffectPanel = false);
-                    },
-                    child: Container(
-                      width: 60,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(
-                        Icons.close,
-                        color: Colors.black,
-                        size: 30,
-                      ),
-                    ),
-                  );
-                }
-
-                final color = colorList[index - 1];
-                return GestureDetector(
-                  onTap: () {
-                    Provider.of<SelectedColorProvider>(
-                      context,
-                      listen: false,
-                    ).setColor(color);
-                  },
-                  child: Container(
-                    width: 50,
-                    decoration: BoxDecoration(
-                      color: color,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.grey.shade400),
-                    ),
+              child: Container(
+                width: 25,
+                height: 30,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(9),
+                    topRight: Radius.circular(9),
                   ),
-                );
-              },
+                ),
+
+                child: Icon(
+                  Icons.keyboard_double_arrow_down_sharp,
+                  size: 25,
+                  color: Colors.indigo,
+                ),
+              ),
             ),
           ),
-        ],
-      ),
+        ),
+
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade100,
+            // borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const SizedBox(width: 5),
+                  const Icon(Icons.opacity, color: Colors.grey),
+                  const SizedBox(width: 5),
+                  Expanded(
+                    child: Consumer<SelectedColorProvider>(
+                      builder: (context, provider, _) {
+                        return Slider(
+                          value: provider.opacity,
+                          min: 0.0,
+                          max: 1.0,
+                          divisions: 10,
+                          label: (provider.opacity * 100).round().toString(),
+                          activeColor: Colors.orange,
+                          onChanged: (value) {
+                            provider.setOpacity(value);
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                  SizedBox(
+                    width: 40,
+                    child: Consumer<SelectedColorProvider>(
+                      builder: (context, provider, _) {
+                        return Text(
+                          "${(provider.opacity * 100).round()}%",
+                          textAlign: TextAlign.center,
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 5),
+
+              SizedBox(
+                height: 50,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: colorList.length + 1,
+                  separatorBuilder: (_, __) => const SizedBox(width: 10),
+                  itemBuilder: (context, index) {
+                    if (index == 0) {
+                      return GestureDetector(
+                        onTap: () {
+                          Provider.of<SelectedColorProvider>(
+                            context,
+                            listen: false,
+                          ).resetColor();
+                          // setState(() => showEffectPanel = false);
+                        },
+                        child: Container(
+                          width: 40,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(
+                            Icons.close,
+                            color: Colors.black,
+                            size: 30,
+                          ),
+                        ),
+                      );
+                    }
+
+                    final color = colorList[index - 1];
+                    return GestureDetector(
+                      onTap: () {
+                        Provider.of<SelectedColorProvider>(
+                          context,
+                          listen: false,
+                        ).setColor(color);
+                      },
+                      child: Container(
+                        width: 50,
+                        decoration: BoxDecoration(
+                          color: color,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.grey.shade400),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 5),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
   // --- State Save/Undo ---
   void _saveState() {
+    _redoStack.clear();
     if (_undoStack.length >= _maxUndoHistory) {
       _undoStack.removeAt(0);
     }
@@ -909,23 +1041,32 @@ class _DownloadLogoState extends State<DownloadLogo> {
   }
 
   void _handleBottomNavTap(int index) async {
+    if (selectedIndex == index) {
+      setState(() {
+        selectedIndex = -1;
+        showDropUp = false;
+        showPaletteBar = false;
+        showEffectPanel = false;
+      });
+      return;
+    }
+
     setState(() {
       selectedIndex = index;
+      showDropUp = index == 0;
+      showEffectPanel = index == 3;
+      showPaletteBar = index == 4;
     });
 
-    Future.delayed(Duration.zero, () {
-      setState(() {
-        showDropUp = index == 0;
-        showPaletteBar = index == 4;
-        showEffectPanel = index == 3;
-      });
-    });
-
-    // ✅ Navigation & other logic
     if (index == 2) {
       final result = await Navigator.of(
         context,
       ).push<String>(_createSlideRoute());
+
+      setState(() {
+        selectedIndex = -1;
+      });
+
       if (result != null && result.isNotEmpty) {
         _saveState();
         setState(() {
@@ -971,6 +1112,11 @@ class _DownloadLogoState extends State<DownloadLogo> {
               ),
         ),
       );
+
+      setState(() {
+        selectedIndex = -1;
+      });
+
       if (selectedImagePath != null && mounted) {
         _addImageToCanvas(selectedImagePath);
       }
@@ -996,6 +1142,10 @@ class _DownloadLogoState extends State<DownloadLogo> {
               ],
             ),
       );
+
+      setState(() {
+        selectedIndex = -1;
+      });
 
       if (selectedSource != null) {
         final pickedFile = await picker.pickImage(source: selectedSource);
@@ -1059,7 +1209,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
   void _elementSelect(int id) {
     setState(() {
       selectedElement = id;
-      // ✅ close bottom options
     });
   }
 
@@ -1069,7 +1218,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
       String message = 'Element deleted!';
       LogoStateData newState = _currentLogoState;
 
-      // Remove from collections first
       final newOrder = List<int>.from(newState.elementOrder)..remove(id);
       final newLocked = Set<int>.from(newState.lockedElements)..remove(id);
       newState = newState.copyWith(

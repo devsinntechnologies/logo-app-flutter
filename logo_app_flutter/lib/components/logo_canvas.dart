@@ -13,7 +13,6 @@ import 'editable_element_wrapper.dart';
 import 'grid_painter.dart';
 
 class LogoCanvas extends StatefulWidget {
-  // final GlobalKey canvasKey;
   final String selectedShapeName;
   final LogoStateData logoState;
   final String svgLogo;
@@ -90,6 +89,17 @@ class LogoCanvas extends StatefulWidget {
 }
 
 class _LogoCanvasState extends State<LogoCanvas> {
+  bool hasTextOnCanvas() {
+  
+  if (widget.logoState.customTexts.any((t) => t.isVisible && t.text.isNotEmpty)) return true;
+
+  if (widget.logoState.isCompanyNameVisible && (widget.logoState.companyName?.isNotEmpty ?? false)) return true;
+
+  if (widget.logoState.isSloganVisible && (widget.logoState.sloganName?.isNotEmpty ?? false)) return true;
+
+  return false;
+}
+
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<SelectedColorProvider>(context);
@@ -132,7 +142,6 @@ class _LogoCanvasState extends State<LogoCanvas> {
                 ),
               ),
 
-            // ✅ Square show only if selected
             if (widget.isCheckerboardVisible && selectedShape == "Square")
               Opacity(
                 opacity: widget.checkerboardOpacity,
@@ -484,6 +493,7 @@ class _LogoCanvasState extends State<LogoCanvas> {
   }
 
   
+  
   Widget _buildEditableWrapper({
     required int id,
     required Offset position,
@@ -548,7 +558,7 @@ class StrokedText extends StatelessWidget {
                   ..color = strokeColor,
           ),
         ),
-        // Fill
+       
         Text(text, style: style),
       ],
     );
@@ -579,7 +589,7 @@ class StrokedSvg extends StatelessWidget {
     return Stack(
       alignment: Alignment.center,
       children: [
-        // Stroke layer: draw multiple slightly offset copies
+  
         for (final offset in [
           Offset(-strokeWidth, 0),
           Offset(strokeWidth, 0),
@@ -612,12 +622,3 @@ class StrokedSvg extends StatelessWidget {
     );
   }
 }
-
-
-
-
-
-
-
-
-

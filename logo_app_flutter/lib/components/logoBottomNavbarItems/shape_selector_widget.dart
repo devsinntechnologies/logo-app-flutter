@@ -46,13 +46,9 @@ class _ShapeSelectorWidgetState extends State<ShapeSelectorWidget> {
     ),
     _ShapeData(
       "Rounded Rect",
-      Container(
-        width: 12,
-        height: 8,
-        decoration: BoxDecoration(
-          color: Colors.grey,
-          borderRadius: BorderRadius.circular(6),
-        ),
+      CustomPaint(
+        size: const Size(24, 17),
+        painter: SquarePainter(Colors.grey, null, null),
       ),
     ),
     _ShapeData(
@@ -93,14 +89,14 @@ class _ShapeSelectorWidgetState extends State<ShapeSelectorWidget> {
     _ShapeData(
       "Arrow",
       CustomPaint(
-        size: const Size(24, 24),
+        size: const Size(28, 28),
         painter: ArrowPainter(Colors.grey, null,null),
       ),
     ),
     _ShapeData(
       "Heart",
       CustomPaint(
-        size: const Size(24, 24),
+        size: const Size(26, 26),
         painter: HeartPainter(Colors.grey, null,null),
       ),
     ),
@@ -113,39 +109,46 @@ class _ShapeSelectorWidgetState extends State<ShapeSelectorWidget> {
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: shapes.length,
-        itemBuilder: (context, index) {
-          return GestureDetector(
-            onTap: () {
-              if (shapes[index].name == "Transparent") {
-                // Toggle checkerboard on/off
-                final isSelected = selectedIndex == index;
-                setState(() {
-                  selectedIndex = isSelected ? null : index;
-                });
-                widget.onShapeSelected(
-                  isSelected ? "TransparentOff" : "Transparent",
-                );
-              } else {
-                setState(() {
-                  selectedIndex = index;
-                });
-                widget.onShapeSelected(shapes[index].name);
-              }
-            },
-            child: Container(
-              width: 25,
-              margin: const EdgeInsets.symmetric(horizontal: 4.5),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                // border: Border.all(
-                //   color: selectedIndex == index ? Colors.blue : Colors.grey,
-                //   width: selectedIndex == index ? 2 : 1,
-                // ),
+       itemBuilder: (context, index) {
+  return GestureDetector(
+    onTap: () {
+      if (shapes[index].name == "Transparent") {
+        final isSelected = selectedIndex == index;
+        setState(() {
+          selectedIndex = isSelected ? null : index;
+        });
+        widget.onShapeSelected(
+          isSelected ? "TransparentOff" : "Transparent",
+        );
+      } else {
+        setState(() {
+          selectedIndex = index;
+        });
+        widget.onShapeSelected(shapes[index].name);
+      }
+    },
+    child: Container(
+      width: 25,
+      margin: const EdgeInsets.symmetric(horizontal: 4.5),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          shapes[index].widget,
+          if (selectedIndex == index)
+            const Positioned(
+            
+              child: Icon(
+                Icons.check,
+                color: Colors.white,
+                size: 20,
               ),
-              child: Center(child: shapes[index].widget),
             ),
-          );
-        },
+        ],
+      ),
+    ),
+  );
+},
+
       ),
     );
   }
@@ -467,16 +470,120 @@ class ArrowPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final path = Path()
-      ..moveTo(0, size.height / 2)
-      ..lineTo(size.width * 0.6, size.height / 2)
-      ..lineTo(size.width * 0.6, size.height * 0.3)
-      ..lineTo(size.width, size.height / 2)
-      ..lineTo(size.width * 0.6, size.height * 0.7)
-      ..lineTo(size.width * 0.6, size.height / 2)
-      ..close();
+    final path = Path();
+
+    final double w = size.width;
+    final double h = size.height;
+    final double centerX = w / 2;
+    final double centerY = h / 2;
+
+    // Centered arrow shape
+    path.moveTo(centerX - w * 0.3, centerY - h * 0.15);
+    path.lineTo(centerX, centerY - h * 0.15);
+    path.lineTo(centerX, centerY - h * 0.3);
+    path.lineTo(centerX + w * 0.3, centerY);
+    path.lineTo(centerX, centerY + h * 0.3);
+    path.lineTo(centerX, centerY + h * 0.15);
+    path.lineTo(centerX - w * 0.3, centerY + h * 0.15);
+    path.close();
 
     final paint = Paint();
+    if (image != null) {
+      canvas.save();
+      canvas.clipPath(path);
+      paintImage(
+        canvas: canvas,
+        rect: Rect.fromLTWH(0, 0, w, h),
+        image: image!,
+        fit: BoxFit.cover,
+      );
+      canvas.restore();
+    } else if (gradient != null) {
+      paint.shader = gradient!.createShader(Rect.fromLTWH(0, 0, w, h));
+      canvas.drawPath(path, paint);
+    } else {
+      paint.color = color ?? Colors.white;
+      canvas.drawPath(path, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_) => false;
+}
+
+// class ArrowPainter extends CustomPainter {
+//   final Color? color;
+//   final Gradient? gradient;
+//   final ui.Image? image;
+
+//   ArrowPainter(this.color, this.gradient, this.image);
+
+//   @override
+//   void paint(Canvas canvas, Size size) {
+//     final path = Path()
+//       ..moveTo(size.width * 0.1, size.height * 0.5)
+//       ..lineTo(size.width * 0.7, size.height * 0.5)
+//       ..lineTo(size.width * 0.7, size.height * 0.3)
+//       ..lineTo(size.width * 0.9, size.height * 0.5)
+//       ..lineTo(size.width * 0.7, size.height * 0.7)
+//       ..lineTo(size.width * 0.7, size.height * 0.5)
+//       ..close();
+
+//     final paint = Paint();
+//     if (image != null) {
+//       canvas.save();
+//       canvas.clipPath(path);
+//       paintImage(
+//         canvas: canvas,
+//         rect: Rect.fromLTWH(0, 0, size.width, size.height),
+//         image: image!,
+//         fit: BoxFit.cover,
+//       );
+//       canvas.restore();
+//     } else if (gradient != null) {
+//       paint.shader = gradient!.createShader(Rect.fromLTWH(0, 0, size.width, size.height));
+//       canvas.drawPath(path, paint);
+//     } else {
+//       paint.color = color ?? Colors.white;
+//       canvas.drawPath(path, paint);
+//     }
+//   }
+
+//   @override
+//   bool shouldRepaint(_) => false;
+// }
+
+
+class HeartPainter extends CustomPainter {
+  final Color? color;
+  final Gradient? gradient;
+  final ui.Image? image;
+
+  HeartPainter(this.color, this.gradient, this.image);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final path = Path();
+
+    double w = size.width;
+    double h = size.height;
+
+    // Heart shape path
+    path.moveTo(w / 2, h * 0.9); // bottom tip
+    path.cubicTo(
+      w * 1.1, h * 0.6, // control point 1
+      w * 0.8, h * 0.1, // control point 2
+      w / 2, h * 0.3,   // top center
+    );
+    path.cubicTo(
+      w * 0.2, h * 0.1, // control point 1
+      -w * 0.1, h * 0.6, // control point 2
+      w / 2, h * 0.9,   // back to bottom tip
+    );
+    path.close();
+
+    final paint = Paint();
+
     if (image != null) {
       canvas.save();
       canvas.clipPath(path);
@@ -491,53 +598,11 @@ class ArrowPainter extends CustomPainter {
       paint.shader = gradient!.createShader(Rect.fromLTWH(0, 0, size.width, size.height));
       canvas.drawPath(path, paint);
     } else {
-      paint.color = color??Colors.white;
+      paint.color = color ?? Colors.red;
       canvas.drawPath(path, paint);
     }
   }
 
   @override
-  bool shouldRepaint(_) => false;
-}
-
-
-class HeartPainter extends CustomPainter {
-  final Color color;
-  final Gradient? gradient;
-  final ui.Image? image;
-
-  HeartPainter(this.color, this.gradient, this.image);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final width = size.width;
-    final height = size.height;
-
-    final path = Path();
-    path.moveTo(width / 2, height * 0.75);
-    path.cubicTo(0, height * 0.5, 0, height * 0.2, width / 2, height * 0.35);
-    path.cubicTo(width, height * 0.2, width, height * 0.5, width / 2, height * 0.75);
-
-    final paint = Paint();
-    if (image != null) {
-      canvas.save();
-      canvas.clipPath(path);
-      paintImage(
-        canvas: canvas,
-        rect: Rect.fromLTWH(0, 0, width, height),
-        image: image!,
-        fit: BoxFit.cover,
-      );
-      canvas.restore();
-    } else if (gradient != null) {
-      paint.shader = gradient!.createShader(Rect.fromLTWH(0, 0, width, height));
-      canvas.drawPath(path, paint);
-    } else {
-      paint.color = color;
-      canvas.drawPath(path, paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(_) => false;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

@@ -1,6 +1,3 @@
-
-
-
 import 'package:flutter/material.dart';
 import 'package:logo_app_flutter/components/bottom_navigation_buttons.dart';
 import 'package:logo_app_flutter/components/step_trail_widget.dart';
@@ -35,22 +32,35 @@ class _DesignInputScreenState extends State<DesignInputScreen> {
     super.dispose();
   }
 
-  void _nextStep() {
-    if (_currentStep < stepTitles.length - 1) {
-      setState(() {
-        _currentStep++;
-      });
-      _pageController.nextPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-      _scrollController.animateTo(
-        (_currentStep * 120).toDouble(),
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
+void _nextStep() {
+  if (_currentStep == 0) {
+    if (companyName.isEmpty || slogan.isEmpty) {
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(
+      //     content: Text('Please enter both Company Name and Slogan.'),
+      //     duration: Duration(seconds: 2),
+      //   ),
+      // );
+      return; 
     }
   }
+
+  if (_currentStep < stepTitles.length - 1) {
+    setState(() {
+      _currentStep++;
+    });
+    _pageController.nextPage(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+    _scrollController.animateTo(
+      (_currentStep * 120).toDouble(),
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+}
+
 
   void _prevStep() {
     if (_currentStep > 0) {
@@ -158,13 +168,16 @@ class _DesignInputScreenState extends State<DesignInputScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: BottomNavigationButtons(
-        currentStep: _currentStep,
-        totalSteps: stepTitles.length,
-        onNext: _nextStep,
-        onFinish: () => Navigator.pop(context),
-        onBack: _prevStep,
-      ),
+      bottomNavigationBar:BottomNavigationButtons(
+  currentStep: _currentStep,
+  totalSteps: stepTitles.length,
+  onNext: _nextStep,
+  onBack: _prevStep,
+  onFinish: () => Navigator.pop(context),
+  companyName: companyName,
+  slogan: slogan,
+),
+
       appBar: AppBar(
         title: const Text('Auto Design'),
         leading: IconButton(

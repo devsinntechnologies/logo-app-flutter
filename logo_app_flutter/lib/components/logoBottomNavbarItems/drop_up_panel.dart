@@ -42,8 +42,9 @@ class _DropUpPanelState extends State<DropUpPanel> {
       final frame = await codec.getNextFrame();
       final image = frame.image;
 
-     
-      final provider = Provider.of<SelectedColorProvider>( context,listen: false,
+      final provider = Provider.of<SelectedColorProvider>(
+        context,
+        listen: false,
       );
       provider.setBackgroundImage(image, file);
     }
@@ -52,8 +53,6 @@ class _DropUpPanelState extends State<DropUpPanel> {
   String? selectedShapeName;
   int selectedIndex = 0;
   Color _baseColor = Colors.red; // Default palette color
-
-
 
   final List<String> options = [
     'Color',
@@ -67,110 +66,160 @@ class _DropUpPanelState extends State<DropUpPanel> {
   @override
   Widget build(BuildContext context) {
     return Material(
-      elevation: 10,
+      // elevation: 10,
       borderRadius: BorderRadius.circular(12),
       color: Colors.white,
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _TopOption(
-                  label: options[0],
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => ColorScreen()),
-                    );
-                  },
-                ),
-                _TopOption(
-                  label: options[1],
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => GradientPickerScreen(),
-                      ),
-                    );
-                  },
-                ),
-                _TopOption(
-                  label: options[2],
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SelectBgImages(),
-                      ),
-                    );
-                  },
-                ),
-                _TopOption(
-                  label: options[3],
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SelectTextureImages(),
-                      ),
-                    );
-                  },
-                ),
-                _TopOption(
-                  label: options[4],
-                  onTap: () {
-                    pickImageFromDevice(context);
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 13),
 
-            // Opacity slider
-            Row(
-              children: [
-                const Icon(Icons.opacity, color: Colors.grey),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Slider(
-                    activeColor: Colors.yellow,
-                    value: _opacityValue,
-                    min: 0,
-                    max: 1,
-                    onChanged: (val) {
-                      setState(() {
-                        _opacityValue = val;
-                      });
-                      widget.onOpacityChanged(_opacityValue);
-                    },
+          children: [
+            Container(
+              height: 30,
+              color: Colors.grey.shade200,
+              child: Align(
+                alignment: Alignment.topRight,
+                child: InkWell(
+                  onTap: widget.onClose,
+
+                  child: Container(
+                    width: 25,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(9),
+                        topRight: Radius.circular(9),
+                      ),
+                    ),
+
+                    child: Icon(
+                      Icons.keyboard_double_arrow_down_sharp,
+                      size: 25,
+                      color: Colors.indigo
+                    ),
                   ),
                 ),
-                Text(
-                  "${(_opacityValue * 100).round()}%",
-                  style: const TextStyle(color: Colors.black),
-                ),
-              ],
+              ),
             ),
-            const SizedBox(height: 16),
+            
+            Container(
+              color: Colors.grey.shade100,
+              height: 30,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _TopOption(
+                    label: options[0],
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => ColorScreen()),
+                      );
+                    },
+                  ),
+                  _TopOption(
+                    label: options[1],
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => GradientPickerScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _TopOption(
+                    label: options[2],
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SelectBgImages(),
+                        ),
+                      );
+                    },
+                  ),
+                  _TopOption(
+                    label: options[3],
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SelectTextureImages(),
+                        ),
+                      );
+                    },
+                  ),
+                  _TopOption(
+                    label: options[4],
+                    onTap: () {
+                      pickImageFromDevice(context);
+                    },
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            // Opacity slider
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15),
+              child: Row(
+                children: [
+                  const Icon(Icons.opacity, color: Colors.grey),
+                  const SizedBox(width: 5),
+                  Expanded(
+                    child: SliderTheme(
+                      data: SliderTheme.of(context).copyWith(
+                        trackHeight: 2,
+                        thumbShape: const RoundSliderThumbShape(
+                          enabledThumbRadius: 6,
+                        ),
+                      ),
+                      child: Slider(
+                        activeColor: Colors.yellow,
+                        value: _opacityValue,
+                        min: 0,
+                        max: 1,
+                        onChanged: (val) {
+                          setState(() {
+                            _opacityValue = val;
+                          });
+                          widget.onOpacityChanged(_opacityValue);
+                        },
+                      ),
+                    ),
+                  ),
+                  Text(
+                    "${(_opacityValue * 100).round()}%",
+                    style: const TextStyle(color: Colors.black),
+                  ),
+                ],
+              ),
+            ),
+            // const SizedBox(height: 10),
 
             // Shape selector
-            SizedBox(
-              height: 50,
-              child: ShapeSelectorWidget(
-                onShapeSelected: (shapeName) {
-                  if (shapeName == "Transparent") {
-                    widget.onToggleCheckerboard(true);
-                  } else if (shapeName == "TransparentOff") {
-                    widget.onToggleCheckerboard(false);
-                  } else {
-                    widget.onToggleCheckerboard(true);
-                    widget.onShapeSelected(shapeName);
-                  }
-                },
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15),
+
+              child: SizedBox(
+                height: 50,
+                child: ShapeSelectorWidget(
+                  onShapeSelected: (shapeName) {
+                    if (shapeName == "Transparent") {
+                      widget.onToggleCheckerboard(true);
+                    } else if (shapeName == "TransparentOff") {
+                      widget.onToggleCheckerboard(false);
+                    } else {
+                      widget.onToggleCheckerboard(true);
+                      widget.onShapeSelected(shapeName);
+                    }
+                  },
+                ),
               ),
             ),
           ],
@@ -184,10 +233,7 @@ class _TopOption extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
 
-  const _TopOption({
-    required this.label,
-    required this.onTap,
-  });
+  const _TopOption({required this.label, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -197,7 +243,7 @@ class _TopOption extends StatelessWidget {
         label,
         style: const TextStyle(
           fontSize: 12,
-          color: Colors.black,
+          color: Colors.indigo,
           fontWeight: FontWeight.normal,
         ),
       ),

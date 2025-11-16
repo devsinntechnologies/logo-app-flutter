@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
 
 class TextScreen extends StatefulWidget {
-  const TextScreen({super.key});
+  final String initialText;
+
+  const TextScreen({super.key, this.initialText = ""});
 
   @override
   State<TextScreen> createState() => _TextScreenState();
 }
 
 class _TextScreenState extends State<TextScreen> {
-  final TextEditingController _controller = TextEditingController();
+  late final TextEditingController _controller;
   final FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
+    _controller = TextEditingController(text: widget.initialText);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FocusScope.of(context).requestFocus(_focusNode);
     });
@@ -29,12 +32,9 @@ class _TextScreenState extends State<TextScreen> {
   void _confirmText() {
     final trimmedText = _controller.text.trim();
     if (trimmedText.isNotEmpty) {
-      Navigator.pop(
-        context,
-        trimmedText,
-      ); // Return to previous screen with text
+      Navigator.pop(context, trimmedText);
     } else {
-      Navigator.pop(context); // Return without doing anything
+      Navigator.pop(context);
     }
   }
 
@@ -44,7 +44,7 @@ class _TextScreenState extends State<TextScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: const Text('Add New Text'),
+        title: Text(widget.initialText.isEmpty ? 'Add New Text' : 'Edit Text'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),

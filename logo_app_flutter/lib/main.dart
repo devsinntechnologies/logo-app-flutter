@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
+import 'package:logo_app_flutter/screens/download_logo.dart';
 import 'package:logo_app_flutter/screens/home_screen.dart';
 import 'package:logo_app_flutter/services/internet_checker.dart';
 import 'package:provider/provider.dart';
@@ -21,7 +22,9 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'Auto Design Module',
         home: InternetChecker(
-            child: const HomeScreen()
+            child: 
+        // DownloadLogo(svgLogo: "svgLogo", companyName: "companyName", sloganName: "sloganName")
+            const HomeScreen()
         ),
       ),
     );

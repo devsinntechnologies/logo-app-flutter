@@ -6,6 +6,8 @@ class BottomNavigationButtons extends StatelessWidget {
   final VoidCallback onNext;
   final VoidCallback onBack;
   final VoidCallback onFinish;
+  final String companyName;
+  final String slogan;
 
   const BottomNavigationButtons({
     super.key,
@@ -14,16 +16,19 @@ class BottomNavigationButtons extends StatelessWidget {
     required this.onNext,
     required this.onBack,
     required this.onFinish,
+    required this.companyName,
+    required this.slogan,
   });
 
   @override
   Widget build(BuildContext context) {
+    final bool isDisabled = companyName.isEmpty || slogan.isEmpty;
+
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(10.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Show Back button if not on the first step
           if (currentStep > 0)
             OutlinedButton(
               onPressed: onBack,
@@ -32,10 +37,8 @@ class BottomNavigationButtons extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
-                padding: const EdgeInsets.symmetric(
-                  vertical: 16,
-                  horizontal: 32,
-                ),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 16, horizontal: 25),
                 foregroundColor: Colors.black,
               ),
               child: const Row(
@@ -47,27 +50,32 @@ class BottomNavigationButtons extends StatelessWidget {
               ),
             )
           else
-            const SizedBox(), // empty placeholder to maintain spacing
-          // Next or Finish button
+            const SizedBox(),
           if (currentStep < totalSteps - 1)
             OutlinedButton(
-              onPressed: onNext,
+              onPressed: isDisabled && currentStep == 0 ? null : onNext,
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: Colors.transparent, width: 1.5),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
-                padding: const EdgeInsets.symmetric(
-                  vertical: 16,
-                  horizontal: 32,
-                ),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 16, horizontal: 25),
                 foregroundColor: Colors.black,
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Text('NEXT', style: TextStyle(fontWeight: FontWeight.bold)),
-                  SizedBox(width: 8),
-                  Icon(Icons.arrow_forward_ios_rounded, size: 16),
+                  Text(
+                    'NEXT',
+                    style: TextStyle(
+                      color: isDisabled && currentStep == 0
+                          ? Colors.grey
+                          : Colors.black,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.arrow_forward_ios_rounded, size: 16),
                 ],
               ),
             ),
