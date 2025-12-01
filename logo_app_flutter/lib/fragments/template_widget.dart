@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:logo_app_flutter/screens/download_logo.dart';
 import 'package:logo_app_flutter/services/logo_service.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:logo_app_flutter/utils/theme_colors.dart';
 
 class TemplateWidget extends StatefulWidget {
   final String companyName;
@@ -127,18 +128,19 @@ class _TemplateWidgetState extends State<TemplateWidget> {
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('No logos found.'));
           }
-
+      
           final svgList = snapshot.data!;
-
+      
           return Padding(
             padding: const EdgeInsets.all(16.0),
             child: GridView.builder(
               itemCount: svgList.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
+              gridDelegate:  SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: screenWidth >= 500 ? 4 : 2,
                 crossAxisSpacing: 3,
                 mainAxisSpacing: 3,
-                childAspectRatio: 0.7,
+                childAspectRatio: screenWidth >= 500 ? 1 : 0.82,
+      
               ),
               itemBuilder: (context, index) {
                 return InkWell(
@@ -168,12 +170,12 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                       Container(
                         padding: EdgeInsets.all(10),
                         width: screenWidth * 1.7,
-
+      
                         decoration: BoxDecoration(
                           border: Border.all(
                             color:
                                 selectedIndex == index
-                                    ? Colors.orange
+                                    ? ThemeColors.darkPrimaryColor
                                     : Colors.grey.shade300,
                             width: selectedIndex == index ? 2.5 : 1,
                           ),
@@ -229,19 +231,20 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                                 ),
                               ),
                             ),
+                            //  const SizedBox(height: 40),
                           ],
                         ),
                       ),
-
+      
                       if (selectedIndex == index)
                         Positioned(
                           bottom: 20,
                           child: SizedBox(
                             height: 30,
-
+      
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.orange,
+                                backgroundColor: ThemeColors.purple,
                                 foregroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20),
@@ -277,8 +280,10 @@ class _TemplateWidgetState extends State<TemplateWidget> {
               },
             ),
           );
+          
         },
       ),
+    
     );
   }
 }

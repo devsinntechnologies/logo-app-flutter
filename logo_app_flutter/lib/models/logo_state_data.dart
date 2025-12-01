@@ -1,6 +1,9 @@
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
+
 class CustomTextElement {
+  final TextAlign textAlign;
   final String text;
   final Offset position;
   final double size;
@@ -9,8 +12,14 @@ class CustomTextElement {
   final bool isVisible;
   final int? layerIndex;
   final Color color;
+  final FontWeight fontWeight;
+
+  final bool isOutlined;
+  final Color outlineColor;
+  final double strokeWidth;
 
   const CustomTextElement({
+    this.textAlign = TextAlign.center,
     required this.text,
     required this.position,
     required this.size,
@@ -19,9 +28,14 @@ class CustomTextElement {
     this.isVisible = true,
     this.layerIndex,
     this.color = const Color(0xFF000000),
+    this.isOutlined = false,
+    this.outlineColor = Colors.black,
+    this.strokeWidth = 1.0,
+       this.fontWeight = FontWeight.normal,
   });
 
   CustomTextElement copyWith({
+    TextAlign? textAlign,
     String? text,
     Offset? position,
     double? size,
@@ -30,8 +44,13 @@ class CustomTextElement {
     bool? isVisible,
     int? layerIndex,
     Color? color,
+    bool? isOutlined,
+    Color? outlineColor,
+    double? strokeWidth,
+      FontWeight? fontWeight,
   }) {
     return CustomTextElement(
+      textAlign: textAlign ?? this.textAlign,
       text: text ?? this.text,
       position: position ?? this.position,
       size: size ?? this.size,
@@ -40,6 +59,28 @@ class CustomTextElement {
       isVisible: isVisible ?? this.isVisible,
       layerIndex: layerIndex ?? this.layerIndex,
       color: color ?? this.color,
+      isOutlined: isOutlined ?? this.isOutlined,
+      outlineColor: outlineColor ?? this.outlineColor,
+      strokeWidth: strokeWidth ?? this.strokeWidth,
+       fontWeight: fontWeight ?? this.fontWeight,
+    );
+  }
+
+  CustomTextElement clone() {
+    return CustomTextElement(
+      textAlign: textAlign,
+      text: text,
+      position: Offset(position.dx, position.dy),
+      size: size,
+      rotation: rotation,
+      opacity: opacity,
+      isVisible: isVisible,
+      layerIndex: layerIndex,
+      color: Color(color.value),
+  fontWeight: fontWeight, 
+      isOutlined: isOutlined,
+      outlineColor: Color(outlineColor.value),
+      strokeWidth: strokeWidth,
     );
   }
 }
@@ -82,12 +123,24 @@ class CustomImageElement {
       layerIndex: layerIndex ?? this.layerIndex,
     );
   }
+
+  CustomImageElement clone() {
+    return CustomImageElement(
+      path: path,
+      position: Offset(position.dx, position.dy),
+      rotation: rotation,
+      size: size,
+      opacity: opacity,
+      isVisible: isVisible,
+      layerIndex: layerIndex,
+    );
+  }
 }
 
 class CustomSvgElement {
   final String svgString;
   final Offset position;
-  final Color color; //
+  final Color? color; //
   final double size;
   final double rotation;
   final double opacity;
@@ -97,7 +150,7 @@ class CustomSvgElement {
   const CustomSvgElement({
     required this.svgString,
     required this.position,
-    required this.color,
+    this.color,
     required this.size,
     required this.rotation,
     this.opacity = 1.0,
@@ -126,9 +179,35 @@ class CustomSvgElement {
       layerIndex: layerIndex ?? this.layerIndex,
     );
   }
+
+  CustomSvgElement clone() {
+    return CustomSvgElement(
+      svgString: svgString,
+      position: Offset(position.dx, position.dy),
+     color: color == null ? null : Color(color!.value),
+      size: size,
+      rotation: rotation,
+      opacity: opacity,
+      isVisible: isVisible,
+      layerIndex: layerIndex,
+    );
+  }
 }
 
 class LogoStateData {
+  final Map<String, double> outlineWidths;
+  final Map<String, Color> outlineColors;
+final Map<int, double> rotationXMap;
+final Map<int, double> rotationYMap;
+final Map<int, double> rotationZMap;
+  final double perspective;
+  final Color companyNameColor;
+  final Color sloganColor;
+  final Color companyNameOutlineColor;
+  final double companyNameOutlineWidth;
+  final Color sloganOutlineColor;
+  final double sloganOutlineWidth;
+
   final Offset logoPosition;
   final double logoSize;
   final double logoRotation;
@@ -168,13 +247,31 @@ class LogoStateData {
 
   final Set<int> lockedElements;
   final List<int> elementOrder;
+  final TextAlign companyNameTextAlign; // ← add this
+  final TextAlign sloganTextAlign;
+
+  
 
   LogoStateData({
+     this.outlineWidths = const {},
+    this.outlineColors = const {},
+this.rotationXMap = const {},
+this.rotationYMap = const {},
+this.rotationZMap = const {},
+
+    this.perspective = 0.001,
     List<CustomTextElement>? customTexts,
     List<CustomImageElement>? customImages,
     List<CustomSvgElement>? customSVGs,
     Set<int>? lockedElements,
     List<int>? elementOrder,
+    this.companyNameColor = Colors.black,
+    this.sloganColor = Colors.black,
+    this.companyNameOutlineColor = Colors.transparent,
+    this.companyNameOutlineWidth = 0.0,
+    this.sloganOutlineColor = Colors.transparent,
+    this.sloganOutlineWidth = 0.0,
+
     required this.logoPosition,
     required this.logoSize,
     required this.logoRotation,
@@ -202,6 +299,8 @@ class LogoStateData {
     this.slogan2Size,
     this.slogan2Rotation,
     required this.isSlogan2Visible,
+    this.companyNameTextAlign = TextAlign.center,
+    this.sloganTextAlign = TextAlign.center,
   }) : customTexts = customTexts ?? [],
        customImages = customImages ?? [],
        customSVGs = customSVGs ?? [],
@@ -229,6 +328,23 @@ class LogoStateData {
   }
 
   LogoStateData copyWith({
+        Map<String, double>? outlineWidths,
+    Map<String, Color>? outlineColors,
+  Map<int, double>? rotationXMap,
+Map<int, double>? rotationYMap,
+Map<int, double>? rotationZMap,
+
+    double? perspective,
+    Color? companyNameColor,
+    Color? companyNameOutlineColor,
+    double? companyNameOutlineWidth,
+
+    Color? sloganColor,
+    Color? sloganOutlineColor,
+    double? sloganOutlineWidth,
+
+    TextAlign? companyNameTextAlign,
+    TextAlign? sloganTextAlign,
     Offset? logoPosition,
     double? logoSize,
     double? logoRotation,
@@ -263,6 +379,24 @@ class LogoStateData {
     List<int>? elementOrder,
   }) {
     return LogoStateData(
+         outlineWidths: outlineWidths ?? this.outlineWidths,
+      outlineColors: outlineColors ?? this.outlineColors,
+rotationXMap: rotationXMap ?? this.rotationXMap,
+rotationYMap: rotationYMap ?? this.rotationYMap,
+rotationZMap: rotationZMap ?? this.rotationZMap,
+
+      perspective: perspective ?? this.perspective,
+
+      companyNameColor: companyNameColor ?? this.companyNameColor,
+      companyNameOutlineColor:
+          companyNameOutlineColor ?? this.companyNameOutlineColor,
+      companyNameOutlineWidth:
+          companyNameOutlineWidth ?? this.companyNameOutlineWidth,
+
+      sloganColor: sloganColor ?? this.sloganColor,
+      sloganOutlineColor: sloganOutlineColor ?? this.sloganOutlineColor,
+      sloganOutlineWidth: sloganOutlineWidth ?? this.sloganOutlineWidth,
+
       logoPosition: logoPosition ?? this.logoPosition,
       logoSize: logoSize ?? this.logoSize,
       logoRotation: logoRotation ?? this.logoRotation,
@@ -291,11 +425,118 @@ class LogoStateData {
       slogan2Size: slogan2Size ?? this.slogan2Size,
       slogan2Rotation: slogan2Rotation ?? this.slogan2Rotation,
       isSlogan2Visible: isSlogan2Visible ?? this.isSlogan2Visible,
-      customTexts: customTexts ?? this.customTexts,
-      customImages: customImages ?? this.customImages,
-      customSVGs: customSVGs ?? this.customSVGs,
-      lockedElements: lockedElements ?? this.lockedElements,
-      elementOrder: elementOrder ?? this.elementOrder,
+      customTexts:
+          customTexts ?? this.customTexts.map((e) => e.clone()).toList(),
+      customImages:
+          customImages ?? this.customImages.map((e) => e.clone()).toList(),
+      customSVGs: customSVGs ?? this.customSVGs.map((e) => e.clone()).toList(),
+      lockedElements: lockedElements ?? Set<int>.from(this.lockedElements),
+      elementOrder: elementOrder ?? List<int>.from(this.elementOrder),
+
+      companyNameTextAlign: companyNameTextAlign ?? this.companyNameTextAlign,
+      sloganTextAlign: sloganTextAlign ?? this.sloganTextAlign,
+    );
+  }
+
+  LogoStateData clone() {
+    return LogoStateData(
+            outlineWidths: Map<String, double>.from(outlineWidths),
+      outlineColors: Map<String, Color>.from(outlineColors),
+rotationXMap: Map<int, double>.from(rotationXMap),
+rotationYMap: Map<int, double>.from(rotationYMap),
+rotationZMap: Map<int, double>.from(rotationZMap),
+
+      perspective: perspective ?? this.perspective,
+
+      companyNameColor: Color(companyNameColor.value),
+      companyNameOutlineColor: Color(companyNameOutlineColor.value),
+      companyNameOutlineWidth: companyNameOutlineWidth,
+
+      sloganColor: Color(sloganColor.value),
+      sloganOutlineColor: Color(sloganOutlineColor.value),
+      sloganOutlineWidth: sloganOutlineWidth,
+
+      logoPosition: Offset(logoPosition.dx, logoPosition.dy),
+      logoSize: logoSize,
+      logoRotation: logoRotation,
+      isLogoVisible: isLogoVisible,
+      svgLogo: svgLogo,
+
+      companyNamePosition: Offset(
+        companyNamePosition.dx,
+        companyNamePosition.dy,
+      ),
+      companyNameSize: companyNameSize,
+      companyNameRotation: companyNameRotation,
+      isCompanyNameVisible: isCompanyNameVisible,
+      companyName: companyName,
+
+      sloganPosition: Offset(sloganPosition.dx, sloganPosition.dy),
+      sloganSize: sloganSize,
+      sloganRotation: sloganRotation,
+      isSloganVisible: isSloganVisible,
+      sloganName: sloganName,
+      
+
+      logo2Position:
+          logo2Position == null
+              ? null
+              : Offset(logo2Position!.dx, logo2Position!.dy),
+      logo2Size: logo2Size,
+      logo2Rotation: logo2Rotation,
+      isLogo2Visible: isLogo2Visible,
+
+      companyName2Position:
+          companyName2Position == null
+              ? null
+              : Offset(companyName2Position!.dx, companyName2Position!.dy),
+      companyName2Size: companyName2Size,
+      companyName2Rotation: companyName2Rotation,
+      isCompanyName2Visible: isCompanyName2Visible,
+
+      slogan2Position:
+          slogan2Position == null
+              ? null
+              : Offset(slogan2Position!.dx, slogan2Position!.dy),
+      slogan2Size: slogan2Size,
+      slogan2Rotation: slogan2Rotation,
+      isSlogan2Visible: isSlogan2Visible,
+
+      /// 🔥 Deep clone lists (VERY IMPORTANT)
+      customTexts:
+          customTexts
+              .map((e) => e.clone()) // requires clone() in CustomTextElement
+              .toList(),
+      customImages:
+          customImages
+              .map((e) => e.clone()) // requires clone() in CustomImageElement
+              .toList(),
+      customSVGs:
+          customSVGs
+              .map((e) => e.clone()) // requires clone() in CustomSvgElement
+              .toList(),
+
+      /// 🔥 Deep clone sets and lists
+      lockedElements: Set<int>.from(lockedElements),
+      elementOrder: List<int>.from(elementOrder),
+
+      companyNameTextAlign: companyNameTextAlign,
+      sloganTextAlign: sloganTextAlign,
     );
   }
 }
+
+// void _updateTextAlignment(TextAlign align) {
+//   final id = widget.selectedElementId;
+//   if (id == null) return;
+
+//   if (id == 1) {
+//     widget.logoState.companyNameAlign = align;
+//   } else if (id == 2) {
+//     widget.logoState.sloganAlign = align;
+//   } else if (id >= 100 && id <= 199) {
+//     final index = id - 100;
+//     widget.logoState.customTexts[index] =
+//         widget.logoState.customTexts[index].copyWith(align: align);
+//   }
+// }

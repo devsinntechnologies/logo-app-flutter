@@ -10,6 +10,7 @@ import 'package:logo_app_flutter/screens/color_screen.dart';
 import 'package:logo_app_flutter/screens/gradiant_picker_screen.dart';
 import 'package:logo_app_flutter/screens/select_bg_images.dart';
 import 'package:logo_app_flutter/screens/select_texture_images.dart';
+import 'package:logo_app_flutter/utils/theme_colors.dart';
 import 'package:provider/provider.dart';
 
 class DropUpPanel extends StatefulWidget {
@@ -84,7 +85,7 @@ class _DropUpPanelState extends State<DropUpPanel> {
                   onTap: widget.onClose,
 
                   child: Container(
-                    width: 25,
+                    width: 30,
                     height: 30,
                     decoration: BoxDecoration(
                       color: Colors.grey.shade100,
@@ -97,7 +98,7 @@ class _DropUpPanelState extends State<DropUpPanel> {
                     child: Icon(
                       Icons.keyboard_double_arrow_down_sharp,
                       size: 25,
-                      color: Colors.indigo
+                     color: ThemeColors.purple,
                     ),
                   ),
                 ),
@@ -243,7 +244,7 @@ class _TopOption extends StatelessWidget {
         label,
         style: const TextStyle(
           fontSize: 12,
-          color: Colors.indigo,
+          color: ThemeColors.purple,
           fontWeight: FontWeight.normal,
         ),
       ),

@@ -1,6 +1,5 @@
-// ignore_for_file: unnecessary_null_comparison, avoid_print, no_leading_underscores_for_local_identifiers
-
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -13,6 +12,7 @@ import 'editable_element_wrapper.dart';
 import 'grid_painter.dart';
 
 class LogoCanvas extends StatefulWidget {
+  final ValueNotifier<bool> isExportingNotifier;
   final String selectedShapeName;
   final LogoStateData logoState;
   final String svgLogo;
@@ -49,7 +49,7 @@ class LogoCanvas extends StatefulWidget {
 
   const LogoCanvas({
     Key? key,
-
+    required this.isExportingNotifier,
     required this.selectedShapeName,
     required this.logoState,
     required this.svgLogo,
@@ -89,16 +89,24 @@ class LogoCanvas extends StatefulWidget {
 }
 
 class _LogoCanvasState extends State<LogoCanvas> {
+  bool isExporting = false;
+
   bool hasTextOnCanvas() {
-  
-  if (widget.logoState.customTexts.any((t) => t.isVisible && t.text.isNotEmpty)) return true;
+    if (widget.logoState.customTexts.any(
+      (t) => t.isVisible && t.text.isNotEmpty,
+    ))
+      return true;
 
-  if (widget.logoState.isCompanyNameVisible && (widget.logoState.companyName?.isNotEmpty ?? false)) return true;
+    if (widget.logoState.isCompanyNameVisible &&
+        (widget.logoState.companyName?.isNotEmpty ?? false))
+      return true;
 
-  if (widget.logoState.isSloganVisible && (widget.logoState.sloganName?.isNotEmpty ?? false)) return true;
+    if (widget.logoState.isSloganVisible &&
+        (widget.logoState.sloganName?.isNotEmpty ?? false))
+      return true;
 
-  return false;
-}
+    return false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -114,209 +122,267 @@ class _LogoCanvasState extends State<LogoCanvas> {
             ? "Square"
             : widget.selectedShapeName;
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final Size canvasSize = constraints.biggest;
-        return Stack(
-          children: [
-            if (widget.showGrid)
-              CustomPaint(
-                painter: GridPainter(
-                  gridColor: Colors.blue,
-                  highlightedHorizontalLine:
-                      widget.highlightedHorizontalGridLineIndex,
-                  highlightedVerticalLine:
-                      widget.highlightedVerticalGridLineIndex,
-                ),
-                size: Size.infinite,
-              ),
-
-            if (widget.isCheckerboardVisible)
-              Opacity(
-                opacity: 0.1,
-                child: Image.asset(
-                  'assets/icons/checkerboard.png',
-                  width: double.infinity,
-                  height: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-              ),
-
-            if (widget.isCheckerboardVisible && selectedShape == "Square")
-              Opacity(
-                opacity: widget.checkerboardOpacity,
-                child: CustomPaint(
-                  size: const Size(double.infinity, double.infinity),
-                  painter: SquarePainter(shapeColor, gradient, bgImage),
-                ),
-              ),
-
-            if (widget.isCheckerboardVisible && selectedShape == "Rounded Rect")
-              Opacity(
-                opacity: widget.checkerboardOpacity,
-                child: Center(
-                  child: CustomPaint(
-                    size: const Size(280, 100),
-                    painter: SquarePainter(shapeColor, gradient, bgImage),
+    return ValueListenableBuilder<bool>(
+      valueListenable: widget.isExportingNotifier,
+      builder: (context, isExporting, child) {
+        print('🎨 LogoCanvas rebuilding with isExporting: $isExporting');
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final bgImage = providers.canvasImage ?? providers.backgroundImage;
+            final Size canvasSize = constraints.biggest;
+            return Stack(
+              children: [
+                if (widget.showGrid)
+                  CustomPaint(
+                    painter: GridPainter(
+                      gridColor: Colors.blue,
+                      highlightedHorizontalLine:
+                          widget.highlightedHorizontalGridLineIndex,
+                      highlightedVerticalLine:
+                          widget.highlightedVerticalGridLineIndex,
+                    ),
+                    size: Size.infinite,
                   ),
-                ),
-              ),
 
-            if (widget.isCheckerboardVisible && selectedShape == "Diamond")
-              Opacity(
-                opacity: widget.checkerboardOpacity,
-                child: CustomPaint(
-                  size: const Size(double.infinity, double.infinity),
-                  painter: DiamondPainter(shapeColor, gradient, bgImage),
-                ),
-              ),
+                if (widget.isCheckerboardVisible)
+                  Opacity(
+                    opacity: 0.1,
+                    child: Image.asset(
+                      'assets/icons/checkerboard.png',
+                      width: double.infinity,
+                      height: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
 
-            if (widget.isCheckerboardVisible && selectedShape == "Triangle")
-              Opacity(
-                opacity: widget.checkerboardOpacity,
-                child: CustomPaint(
-                  size: const Size(double.infinity, double.infinity),
-                  painter: TrianglePainter(shapeColor, gradient, bgImage),
-                ),
-              ),
+                if (widget.isCheckerboardVisible && selectedShape == "Square")
+                  Opacity(
+                    opacity: widget.checkerboardOpacity,
+                    child: CustomPaint(
+                      size: const Size(double.infinity, double.infinity),
+                      painter: SquarePainter(shapeColor, gradient, bgImage),
+                    ),
+                  ),
 
-            if (widget.isCheckerboardVisible && selectedShape == "Pentagon")
-              Opacity(
-                opacity: widget.checkerboardOpacity,
-                child: CustomPaint(
-                  size: const Size(double.infinity, double.infinity),
-                  painter: PentagonPainter(shapeColor, gradient, bgImage),
-                ),
-              ),
+                if (widget.isCheckerboardVisible &&
+                    selectedShape == "Rounded Rect")
+                  Opacity(
+                    opacity: widget.checkerboardOpacity,
+                    child: Center(
+                      child: CustomPaint(
+                        size: const Size(280, 100),
+                        painter: SquarePainter(shapeColor, gradient, bgImage),
+                      ),
+                    ),
+                  ),
 
-            if (widget.isCheckerboardVisible && selectedShape == "Hexagon")
-              Opacity(
-                opacity: widget.checkerboardOpacity,
-                child: CustomPaint(
-                  size: const Size(double.infinity, double.infinity),
-                  painter: HexagonPainter(shapeColor, gradient, bgImage),
-                ),
-              ),
+                if (widget.isCheckerboardVisible && selectedShape == "Diamond")
+                  Opacity(
+                    opacity: widget.checkerboardOpacity,
+                    child: CustomPaint(
+                      size: const Size(double.infinity, double.infinity),
+                      painter: DiamondPainter(shapeColor, gradient, bgImage),
+                    ),
+                  ),
 
-            if (widget.isCheckerboardVisible && selectedShape == "Star")
-              Opacity(
-                opacity: widget.checkerboardOpacity,
-                child: CustomPaint(
-                  size: const Size(double.infinity, double.infinity),
-                  painter: StarPainter(shapeColor, gradient, bgImage),
-                ),
-              ),
+                if (widget.isCheckerboardVisible && selectedShape == "Triangle")
+                  Opacity(
+                    opacity: widget.checkerboardOpacity,
+                    child: CustomPaint(
+                      size: const Size(double.infinity, double.infinity),
+                      painter: TrianglePainter(shapeColor, gradient, bgImage),
+                    ),
+                  ),
 
-            if (widget.isCheckerboardVisible && selectedShape == "Arrow")
-              Opacity(
-                opacity: widget.checkerboardOpacity,
-                child: CustomPaint(
-                  size: const Size(double.infinity, double.infinity),
-                  painter: ArrowPainter(shapeColor, gradient, bgImage),
-                ),
-              ),
+                if (widget.isCheckerboardVisible && selectedShape == "Pentagon")
+                  Opacity(
+                    opacity: widget.checkerboardOpacity,
+                    child: CustomPaint(
+                      size: const Size(double.infinity, double.infinity),
+                      painter: PentagonPainter(shapeColor, gradient, bgImage),
+                    ),
+                  ),
 
-            if (widget.isCheckerboardVisible && selectedShape == "Heart")
-              Opacity(
-                opacity: widget.checkerboardOpacity,
-                child: CustomPaint(
-                  size: const Size(200, 200),
-                  painter: HeartPainter(shapeColor, gradient, bgImage),
-                ),
-              ),
-            if (widget.isCheckerboardActive == false ||
-                widget.isCheckerboardVisible == false ||
-                selectedShape.isEmpty)
-              Opacity(
-                opacity: widget.checkerboardOpacity,
-                child: CustomPaint(
-                  size: const Size(double.infinity, double.infinity),
-                  painter: SquarePainter(shapeColor, gradient, bgImage),
-                ),
-              ),
+                if (widget.isCheckerboardVisible && selectedShape == "Hexagon")
+                  Opacity(
+                    opacity: widget.checkerboardOpacity,
+                    child: CustomPaint(
+                      size: const Size(double.infinity, double.infinity),
+                      painter: HexagonPainter(shapeColor, gradient, bgImage),
+                    ),
+                  ),
 
-            ...(widget.elementOrder.isNotEmpty
-                    ? widget.elementOrder
-                    : widget.logoState.visibleElementIds)
-                .map((id) => _buildElementById(id, canvasSize))
-                .whereType<Widget>(),
-          ],
+                if (widget.isCheckerboardVisible && selectedShape == "Star")
+                  Opacity(
+                    opacity: widget.checkerboardOpacity,
+                    child: CustomPaint(
+                      size: const Size(double.infinity, double.infinity),
+                      painter: StarPainter(shapeColor, gradient, bgImage),
+                    ),
+                  ),
+
+                if (widget.isCheckerboardVisible && selectedShape == "Arrow")
+                  Opacity(
+                    opacity: widget.checkerboardOpacity,
+                    child: CustomPaint(
+                      size: const Size(double.infinity, double.infinity),
+                      painter: ArrowPainter(shapeColor, gradient, bgImage),
+                    ),
+                  ),
+
+                if (widget.isCheckerboardVisible && selectedShape == "Heart")
+                  Opacity(
+                    opacity: widget.checkerboardOpacity,
+                    child: CustomPaint(
+                      size: const Size(200, 200),
+                      painter: HeartPainter(shapeColor, gradient, bgImage),
+                    ),
+                  ),
+                if (widget.isCheckerboardActive == false ||
+                    widget.isCheckerboardVisible == false ||
+                    selectedShape.isEmpty)
+                  Opacity(
+                    opacity: widget.checkerboardOpacity,
+                    child: CustomPaint(
+                      size: const Size(double.infinity, double.infinity),
+                      painter: SquarePainter(shapeColor, gradient, bgImage),
+                    ),
+                  ),
+
+                // NOTE: Removed the big Transform around the whole stack.
+                // Build elements individually — rotation will be applied per-selected-element
+                Stack(
+                  children: [
+                    ...(widget.elementOrder.isNotEmpty
+                            ? widget.elementOrder
+                            : widget.logoState.visibleElementIds)
+                        .map(
+                          (id) => _buildElementById(
+                            id,
+                            canvasSize,
+                            isExporting: isExporting,
+                          ),
+                        )
+                        .whereType<Widget>(),
+                  ],
+                ),
+              ],
+            );
+          },
         );
       },
     );
   }
 
-  Widget? _buildElementById(int id, Size canvasSize) {
+  Widget? _buildElementById(
+    int id,
+    Size canvasSize, {
+    required bool isExporting,
+  }) {
     final provider = Provider.of<SelectedColorProvider>(context, listen: true);
-
-    final bool isSelected = provider.selectedElementId == id;
+    final bool isSelected = widget.selectedElementId == id;
     final outlineColor = provider.getOutlineColor(id);
     final outlineWidth = provider.getOutlineWidth(id);
+    // const Color highlightColor = Colors.red;
+    final Color shapeColor = provider.shapeColor;
 
-    const Color highlightColor = Colors.red;
+    final Color companyColor = provider.companyTextColor;
+    final Color customTextColor = provider.customTextColor;
 
-    final Color shapeColor =
-        (isSelected && id == 0) ? provider.selectedColor : provider.shapeColor;
-    final Color companyColor =
-        (isSelected && id == 1) ? highlightColor : provider.companyTextColor;
-    final Color sloganColor =
-        (isSelected && id == 2) ? highlightColor : provider.sloganColor;
+    final Color sloganColor = provider.sloganColor;
 
     final scaleFactor = 0.2;
 
-    Size _calculateTextSize(String text, TextStyle style) {
-      final TextPainter textPainter = TextPainter(
-        text: TextSpan(text: text, style: style),
+    Size _calculateTextSize(
+      String text,
+      TextStyle style, {
+      FontWeight? fontWeight,
+    }) {
+      final tp = TextPainter(
+        text: TextSpan(
+          text: text,
+          style: style.copyWith(fontWeight: fontWeight ?? style.fontWeight),
+        ),
         maxLines: 1,
         textDirection: TextDirection.ltr,
       )..layout();
-      return textPainter.size;
+      return tp.size;
     }
 
+    Offset _centerAlign(Size canvasSize, Size childSize) {
+      return Offset(
+        (canvasSize.width - childSize.width) / 2,
+        (canvasSize.height - childSize.height) / 2,
+      );
+    }
+
+    // wrap() now applies the 3D transform only when this element is selected
     Widget wrap(
       Widget child, {
       required Offset centerPosition,
       required double rotation,
       required Size childSize,
+      required bool isExporting,
     }) {
+      // final topLeftPosition = centerPosition;
       final topLeftPosition = Offset(
-        centerPosition.dx - childSize.width / 3,
-        centerPosition.dy - childSize.height / 2.5,
+        centerPosition.dx - childSize.width / 2,
+        centerPosition.dy - childSize.height / 2,
       );
+
+      // Apply 3D only for the currently selected element (widget.selectedElementId)
+
+final elementId = id; // keep id local
+final double rotationX = widget.logoState.rotationXMap[elementId] ?? 0.0;
+final double rotationY = widget.logoState.rotationYMap[elementId] ?? 0.0;
+final double rotationZ = widget.logoState.rotationZMap[elementId] ?? 0.0;
+
+Widget rotatedChild = Transform(
+  alignment: Alignment.center,
+  transform: Matrix4.identity()
+    ..rotateX(rotationX * (math.pi / 180))
+    ..rotateY(rotationY * (math.pi / 180))
+    ..rotateZ(rotationZ * (math.pi / 180)),
+  child: child,
+);
+
 
       return _buildEditableWrapper(
         id: id,
         position: topLeftPosition,
         rotation: rotation,
         isLocked: widget.lockedElements.contains(id),
-        child: child,
+        child: rotatedChild,
         canvasSize: canvasSize,
+        isExporting: isExporting,
       );
     }
 
-    Offset _centerAlign(Size canvasSize, Size childSize) {
-      return Offset(canvasSize.width / 2, canvasSize.height / 2);
-    }
-
-    // ✅ Custom Text (100–199)
+    // Custom Texts
     if (id >= 100 && id < 200) {
       final index = id - 100;
-      if (index < 0 || index >= widget.logoState.customTexts.length)
-        return null;
+      if (index >= widget.logoState.customTexts.length) return null;
       final customText = widget.logoState.customTexts[index];
       if (!customText.isVisible) return null;
-
+      final elementColor = provider.getColorForElement(
+        id,
+        fallback: provider.customTextColor,
+      );
       final textStyle = TextStyle(
         fontSize: customText.size,
-        color: companyColor,
+        color: elementColor,
         fontWeight: FontWeight.w500,
       );
-
       final measuredSize = _calculateTextSize(customText.text, textStyle);
       final textSize = Size(
         measuredSize.width * scaleFactor,
         measuredSize.height * scaleFactor,
       );
+
+      final centerPosition =
+          (customText.position == Offset.zero)
+              ? _centerAlign(canvasSize, textSize)
+              : customText.position;
 
       return wrap(
         Center(
@@ -327,24 +393,29 @@ class _LogoCanvasState extends State<LogoCanvas> {
               style: textStyle,
               strokeColor: outlineColor,
               strokeWidth: outlineWidth,
+              textAlign: provider.customTextAlign,
             ),
           ),
         ),
-        centerPosition: customText.position,
+        centerPosition: centerPosition,
         rotation: customText.rotation,
         childSize: textSize,
+        isExporting: isExporting,
       );
     }
 
-    // ✅ Custom Images (200–299)
+    // Custom Images
     if (id >= 200 && id < 300) {
       final index = id - 200;
-      if (index < 0 || index >= widget.logoState.customImages.length)
-        return null;
+      if (index >= widget.logoState.customImages.length) return null;
       final image = widget.logoState.customImages[index];
       if (!image.isVisible) return null;
 
       final imageSize = Size(image.size ?? 100, image.size ?? 100);
+      final centerPosition =
+          (image.position == Offset.zero)
+              ? _centerAlign(canvasSize, imageSize)
+              : image.position;
 
       return wrap(
         Center(
@@ -354,81 +425,88 @@ class _LogoCanvasState extends State<LogoCanvas> {
                 image.path.startsWith('assets/')
                     ? Image.asset(
                       image.path,
-                      height: imageSize.height,
                       width: imageSize.width,
+                      height: imageSize.height,
                       fit: BoxFit.contain,
                     )
                     : Image.file(
                       File(image.path),
-                      height: imageSize.height,
                       width: imageSize.width,
+                      height: imageSize.height,
                       fit: BoxFit.contain,
                     ),
           ),
         ),
-        centerPosition: image.position,
+        centerPosition: centerPosition,
         rotation: image.rotation,
         childSize: imageSize,
+        isExporting: isExporting,
       );
     }
 
-    // ✅ Custom SVG (300–399) + Outline
+    // Custom SVGs
     if (id >= 300 && id < 400) {
       final index = id - 300;
-      if (index < 0 || index >= widget.logoState.customSVGs.length) return null;
+      if (index >= widget.logoState.customSVGs.length) return null;
       final svgElement = widget.logoState.customSVGs[index];
       if (!svgElement.isVisible) return null;
-
+      final elementColor = provider.getColorForElement(
+        id,
+        fallback: Colors.black,
+      );
       final svgSize = Size(svgElement.size, svgElement.size);
-
-      
+      final centerPosition =
+          (svgElement.position == Offset.zero)
+              ? _centerAlign(canvasSize, svgSize)
+              : svgElement.position;
 
       return wrap(
-  StrokedSvg(
-    svgString: svgElement.svgString,
-    width: svgElement.size,
-    height: svgElement.size,
-    strokeColor: outlineColor,
-    strokeWidth: outlineWidth,
-    fillColor: null, // ya agar fill color dena ho to pass kar do
-  ),
-  centerPosition: svgElement.position,
-  rotation: svgElement.rotation,
-  childSize: svgSize,
-);
-
+        StrokedSvg(
+          svgString: svgElement.svgString,
+          width: svgElement.size,
+          height: svgElement.size,
+          strokeColor: outlineColor,
+          strokeWidth: outlineWidth,
+          // fillColor: elementColor,
+        ),
+        centerPosition: centerPosition,
+        rotation: svgElement.rotation,
+        childSize: svgSize,
+        isExporting: isExporting,
+      );
     }
 
-    // ✅ Main Logo / Company Name / Slogan
+    // Main Logo, Company Name, Slogan
     switch (id) {
-    
-      case 0: // Shape (Main Logo SVG)
-  final logoSize = widget.logoState.logoSize;
-  final shapeSize = Size(logoSize, logoSize) * 0.9;
-  final centerPosition =
-      (widget.logoState.logoPosition == Offset.zero ||
-              widget.logoState.logoPosition == null)
-          ? _centerAlign(canvasSize, shapeSize)
-          : widget.logoState.logoPosition;
+      case 0: // Logo
+        final logoSize = widget.logoState.logoSize;
+        final shapeSize = Size(logoSize, logoSize) * 0.9;
+        final centerPosition =
+            (widget.logoState.logoPosition == Offset.zero ||
+                    widget.logoState.logoPosition == null)
+                ? _centerAlign(canvasSize, shapeSize)
+                : widget.logoState.logoPosition;
+        // final elementColor = provider.getColorForElement(
+        //   id,
+        //   fallback: Colors.black,
+        // );
+        return widget.logoState.isLogoVisible
+            ? wrap(
+              StrokedSvg(
+                svgString: widget.svgLogo,
+                width: logoSize,
+                height: logoSize,
+                strokeColor: outlineColor,
+                strokeWidth: outlineWidth,
 
-  return widget.logoState.isLogoVisible
-      ? wrap(
-          StrokedSvg(
-            svgString: widget.svgLogo,
-            width: logoSize,
-            height: logoSize,
-            strokeColor: outlineColor,
-            strokeWidth: outlineWidth,
-            fillColor: provider.isColorOverrideActive || isSelected
-                ? (isSelected ? highlightColor : shapeColor)
-                : null,
-          ),
-          centerPosition: centerPosition,
-          rotation: widget.logoState.logoRotation,
-          childSize: shapeSize,
-        )
-      : null;
-
+                // fillColor: elementColor,
+              ),
+              centerPosition: centerPosition,
+              rotation: widget.logoState.logoRotation,
+              childSize: shapeSize,
+              isExporting: isExporting,
+            )
+            : null;
 
       case 1: // Company Name
         final nameText = widget.logoState.companyName ?? '';
@@ -452,10 +530,12 @@ class _LogoCanvasState extends State<LogoCanvas> {
                 style: textStyle,
                 strokeColor: outlineColor,
                 strokeWidth: outlineWidth,
+                textAlign: provider.companyNameAlign,
               ),
               centerPosition: centerPosition,
               rotation: widget.logoState.companyNameRotation,
               childSize: textSize,
+              isExporting: isExporting,
             )
             : null;
 
@@ -463,8 +543,7 @@ class _LogoCanvasState extends State<LogoCanvas> {
         final sloganText = widget.logoState.sloganName ?? '';
         final sloganSize = widget.logoState.sloganSize;
         final sloganStyle = TextStyle(fontSize: sloganSize, color: sloganColor);
-        final sloganMeasured =
-            _calculateTextSize(sloganText, sloganStyle) * scaleFactor;
+        final sloganMeasured = _calculateTextSize(sloganText, sloganStyle);
         final centerPosition =
             (widget.logoState.sloganPosition == Offset.zero ||
                     widget.logoState.sloganPosition == null)
@@ -473,17 +552,17 @@ class _LogoCanvasState extends State<LogoCanvas> {
 
         return widget.logoState.isSloganVisible
             ? wrap(
-              Center(
-                child: StrokedText(
-                  text: sloganText,
-                  style: sloganStyle,
-                  strokeColor: outlineColor,
-                  strokeWidth: outlineWidth,
-                ),
+              StrokedText(
+                text: sloganText,
+                style: sloganStyle,
+                strokeColor: outlineColor,
+                strokeWidth: outlineWidth,
+                textAlign: provider.sloganAlign,
               ),
               centerPosition: centerPosition,
               rotation: widget.logoState.sloganRotation,
               childSize: sloganMeasured,
+              isExporting: isExporting,
             )
             : null;
 
@@ -492,8 +571,6 @@ class _LogoCanvasState extends State<LogoCanvas> {
     }
   }
 
-  
-  
   Widget _buildEditableWrapper({
     required int id,
     required Offset position,
@@ -501,7 +578,11 @@ class _LogoCanvasState extends State<LogoCanvas> {
     required Widget child,
     required Size canvasSize,
     required bool isLocked,
+    required bool isExporting,
   }) {
+    print(
+      '🔧 Building EditableElementWrapper for id: $id, isExporting: $isExporting',
+    );
     return EditableElementWrapper(
       id: id,
       position: position,
@@ -524,6 +605,7 @@ class _LogoCanvasState extends State<LogoCanvas> {
       onResizePanStart: widget.onElementResizePanStart,
       onResizePanUpdate: widget.onElementResizePanUpdate,
       onResizePanEnd: widget.onElementResizePanEnd,
+      isExporting: isExporting,
       child: child,
     );
   }
@@ -534,6 +616,7 @@ class StrokedText extends StatelessWidget {
   final TextStyle style;
   final Color strokeColor;
   final double strokeWidth;
+  final TextAlign textAlign;
 
   const StrokedText({
     super.key,
@@ -541,6 +624,7 @@ class StrokedText extends StatelessWidget {
     required this.style,
     this.strokeColor = Colors.black,
     this.strokeWidth = 2,
+    this.textAlign = TextAlign.center,
   });
 
   @override
@@ -556,15 +640,19 @@ class StrokedText extends StatelessWidget {
                   ..style = PaintingStyle.stroke
                   ..strokeWidth = strokeWidth
                   ..color = strokeColor,
+            fontWeight: style.fontWeight,
           ),
+          textAlign: textAlign,
         ),
-       
-        Text(text, style: style),
+        Text(
+          text,
+          style: style.copyWith(fontWeight: style.fontWeight),
+          textAlign: textAlign,
+        ),
       ],
     );
   }
 }
-
 
 class StrokedSvg extends StatelessWidget {
   final String svgString;
@@ -589,34 +677,37 @@ class StrokedSvg extends StatelessWidget {
     return Stack(
       alignment: Alignment.center,
       children: [
-  
-        for (final offset in [
-          Offset(-strokeWidth, 0),
-          Offset(strokeWidth, 0),
-          Offset(0, -strokeWidth),
-          Offset(0, strokeWidth),
-          Offset(-strokeWidth, -strokeWidth),
-          Offset(-strokeWidth, strokeWidth),
-          Offset(strokeWidth, -strokeWidth),
-          Offset(strokeWidth, strokeWidth),
-        ])
-          Transform.translate(
-            offset: offset,
-            child: SvgPicture.string(
-              svgString,
-              width: width,
-              height: height,
-              colorFilter: ColorFilter.mode(strokeColor, BlendMode.srcIn),
+        // Stroke effect (only if strokeWidth > 0)
+        if (strokeWidth > 0)
+          ...[
+            Offset(-strokeWidth, 0),
+            Offset(strokeWidth, 0),
+            Offset(0, -strokeWidth),
+            Offset(0, strokeWidth),
+            Offset(-strokeWidth, -strokeWidth),
+            Offset(-strokeWidth, strokeWidth),
+            Offset(strokeWidth, -strokeWidth),
+            Offset(strokeWidth, strokeWidth),
+          ].map(
+            (offset) => Transform.translate(
+              offset: offset,
+              child: SvgPicture.string(
+                svgString,
+                width: width,
+                height: height,
+                colorFilter: ColorFilter.mode(strokeColor, BlendMode.srcIn),
+              ),
             ),
           ),
 
-        // Fill layer
+        // Main SVG with optional fill color
         SvgPicture.string(
           svgString,
           width: width,
           height: height,
-          colorFilter:
-              fillColor != null ? ColorFilter.mode(fillColor!, BlendMode.srcIn) : null,
+          colorFilter: fillColor != null
+      ? ColorFilter.mode(fillColor!, BlendMode.srcIn)
+      : null, 
         ),
       ],
     );

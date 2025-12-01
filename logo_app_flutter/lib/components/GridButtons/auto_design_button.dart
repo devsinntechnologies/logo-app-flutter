@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:logo_app_flutter/screens/design_input_screen.dart';
+import 'package:logo_app_flutter/utils/theme_colors.dart';
 
 class AutoDesignButton extends StatelessWidget {
   const AutoDesignButton({super.key});
@@ -19,7 +20,7 @@ class AutoDesignButton extends StatelessWidget {
           width: 150,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: const Color(0xFF5FD3F3),
+            gradient: ThemeColors.orangePinkPurple,
             borderRadius: BorderRadius.circular(30),
             boxShadow: [
               BoxShadow(

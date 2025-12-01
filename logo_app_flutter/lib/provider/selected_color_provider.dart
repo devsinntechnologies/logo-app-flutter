@@ -1,11 +1,12 @@
-
-
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class SelectedColorProvider extends ChangeNotifier {
-  Color _selectedColor = Colors.white;
+  
+  
+  Color? _selectedColor = null ;
   Gradient? _selectedGradient;
   ui.Image? _backgroundImage;
   double get intensity => _brightness;
@@ -17,8 +18,54 @@ int get selectedIndex => _selectedIndex;
   Color _companyTextColor = Colors.black;
   Color _sloganColor = Colors.black;
   Color _shapeColor = Colors.white;
+  Color _customTextColor = Colors.black;
 
   bool _isColorManuallySelected = false;
+  // new map to track if user manually changed color
+Map<int, bool> _isElementColorOverridden = {};
+
+// updated getColorForElement
+// Color getColorForElement(int id, {required Color originalColor}) {
+//   if (_isElementColorOverridden[id] == true) {
+//     return _overrideColors[id] ?? originalColor;
+//   }
+//   return originalColor; // first-time original color
+// }
+
+// when user changes color manually
+// void setOverrideColorForElement(int id, Color color) {
+//   _overrideColors[id] = color;
+//   _isElementColorOverridden[id] = true; // mark as overridden
+//   notifyListeners();
+// }
+
+// optional: reset element to original
+
+void resetAllColors({required Map<int, Color> defaultColors}) {
+  _overrideColors.clear();           // user overrides remove ho jaye
+  _isElementColorOverridden.clear(); // manual flags reset
+  _companyTextColor = defaultColors[0] ?? Colors.black;
+  _sloganColor = defaultColors[1] ?? Colors.black;
+  _shapeColor = defaultColors[2] ?? Colors.white;
+  notifyListeners();
+}
+//  void resetAllColors() {
+//     // reset company, slogan, shape to default
+//     _companyTextColor = _defaultCompanyColor;
+//     _sloganColor = _defaultSloganColor;
+//     _shapeColor = _defaultShapeColor;
+
+//     // reset all element overrides
+//     _overrideColors.clear();
+//     _isElementColorOverridden.clear();
+
+//     _selectedColor = Colors.white;
+//     _selectedGradient = null;
+//     _backgroundImage = null;
+//     _isColorManuallySelected = false;
+
+//     notifyListeners();
+//   }
 
   bool get isColorOverrideActive =>
       _selectedGradient != null ||
@@ -29,15 +76,17 @@ int get selectedIndex => _selectedIndex;
   Color get companyTextColor => _companyTextColor;
   Color get sloganColor => _sloganColor;
   Color get shapeColor => _shapeColor;
+  Color get customTextColor => _customTextColor;
   int _rotateIndex = 0;
 
   Color _baseColor = Colors.black;
   double _brightness = 0.5;
+bool isColorApplied = false;
 
   Color get baseColor => _baseColor;
   double get brightness => _brightness;
 
-  Color get selectedColor => _selectedColor;
+  Color? get selectedColor => _selectedColor;
   Gradient? get selectedGradient => _selectedGradient;
   ui.Image? get backgroundImage => _backgroundImage;
   File? get imageFile => _imageFile;
@@ -59,6 +108,44 @@ int get selectedIndex => _selectedIndex;
     _selectedElementId = id;
     notifyListeners();
   }
+
+TextAlign _companyNameAlign = TextAlign.center;
+TextAlign _sloganAlign = TextAlign.center;
+TextAlign _customTextAlign = TextAlign.center;
+
+// GETTERS
+TextAlign get companyNameAlign => _companyNameAlign;
+TextAlign get sloganAlign => _sloganAlign;
+TextAlign get customTextAlign => _customTextAlign;
+
+// SETTERS
+void setCompanyNameAlign(TextAlign align) {
+  _companyNameAlign = align;
+  notifyListeners();
+}
+
+void setSloganAlign(TextAlign align) {
+  _sloganAlign = align;
+  notifyListeners();
+}
+
+void setCustomTextAlign(TextAlign align) {
+  _customTextAlign = align;
+  notifyListeners();
+}
+
+
+ui.Image? canvasImage;
+
+void setImage(ui.Image image) {
+  canvasImage = image;
+  notifyListeners();
+}
+
+void resetImage() {
+  canvasImage = null;
+  notifyListeners();
+}
 
 
  
@@ -269,6 +356,13 @@ int get selectedIndex => _selectedIndex;
    double getOutlineWidth(int elementId) {
     return _elementOutlineWidths[elementId] ?? 0.0;
   }
+  void resetAllOutlines() {
+  _elementOutlineColors.clear();
+  _elementOutlineWidths.clear();
+  notifyListeners();
+}
+// final LogoState logoState;
+
     /// Remove any active selection (editing handles/icons hide ho jaye)
   void clearSelection() {
     _selectedElementId = null;
@@ -378,5 +472,7 @@ void setColorForElement(int id, Color color) {
   _individualElementColors[id] = color;
   notifyListeners();
 }
+
+
 }
 

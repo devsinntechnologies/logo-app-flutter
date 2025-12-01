@@ -106,6 +106,7 @@
 // }
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:logo_app_flutter/utils/theme_colors.dart';
 
 class ChooseFontsWidget extends StatefulWidget {
   final Function(int) onFontSelected;
@@ -136,17 +137,18 @@ class _ChooseFontsWidgetState extends State<ChooseFontsWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
     return Column(
       children: [
+        const SizedBox(height: 20),
         const Text(
           "CHOOSE FONTS",
-          style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 20),
-
-        /// Scrollable font list
+    
         SizedBox(
-          height: 400, // or MediaQuery height * 0.5
+          height: screenHeight * 0.6, 
           child: ListView.builder(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: fontNames.length,
@@ -189,7 +191,9 @@ class _ChooseFontsWidgetState extends State<ChooseFontsWidget> {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 6),
       decoration: BoxDecoration(
-        color: isSelected ? Colors.orange : Colors.transparent,
+        // color: isSelected ? Colors.orange : Colors.transparent,
+        gradient: isSelected
+            ? ThemeColors.textGradient: null,
         borderRadius: BorderRadius.circular(6),
         border: Border.all(color: Colors.black),
       ),

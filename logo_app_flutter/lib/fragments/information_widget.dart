@@ -43,79 +43,113 @@ class _InformationWidgetState extends State<InformationWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              const SizedBox(height: 16),
-              const Text(
-                "CHOOSE INDUSTRY",
-                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+        child: Column(
+          children: [
+            const SizedBox(height: 16),
+            const Text(
+              "CHOOSE INDUSTRY",
+              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+            ),
+            Container(
+              height: 60,
+              margin: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.black, width: 2),
+                borderRadius: BorderRadius.circular(15),
               ),
-              Container(
-                height: 60,
-                margin: const EdgeInsets.all(16),
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.black, width: 2),
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    value: selectedCategory,
-                    isExpanded: true,
-                    icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 35),
-                    style: const TextStyle(color: Colors.black, fontSize: 16),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        selectedCategory = newValue!;
-                      });
-                      widget.onSave(nameController.text, sloganController.text, selectedCategory);
-                    },
-                    items: categories.map((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ),
-              const Text("YOUR COMPANY NAME", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              SizedBox(
-                width: 330,
-                child: TextField(
-                  controller: nameController,
-                  textAlign: TextAlign.center,
-                  decoration: InputDecoration(
-                    hintText: 'Enter your company name',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
-                  ),
-                  onChanged: (text) {
-                    widget.onSave(text, sloganController.text, selectedCategory);
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: selectedCategory,
+                  isExpanded: true,
+                  icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 35),
+                  style: const TextStyle(color: Colors.black, fontSize: 16),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      selectedCategory = newValue!;
+                    });
+                    widget.onSave(
+                      nameController.text,
+                      sloganController.text,
+                      selectedCategory,
+                    );
                   },
+                  items:
+                      categories.map((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(
+                            value,
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        );
+                      }).toList(),
                 ),
               ),
-              const SizedBox(height: 12),
-              const Text("SLOGAN", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              SizedBox(
-                width: 330,
-                child: TextField(
-                  controller: sloganController,
-                  textAlign: TextAlign.center,
-                  decoration: InputDecoration(
-                    hintText: 'Enter your slogan',
-                    hintStyle: TextStyle(color: Colors.black),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              "YOUR COMPANY NAME",
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: 330,
+              child: TextField(
+                controller: nameController,
+                textAlign: TextAlign.center,
+                maxLength: 10,
+                cursorColor: Colors.black,
+                decoration: InputDecoration(
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: const BorderSide(color: Colors.black, width: 2),
                   ),
-                  onChanged: (text) {
-                    widget.onSave(nameController.text, text, selectedCategory);
-                  },
+                  counterText: "",
+                  hintText: 'Enter your company name',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
                 ),
+                onChanged: (text) {
+                  widget.onSave(text, sloganController.text, selectedCategory);
+                },
               ),
-            ],
-          ),
+           
+           
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              "SLOGAN",
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: 330,
+              child: TextField(
+                controller: sloganController,
+                textAlign: TextAlign.center,
+                maxLength: 20,
+                cursorColor: Colors.black,
+                decoration: InputDecoration(
+                  focusedBorder: OutlineInputBorder(
+                    // focused outline color
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: const BorderSide(color: Colors.black, width: 2),
+                  ),
+                  counterText: "",
+                  hintText: 'Enter your slogan',
+                  hintStyle: TextStyle(color: Colors.black),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                ),
+                onChanged: (text) {
+                  widget.onSave(nameController.text, text, selectedCategory);
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );

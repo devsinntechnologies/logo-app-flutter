@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:logo_app_flutter/screens/download_logo.dart';
+import 'package:logo_app_flutter/utils/theme_colors.dart';
 
 class CreateLogoButton extends StatelessWidget {
   const CreateLogoButton({super.key});
@@ -8,11 +10,12 @@ class CreateLogoButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        SnackBar snackBar = const SnackBar(
-          content: Text('Create Logo button pressed!'),
-          duration: Duration(milliseconds: 100),
-        );
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        Navigator.push(context, MaterialPageRoute(builder: (_)=>DownloadLogo(svgLogo: "", companyName: "", sloganName: "")));
+        // SnackBar snackBar = const SnackBar(
+        //   content: Text('Create Logo button pressed!'),
+        //   duration: Duration(milliseconds: 100),
+        // );
+        // ScaffoldMessenger.of(context).showSnackBar(snackBar);
       },
       child: Center(
         child: Container(
@@ -21,14 +24,8 @@ class CreateLogoButton extends StatelessWidget {
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             // color: const Color(0xFF5FD3F3),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Color(0xFFb18bff), // light purple
-                Color(0xFF8f5bff), // deep purple
-              ],
-            ),
+                      gradient: ThemeColors.greenBlue,
+
             borderRadius: BorderRadius.circular(30),
             boxShadow: [
               BoxShadow(

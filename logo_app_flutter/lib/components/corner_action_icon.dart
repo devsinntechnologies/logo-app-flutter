@@ -19,7 +19,7 @@ class CornerActionIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      behavior: HitTestBehavior.translucent, // Ensure it receives touches
+      behavior: HitTestBehavior.translucent, 
       onTap: onTap,
       onPanStart: onPanStart,
       onPanUpdate: onPanUpdate,

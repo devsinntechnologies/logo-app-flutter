@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:logo_app_flutter/utils/theme_colors.dart';
 
 class StepTrailWidget extends StatelessWidget {
   final int currentStep;
@@ -41,7 +42,8 @@ class StepTrailWidget extends StatelessWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: isCompleted || isActive ? Colors.orange : Colors.grey[300],
+            color:
+                isCompleted || isActive ? ThemeColors.purple : Colors.grey[300],
             shape: BoxShape.circle,
           ),
           child: Center(
@@ -50,8 +52,11 @@ class StepTrailWidget extends StatelessWidget {
                     ? const Icon(Icons.check, color: Colors.white)
                     : Text(
                       '${index + 1}',
-                      style: const TextStyle(
-                        color: Colors.black,
+                      style: TextStyle(
+                        color:
+                            (isCompleted || isActive)
+                                ? Colors.white
+                                : Colors.black,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -70,7 +75,7 @@ class StepTrailWidget extends StatelessWidget {
           Container(
             width: 50,
             height: 2,
-            color: isCompleted ? Colors.orange : Colors.grey[300],
+            color: isCompleted ? ThemeColors.purple : Colors.grey[300],
           ),
         const SizedBox(width: 8),
       ],

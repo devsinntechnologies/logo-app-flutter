@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.example.logo_app_flutter"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 35 
     ndkVersion =  "27.0.12077973"
 
     compileOptions {
@@ -41,4 +41,7 @@ android {
 
 flutter {
     source = "../.."
+}
+dependencies {
+    implementation(kotlin("stdlib", "1.9.10"))
 }

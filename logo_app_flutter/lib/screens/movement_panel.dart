@@ -1,33 +1,51 @@
-// // ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'dart:async';
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:logo_app_flutter/models/logo_state_data.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
-import 'package:logo_app_flutter/screens/text_screen.dart';
+import 'package:logo_app_flutter/utils/theme_colors.dart';
 import 'package:provider/provider.dart';
-// import 'selected_color_provider.dart'; // <-- import your provider
+
+typedef Element3DRotationCallback =
+    void Function(int id, double rotationX, double rotationY, double rotationZ);
+typedef ElementActionCallback = void Function(int id);
 
 class MovementPanel extends StatefulWidget {
-  final dynamic logoState;
+  final VoidCallback? onEditPressed;
+  final Function(TextAlign)? onTextAlignChanged;
+  final LogoStateData logoState;
   final VoidCallback? onClose;
   final Function(String) onDirectionPressed;
   final VoidCallback onDuplicatePressed;
   final bool isVisible;
-  final VoidCallback onBringToFrontPressed; // Up Layer
-  final VoidCallback onSendToBackPressed; // Down Layer
+  final VoidCallback onBringToFrontPressed;
+  final VoidCallback onSendToBackPressed;
+  final VoidCallback? onSaveState;
 
   final int? selectedElementId;
 
+  /// Callback to notify parent about updated logoState
+  final Function(LogoStateData)? onLogoStateChanged;
+  final Element3DRotationCallback? onElement3DRotationUpdate;
+  final ElementActionCallback? onElement3DReset;
+
   const MovementPanel({
     Key? key,
+    this.onTextAlignChanged,
+    this.onEditPressed,
     required this.onDirectionPressed,
     required this.onDuplicatePressed,
     required this.isVisible,
     required this.onBringToFrontPressed,
     required this.onSendToBackPressed,
+    required this.logoState,
     this.selectedElementId,
     this.onClose,
-    this.logoState,
+    this.onLogoStateChanged,
+    this.onSaveState,
+    this.onElement3DRotationUpdate,
+    this.onElement3DReset,
   }) : super(key: key);
 
   @override
@@ -36,26 +54,19 @@ class MovementPanel extends StatefulWidget {
 
 class _MovementPanelState extends State<MovementPanel>
     with SingleTickerProviderStateMixin {
-  late TextEditingController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController(
-      text: "This is some text the user can select",
-    );
-  }
+  TextAlign _selectedTextAlign = TextAlign.left;
+  Timer? _timer;
 
   @override
   void dispose() {
-    _controller.dispose();
+    _stopMoving();
     super.dispose();
   }
 
-  Timer? _timer;
-  bool showPanel = true;
   void _startMoving(String direction) {
-    _stopMoving(); // Pehle koi purana timer stop karo
+    _stopMoving();
+    // Save state when movement starts
+    widget.onSaveState?.call();
     _timer = Timer.periodic(const Duration(milliseconds: 100), (_) {
       widget.onDirectionPressed(direction);
     });
@@ -66,14 +77,18 @@ class _MovementPanelState extends State<MovementPanel>
     _timer = null;
   }
 
+  // Helper method to save state and update UI
+  void _saveStateAndUpdate(VoidCallback updateFunction) {
+    widget.onSaveState?.call();
+    updateFunction();
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
-    TextField(controller: _controller, maxLines: null);
-
     if (!widget.isVisible) return const SizedBox.shrink();
 
     return Column(
-      // mainAxisSize: MainAxisSize.min,
       children: [
         Container(
           width: MediaQuery.of(context).size.width,
@@ -83,39 +98,32 @@ class _MovementPanelState extends State<MovementPanel>
             alignment: Alignment.topRight,
             child: InkWell(
               onTap: widget.onClose,
-
               child: Container(
                 width: 25,
                 height: 30,
                 decoration: BoxDecoration(
                   color: Colors.grey.shade100,
-
-                  borderRadius: BorderRadius.only(
+                  borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(9),
                     topRight: Radius.circular(9),
                   ),
                 ),
-
-                child: Icon(
+                child: const Icon(
                   Icons.keyboard_double_arrow_down_sharp,
                   size: 25,
-                  color: Colors.indigo,
+                  color: ThemeColors.purple,
                 ),
               ),
             ),
           ),
         ),
-
         Align(
           alignment: Alignment.bottomCenter,
           child: Padding(
             padding: const EdgeInsets.only(bottom: 50),
             child: Container(
               width: MediaQuery.of(context).size.width,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                // borderRadius: BorderRadius.circular(12),
-              ),
+              decoration: BoxDecoration(color: Colors.white),
               child: DefaultTabController(
                 length: 4,
                 child: Column(
@@ -123,12 +131,11 @@ class _MovementPanelState extends State<MovementPanel>
                   children: [
                     Container(
                       color: Colors.grey.shade100,
-
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 9.0),
                         child: const TabBar(
-                          indicatorColor: Colors.indigo,
-                          labelColor: Colors.indigo,
+                          indicatorColor: ThemeColors.purple,
+                          labelColor: ThemeColors.purple,
                           unselectedLabelColor: Colors.grey,
                           labelPadding: EdgeInsets.symmetric(vertical: 0),
                           tabs: [
@@ -148,7 +155,7 @@ class _MovementPanelState extends State<MovementPanel>
                       child: TabBarView(
                         children: [
                           _buildControlsTab(),
-                          _buildColorsTab(context), // 🔹 context added
+                          _buildColorsTab(context),
                           _buildOutlinesTab(),
                           _build3DTab(),
                         ],
@@ -165,251 +172,387 @@ class _MovementPanelState extends State<MovementPanel>
   }
 
   Widget _buildControlsTab() {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Column(
+    return Consumer<SelectedColorProvider>(
+      builder: (context, provider, _) {
+        final int selectedElement = widget.selectedElementId ?? 0;
+
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 10.0,
+                vertical: 10,
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _buildDirectionButton(
-                    icon: Icons.arrow_upward,
-                    direction: 'up',
-                    tooltip: 'Up',
-                  ),
-                  // const SizedBox(height: ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
+                  // movement arrows column
+                  Column(
                     children: [
                       _buildDirectionButton(
-                        icon: Icons.arrow_back,
-                        direction: 'left',
-                        tooltip: 'Left',
+                        icon: Icons.arrow_upward,
+                        direction: 'up',
+                        tooltip: 'Up',
                       ),
-                      const SizedBox(width: 40),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _buildDirectionButton(
+                            icon: Icons.arrow_back,
+                            direction: 'left',
+                            tooltip: 'Left',
+                          ),
+                          const SizedBox(width: 40),
+                          _buildDirectionButton(
+                            icon: Icons.arrow_forward,
+                            direction: 'right',
+                            tooltip: 'Right',
+                          ),
+                        ],
+                      ),
                       _buildDirectionButton(
-                        icon: Icons.arrow_forward,
-                        direction: 'right',
-                        tooltip: 'Right',
+                        icon: Icons.arrow_downward,
+                        direction: 'down',
+                        tooltip: 'Down',
                       ),
+                      const SizedBox(height: 8),
                     ],
                   ),
-                  // const SizedBox(height: 8),
-                  _buildDirectionButton(
-                    icon: Icons.arrow_downward,
-                    direction: 'down',
-                    tooltip: 'Down',
-                  ),
-                  const SizedBox(height: 8),
-                ],
-              ),
-              // SizedBox(width: 10),
-              Column(
-                children: [
-                  GestureDetector(
-                    onTap: widget.onBringToFrontPressed,
 
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.black, width: 1),
-                      ),
-                      padding: const EdgeInsets.all(5),
-                      child: const Icon(
-                        Icons.layers_outlined,
-                        color: Colors.black,
-                        size: 18,
-                      ),
-                    ),
-                  ),
-                  const Text(
-                    "Layer Up",
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 10),
-                  GestureDetector(
-                    onTap: widget.onSendToBackPressed,
-
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.black, width: 1),
-                      ),
-                      padding: const EdgeInsets.all(5),
-                      child: const Icon(
-                        Icons.layers_outlined,
-                        color: Colors.black,
-                        size: 18,
-                      ),
-                    ),
-                  ),
-                  const Text(
-                    "Layer Down",
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-
-              Column(
-                children: [
-                  if (widget.selectedElementId != 0)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: const [
-                        Icon(
-                          Icons.format_align_right,
-                          color: Colors.grey,
-                          size: 25,
-                        ),
-                        SizedBox(width: 10),
-                        Icon(
-                          Icons.format_align_center,
-                          color: Colors.grey,
-                          size: 25,
-                        ),
-                        SizedBox(width: 10),
-                        Icon(
-                          Icons.format_align_left,
-                          color: Colors.grey,
-                          size: 25,
-                        ),
-                      ],
-                    ),
-
-                  if (widget.selectedElementId != 0) const SizedBox(height: 15),
-
-                  Row(
+                  // layer controls
+                  Column(
                     children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          print(
-                            'Duplicate pressed for ${widget.selectedElementId}',
-                          );
-                          widget.onDuplicatePressed();
+                      GestureDetector(
+                        onTap: () {
+                          widget.onSaveState?.call();
+                          widget.onBringToFrontPressed();
                         },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.orange,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.black, width: 1),
                           ),
-                          padding:
-                              (widget.selectedElementId == 0)
-                                  ? null // sirf Duplicate → default size
-                                  : const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 5,
-                                  ),
-
-                          minimumSize: const Size(70, 30),
-                        ),
-                        child: const Text(
-                          "Duplicate",
-                          style: TextStyle(color: Colors.white),
+                          padding: const EdgeInsets.all(5),
+                          child: const Icon(
+                            Icons.layers_outlined,
+                            color: Colors.black,
+                            size: 18,
+                          ),
                         ),
                       ),
-
-                      const SizedBox(width: 10),
-
-                      // Edit button hide when logo selected
-                      if (widget.selectedElementId != 0)
-                        ElevatedButton(
-                          onPressed: () async {
-                            String textToEdit = "";
-                            final id = widget.selectedElementId;
-
-                            if (id == null) return;
-
-                            if (id == 1) {
-                              textToEdit = widget.logoState.companyName ?? "";
-                            } else if (id == 2) {
-                              textToEdit = widget.logoState.sloganName ?? "";
-                            } else if (id >= 100 && id <= 199) {
-                              final element = widget.logoState.customTexts
-                                  .firstWhere((t) => t.id == id);
-                              textToEdit = element.text;
-                            }
-
-                            final editedText = await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder:
-                                    (_) => TextScreen(initialText: textToEdit),
-                              ),
-                            );
-
-                            if (editedText != null) {
-                              if (id == 1)
-                                widget.logoState.companyName = editedText;
-                              else if (id == 2)
-                                widget.logoState.sloganName = editedText;
-                              else if (id >= 100 && id <= 199) {
-                                final element = widget.logoState.customTexts
-                                    .firstWhere((t) => t.id == id);
-                                element.text = editedText;
-                              }
-                              setState(() {});
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 5,
-                            ),
-                            minimumSize: const Size(55, 30),
+                      const Text(
+                        "Layer Up",
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      GestureDetector(
+                        onTap: () {
+                          widget.onSaveState?.call();
+                          widget.onSendToBackPressed();
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.black, width: 1),
                           ),
-                          child: const Text(
-                            "Edit",
-                            style: TextStyle(color: Colors.white),
+                          padding: const EdgeInsets.all(5),
+                          child: const Icon(
+                            Icons.layers_outlined,
+                            color: Colors.black,
+                            size: 18,
                           ),
                         ),
+                      ),
+                      const Text(
+                        "Layer Down",
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  Column(
+                    children: [
+                      // if (widget.selectedElementId != 0)
+                      //   Row(
+                      //     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      //     children: [
+                      //       IconButton(
+                      //         icon: Icon(
+                      //           Icons.format_align_left,
+                      //           color:
+                      //               _selectedTextAlign == TextAlign.left
+                      //                   ? Colors.orange
+                      //                   : Colors.grey,
+                      //         ),
+                      //         onPressed: () {
+                      //           _saveStateAndUpdate(() {
+                      //             _selectedTextAlign = TextAlign.left;
+                      //             if (selectedElement == 1) {
+                      //               provider.setCompanyNameAlign(
+                      //                 TextAlign.left,
+                      //               );
+                      //             } else if (selectedElement == 2) {
+                      //               provider.setSloganAlign(TextAlign.left);
+                      //             } else {
+                      //               provider.setCustomTextAlign(TextAlign.left);
+                      //             }
+                      //             widget.onTextAlignChanged?.call(
+                      //               TextAlign.left,
+                      //             );
+                      //           });
+                      //         },
+                      //       ),
+                      //       IconButton(
+                      //         icon: Icon(
+                      //           Icons.format_align_center,
+                      //           color:
+                      //               _selectedTextAlign == TextAlign.center
+                      //                   ? Colors.orange
+                      //                   : Colors.grey,
+                      //         ),
+                      //         onPressed: () {
+                      //           _saveStateAndUpdate(() {
+                      //             _selectedTextAlign = TextAlign.center;
+                      //             if (selectedElement == 1) {
+                      //               provider.setCompanyNameAlign(
+                      //                 TextAlign.center,
+                      //               );
+                      //             } else if (selectedElement == 2) {
+                      //               provider.setSloganAlign(TextAlign.center);
+                      //             } else {
+                      //               provider.setCustomTextAlign(
+                      //                 TextAlign.center,
+                      //               );
+                      //             }
+                      //             widget.onTextAlignChanged?.call(
+                      //               TextAlign.center,
+                      //             );
+                      //           });
+                      //         },
+                      //       ),
+                      //       IconButton(
+                      //         icon: Icon(
+                      //           Icons.format_align_right,
+                      //           color:
+                      //               _selectedTextAlign == TextAlign.right
+                      //                   ? Colors.orange
+                      //                   : Colors.grey,
+                      //         ),
+                      //         onPressed: () {
+                      //           _saveStateAndUpdate(() {
+                      //             _selectedTextAlign = TextAlign.right;
+                      //             if (selectedElement == 1) {
+                      //               provider.setCompanyNameAlign(
+                      //                 TextAlign.right,
+                      //               );
+                      //             } else if (selectedElement == 2) {
+                      //               provider.setSloganAlign(TextAlign.right);
+                      //             } else {
+                      //               provider.setCustomTextAlign(
+                      //                 TextAlign.right,
+                      //               );
+                      //             }
+                      //             widget.onTextAlignChanged?.call(
+                      //               TextAlign.right,
+                      //             );
+                      //           });
+                      //         },
+                      //       ),
+                      //     ],
+                      //   ),
+                      if (selectedElement != 0) const SizedBox(height: 15),
+
+                      // Duplicate & Edit buttons
+                      Column(
+                        children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              widget.onSaveState?.call();
+                              widget.onDuplicatePressed();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: ThemeColors.purple,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 5,
+                              ),
+                              minimumSize: const Size(70, 30),
+                            ),
+                            child: const Text(
+                              "Duplicate",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          if (selectedElement != 0)
+                            ElevatedButton(
+                              onPressed: () {
+                                widget.onSaveState?.call();
+                                widget.onEditPressed?.call();
+                              },
+                              style: ElevatedButton.styleFrom(
+                                                             backgroundColor: ThemeColors.purple,
+
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 5,
+                                ),
+                                minimumSize: const Size(55, 30),
+                              ),
+                              child: const Text(
+                                "Edit",
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                        ],
+                      ),
                     ],
                   ),
                 ],
               ),
-            ],
-          ),
-        ),
-      ],
+            ),
+          ],
+        );
+      },
     );
   }
 
   Widget _buildColorsTab(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-      child: Wrap(
-        spacing: 10,
-        runSpacing: 10,
-        children: [
-          _buildColorBox(context, Colors.red),
-          _buildColorBox(context, Colors.green),
-          _buildColorBox(context, Colors.blue),
-          _buildColorBox(context, Colors.yellow),
-          _buildColorBox(context, Colors.purple),
-          _buildColorBox(context, Colors.orange),
-          _buildColorBox(context, Colors.pink),
-          _buildColorBox(context, Colors.teal),
-          _buildColorBox(context, Colors.brown),
-          _buildColorBox(context, Colors.grey),
-        ],
-      ),
+    return Consumer<SelectedColorProvider>(
+      builder: (context, provider, _) {
+        if (widget.selectedElementId == null)
+          return const Center(child: Text("Select an element first"));
+
+        final elementId = widget.selectedElementId!;
+
+        // Get current color for the selected element
+        Color currentColor = _getCurrentColorForElement(provider, elementId);
+
+        final colors = [
+          Colors.black,
+          Colors.orange,
+          Colors.red,
+          Colors.green,
+          Colors.blue,
+          Colors.yellow,
+          Colors.purple,
+          Colors.pink,
+          Colors.teal,
+          Colors.brown,
+          Colors.grey,
+        ];
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            // crossAxisAlignment: CrossAxisAlignment.center,
+            // mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                height: 50,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children:
+                      colors
+                          .map(
+                            (color) => GestureDetector(
+                              onTap: () {
+                                widget.onSaveState?.call();
+                                _setColorForElement(provider, elementId, color);
+                              },
+                              child: Container(
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                ),
+                                width: 30,
+                                height: 30,
+                                decoration: BoxDecoration(
+                                  color: color,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color:
+                                        currentColor == color
+                                            ? Colors.black
+                                            : Colors.transparent,
+                                    width: 2,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
     );
+  }
+
+  // Helper method to get current color for an element
+  Color _getCurrentColorForElement(
+    SelectedColorProvider provider,
+    int elementId,
+  ) {
+    if (elementId == 0) {
+      return provider.shapeColor;
+    } else if (elementId == 1) {
+      return provider.companyTextColor;
+    } else if (elementId == 2) {
+      return provider.sloganColor;
+    } else if (elementId >= 100 && elementId < 200) {
+      // Custom text
+      return provider.getColorForElement(
+        elementId,
+        fallback: provider.customTextColor,
+      );
+    } else if (elementId >= 300 && elementId < 400) {
+      // Custom SVG
+      return provider.getColorForElement(elementId, fallback: Colors.black);
+    } else {
+      return provider.getColorForElement(elementId, fallback: Colors.black);
+    }
+  }
+
+  void _setColorForElement(
+    SelectedColorProvider provider,
+    int elementId,
+    Color color,
+  ) {
+    if (elementId == 0) {
+      provider.setShapeColor(color);
+    } else if (elementId == 1) {
+      provider.setCompanyTextColor(color);
+    } else if (elementId == 2) {
+      provider.setSloganColor(color);
+    } else {
+      provider.setOverrideColorForElement(elementId, color);
+    }
   }
 
   Widget _buildOutlinesTab() {
     return Consumer<SelectedColorProvider>(
       builder: (context, provider, _) {
-        if (widget.selectedElementId == null) {
+        if (widget.selectedElementId == null)
           return const Center(child: Text("Select an element first"));
-        }
 
         final elementId = widget.selectedElementId!;
         double outlineThickness = provider.getOutlineWidth(elementId);
@@ -441,8 +584,8 @@ class _MovementPanelState extends State<MovementPanel>
                   Expanded(
                     child: SliderTheme(
                       data: SliderTheme.of(context).copyWith(
-                        activeTrackColor: Colors.orange,
-                        thumbColor: Colors.orange,
+                        activeTrackColor:ThemeColors.lightPurple,
+                        thumbColor:ThemeColors.purple,
                       ),
                       child: Slider(
                         min: 0,
@@ -451,6 +594,11 @@ class _MovementPanelState extends State<MovementPanel>
                         value: outlineThickness,
                         onChanged: (value) {
                           provider.setOutlineWidth(elementId, value);
+                          widget.onSaveState?.call();
+                        },
+                        onChangeEnd: (value) {
+                          // Save state only when user stops sliding
+                          widget.onSaveState?.call();
                         },
                       ),
                     ),
@@ -465,39 +613,41 @@ class _MovementPanelState extends State<MovementPanel>
                   ),
                 ],
               ),
-
               const SizedBox(height: 8),
 
-              // Outline colors
               SizedBox(
                 height: 50,
                 child: ListView(
                   scrollDirection: Axis.horizontal,
                   children:
-                      colors.map((color) {
-                        return GestureDetector(
-                          onTap: () {
-                            provider.setOutlineColor(elementId, color);
-                            print("Outline color for $elementId: $color");
-                          },
-                          child: Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 6),
-                            width: 30,
-                            height: 30,
-                            decoration: BoxDecoration(
-                              color: color,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color:
-                                    outlineColor == color
-                                        ? Colors.black
-                                        : Colors.transparent,
-                                width: 2,
+                      colors
+                          .map(
+                            (color) => GestureDetector(
+                              onTap: () {
+                                widget.onSaveState?.call();
+                                provider.setOutlineColor(elementId, color);
+                              },
+                              child: Container(
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                ),
+                                width: 30,
+                                height: 30,
+                                decoration: BoxDecoration(
+                                  color: color,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color:
+                                        outlineColor == color
+                                            ? Colors.black
+                                            : Colors.transparent,
+                                    width: 2,
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        );
-                      }).toList(),
+                          )
+                          .toList(),
                 ),
               ),
             ],
@@ -507,156 +657,15 @@ class _MovementPanelState extends State<MovementPanel>
     );
   }
 
-  // Widget _buildOutlinesTab() {
-  //   Color outlineColor = Colors.black;
-  //   double outlineThickness = 0.0;
-
-  //   return StatefulBuilder(
-  //     builder: (context, setState) {
-  //       final colors = [
-  //         Colors.orange,
-  //         Colors.black,
-  //         Colors.red,
-  //         Colors.green,
-  //         Colors.blue,
-  //         Colors.yellow,
-  //         Colors.lightBlue,
-  //         Colors.pink,
-  //         Colors.grey,
-  //       ];
-
-  //       return Padding(
-  //         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-  //         child: Column(
-  //           mainAxisSize: MainAxisSize.min,
-  //           children: [
-  //             // Slider on top
-  //             Padding(
-  //               padding: const EdgeInsets.symmetric(
-  //                 horizontal: 12.0,
-  //                 vertical: 10,
-  //               ),
-  //               child: Row(
-  //                 children: [
-  //                   const Text(
-  //                     "Outline",
-  //                     style: TextStyle(fontWeight: FontWeight.bold),
-  //                   ),
-  //                   SliderTheme(
-  //                     data: SliderTheme.of(context).copyWith(
-  //                       activeTrackColor: Colors.orange,
-  //                       // inactiveTrackColor: Colors.orange.withOpacity(0.3),
-  //                       thumbColor: Colors.orange,
-  //                       // overlayColor: Colors.orange.withOpacity(0.2),
-  //                     ),
-  //                     child: Expanded(
-  //                       child: Slider(
-  //                         min: 0,
-  //                         max: 10,
-  //                         divisions: 10,
-  //                         value: outlineThickness,
-  //                         onChanged: (value) {
-  //                           setState(() {
-  //                             outlineThickness = value;
-  //                           });
-  //                           print('Outline thickness: $outlineThickness');
-  //                         },
-  //                       ),
-  //                     ),
-  //                   ),
-  //                   SizedBox(
-  //                     width: 35,
-  //                     child: Text(
-  //                       outlineThickness.toStringAsFixed(0),
-  //                       textAlign: TextAlign.center,
-  //                       style: const TextStyle(fontWeight: FontWeight.bold),
-  //                     ),
-  //                   ),
-  //                 ],
-  //               ),
-  //             ),
-
-  //             const SizedBox(height: 15),
-
-  //             // Colors + Icons in one horizontal line
-  //             SizedBox(
-  //               height: 50,
-
-  //               child: ListView(
-  //                 scrollDirection: Axis.horizontal,
-  //                 children: [
-  //                   Container(
-  //                     decoration: BoxDecoration(
-  //                       color: Colors.orange,
-  //                       shape: BoxShape.circle,
-  //                     ),
-  //                     child: const Icon(
-  //                       Icons.edit,
-  //                       size: 30,
-  //                       color: Colors.white,
-  //                     ),
-  //                   ),
-
-  //                   SizedBox(width: 10),
-  //                   Container(
-  //                     decoration: BoxDecoration(
-  //                       color: Colors.orange,
-  //                       shape: BoxShape.circle,
-  //                     ),
-  //                     child: Icon(
-  //                       Icons.color_lens,
-  //                       size: 30,
-  //                       color: Colors.white,
-  //                     ),
-  //                   ),
-  //                   // Colors
-  //                   ...colors.map((color) {
-  //                     return GestureDetector(
-  //                       onTap: () {
-  //                         setState(() {
-  //                           outlineColor = color;
-  //                         });
-  //                         print('Selected outline color: $outlineColor');
-  //                       },
-  //                       child: Container(
-  //                         margin: const EdgeInsets.symmetric(horizontal: 6),
-  //                         width: 30,
-  //                         height: 30,
-  //                         decoration: BoxDecoration(
-  //                           color: color,
-  //                           shape: BoxShape.circle,
-  //                           border: Border.all(
-  //                             color:
-  //                                 outlineColor == color
-  //                                     ? Colors.black
-  //                                     : Colors.transparent,
-  //                             width: 2,
-  //                           ),
-  //                         ),
-  //                       ),
-  //                     );
-  //                   }).toList(),
-
-  //                   const SizedBox(width: 12),
-
-  //                   // Icons
-  //                 ],
-  //               ),
-  //             ),
-  //           ],
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
-
   Widget _build3DTab() {
-    double slider1 = 0;
-    double slider2 = 0;
-    double slider3 = 0;
-
     return StatefulBuilder(
-      builder: (context, setState) {
+      builder: (context, setLocalState) {
+        final int elementId = widget.selectedElementId ?? -1;
+
+        double rotationX = widget.logoState.rotationXMap[elementId] ?? 0.0;
+        double rotationY = widget.logoState.rotationYMap[elementId] ?? 0.0;
+        double rotationZ = widget.logoState.rotationZMap[elementId] ?? 0.0;
+
         Widget buildSlider(
           String label,
           double value,
@@ -674,20 +683,15 @@ class _MovementPanelState extends State<MovementPanel>
                   ),
                 ),
                 Expanded(
-                  child: SliderTheme(
-                    data: SliderTheme.of(context).copyWith(
-                      activeTrackColor: Colors.orange,
-                      inactiveTrackColor: Colors.orange.withOpacity(0.3),
-                      thumbColor: Colors.orange,
-                      overlayColor: Colors.orange.withOpacity(0.2),
-                    ),
-                    child: Slider(
-                      min: 0,
-                      max: 360,
-                      divisions: 360,
-                      value: value,
-                      onChanged: onChanged,
-                    ),
+                  child: Slider(
+                    min: 0,
+                    max: 360,
+                    divisions: 360,
+                    value: value,
+                    activeColor: ThemeColors.purple,
+                    inactiveColor: Colors.pink.shade100,
+                    onChanged: onChanged,
+                    onChangeEnd: (v) => widget.onSaveState?.call(),
                   ),
                 ),
               ],
@@ -698,20 +702,57 @@ class _MovementPanelState extends State<MovementPanel>
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
           child: Column(
-            spacing: 10,
             mainAxisSize: MainAxisSize.min,
             children: [
-              buildSlider(slider1.toStringAsFixed(0), slider1, (v) {
-                setState(() => slider1 = v);
-                print("Slider 1: $slider1");
+              buildSlider("X", rotationX, (v) {
+                int id = widget.selectedElementId ?? -1;
+                if (id != -1) {
+                  final newMap = Map<int, double>.from(
+                    widget.logoState.rotationXMap,
+                  );
+                  newMap[id] = v;
+
+                  widget.onLogoStateChanged!(
+                    widget.logoState.copyWith(rotationXMap: newMap),
+                  );
+                }
+
+                setLocalState(() {});
               }),
-              buildSlider(slider2.toStringAsFixed(0), slider2, (v) {
-                setState(() => slider2 = v);
-                print("Slider 2: $slider2");
+
+              const SizedBox(height: 8),
+              buildSlider("Y", rotationY, (v) {
+                int id = widget.selectedElementId ?? -1;
+                if (id != -1) {
+                  final newMap = Map<int, double>.from(
+                    widget.logoState.rotationYMap,
+                  );
+                  newMap[id] = v;
+
+                  widget.onLogoStateChanged!(
+                    widget.logoState.copyWith(rotationYMap: newMap),
+                  );
+                }
+
+                setLocalState(() {});
               }),
-              buildSlider(slider3.toStringAsFixed(0), slider3, (v) {
-                setState(() => slider3 = v);
-                print("Slider 3: $slider3");
+
+              const SizedBox(height: 8),
+
+              buildSlider("Z", rotationZ, (v) {
+                int id = widget.selectedElementId ?? -1;
+                if (id != -1) {
+                  final newMap = Map<int, double>.from(
+                    widget.logoState.rotationZMap,
+                  );
+                  newMap[id] = v;
+
+                  widget.onLogoStateChanged!(
+                    widget.logoState.copyWith(rotationZMap: newMap),
+                  );
+                }
+
+                setLocalState(() {});
               }),
             ],
           ),
@@ -724,27 +765,20 @@ class _MovementPanelState extends State<MovementPanel>
     return GestureDetector(
       onTap: () {
         if (widget.selectedElementId != null) {
+          widget.onSaveState?.call(); // Save state before color change
           final provider = Provider.of<SelectedColorProvider>(
             context,
             listen: false,
           );
-
           final elementId = widget.selectedElementId!;
-
-          // Har element ka color uske type ke hisaab se set karo
-          if (elementId == 0) {
+          if (elementId == 0)
             provider.setShapeColor(color);
-            provider.setSvgColorOverridden(true);
-          } else if (elementId == 1) {
+          else if (elementId == 1)
             provider.setCompanyTextColor(color);
-          } else if (elementId == 2) {
+          else if (elementId == 2)
             provider.setSloganColor(color);
-          } else {
-            // Baaki sab custom elements
+          else
             provider.setOverrideColorForElement(elementId, color);
-          }
-
-          print("Changing color of element $elementId to $color");
         }
       },
       child: Container(
@@ -768,7 +802,10 @@ class _MovementPanelState extends State<MovementPanel>
       behavior: HitTestBehavior.opaque,
       onLongPressStart: (_) => _startMoving(direction),
       onLongPressEnd: (_) => _stopMoving(),
-      onTap: () => widget.onDirectionPressed(direction), // single step move
+      onTap: () {
+        widget.onSaveState?.call(); // Save state for single tap
+        widget.onDirectionPressed(direction);
+      },
       child: Tooltip(
         message: tooltip,
         child: Container(
@@ -784,5 +821,3 @@ class _MovementPanelState extends State<MovementPanel>
     );
   }
 }
-
-// ignore_for_file: public_member_api_docs, sort_constructors_first

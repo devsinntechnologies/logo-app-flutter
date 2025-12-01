@@ -1,114 +1,5 @@
-// import 'package:flutter/material.dart';
-
-// typedef BottomNavItemTapCallback = void Function(int index);
-
-// class LogoBottomNavBar extends StatefulWidget {
-//   final int selectedIndex;
-//   final BottomNavItemTapCallback onItemSelected;
-//   final bool hasTapped;
-
-//   const LogoBottomNavBar({
-//     super.key,
-//     required this.selectedIndex,
-//     required this.onItemSelected,
-//     required this.hasTapped,
-//   });
-
-//   @override
-//   State<LogoBottomNavBar> createState() => _LogoBottomNavBarState();
-// }
-
-// class _LogoBottomNavBarState extends State<LogoBottomNavBar> {
-//   int? expandedIndex;
-//   @override
-//   Widget build(BuildContext context) {
-//     return Padding(
-//       padding: const EdgeInsets.only(bottom: 8.0),
-//       child: SizedBox(
-//         height: 70,
-//         child: Row(
-//           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//           children: List.generate(6, (index) {
-//             IconData iconData;
-//             String label;
-
-//             switch (index) {
-//               case 0:
-//                 iconData = Icons.layers;
-//                 label = 'Background';
-
-//                 break;
-//               case 1:
-//                 iconData = Icons.article_rounded;
-//                 label = 'Art';
-//                 break;
-//               case 2:
-//                 iconData = Icons.text_fields_outlined;
-//                 label = 'Text';
-//                 break;
-//               case 3:
-//                 iconData = Icons.edit;
-//                 label = 'Effects';
-
-//                 break;
-//                 case 4:
-//                 iconData = Icons.palette;
-//                 label = 'Palette';
-
-//                 break;
-//               case 5:
-//               default:
-//                 iconData = Icons.image;
-//                 label = 'Images';
-
-//                 break;
-//             }
-
-//             final isSelected = widget.selectedIndex == index;
-//              final isExpanded = expandedIndex == index;
-
-//             return GestureDetector(
-//               onTap: () => widget.onItemSelected(index),
-//               child: Container(
-//                 // margin: EdgeInsets.only(bottom: 20),
-//                 width: MediaQuery.of(context).size.width / 6,
-//                 height: 60,
-//                 color: isSelected && widget.hasTapped ? Colors.white : Colors.black,
-
-//                 child: Column(
-//                   mainAxisAlignment: MainAxisAlignment.center,
-//                   children: [
-//                     Icon(
-//                       iconData,
-//                       color:
-//                           isSelected && widget.hasTapped ? Colors.black : Colors.white,
-
-//                       size: 20,
-//                     ),
-//                     const SizedBox(height: 2),
-//                     Text(
-//                       label,
-//                       style: TextStyle(
-//                         fontSize: 13,
-//                         fontWeight: FontWeight.bold,
-//                         color:
-//                             isSelected && widget.hasTapped
-//                                 ? Colors.black
-//                                 : Colors.white,
-//                       ),
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//             );
-//           }),
-//         ),
-//       ),
-//     );
-//   }
-// }
-
 import 'package:flutter/material.dart';
+import 'package:logo_app_flutter/utils/theme_colors.dart';
 
 typedef BottomNavItemTapCallback = void Function(int index);
 
@@ -133,120 +24,186 @@ class _LogoBottomNavBarState extends State<LogoBottomNavBar> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 60,
-      color: Colors.black,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: List.generate(6, (index) {
-          IconData iconData;
-          String label;
-
-          switch (index) {
-            case 0:
-              iconData = Icons.layers;
-              label = 'Background';
-              break;
-            case 1:
-              iconData = Icons.article_rounded;
-              label = 'Art';
-              break;
-            case 2:
-              iconData = Icons.text_fields_outlined;
-              label = 'Text';
-              break;
-            case 3:
-              iconData = Icons.edit;
-              label = 'Effects';
-              break;
-            case 4:
-              iconData = Icons.palette;
-              label = 'Palette';
-              break;
-            default:
-              iconData = Icons.image;
-              label = 'Images';
-              break;
-          }
-
-          final isSelected = widget.selectedIndex == index;
-          final isScrollEnabled = scrollableIndex == index;
-
-          return GestureDetector(
-            onTap: () {
-              setState(() {
-                scrollableIndex = (scrollableIndex == index) ? null : index;
-              });
-
-              if (widget.selectedIndex == index) {
-                widget.onItemSelected(-1);
-              } else {
-                widget.onItemSelected(index);
-              }
-            },
-            child: Container(
-              width: MediaQuery.of(context).size.width / 6,
-              height: 60,
-              color:
-                  (isSelected && widget.hasTapped && widget.selectedIndex != -1)
-                      ? Colors.white
-                      : Colors.black,
-
-              padding: const EdgeInsets.all(4),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    iconData,
+    return SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // if (MediaQuery.of(context).size.height > 500)
+          // if (widget.selectedIndex != -1)
+          //   Container(height: 60, color: Colors.grey.shade200),
+          Container(
+            height: 60,
+            color: ThemeColors.darkPrimaryColor,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: List.generate(6, (index) {
+                IconData iconData;
+                String label;
+      
+                switch (index) {
+                  case 0:
+                    iconData = Icons.layers;
+                    label = 'Background';
+                    break;
+                  case 1:
+                    iconData = Icons.article_rounded;
+                    label = 'Art';
+                    break;
+                  case 2:
+                    iconData = Icons.text_fields_outlined;
+                    label = 'Text';
+                    break;
+                  case 3:
+                    iconData = Icons.edit;
+                    label = 'Effects';
+                    break;
+                  case 4:
+                    iconData = Icons.palette;
+                    label = 'Palette';
+                    break;
+                  default:
+                    iconData = Icons.image;
+                    label = 'Images';
+                    break;
+                }
+      
+                final isSelected = widget.selectedIndex == index;
+                final isScrollEnabled = scrollableIndex == index;
+      
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      scrollableIndex = (scrollableIndex == index) ? null : index;
+                    });
+      
+                    if (widget.selectedIndex == index) {
+                      widget.onItemSelected(-1);
+                    } else {
+                      widget.onItemSelected(index);
+                    }
+                  },
+                  child: Container(
+                    width: MediaQuery.of(context).size.width / 6,
+                    height: 60,
                     color:
                         (isSelected &&
                                 widget.hasTapped &&
                                 widget.selectedIndex != -1)
-                            ? Colors.black
-                            : Colors.white,
-
-                    size: 20,
-                  ),
-                  const SizedBox(height: 2),
-                  SizedBox(
-                    height: 25,
-                    child:
-                        isScrollEnabled
-                            ? SingleChildScrollView(
-                              physics: const BouncingScrollPhysics(),
-                              child: Text(
-                                label,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color:
-                                      isSelected && widget.hasTapped
-                                          ? Colors.black
-                                          : Colors.white,
-                                ),
-                              ),
-                            )
-                            : Text(
-                              label,
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color:
-                                    isSelected && widget.hasTapped
-                                        ? Colors.black
-                                        : Colors.white,
-                              ),
+                            ? Colors.white
+                            : ThemeColors.darkPrimaryColor,
+                    padding: const EdgeInsets.all(4),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          iconData,
+                          color:
+                              (isSelected &&
+                                      widget.hasTapped &&
+                                      widget.selectedIndex != -1)
+                                  ? Colors.black
+                                  : Colors.white,
+                          size: 20,
+                        ),
+                        const SizedBox(height: 2),
+                        SizedBox(
+                          height: 25,
+                          child: AutoScrollText(
+                            text: label,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color:
+                                  isSelected && widget.hasTapped
+                                      ? Colors.black
+                                      : Colors.white,
                             ),
+                            scroll:
+                                isSelected &&
+                                widget.hasTapped, // scroll only on white
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
+                );
+              }),
             ),
-          );
-        }),
+          ),
+        ],
       ),
+    );
+  }
+}
+
+class AutoScrollText extends StatefulWidget {
+  final String text;
+  final TextStyle? style;
+  final bool scroll; // true when selected
+
+  const AutoScrollText({
+    super.key,
+    required this.text,
+    this.style,
+    required this.scroll,
+  });
+
+  @override
+  State<AutoScrollText> createState() => _AutoScrollTextState();
+}
+
+class _AutoScrollTextState extends State<AutoScrollText>
+    with SingleTickerProviderStateMixin {
+  late final ScrollController _controller;
+  late final AnimationController _animationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = ScrollController();
+
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    )..addListener(() {
+      if (_controller.hasClients) {
+        _controller.jumpTo(
+          _animationController.value * _controller.position.maxScrollExtent,
+        );
+      }
+    });
+
+    if (widget.scroll) {
+      _animationController.repeat(reverse: true);
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant AutoScrollText oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.scroll != oldWidget.scroll) {
+      if (widget.scroll) {
+        _animationController.repeat(reverse: true);
+      } else {
+        _animationController.stop();
+        _controller.jumpTo(0);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      controller: _controller,
+      scrollDirection: Axis.horizontal,
+      child: Text(widget.text, style: widget.style),
     );
   }
 }

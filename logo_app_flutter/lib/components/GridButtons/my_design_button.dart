@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:logo_app_flutter/utils/theme_colors.dart';
 
 class MyDesignButton extends StatelessWidget {
   const MyDesignButton({super.key});
@@ -20,7 +21,8 @@ class MyDesignButton extends StatelessWidget {
           width: 150,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: const Color(0xFF5FD3F3),
+            gradient: ThemeColors.yellowOrangePink,
+
             borderRadius: BorderRadius.circular(30),
             boxShadow: [
               BoxShadow(
@@ -37,11 +39,7 @@ class MyDesignButton extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Image.asset(
-                    'assets/icons/myData.png',
-                    width: 40,
-                    height: 40,
-                  ),
+                  Image.asset('assets/icons/myData.png', width: 40, height: 40),
                   SizedBox(height: 20),
                   Text(
                     'My Design',

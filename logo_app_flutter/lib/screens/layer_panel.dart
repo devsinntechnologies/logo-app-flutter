@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:logo_app_flutter/models/logo_state_data.dart';
+import 'package:logo_app_flutter/utils/theme_colors.dart';
 
 class LayersPanel extends StatefulWidget {
   final LogoStateData logoState;
@@ -25,15 +28,64 @@ class LayersPanel extends StatefulWidget {
 
 class _LayersPanelState extends State<LayersPanel> {
   bool _moveUp = true;
-  Widget _buildLayerPreview(BuildContext context, int id) {
-    Widget child;
-    String text = '';
+Widget _buildLayerPreview(BuildContext context, int id) {
+  Widget child;
+  String text = '';
 
+  // Handle custom images (IDs 200-299)
+  if (id >= 200 && id < 300) {
+    final index = id - 200;
+    if (index < widget.logoState.customImages.length) {
+      final image = widget.logoState.customImages[index];
+      child = Icon(Icons.image, color: Colors.white, size: 28);
+      text = 'Image ${index + 1}';
+    } else {
+      child = const Icon(Icons.error);
+      text = 'Unknown Image';
+    }
+  } 
+ // Handle custom images (IDs 200-299)
+if (id >= 200 && id < 300) {
+  final index = id - 200;
+  if (index < widget.logoState.customImages.length) {
+    final image = widget.logoState.customImages[index];
+    
+    // Try to display the actual image as thumbnail
+    try {
+      if (image.path.startsWith('assets/')) {
+        child = Image.asset(
+          image.path,
+          width: 35,
+          height: 35,
+          fit: BoxFit.cover,
+        );
+      } else {
+        child = Image.file(
+          File(image.path),
+          width: 35,
+          height: 35,
+          fit: BoxFit.cover,
+        );
+      }
+    } catch (e) {
+      // Fallback to icon if image loading fails
+      child = Icon(Icons.image, color: Colors.white, size: 20);
+    }
+    text = 'Image ${index + 1}';
+  } else {
+    child = const Icon(Icons.error);
+    text = 'Unknown Image';
+  }
+}
+  // Handle existing cases
+  else {
     switch (id) {
       case 0:
       case 3:
         child = SvgPicture.string(
           widget.svgLogo,
+          width: 28, // Increased size
+          height: 28, // Increased size
           colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
         );
         text = 'Logo';
@@ -63,44 +115,38 @@ class _LayersPanelState extends State<LayersPanel> {
         text = 'Slogan';
         break;
       default:
-        if (id >= 100) {
+        if (id >= 100 && id < 200) {
           final customText = widget.logoState.customTexts[id - 100];
-          child = Text(customText.text, style: const TextStyle(fontSize: 18));
+          child = Text(
+            customText.text, 
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+            ),
+          );
           text = customText.text;
         } else {
           child = const Icon(Icons.error);
           text = 'Unknown';
         }
     }
-
-    return Row(
-      children: [
-        SizedBox(width: 5,),
-        Container(
-          width: 50,
-          height: 20,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(4),
-            // color: Colors.white.withOpacity(0.5),
-          ),
-          child: FittedBox(child: child),
-        ),
-        // const SizedBox(width: 12),
-        // Expanded(
-        //   child: Text(
-        //     text,
-        //     style: const TextStyle(
-        //       color: Colors.white,
-        //       fontWeight: FontWeight.w500,
-        //     ),
-        //     overflow: TextOverflow.ellipsis,
-        //   ),
-        // ),
-      ],
-    );
   }
 
+  return Row(
+    children: [
+      SizedBox(width: 5),
+      Container(
+        width: 60,
+        height: 20,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: FittedBox(child: child),
+      ),
+    ],
+  );
+}
   @override
   Widget build(BuildContext context) {
     final orderedVisibleIds =
@@ -162,7 +208,7 @@ class _LayersPanelState extends State<LayersPanel> {
                 ],
               ),
 
-               Divider(),
+              Divider(),
               // --- Layer List ---
               if (orderedVisibleIds.isEmpty)
                 const Expanded(
@@ -189,7 +235,7 @@ class _LayersPanelState extends State<LayersPanel> {
                           ListTile(
                             dense: true,
                             visualDensity: const VisualDensity(vertical: -4),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 5),
+                            contentPadding: EdgeInsets.symmetric(horizontal: 5),
                             title: _buildLayerPreview(context, id),
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -214,8 +260,12 @@ class _LayersPanelState extends State<LayersPanel> {
                                       if (_moveUp && index > 0) {
                                         widget.onReorder(id, true); // move up
                                       } else if (!_moveUp &&
-                                          index < orderedVisibleIds.length - 1) {
-                                        widget.onReorder(id, false); // move down
+                                          index <
+                                              orderedVisibleIds.length - 1) {
+                                        widget.onReorder(
+                                          id,
+                                          false,
+                                        ); // move down
                                       }
                                       _moveUp = !_moveUp; // toggle direction
                                     });
@@ -224,62 +274,62 @@ class _LayersPanelState extends State<LayersPanel> {
                               ],
                             ),
                           ),
-                          Divider()
+                          Divider(),
                         ],
                       );
                     },
                   ),
                 ),
-               Container(
-  color: Colors.orange,
-  child: ListTile(
-    dense: true,
-    // visualDensity: const VisualDensity(vertical: -4),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 5),
-    title: const SizedBox.shrink(), // no title
-    trailing: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        IconButton(
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(),
-          icon: Icon(
-            areAllLocked ? Icons.lock : Icons.lock_open,
-            size: 22,
-            color: Colors.white,
-          ),
-          onPressed: () => widget.onToggleLockAll(!areAllLocked),
-        ),
-        const SizedBox(width: 2),
-        IconButton(
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(),
-          icon: const Icon(
-            Icons.import_export,
-            color: Colors.white,
-            size: 25,
-          ),
-          onPressed: () {
-           setState(() {
-              if (_moveUp) {
-                
-                for (int id in orderedVisibleIds) {
-                  widget.onReorder(id, true);
-                }
-              } else {
-                for (int id in orderedVisibleIds.reversed) {
-                  widget.onReorder(id, false);
-                }
-              }
-              _moveUp = !_moveUp; 
-            });
-          },
-        ),
-      ],
-    ),
-  ),
-),
- 
+              Container(
+                decoration: BoxDecoration(
+                  gradient: ThemeColors.textGradient
+                ),
+                child: ListTile(
+                  dense: true,
+                  // visualDensity: const VisualDensity(vertical: -4),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 5),
+                  title: const SizedBox.shrink(), // no title
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        icon: Icon(
+                          areAllLocked ? Icons.lock : Icons.lock_open,
+                          size: 22,
+                          color: Colors.white,
+                        ),
+                        onPressed: () => widget.onToggleLockAll(!areAllLocked),
+                      ),
+                      const SizedBox(width: 2),
+                      IconButton(
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        icon: const Icon(
+                          Icons.import_export,
+                          color: Colors.white,
+                          size: 25,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            if (_moveUp) {
+                              for (int id in orderedVisibleIds) {
+                                widget.onReorder(id, true);
+                              }
+                            } else {
+                              for (int id in orderedVisibleIds.reversed) {
+                                widget.onReorder(id, false);
+                              }
+                            }
+                            _moveUp = !_moveUp;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
         ),

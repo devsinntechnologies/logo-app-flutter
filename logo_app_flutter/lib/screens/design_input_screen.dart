@@ -5,6 +5,7 @@ import 'package:logo_app_flutter/fragments/choose_fonts_widget.dart';
 import 'package:logo_app_flutter/fragments/information_widget.dart';
 import 'package:logo_app_flutter/fragments/template_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:logo_app_flutter/utils/theme_colors.dart';
 
 class DesignInputScreen extends StatefulWidget {
   const DesignInputScreen({super.key});
@@ -32,35 +33,34 @@ class _DesignInputScreenState extends State<DesignInputScreen> {
     super.dispose();
   }
 
-void _nextStep() {
-  if (_currentStep == 0) {
-    if (companyName.isEmpty || slogan.isEmpty) {
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   const SnackBar(
-      //     content: Text('Please enter both Company Name and Slogan.'),
-      //     duration: Duration(seconds: 2),
-      //   ),
-      // );
-      return; 
+  void _nextStep() {
+    if (_currentStep == 0) {
+      if (companyName.isEmpty || slogan.isEmpty) {
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(
+        //     content: Text('Please enter both Company Name and Slogan.'),
+        //     duration: Duration(seconds: 2),
+        //   ),
+        // );
+        return;
+      }
+    }
+
+    if (_currentStep < stepTitles.length - 1) {
+      setState(() {
+        _currentStep++;
+      });
+      _pageController.nextPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+      _scrollController.animateTo(
+        (_currentStep * 120).toDouble(),
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
     }
   }
-
-  if (_currentStep < stepTitles.length - 1) {
-    setState(() {
-      _currentStep++;
-    });
-    _pageController.nextPage(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
-    _scrollController.animateTo(
-      (_currentStep * 120).toDouble(),
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
-  }
-}
-
 
   void _prevStep() {
     if (_currentStep > 0) {
@@ -84,19 +84,22 @@ void _nextStep() {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          backgroundColor: Colors.white,
           title: const Text('Are you sure?'),
-          content: const Text('Do you really want to go back to the Home Screen?'),
+          content: const Text(
+            'Do you really want to go back to the Home Screen?',
+          ),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
+              child: const Text('Cancel',style: TextStyle(color: ThemeColors.purple),),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
                 Navigator.pop(context);
               },
-              child: const Text('Yes'),
+              child: const Text('Yes',style: TextStyle(color: ThemeColors.purple),),
             ),
           ],
         );
@@ -167,43 +170,51 @@ void _nextStep() {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
-      bottomNavigationBar:BottomNavigationButtons(
-  currentStep: _currentStep,
-  totalSteps: stepTitles.length,
-  onNext: _nextStep,
-  onBack: _prevStep,
-  onFinish: () => Navigator.pop(context),
-  companyName: companyName,
-  slogan: slogan,
-),
+      bottomNavigationBar: BottomNavigationButtons(
+        currentStep: _currentStep,
+        totalSteps: stepTitles.length,
+        onNext: _nextStep,
+        onBack: _prevStep,
+        onFinish: () => Navigator.pop(context),
+        companyName: companyName,
+        slogan: slogan,
+      ),
 
       appBar: AppBar(
+        scrolledUnderElevation: 0,
+        backgroundColor: Colors.white,
         title: const Text('Auto Design'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: _showExitConfirmationDialog,
         ),
       ),
-      body: Column(
-        children: [
-          const Divider(height: 1),
-          StepTrailWidget(
-            currentStep: _currentStep,
-            stepTitles: stepTitles,
-            scrollController: _scrollController,
-          ),
-          const Divider(height: 1),
-          const SizedBox(height: 10),
-          Expanded(
-            child: PageView.builder(
-              controller: _pageController,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: stepTitles.length,
-              itemBuilder: (context, index) => _buildStepContent(index),
+      body: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Divider(height: 1),
+            StepTrailWidget(
+              currentStep: _currentStep,
+              stepTitles: stepTitles,
+              scrollController: _scrollController,
             ),
-          ),
-        ],
+            const Divider(height: 1),
+            const SizedBox(height: 10),
+            SizedBox(
+              height: screenHeight* 0.72,
+              child: PageView.builder(
+                controller: _pageController,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: stepTitles.length,
+                itemBuilder: (context, index) => _buildStepContent(index),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
