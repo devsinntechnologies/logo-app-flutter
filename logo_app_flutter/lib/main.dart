@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
-import 'package:logo_app_flutter/screens/Splash_screen.dart';
+import 'package:logo_app_flutter/screens/splash_screen.dart';
 import 'package:logo_app_flutter/screens/home_screen.dart';
 import 'package:logo_app_flutter/services/internet_checker.dart';
 import 'package:provider/provider.dart';
@@ -59,10 +60,19 @@ void initState() {
         ChangeNotifierProvider(create: (_) => SelectedColorProvider()),
       ],
       child: MaterialApp(
+          theme: ThemeData(
+    textTheme: GoogleFonts.poppinsTextTheme(),
+  ),
+  darkTheme: ThemeData(
+    textTheme: GoogleFonts.poppinsTextTheme(
+      ThemeData.dark().textTheme,
+    ),
+  ),
+  themeMode: ThemeMode.system,
         debugShowCheckedModeBanner: false,
         title: 'Auto Design Module',
         home: InternetChecker(
-            child:  HomeScreen(),
+            child:  SplashScreen(),
         ),
         // home: VideoSplashScreen(),
 
