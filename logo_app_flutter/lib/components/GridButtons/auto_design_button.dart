@@ -15,50 +15,57 @@ class AutoDesignButton extends StatelessWidget {
         );
       },
       child: Center(
-        child: Container(
-          height: 120, 
-          width: 150,
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            gradient: ThemeColors.orangePinkPurple,
-            borderRadius: BorderRadius.circular(30),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.25),
-                blurRadius: 10,
-                spreadRadius: 3,
-                offset: const Offset(2, 4),
-              ),
-            ],
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center, // optional
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Container(
+            height: 220, 
+            // width: 150,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: ThemeColors.orangePinkPurple,
+              borderRadius: BorderRadius.circular(35),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.25),
+                  blurRadius: 10,
+                  spreadRadius: 3,
+                  offset: const Offset(2, 4),
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center, // optional
                 children: [
-                  Image.asset(
-                    'assets/icons/wandd.png',
-                    width: 40,
-                    height: 40,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Image.asset(
+                        'assets/icons/wandd.png',
+                        width: 60,
+                        // height: 40,
+                      ),
+                      SizedBox(height: 25),
+                      const Text(
+                        'Auto Design',
+                        style: TextStyle(
+                          fontSize: 24,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
-                  SizedBox(height: 20),
-                  const Text(
-                    'Auto Design',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  const Spacer(),
+                  Column(
+                    children: [
+                      const Icon(Icons.chevron_right, color: Colors.white,size: 42,),
+                    ],
                   ),
                 ],
               ),
-              const Spacer(),
-              Column(
-                children: [
-                  const Icon(Icons.chevron_right, color: Colors.white),
-                ],
-              ),
-            ],
+            ),
           ),
         ),
       ),

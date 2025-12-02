@@ -49,27 +49,26 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
         ? const CircularProgressIndicator()
         : GestureDetector(
           onTap: _signInWithGoogle,
-          child: Row(
-            children: [
-              
-              ShaderMask(
-              shaderCallback: (bounds) =>
-              ThemeColors.textGradient.createShader(
-              Rect.fromLTWH(0, 0, bounds.width, bounds.height),
+          child: Padding(
+            padding: const EdgeInsets.only(right: 6.0),
+            child: Container(
+              decoration: BoxDecoration(
+              gradient: ThemeColors.textGradient,
+              borderRadius: BorderRadius.circular(8),
               ),
-              child: Text(
-              "Login in",style: TextStyle(
-                fontSize: 16,
-                color: Colors.white,
-                fontWeight: FontWeight.bold
-                ),
+              child: 
+              Padding(
+                padding: const EdgeInsets.all(6.0),
+                child: Text(
+                  "Login",style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold
+                    ),
+                  ),
               ),
-               ),
-              SizedBox(width: 5),
-              Icon(Icons.arrow_forward, color: ThemeColors.purple),
-
-            ],
-          ),
+            ),
+          )
         );
     // IconButton(
     //   // icon: Icon(Icons.login_outlined),

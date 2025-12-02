@@ -94,136 +94,154 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
       body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 50),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Builder(
-                  builder:
-                      (context) => IconButton(
-                        icon: Image.asset(
-                          "assets/icons/menu.png",
-                          width: 30,
-                          height: 30,
+        child: Padding(
+          padding: const EdgeInsets.all(4),
+          child: Column(
+            children: [
+              const SizedBox(height: 50),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Builder(
+                    builder:
+                        (context) => IconButton(
+                          icon: Image.asset(
+                            "assets/icons/menu.png",
+                            width: 30,
+                            height: 30,
+                          ),
+                          onPressed: () {
+                            Scaffold.of(context).openDrawer();
+                          },
                         ),
-                        onPressed: () {
-                          Scaffold.of(context).openDrawer();
-                        },
-                      ),
-                ),
-                Center(
-                  child: Text(
-                    'Logo Maker',
-                    style: GoogleFonts.poppins(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black87,
+                  ),
+                  Center(
+                    child: Row(
+                      children: [
+                        Image.asset(
+                          'assets/icons/logo_nobg.png',
+                          // width: 30,
+                          height: 40,
+                        ),
+                        // const SizedBox(width:2),
+                        Text(
+                          'SmartLogoMaker',
+                          style: GoogleFonts.poppins(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-               GoogleSignInButton()
-                // SizedBox(width: 1),
-              ],
-            ),
-            const SizedBox(height: 20),
-            // GestureDetector(
-            //   onTap: () {
-            //     SnackBar snackBar = const SnackBar(
-            //       content: Text('Template button pressed!'),
-            //       duration: Duration(milliseconds: 100),
-            //     );
-            //     ScaffoldMessenger.of(context).showSnackBar(snackBar);
-            //   },
-            //   child: Container(
-            //     width: 330,
-            //     height: 100,
-            //     padding: const EdgeInsets.all(20),
-            //     decoration: BoxDecoration(
-            //       // color: const Color(0xFF5FD3F3),
-            //       gradient: LinearGradient(
-            //         begin: Alignment.topLeft,
-            //         end: Alignment.bottomRight,
-            //         colors: [
-            //           Color(0xFFF96C8B), // Pinkish red
-            //           Color(0xFFF99FBC),
-            //         ],
-            //       ),
-            //       borderRadius: BorderRadius.circular(30),
-            //       boxShadow: [
-            //         BoxShadow(
-            //           color: Colors.black.withOpacity(0.25),
-            //           blurRadius: 10,
-            //           spreadRadius: 3,
-            //           offset: const Offset(2, 4),
-            //         ),
-            //       ],
-            //     ),
-            //     child: Row(
-            //       crossAxisAlignment: CrossAxisAlignment.center, // optional
-            //       children: [
-            //         Row(
-            //           crossAxisAlignment: CrossAxisAlignment.center,
-            //           children: [
-            //             Image.asset(
-            //               'assets/icons/color-palette.png',
-            //               width: 40,
-            //               height: 40,
-            //             ),
-            //             SizedBox(width: 20),
-            //             Column(
-            //               mainAxisAlignment: MainAxisAlignment.center,
-            //               crossAxisAlignment: CrossAxisAlignment.start,
-            //               children: [
-            //                 Text(
-            //                   textAlign: TextAlign.start,
-            //                   'Template',
-            //                   style: GoogleFonts.poppins(
-            //                     color: Colors.white,
-            //                     fontWeight: FontWeight.w600,
-            //                     fontSize: 13,
-            //                   ),
-            //                 ),
-            //                 Text(
-            //                   'Edit and Save Logo Template',
-            //                   style: GoogleFonts.poppins(
-            //                     color: Colors.white,
-            //                     fontWeight: FontWeight.normal,
-            //                     fontSize: 13,
-            //                   ),
-            //                 ),
-            //               ],
-            //             ),
-            //           ],
-            //         ),
-            //         const Spacer(),
-            //         Column(
-            //           children: [
-            //             const Icon(Icons.chevron_right, color: Colors.white),
-            //           ],
-            //         ),
-            //       ],
-            //     ),
-            //   ),
-            // ),
+                 GoogleSignInButton(),
+                  // SizedBox(width: 1),
+                ],
+              ),
+              const SizedBox(height: 23),
+              // GestureDetector(
+              //   onTap: () {
+              //     SnackBar snackBar = const SnackBar(
+              //       content: Text('Template button pressed!'),
+              //       duration: Duration(milliseconds: 100),
+              //     );
+              //     ScaffoldMessenger.of(context).showSnackBar(snackBar);
+              //   },
+              //   child: Container(
+              //     width: 330,
+              //     height: 100,
+              //     padding: const EdgeInsets.all(20),
+              //     decoration: BoxDecoration(
+              //       // color: const Color(0xFF5FD3F3),
+              //       gradient: LinearGradient(
+              //         begin: Alignment.topLeft,
+              //         end: Alignment.bottomRight,
+              //         colors: [
+              //           Color(0xFFF96C8B), // Pinkish red
+              //           Color(0xFFF99FBC),
+              //         ],
+              //       ),
+              //       borderRadius: BorderRadius.circular(30),
+              //       boxShadow: [
+              //         BoxShadow(
+              //           color: Colors.black.withOpacity(0.25),
+              //           blurRadius: 10,
+              //           spreadRadius: 3,
+              //           offset: const Offset(2, 4),
+              //         ),
+              //       ],
+              //     ),
+              //     child: Row(
+              //       crossAxisAlignment: CrossAxisAlignment.center, // optional
+              //       children: [
+              //         Row(
+              //           crossAxisAlignment: CrossAxisAlignment.center,
+              //           children: [
+              //             Image.asset(
+              //               'assets/icons/color-palette.png',
+              //               width: 40,
+              //               height: 40,
+              //             ),
+              //             SizedBox(width: 20),
+              //             Column(
+              //               mainAxisAlignment: MainAxisAlignment.center,
+              //               crossAxisAlignment: CrossAxisAlignment.start,
+              //               children: [
+              //                 Text(
+              //                   textAlign: TextAlign.start,
+              //                   'Template',
+              //                   style: GoogleFonts.poppins(
+              //                     color: Colors.white,
+              //                     fontWeight: FontWeight.w600,
+              //                     fontSize: 13,
+              //                   ),
+              //                 ),
+              //                 Text(
+              //                   'Edit and Save Logo Template',
+              //                   style: GoogleFonts.poppins(
+              //                     color: Colors.white,
+              //                     fontWeight: FontWeight.normal,
+              //                     fontSize: 13,
+              //                   ),
+              //                 ),
+              //               ],
+              //             ),
+              //           ],
+              //         ),
+              //         const Spacer(),
+              //         Column(
+              //           children: [
+              //             const Icon(Icons.chevron_right, color: Colors.white),
+              //           ],
+              //         ),
+              //       ],
+              //     ),
+              //   ),
+              // ),
+            
+              AutoDesignButton(),
+              SizedBox(height: 4),
           
-            AutoDesignButton(),
-            SizedBox(height: 30),
-
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [CreateLogoButton(), MyDesignButton()],
-            ),
-            SizedBox(height: 30),
-            // Row(
-            //   crossAxisAlignment: CrossAxisAlignment.center,
-            //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            //   children: [MyLogoButton(), MyDesignButton()],
-            // ),
-          ],
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  // crossAxisAlignment: CrossAxisAlignment.center,
+                  // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [Expanded(child: CreateLogoButton()), 
+                  SizedBox(width: 10),
+                  Expanded(child: MyDesignButton())],
+                ),
+              ),
+              SizedBox(height: 30),
+              // Row(
+              //   crossAxisAlignment: CrossAxisAlignment.center,
+              //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              //   children: [MyLogoButton(), MyDesignButton()],
+              // ),
+            ],
+          ),
         ),
       ),
     );
