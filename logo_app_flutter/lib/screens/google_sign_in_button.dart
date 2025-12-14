@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:logo_app_flutter/components/google_alert.dart';
 import 'package:logo_app_flutter/services/auth_service.dart';
 import 'package:logo_app_flutter/utils/theme_colors.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -18,29 +19,105 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
   @override
   void initState() {
     super.initState();
+
     _supabase.auth.onAuthStateChange.listen((data) {
       final session = data.session;
       if (session != null && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Signed in successfully!')),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(content: Text("Signed in successfully!")),
+        // );
       }
     });
   }
 
   Future<void> _signInWithGoogle() async {
     setState(() => _isLoading = true);
+
     try {
       await authService.signInWithGoogle();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Sign in failed: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Sign in failed: $e')),
+        );
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  void _showConfirmDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+            backgroundColor: Colors.grey[100],
+            title: GestureDetector(
+              onTap: () {
+                _signInWithGoogle();
+              },
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(5),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.shade400,
+                      offset: const Offset(4, 4),
+                      blurRadius: 6,
+                    ),
+                    BoxShadow(
+                      color: Colors.white,
+                      offset: const Offset(-4, -4),
+                      blurRadius: 6,
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Image.asset(
+                      "assets/icons/google.png",
+                      height: 24,
+                    ),
+                    const SizedBox(width: 10),
+                    const Text(
+                      "Sign In with Google",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+
+            // actions: [
+            //   TextButton(
+            //     onPressed: () => Navigator.pop(context),
+            //     child: const Text(
+            //       "Cancel",
+            //       style: TextStyle(fontSize: 14, color: ThemeColors.purple),
+            //     ),
+            //   ),
+            //   TextButton(
+            //     onPressed: () {
+            //       Navigator.pop(context);
+            //       _signInWithGoogle();
+            //     },
+            //     child: const Text(
+            //       "Add",
+            //       style: TextStyle(fontSize: 14, color: ThemeColors.purple),
+            //     ),
+            //   ),
+            // ],
+
+            );
+      },
+    );
   }
 
   @override
@@ -48,34 +125,28 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
     return _isLoading
         ? const CircularProgressIndicator()
         : GestureDetector(
-          onTap: _signInWithGoogle,
-          child: Padding(
-            padding: const EdgeInsets.only(right: 6.0),
-            child: Container(
-              decoration: BoxDecoration(
-              gradient: ThemeColors.textGradient,
-              borderRadius: BorderRadius.circular(8),
-              ),
-              child: 
-              Padding(
-                padding: const EdgeInsets.all(6.0),
-                child: Text(
-                  "Login",style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold
+            onTap: () => showCustomGoogleDialog(context),
+
+            child: Padding(
+              padding: const EdgeInsets.only(right: 6.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: ThemeColors.textGradient,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Padding(
+                  padding: EdgeInsets.all(6.0),
+                  child: Text(
+                    "Login",
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
+                ),
               ),
             ),
-          )
-        );
-    // IconButton(
-    //   // icon: Icon(Icons.login_outlined),
-    //   // icon: Image.asset('assets/icons/google.png', height: 40),
-
-    //   onPressed: _signInWithGoogle,
-
-    // );
+          );
   }
 }

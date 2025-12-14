@@ -120,9 +120,9 @@ class HomeScreen extends StatelessWidget {
                     child: Row(
                       children: [
                         Image.asset(
-                          'assets/icons/logo_nobg.png',
+                          'assets/icons/logo_app.png',
                           // width: 30,
-                          height: 40,
+                          height: 30,
                         ),
                         // const SizedBox(width:2),
                         Text(

@@ -1,5 +1,3 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
-
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:logo_app_flutter/models/logo_state_data.dart';
@@ -7,8 +5,8 @@ import 'package:logo_app_flutter/provider/selected_color_provider.dart';
 import 'package:logo_app_flutter/utils/theme_colors.dart';
 import 'package:provider/provider.dart';
 
-typedef Element3DRotationCallback =
-    void Function(int id, double rotationX, double rotationY, double rotationZ);
+typedef Element3DRotationCallback = void Function(
+    int id, double rotationX, double rotationY, double rotationZ);
 typedef ElementActionCallback = void Function(int id);
 
 class MovementPanel extends StatefulWidget {
@@ -403,8 +401,7 @@ class _MovementPanelState extends State<MovementPanel>
                                 widget.onEditPressed?.call();
                               },
                               style: ElevatedButton.styleFrom(
-                                                             backgroundColor: ThemeColors.purple,
-
+                                backgroundColor: ThemeColors.purple,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20),
                                 ),
@@ -468,35 +465,33 @@ class _MovementPanelState extends State<MovementPanel>
                 height: 50,
                 child: ListView(
                   scrollDirection: Axis.horizontal,
-                  children:
-                      colors
-                          .map(
-                            (color) => GestureDetector(
-                              onTap: () {
-                                widget.onSaveState?.call();
-                                _setColorForElement(provider, elementId, color);
-                              },
-                              child: Container(
-                                margin: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                ),
-                                width: 30,
-                                height: 30,
-                                decoration: BoxDecoration(
-                                  color: color,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color:
-                                        currentColor == color
-                                            ? Colors.black
-                                            : Colors.transparent,
-                                    width: 2,
-                                  ),
-                                ),
+                  children: colors
+                      .map(
+                        (color) => GestureDetector(
+                          onTap: () {
+                            _setColorForElement(provider, elementId, color);
+                            widget.onSaveState?.call();
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                            ),
+                            width: 30,
+                            height: 30,
+                            decoration: BoxDecoration(
+                              color: color,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: currentColor == color
+                                    ? Colors.black
+                                    : Colors.transparent,
+                                width: 2,
                               ),
                             ),
-                          )
-                          .toList(),
+                          ),
+                        ),
+                      )
+                      .toList(),
                 ),
               ),
               const SizedBox(height: 8),
@@ -513,7 +508,7 @@ class _MovementPanelState extends State<MovementPanel>
     int elementId,
   ) {
     if (elementId == 0) {
-      return provider.shapeColor;
+       return provider.shapeColor ?? Colors.black;
     } else if (elementId == 1) {
       return provider.companyTextColor;
     } else if (elementId == 2) {
@@ -546,6 +541,9 @@ class _MovementPanelState extends State<MovementPanel>
     } else {
       provider.setOverrideColorForElement(elementId, color);
     }
+
+    // ✅ Save state after the change
+    widget.onSaveState?.call();
   }
 
   Widget _buildOutlinesTab() {
@@ -584,8 +582,8 @@ class _MovementPanelState extends State<MovementPanel>
                   Expanded(
                     child: SliderTheme(
                       data: SliderTheme.of(context).copyWith(
-                        activeTrackColor:ThemeColors.lightPurple,
-                        thumbColor:ThemeColors.purple,
+                        activeTrackColor: ThemeColors.lightPurple,
+                        thumbColor: ThemeColors.purple,
                       ),
                       child: Slider(
                         min: 0,
@@ -593,12 +591,21 @@ class _MovementPanelState extends State<MovementPanel>
                         divisions: 10,
                         value: outlineThickness,
                         onChanged: (value) {
-                          provider.setOutlineWidth(elementId, value);
                           widget.onSaveState?.call();
+                          provider.setOutlineWidth(elementId, value);
+                          if (widget.onLogoStateChanged != null) {
+                            widget.onLogoStateChanged!(
+                              widget.logoState.copyWith(
+                                outlineWidths:
+                                    Map.from(widget.logoState.outlineWidths)
+                                      ..['$elementId'] = value,
+                              ),
+                            );
+                          }
                         },
                         onChangeEnd: (value) {
                           // Save state only when user stops sliding
-                          widget.onSaveState?.call();
+                          // widget.onSaveState?.call();
                         },
                       ),
                     ),
@@ -614,40 +621,47 @@ class _MovementPanelState extends State<MovementPanel>
                 ],
               ),
               const SizedBox(height: 8),
-
               SizedBox(
                 height: 50,
                 child: ListView(
                   scrollDirection: Axis.horizontal,
-                  children:
-                      colors
-                          .map(
-                            (color) => GestureDetector(
-                              onTap: () {
-                                widget.onSaveState?.call();
-                                provider.setOutlineColor(elementId, color);
-                              },
-                              child: Container(
-                                margin: const EdgeInsets.symmetric(
-                                  horizontal: 6,
+                  children: colors
+                      .map(
+                        (color) => GestureDetector(
+                          onTap: () {
+                            widget.onSaveState?.call();
+                            provider.setOutlineColor(elementId, color);
+
+                            if (widget.onLogoStateChanged != null) {
+                              widget.onLogoStateChanged!(
+                                widget.logoState.copyWith(
+                                  outlineColors:
+                                      Map.from(widget.logoState.outlineColors)
+                                        ..['$elementId'] = color,
                                 ),
-                                width: 30,
-                                height: 30,
-                                decoration: BoxDecoration(
-                                  color: color,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color:
-                                        outlineColor == color
-                                            ? Colors.black
-                                            : Colors.transparent,
-                                    width: 2,
-                                  ),
-                                ),
+                              );
+                            }
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                            ),
+                            width: 30,
+                            height: 30,
+                            decoration: BoxDecoration(
+                              color: color,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: outlineColor == color
+                                    ? Colors.black
+                                    : Colors.transparent,
+                                width: 2,
                               ),
                             ),
-                          )
-                          .toList(),
+                          ),
+                        ),
+                      )
+                      .toList(),
                 ),
               ),
             ],
@@ -661,16 +675,15 @@ class _MovementPanelState extends State<MovementPanel>
     return StatefulBuilder(
       builder: (context, setLocalState) {
         final int elementId = widget.selectedElementId ?? -1;
+        if (elementId == -1) return const SizedBox();
 
+        // Directly read from logoState
         double rotationX = widget.logoState.rotationXMap[elementId] ?? 0.0;
         double rotationY = widget.logoState.rotationYMap[elementId] ?? 0.0;
         double rotationZ = widget.logoState.rotationZMap[elementId] ?? 0.0;
 
         Widget buildSlider(
-          String label,
-          double value,
-          ValueChanged<double> onChanged,
-        ) {
+            String label, double value, ValueChanged<double> onChanged) {
           return SizedBox(
             height: 28,
             child: Row(
@@ -678,7 +691,7 @@ class _MovementPanelState extends State<MovementPanel>
                 SizedBox(
                   width: 40,
                   child: Text(
-                    "$label°",
+                    "${value.round()}°", // Show current value
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -690,8 +703,15 @@ class _MovementPanelState extends State<MovementPanel>
                     value: value,
                     activeColor: ThemeColors.purple,
                     inactiveColor: Colors.pink.shade100,
-                    onChanged: onChanged,
-                    onChangeEnd: (v) => widget.onSaveState?.call(),
+                    onChanged: (v) {
+                      onChanged(v);
+                      // Immediate feedback
+                      setLocalState(() {});
+                    },
+                    onChangeEnd: (_) {
+                      // Save state for undo/redo ONLY on change end
+                      widget.onSaveState?.call();
+                    },
                   ),
                 ),
               ],
@@ -705,54 +725,36 @@ class _MovementPanelState extends State<MovementPanel>
             mainAxisSize: MainAxisSize.min,
             children: [
               buildSlider("X", rotationX, (v) {
-                int id = widget.selectedElementId ?? -1;
-                if (id != -1) {
-                  final newMap = Map<int, double>.from(
-                    widget.logoState.rotationXMap,
-                  );
-                  newMap[id] = v;
-
-                  widget.onLogoStateChanged!(
-                    widget.logoState.copyWith(rotationXMap: newMap),
-                  );
-                }
-
-                setLocalState(() {});
+                widget.onLogoStateChanged!(
+                  widget.logoState.copyWith(
+                    rotationXMap: {
+                      ...widget.logoState.rotationXMap,
+                      elementId: v,
+                    },
+                  ),
+                );
               }),
-
               const SizedBox(height: 8),
               buildSlider("Y", rotationY, (v) {
-                int id = widget.selectedElementId ?? -1;
-                if (id != -1) {
-                  final newMap = Map<int, double>.from(
-                    widget.logoState.rotationYMap,
-                  );
-                  newMap[id] = v;
-
-                  widget.onLogoStateChanged!(
-                    widget.logoState.copyWith(rotationYMap: newMap),
-                  );
-                }
-
-                setLocalState(() {});
+                widget.onLogoStateChanged!(
+                  widget.logoState.copyWith(
+                    rotationYMap: {
+                      ...widget.logoState.rotationYMap,
+                      elementId: v,
+                    },
+                  ),
+                );
               }),
-
               const SizedBox(height: 8),
-
               buildSlider("Z", rotationZ, (v) {
-                int id = widget.selectedElementId ?? -1;
-                if (id != -1) {
-                  final newMap = Map<int, double>.from(
-                    widget.logoState.rotationZMap,
-                  );
-                  newMap[id] = v;
-
-                  widget.onLogoStateChanged!(
-                    widget.logoState.copyWith(rotationZMap: newMap),
-                  );
-                }
-
-                setLocalState(() {});
+                widget.onLogoStateChanged!(
+                  widget.logoState.copyWith(
+                    rotationZMap: {
+                      ...widget.logoState.rotationZMap,
+                      elementId: v,
+                    },
+                  ),
+                );
               }),
             ],
           ),
@@ -760,6 +762,106 @@ class _MovementPanelState extends State<MovementPanel>
       },
     );
   }
+  // Widget _build3DTab() {
+  //   return StatefulBuilder(
+  //     builder: (context, setLocalState) {
+  //       final int elementId = widget.selectedElementId ?? -1;
+
+  //       double rotationX = widget.logoState.rotationXMap[elementId] ?? 0.0;
+  //       double rotationY = widget.logoState.rotationYMap[elementId] ?? 0.0;
+  //       double rotationZ = widget.logoState.rotationZMap[elementId] ?? 0.0;
+
+  //       Widget buildSlider(
+  //         String label,
+  //         double value,
+  //         ValueChanged<double> onChanged,
+  //       ) {
+  //         return SizedBox(
+  //           height: 28,
+  //           child: Row(
+  //             children: [
+  //               SizedBox(
+  //                 width: 40,
+  //                 child: Text(
+  //                   "$label°",
+  //                   style: const TextStyle(fontWeight: FontWeight.bold),
+  //                 ),
+  //               ),
+  //               Expanded(
+  //                 child: Slider(
+  //                   min: 0,
+  //                   max: 360,
+  //                   divisions: 360,
+  //                   value: value,
+  //                   activeColor: ThemeColors.purple,
+  //                   inactiveColor: Colors.pink.shade100,
+  //                   onChanged: onChanged,
+  //                   onChangeEnd: (v) => widget.onSaveState?.call(),
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //         );
+  //       }
+
+  //       return Padding(
+  //         padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+  //         child: Column(
+  //           mainAxisSize: MainAxisSize.min,
+  //           children: [
+  //             buildSlider("X", rotationX, (v) {
+  //               int id = widget.selectedElementId ?? -1;
+  //               if (id != -1) {
+  //                 final newMap = Map<int, double>.from(
+  //                   widget.logoState.rotationXMap,
+  //                 );
+  //                 newMap[id] = v;
+
+  //                 widget.onLogoStateChanged!(
+  //                   widget.logoState.copyWith(rotationXMap: newMap),
+  //                 );
+  //               }
+
+  //               setLocalState(() {});
+  //             }),
+  //             const SizedBox(height: 8),
+  //             buildSlider("Y", rotationY, (v) {
+  //               int id = widget.selectedElementId ?? -1;
+  //               if (id != -1) {
+  //                 final newMap = Map<int, double>.from(
+  //                   widget.logoState.rotationYMap,
+  //                 );
+  //                 newMap[id] = v;
+
+  //                 widget.onLogoStateChanged!(
+  //                   widget.logoState.copyWith(rotationYMap: newMap),
+  //                 );
+  //               }
+
+  //               setLocalState(() {});
+  //             }),
+  //             const SizedBox(height: 8),
+  //             buildSlider("Z", rotationZ, (v) {
+  //               int id = widget.selectedElementId ?? -1;
+  //               if (id != -1) {
+  //                 final newMap = Map<int, double>.from(
+  //                   widget.logoState.rotationZMap,
+  //                 );
+  //                 newMap[id] = v;
+
+  //                 widget.onLogoStateChanged!(
+  //                   widget.logoState.copyWith(rotationZMap: newMap),
+  //                 );
+  //               }
+
+  //               setLocalState(() {});
+  //             }),
+  //           ],
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
 
   Widget _buildColorBox(BuildContext context, Color color) {
     return GestureDetector(

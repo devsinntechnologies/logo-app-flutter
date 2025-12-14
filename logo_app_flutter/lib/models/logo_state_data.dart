@@ -1,6 +1,41 @@
 import 'dart:ui';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+
+class EditorState {
+  final LogoStateData logo;
+  final BackgroundState background;
+
+  EditorState({required this.logo, required this.background});
+
+  EditorState clone() => EditorState(
+        logo: logo.clone(),
+        background: background.clone(),
+      );
+}
+
+class BackgroundState {
+  final Color? color;
+  final Gradient? gradient;
+  final String? imagePath; // file path for image
+  final bool checkerboardVisible;
+
+  BackgroundState({
+    required this.color,
+    required this.gradient,
+    required this.imagePath,
+    required this.checkerboardVisible,
+  });
+
+  BackgroundState clone() => BackgroundState(
+        color: color,
+        gradient: gradient,
+        imagePath: imagePath,
+        checkerboardVisible: checkerboardVisible,
+      );
+}
+
 
 class CustomTextElement {
   final TextAlign textAlign;
@@ -31,7 +66,7 @@ class CustomTextElement {
     this.isOutlined = false,
     this.outlineColor = Colors.black,
     this.strokeWidth = 1.0,
-       this.fontWeight = FontWeight.normal,
+    this.fontWeight = FontWeight.normal,
   });
 
   CustomTextElement copyWith({
@@ -47,7 +82,7 @@ class CustomTextElement {
     bool? isOutlined,
     Color? outlineColor,
     double? strokeWidth,
-      FontWeight? fontWeight,
+    FontWeight? fontWeight,
   }) {
     return CustomTextElement(
       textAlign: textAlign ?? this.textAlign,
@@ -62,7 +97,7 @@ class CustomTextElement {
       isOutlined: isOutlined ?? this.isOutlined,
       outlineColor: outlineColor ?? this.outlineColor,
       strokeWidth: strokeWidth ?? this.strokeWidth,
-       fontWeight: fontWeight ?? this.fontWeight,
+      fontWeight: fontWeight ?? this.fontWeight,
     );
   }
 
@@ -77,7 +112,7 @@ class CustomTextElement {
       isVisible: isVisible,
       layerIndex: layerIndex,
       color: Color(color.value),
-  fontWeight: fontWeight, 
+      fontWeight: fontWeight,
       isOutlined: isOutlined,
       outlineColor: Color(outlineColor.value),
       strokeWidth: strokeWidth,
@@ -184,7 +219,7 @@ class CustomSvgElement {
     return CustomSvgElement(
       svgString: svgString,
       position: Offset(position.dx, position.dy),
-     color: color == null ? null : Color(color!.value),
+      color: color == null ? null : Color(color!.value),
       size: size,
       rotation: rotation,
       opacity: opacity,
@@ -195,11 +230,12 @@ class CustomSvgElement {
 }
 
 class LogoStateData {
+  final Map<String, Color> elementColors;
   final Map<String, double> outlineWidths;
   final Map<String, Color> outlineColors;
-final Map<int, double> rotationXMap;
-final Map<int, double> rotationYMap;
-final Map<int, double> rotationZMap;
+  final Map<int, double> rotationXMap;
+  final Map<int, double> rotationYMap;
+  final Map<int, double> rotationZMap;
   final double perspective;
   final Color companyNameColor;
   final Color sloganColor;
@@ -250,14 +286,14 @@ final Map<int, double> rotationZMap;
   final TextAlign companyNameTextAlign; // ← add this
   final TextAlign sloganTextAlign;
 
-  
-
   LogoStateData({
-     this.outlineWidths = const {},
+    this.elementColors = const {},
+
+    this.outlineWidths = const {},
     this.outlineColors = const {},
-this.rotationXMap = const {},
-this.rotationYMap = const {},
-this.rotationZMap = const {},
+    this.rotationXMap = const {},
+    this.rotationYMap = const {},
+    this.rotationZMap = const {},
 
     this.perspective = 0.001,
     List<CustomTextElement>? customTexts,
@@ -328,11 +364,12 @@ this.rotationZMap = const {},
   }
 
   LogoStateData copyWith({
-        Map<String, double>? outlineWidths,
+    Map<String, Color>? elementColors,
+    Map<String, double>? outlineWidths,
     Map<String, Color>? outlineColors,
-  Map<int, double>? rotationXMap,
-Map<int, double>? rotationYMap,
-Map<int, double>? rotationZMap,
+    Map<int, double>? rotationXMap,
+    Map<int, double>? rotationYMap,
+    Map<int, double>? rotationZMap,
 
     double? perspective,
     Color? companyNameColor,
@@ -379,11 +416,12 @@ Map<int, double>? rotationZMap,
     List<int>? elementOrder,
   }) {
     return LogoStateData(
-         outlineWidths: outlineWidths ?? this.outlineWidths,
+      elementColors: elementColors ?? this.elementColors,
+      outlineWidths: outlineWidths ?? this.outlineWidths,
       outlineColors: outlineColors ?? this.outlineColors,
-rotationXMap: rotationXMap ?? this.rotationXMap,
-rotationYMap: rotationYMap ?? this.rotationYMap,
-rotationZMap: rotationZMap ?? this.rotationZMap,
+      rotationXMap: rotationXMap ?? this.rotationXMap,
+      rotationYMap: rotationYMap ?? this.rotationYMap,
+      rotationZMap: rotationZMap ?? this.rotationZMap,
 
       perspective: perspective ?? this.perspective,
 
@@ -440,11 +478,12 @@ rotationZMap: rotationZMap ?? this.rotationZMap,
 
   LogoStateData clone() {
     return LogoStateData(
-            outlineWidths: Map<String, double>.from(outlineWidths),
+      elementColors: Map<String, Color>.from(elementColors),
+      outlineWidths: Map<String, double>.from(outlineWidths),
       outlineColors: Map<String, Color>.from(outlineColors),
-rotationXMap: Map<int, double>.from(rotationXMap),
-rotationYMap: Map<int, double>.from(rotationYMap),
-rotationZMap: Map<int, double>.from(rotationZMap),
+      rotationXMap: Map<int, double>.from(rotationXMap),
+      rotationYMap: Map<int, double>.from(rotationYMap),
+      rotationZMap: Map<int, double>.from(rotationZMap),
 
       perspective: perspective ?? this.perspective,
 
@@ -476,7 +515,6 @@ rotationZMap: Map<int, double>.from(rotationZMap),
       sloganRotation: sloganRotation,
       isSloganVisible: isSloganVisible,
       sloganName: sloganName,
-      
 
       logo2Position:
           logo2Position == null
@@ -525,6 +563,7 @@ rotationZMap: Map<int, double>.from(rotationZMap),
     );
   }
 }
+
 
 // void _updateTextAlignment(TextAlign align) {
 //   final id = widget.selectedElementId;

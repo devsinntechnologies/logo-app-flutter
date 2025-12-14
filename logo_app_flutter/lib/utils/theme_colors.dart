@@ -57,4 +57,14 @@ class ThemeColors {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
+    static const LinearGradient yellowOrangePurple = LinearGradient(
+    colors: [
+      Color(0xFFF6BF76), // Start color
+      Color(0xFFED8667), 
+     Color(0xFFA744A2),  // End color
+
+    ],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
 }

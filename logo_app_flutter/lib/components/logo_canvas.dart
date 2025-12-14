@@ -94,185 +94,311 @@ class _LogoCanvasState extends State<LogoCanvas> {
   bool hasTextOnCanvas() {
     if (widget.logoState.customTexts.any(
       (t) => t.isVisible && t.text.isNotEmpty,
-    ))
-      return true;
+    )) return true;
 
     if (widget.logoState.isCompanyNameVisible &&
-        (widget.logoState.companyName?.isNotEmpty ?? false))
-      return true;
+        (widget.logoState.companyName?.isNotEmpty ?? false)) return true;
 
     if (widget.logoState.isSloganVisible &&
-        (widget.logoState.sloganName?.isNotEmpty ?? false))
-      return true;
+        (widget.logoState.sloganName?.isNotEmpty ?? false)) return true;
 
     return false;
   }
 
   @override
-  Widget build(BuildContext context) {
-    final provider = Provider.of<SelectedColorProvider>(context);
-    final gradient = provider.selectedGradient;
-    final providers = Provider.of<SelectedColorProvider>(context);
-    final bgImage = providers.backgroundImage;
-    final shapeColor =
-        Provider.of<SelectedColorProvider>(context).selectedColor;
 
-    final String selectedShape =
-        (widget.selectedShapeName.isEmpty)
-            ? "Square"
-            : widget.selectedShapeName;
+  @override
+Widget build(BuildContext context) {
+  final provider = Provider.of<SelectedColorProvider>(context);
+  final gradient = provider.selectedGradient;
+  final shapeColor = provider.selectedColor ?? Colors.white;
+  final bgImage = provider.canvasImage ?? provider.backgroundImage;
 
-    return ValueListenableBuilder<bool>(
-      valueListenable: widget.isExportingNotifier,
-      builder: (context, isExporting, child) {
-        print('🎨 LogoCanvas rebuilding with isExporting: $isExporting');
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            final bgImage = providers.canvasImage ?? providers.backgroundImage;
-            final Size canvasSize = constraints.biggest;
-            return Stack(
-              children: [
-                if (widget.showGrid)
-                  CustomPaint(
-                    painter: GridPainter(
-                      gridColor: Colors.blue,
-                      highlightedHorizontalLine:
-                          widget.highlightedHorizontalGridLineIndex,
-                      highlightedVerticalLine:
-                          widget.highlightedVerticalGridLineIndex,
-                    ),
-                    size: Size.infinite,
+  // Use provider opacity and checkerboard visibility
+  final checkerboardVisible = provider.isCheckerboardVisible;
+  final opacity = provider.opacity;
+
+  final String selectedShape =
+      (widget.selectedShapeName.isEmpty) ? "Square" : widget.selectedShapeName;
+
+  return ValueListenableBuilder<bool>(
+    valueListenable: widget.isExportingNotifier,
+    builder: (context, isExporting, child) {
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final Size canvasSize = constraints.biggest;
+
+          Widget? getPainterForShape(String shape) {
+            switch (shape) {
+              case "Square":
+              case "Rounded Rect":
+                return CustomPaint(
+                  size: shape == "Square"
+                      ? Size(double.infinity, double.infinity)
+                      : const Size(280, 100),
+                  painter: SquarePainter(shapeColor, gradient, bgImage),
+                );
+              case "Diamond":
+                return CustomPaint(
+                  size: const Size(double.infinity, double.infinity),
+                  painter: DiamondPainter(shapeColor, gradient, bgImage),
+                );
+              case "Triangle":
+                return CustomPaint(
+                  size: const Size(double.infinity, double.infinity),
+                  painter: TrianglePainter(shapeColor, gradient, bgImage),
+                );
+              case "Pentagon":
+                return CustomPaint(
+                  size: const Size(double.infinity, double.infinity),
+                  painter: PentagonPainter(shapeColor, gradient, bgImage),
+                );
+              case "Hexagon":
+                return CustomPaint(
+                  size: const Size(double.infinity, double.infinity),
+                  painter: HexagonPainter(shapeColor, gradient, bgImage),
+                );
+              case "Star":
+                return CustomPaint(
+                  size: const Size(double.infinity, double.infinity),
+                  painter: StarPainter(shapeColor, gradient, bgImage),
+                );
+              case "Arrow":
+                return CustomPaint(
+                  size: const Size(double.infinity, double.infinity),
+                  painter: ArrowPainter(shapeColor, gradient, bgImage),
+                );
+              case "Heart":
+                return CustomPaint(
+                  size: const Size(200, 200),
+                  painter: HeartPainter(shapeColor, gradient, bgImage),
+                );
+              default:
+                return CustomPaint(
+                  size: const Size(double.infinity, double.infinity),
+                  painter: SquarePainter(shapeColor, gradient, bgImage),
+                );
+            }
+          }
+
+          return Stack(
+            children: [
+              if (widget.showGrid)
+                CustomPaint(
+                  painter: GridPainter(
+                    gridColor: Colors.blue,
+                    highlightedHorizontalLine:
+                        widget.highlightedHorizontalGridLineIndex,
+                    highlightedVerticalLine:
+                        widget.highlightedVerticalGridLineIndex,
                   ),
-
-                if (widget.isCheckerboardVisible)
-                  Opacity(
-                    opacity: 0.1,
-                    child: Image.asset(
-                      'assets/icons/checkerboard.png',
-                      width: double.infinity,
-                      height: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-
-                if (widget.isCheckerboardVisible && selectedShape == "Square")
-                  Opacity(
-                    opacity: widget.checkerboardOpacity,
-                    child: CustomPaint(
-                      size: const Size(double.infinity, double.infinity),
-                      painter: SquarePainter(shapeColor, gradient, bgImage),
-                    ),
-                  ),
-
-                if (widget.isCheckerboardVisible &&
-                    selectedShape == "Rounded Rect")
-                  Opacity(
-                    opacity: widget.checkerboardOpacity,
-                    child: Center(
-                      child: CustomPaint(
-                        size: const Size(280, 100),
-                        painter: SquarePainter(shapeColor, gradient, bgImage),
-                      ),
-                    ),
-                  ),
-
-                if (widget.isCheckerboardVisible && selectedShape == "Diamond")
-                  Opacity(
-                    opacity: widget.checkerboardOpacity,
-                    child: CustomPaint(
-                      size: const Size(double.infinity, double.infinity),
-                      painter: DiamondPainter(shapeColor, gradient, bgImage),
-                    ),
-                  ),
-
-                if (widget.isCheckerboardVisible && selectedShape == "Triangle")
-                  Opacity(
-                    opacity: widget.checkerboardOpacity,
-                    child: CustomPaint(
-                      size: const Size(double.infinity, double.infinity),
-                      painter: TrianglePainter(shapeColor, gradient, bgImage),
-                    ),
-                  ),
-
-                if (widget.isCheckerboardVisible && selectedShape == "Pentagon")
-                  Opacity(
-                    opacity: widget.checkerboardOpacity,
-                    child: CustomPaint(
-                      size: const Size(double.infinity, double.infinity),
-                      painter: PentagonPainter(shapeColor, gradient, bgImage),
-                    ),
-                  ),
-
-                if (widget.isCheckerboardVisible && selectedShape == "Hexagon")
-                  Opacity(
-                    opacity: widget.checkerboardOpacity,
-                    child: CustomPaint(
-                      size: const Size(double.infinity, double.infinity),
-                      painter: HexagonPainter(shapeColor, gradient, bgImage),
-                    ),
-                  ),
-
-                if (widget.isCheckerboardVisible && selectedShape == "Star")
-                  Opacity(
-                    opacity: widget.checkerboardOpacity,
-                    child: CustomPaint(
-                      size: const Size(double.infinity, double.infinity),
-                      painter: StarPainter(shapeColor, gradient, bgImage),
-                    ),
-                  ),
-
-                if (widget.isCheckerboardVisible && selectedShape == "Arrow")
-                  Opacity(
-                    opacity: widget.checkerboardOpacity,
-                    child: CustomPaint(
-                      size: const Size(double.infinity, double.infinity),
-                      painter: ArrowPainter(shapeColor, gradient, bgImage),
-                    ),
-                  ),
-
-                if (widget.isCheckerboardVisible && selectedShape == "Heart")
-                  Opacity(
-                    opacity: widget.checkerboardOpacity,
-                    child: CustomPaint(
-                      size: const Size(200, 200),
-                      painter: HeartPainter(shapeColor, gradient, bgImage),
-                    ),
-                  ),
-                if (widget.isCheckerboardActive == false ||
-                    widget.isCheckerboardVisible == false ||
-                    selectedShape.isEmpty)
-                  Opacity(
-                    opacity: widget.checkerboardOpacity,
-                    child: CustomPaint(
-                      size: const Size(double.infinity, double.infinity),
-                      painter: SquarePainter(shapeColor, gradient, bgImage),
-                    ),
-                  ),
-
-                // NOTE: Removed the big Transform around the whole stack.
-                // Build elements individually — rotation will be applied per-selected-element
-                Stack(
-                  children: [
-                    ...(widget.elementOrder.isNotEmpty
-                            ? widget.elementOrder
-                            : widget.logoState.visibleElementIds)
-                        .map(
-                          (id) => _buildElementById(
-                            id,
-                            canvasSize,
-                            isExporting: isExporting,
-                          ),
-                        )
-                        .whereType<Widget>(),
-                  ],
+                  size: Size.infinite,
                 ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
+
+              // Checkerboard
+              if (checkerboardVisible)
+                Opacity(
+                  opacity: 0.1,
+                  child: Image.asset(
+                    'assets/icons/checkerboard.png',
+                    width: double.infinity,
+                    height: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+
+              if (checkerboardVisible)
+                Opacity(
+                  opacity: opacity,
+                  child: Center(child: getPainterForShape(selectedShape)),
+                ),
+
+              // Individual elements stack
+              Stack(
+                children: [
+                  ...(widget.elementOrder.isNotEmpty
+                          ? widget.elementOrder
+                          : widget.logoState.visibleElementIds)
+                      .map(
+                        (id) => _buildElementById(
+                          id,
+                          canvasSize,
+                          isExporting: isExporting,
+                        ),
+                      )
+                      .whereType<Widget>(),
+                ],
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+}
+
+  // Widget build(BuildContext context) {
+  //   final provider = Provider.of<SelectedColorProvider>(context);
+  //   final gradient = provider.selectedGradient;
+  //   final providers = Provider.of<SelectedColorProvider>(context);
+  //   final shapeColor =
+  //       Provider.of<SelectedColorProvider>(context).selectedColor;
+
+  //   final String selectedShape = (widget.selectedShapeName.isEmpty)
+  //       ? "Square"
+  //       : widget.selectedShapeName;
+
+  //   return ValueListenableBuilder<bool>(
+  //     valueListenable: widget.isExportingNotifier,
+  //     builder: (context, isExporting, child) {
+  //       print('🎨 LogoCanvas rebuilding with isExporting: $isExporting');
+  //       return LayoutBuilder(
+  //         builder: (context, constraints) {
+  //           final bgImage = providers.canvasImage ?? providers.backgroundImage;
+  //           final Size canvasSize = constraints.biggest;
+  //           return Stack(
+  //             children: [
+  //               if (widget.showGrid)
+  //                 CustomPaint(
+  //                   painter: GridPainter(
+  //                     gridColor: Colors.blue,
+  //                     highlightedHorizontalLine:
+  //                         widget.highlightedHorizontalGridLineIndex,
+  //                     highlightedVerticalLine:
+  //                         widget.highlightedVerticalGridLineIndex,
+  //                   ),
+  //                   size: Size.infinite,
+  //                 ),
+
+  //               if (widget.isCheckerboardVisible)
+  //                 Opacity(
+  //                   opacity: 0.1,
+  //                   child: Image.asset(
+  //                     'assets/icons/checkerboard.png',
+  //                     width: double.infinity,
+  //                     height: double.infinity,
+  //                     fit: BoxFit.cover,
+  //                   ),
+  //                 ),
+
+  //               if (widget.isCheckerboardVisible && selectedShape == "Square")
+  //                 Opacity(
+  //                   opacity: widget.checkerboardOpacity,
+  //                   child: CustomPaint(
+  //                     size: const Size(double.infinity, double.infinity),
+  //                     painter: SquarePainter(shapeColor, gradient, bgImage),
+  //                   ),
+  //                 ),
+
+  //               if (widget.isCheckerboardVisible &&
+  //                   selectedShape == "Rounded Rect")
+  //                 Opacity(
+  //                   opacity: widget.checkerboardOpacity,
+  //                   child: Center(
+  //                     child: CustomPaint(
+  //                       size: const Size(280, 100),
+  //                       painter: SquarePainter(shapeColor, gradient, bgImage),
+  //                     ),
+  //                   ),
+  //                 ),
+
+  //               if (widget.isCheckerboardVisible && selectedShape == "Diamond")
+  //                 Opacity(
+  //                   opacity: widget.checkerboardOpacity,
+  //                   child: CustomPaint(
+  //                     size: const Size(double.infinity, double.infinity),
+  //                     painter: DiamondPainter(shapeColor, gradient, bgImage),
+  //                   ),
+  //                 ),
+
+  //               if (widget.isCheckerboardVisible && selectedShape == "Triangle")
+  //                 Opacity(
+  //                   opacity: widget.checkerboardOpacity,
+  //                   child: CustomPaint(
+  //                     size: const Size(double.infinity, double.infinity),
+  //                     painter: TrianglePainter(shapeColor, gradient, bgImage),
+  //                   ),
+  //                 ),
+
+  //               if (widget.isCheckerboardVisible && selectedShape == "Pentagon")
+  //                 Opacity(
+  //                   opacity: widget.checkerboardOpacity,
+  //                   child: CustomPaint(
+  //                     size: const Size(double.infinity, double.infinity),
+  //                     painter: PentagonPainter(shapeColor, gradient, bgImage),
+  //                   ),
+  //                 ),
+
+  //               if (widget.isCheckerboardVisible && selectedShape == "Hexagon")
+  //                 Opacity(
+  //                   opacity: widget.checkerboardOpacity,
+  //                   child: CustomPaint(
+  //                     size: const Size(double.infinity, double.infinity),
+  //                     painter: HexagonPainter(shapeColor, gradient, bgImage),
+  //                   ),
+  //                 ),
+
+  //               if (widget.isCheckerboardVisible && selectedShape == "Star")
+  //                 Opacity(
+  //                   opacity: widget.checkerboardOpacity,
+  //                   child: CustomPaint(
+  //                     size: const Size(double.infinity, double.infinity),
+  //                     painter: StarPainter(shapeColor, gradient, bgImage),
+  //                   ),
+  //                 ),
+
+  //               if (widget.isCheckerboardVisible && selectedShape == "Arrow")
+  //                 Opacity(
+  //                   opacity: widget.checkerboardOpacity,
+  //                   child: CustomPaint(
+  //                     size: const Size(double.infinity, double.infinity),
+  //                     painter: ArrowPainter(shapeColor, gradient, bgImage),
+  //                   ),
+  //                 ),
+
+  //               if (widget.isCheckerboardVisible && selectedShape == "Heart")
+  //                 Opacity(
+  //                   opacity: widget.checkerboardOpacity,
+  //                   child: CustomPaint(
+  //                     size: const Size(200, 200),
+  //                     painter: HeartPainter(shapeColor, gradient, bgImage),
+  //                   ),
+  //                 ),
+  //               if (widget.isCheckerboardActive == false ||
+  //                   widget.isCheckerboardVisible == false ||
+  //                   selectedShape.isEmpty)
+  //                 Opacity(
+  //                   opacity: widget.checkerboardOpacity,
+  //                   child: CustomPaint(
+  //                     size: const Size(double.infinity, double.infinity),
+  //                     painter: SquarePainter(shapeColor, gradient, bgImage),
+  //                   ),
+  //                 ),
+
+  //               // NOTE: Removed the big Transform around the whole stack.
+  //               // Build elements individually — rotation will be applied per-selected-element
+  //               Stack(
+  //                 children: [
+  //                   ...(widget.elementOrder.isNotEmpty
+  //                           ? widget.elementOrder
+  //                           : widget.logoState.visibleElementIds)
+  //                       .map(
+  //                         (id) => _buildElementById(
+  //                           id,
+  //                           canvasSize,
+  //                           isExporting: isExporting,
+  //                         ),
+  //                       )
+  //                       .whereType<Widget>(),
+  //                 ],
+  //               ),
+  //             ],
+  //           );
+  //         },
+  //       );
+  //     },
+  //   );
+  // }
 
   Widget? _buildElementById(
     int id,
@@ -284,7 +410,8 @@ class _LogoCanvasState extends State<LogoCanvas> {
     final outlineColor = provider.getOutlineColor(id);
     final outlineWidth = provider.getOutlineWidth(id);
     // const Color highlightColor = Colors.red;
-    final Color shapeColor = provider.shapeColor;
+final Color? shapeColor = provider.shapeColor;
+
 
     final Color companyColor = provider.companyTextColor;
     final Color customTextColor = provider.customTextColor;
@@ -332,20 +459,19 @@ class _LogoCanvasState extends State<LogoCanvas> {
 
       // Apply 3D only for the currently selected element (widget.selectedElementId)
 
-final elementId = id; // keep id local
-final double rotationX = widget.logoState.rotationXMap[elementId] ?? 0.0;
-final double rotationY = widget.logoState.rotationYMap[elementId] ?? 0.0;
-final double rotationZ = widget.logoState.rotationZMap[elementId] ?? 0.0;
+      final elementId = id; // keep id local
+      final double rotationX = widget.logoState.rotationXMap[elementId] ?? 0.0;
+      final double rotationY = widget.logoState.rotationYMap[elementId] ?? 0.0;
+      final double rotationZ = widget.logoState.rotationZMap[elementId] ?? 0.0;
 
-Widget rotatedChild = Transform(
-  alignment: Alignment.center,
-  transform: Matrix4.identity()
-    ..rotateX(rotationX * (math.pi / 180))
-    ..rotateY(rotationY * (math.pi / 180))
-    ..rotateZ(rotationZ * (math.pi / 180)),
-  child: child,
-);
-
+      Widget rotatedChild = Transform(
+        alignment: Alignment.center,
+        transform: Matrix4.identity()
+          ..rotateX(rotationX * (math.pi / 180))
+          ..rotateY(rotationY * (math.pi / 180))
+          ..rotateZ(rotationZ * (math.pi / 180)),
+        child: child,
+      );
 
       return _buildEditableWrapper(
         id: id,
@@ -379,10 +505,9 @@ Widget rotatedChild = Transform(
         measuredSize.height * scaleFactor,
       );
 
-      final centerPosition =
-          (customText.position == Offset.zero)
-              ? _centerAlign(canvasSize, textSize)
-              : customText.position;
+      final centerPosition = (customText.position == Offset.zero)
+          ? _centerAlign(canvasSize, textSize)
+          : customText.position;
 
       return wrap(
         Center(
@@ -412,29 +537,27 @@ Widget rotatedChild = Transform(
       if (!image.isVisible) return null;
 
       final imageSize = Size(image.size ?? 100, image.size ?? 100);
-      final centerPosition =
-          (image.position == Offset.zero)
-              ? _centerAlign(canvasSize, imageSize)
-              : image.position;
+      final centerPosition = (image.position == Offset.zero)
+          ? _centerAlign(canvasSize, imageSize)
+          : image.position;
 
       return wrap(
         Center(
           child: Opacity(
             opacity: image.opacity?.clamp(0.0, 1.0) ?? 1.0,
-            child:
-                image.path.startsWith('assets/')
-                    ? Image.asset(
-                      image.path,
-                      width: imageSize.width,
-                      height: imageSize.height,
-                      fit: BoxFit.contain,
-                    )
-                    : Image.file(
-                      File(image.path),
-                      width: imageSize.width,
-                      height: imageSize.height,
-                      fit: BoxFit.contain,
-                    ),
+            child: image.path.startsWith('assets/')
+                ? Image.asset(
+                    image.path,
+                    width: imageSize.width,
+                    height: imageSize.height,
+                    fit: BoxFit.contain,
+                  )
+                : Image.file(
+                    File(image.path),
+                    width: imageSize.width,
+                    height: imageSize.height,
+                    fit: BoxFit.contain,
+                  ),
           ),
         ),
         centerPosition: centerPosition,
@@ -455,10 +578,9 @@ Widget rotatedChild = Transform(
         fallback: Colors.black,
       );
       final svgSize = Size(svgElement.size, svgElement.size);
-      final centerPosition =
-          (svgElement.position == Offset.zero)
-              ? _centerAlign(canvasSize, svgSize)
-              : svgElement.position;
+      final centerPosition = (svgElement.position == Offset.zero)
+          ? _centerAlign(canvasSize, svgSize)
+          : svgElement.position;
 
       return wrap(
         StrokedSvg(
@@ -481,31 +603,30 @@ Widget rotatedChild = Transform(
       case 0: // Logo
         final logoSize = widget.logoState.logoSize;
         final shapeSize = Size(logoSize, logoSize) * 0.9;
-        final centerPosition =
-            (widget.logoState.logoPosition == Offset.zero ||
-                    widget.logoState.logoPosition == null)
-                ? _centerAlign(canvasSize, shapeSize)
-                : widget.logoState.logoPosition;
+        final centerPosition = (widget.logoState.logoPosition == Offset.zero ||
+                widget.logoState.logoPosition == null)
+            ? _centerAlign(canvasSize, shapeSize)
+            : widget.logoState.logoPosition;
         // final elementColor = provider.getColorForElement(
         //   id,
         //   fallback: Colors.black,
         // );
         return widget.logoState.isLogoVisible
             ? wrap(
-              StrokedSvg(
-                svgString: widget.svgLogo,
-                width: logoSize,
-                height: logoSize,
-                strokeColor: outlineColor,
-                strokeWidth: outlineWidth,
+                StrokedSvg(
+                  svgString: widget.svgLogo,
+                  width: logoSize,
+                  height: logoSize,
+                  strokeColor: outlineColor,
+                  strokeWidth: outlineWidth,
 
-                // fillColor: elementColor,
-              ),
-              centerPosition: centerPosition,
-              rotation: widget.logoState.logoRotation,
-              childSize: shapeSize,
-              isExporting: isExporting,
-            )
+                  // fillColor: elementColor,
+                ),
+                centerPosition: centerPosition,
+                rotation: widget.logoState.logoRotation,
+                childSize: shapeSize,
+                isExporting: isExporting,
+              )
             : null;
 
       case 1: // Company Name
@@ -525,18 +646,18 @@ Widget rotatedChild = Transform(
 
         return widget.logoState.isCompanyNameVisible
             ? wrap(
-              StrokedText(
-                text: nameText,
-                style: textStyle,
-                strokeColor: outlineColor,
-                strokeWidth: outlineWidth,
-                textAlign: provider.companyNameAlign,
-              ),
-              centerPosition: centerPosition,
-              rotation: widget.logoState.companyNameRotation,
-              childSize: textSize,
-              isExporting: isExporting,
-            )
+                StrokedText(
+                  text: nameText,
+                  style: textStyle,
+                  strokeColor: outlineColor,
+                  strokeWidth: outlineWidth,
+                  textAlign: provider.companyNameAlign,
+                ),
+                centerPosition: centerPosition,
+                rotation: widget.logoState.companyNameRotation,
+                childSize: textSize,
+                isExporting: isExporting,
+              )
             : null;
 
       case 2: // Slogan
@@ -552,18 +673,18 @@ Widget rotatedChild = Transform(
 
         return widget.logoState.isSloganVisible
             ? wrap(
-              StrokedText(
-                text: sloganText,
-                style: sloganStyle,
-                strokeColor: outlineColor,
-                strokeWidth: outlineWidth,
-                textAlign: provider.sloganAlign,
-              ),
-              centerPosition: centerPosition,
-              rotation: widget.logoState.sloganRotation,
-              childSize: sloganMeasured,
-              isExporting: isExporting,
-            )
+                StrokedText(
+                  text: sloganText,
+                  style: sloganStyle,
+                  strokeColor: outlineColor,
+                  strokeWidth: outlineWidth,
+                  textAlign: provider.sloganAlign,
+                ),
+                centerPosition: centerPosition,
+                rotation: widget.logoState.sloganRotation,
+                childSize: sloganMeasured,
+                isExporting: isExporting,
+              )
             : null;
 
       default:
@@ -635,11 +756,10 @@ class StrokedText extends StatelessWidget {
         Text(
           text,
           style: style.copyWith(
-            foreground:
-                Paint()
-                  ..style = PaintingStyle.stroke
-                  ..strokeWidth = strokeWidth
-                  ..color = strokeColor,
+            foreground: Paint()
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = strokeWidth
+              ..color = strokeColor,
             fontWeight: style.fontWeight,
           ),
           textAlign: textAlign,
@@ -706,8 +826,8 @@ class StrokedSvg extends StatelessWidget {
           width: width,
           height: height,
           colorFilter: fillColor != null
-      ? ColorFilter.mode(fillColor!, BlendMode.srcIn)
-      : null, 
+              ? ColorFilter.mode(fillColor!, BlendMode.srcIn)
+              : null,
         ),
       ],
     );

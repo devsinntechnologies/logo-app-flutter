@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -33,6 +32,7 @@ class _SelectBgImagesState extends State<SelectBgImages> {
     'assets/bg_images/bg_9.jpg',
     'assets/bg_images/bg_10.jpg',
   ];
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(

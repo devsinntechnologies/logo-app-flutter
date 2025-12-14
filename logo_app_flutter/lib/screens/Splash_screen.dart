@@ -13,31 +13,22 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   late VideoPlayerController controller;
   bool isReady = false;
-  bool isVideoCompleted = false;
 
   @override
   void initState() {
     super.initState();
     controller = VideoPlayerController.asset("assets/videos/splash_screen.mp4")
-      ..addListener(() {
-        if (controller.value.position >= controller.value.duration &&
-            controller.value.isInitialized &&
-            controller.value.duration != Duration.zero) {
-          // Prevent multiple navigations
-          if (!isVideoCompleted) {
-            isVideoCompleted = true;
-
-            // Navigate to next screen
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => HomeScreen()),
-            );
-          }
-        }
-      })
       ..initialize().then((_) {
         controller.play();
         controller.setLooping(false);
+
+        controller.addListener(() {
+          bool finished =
+              controller.value.position >= controller.value.duration;
+          if (finished) {
+            navigateToHome();
+          }
+        });
 
         setState(() {
           isReady = true;
@@ -45,37 +36,49 @@ class _SplashScreenState extends State<SplashScreen> {
       });
   }
 
+  void navigateToHome() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const HomeScreen()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
-      backgroundColor: Color.fromRGBO(24, 25, 45, 1),
-      body: Stack(
-        children: [
-          Center(
-            child: isReady
-                ? AspectRatio(
-                    aspectRatio: controller.value.aspectRatio,
-                    child: Transform.scale(
-                      scale: 2.3, // Increase this to zoom (1.0 = normal)
+      backgroundColor: const Color.fromRGBO(24, 25, 45, 1),
+      body: controller.value.isInitialized
+          ? Stack(
+              children: [
+                // FULL SCREEN VIDEO WITH ZOOM
+                Center(
+                  child: Transform.scale(
+                    scale: 2.3,
+                    child: AspectRatio(
+                      aspectRatio: controller.value.aspectRatio,
                       child: VideoPlayer(controller),
                     ),
-                  )
-                : const CircularProgressIndicator(),
-          ),
-          Positioned(
-              left: size.width * 0.30,
-              bottom: 30,
-              child: Text(
-                "Smart Logo Maker",
-                style: GoogleFonts.poppins(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 20,
+                  ),
                 ),
-              ))
-        ],
-      ),
+
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 35),
+                    child: Text(
+                      "Smart Logo Maker",
+                      style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 20,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            )
+          : const Center(child: CircularProgressIndicator()),
     );
   }
 

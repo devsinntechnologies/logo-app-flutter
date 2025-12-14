@@ -24,7 +24,6 @@ class _ShapeSelectorWidgetState extends State<ShapeSelectorWidget> {
         height: 24,
         decoration: const BoxDecoration(
           shape: BoxShape.circle,
-
           image: DecorationImage(
             opacity: .5,
 
@@ -36,10 +35,9 @@ class _ShapeSelectorWidgetState extends State<ShapeSelectorWidget> {
         ),
       ),
     ),
-
     _ShapeData(
       "Square",
-   CustomPaint(
+      CustomPaint(
         size: const Size(24, 24),
         painter: SquarePainter(Colors.grey, null, null),
       ),
@@ -55,7 +53,7 @@ class _ShapeSelectorWidgetState extends State<ShapeSelectorWidget> {
       "Triangle",
       CustomPaint(
         size: const Size(24, 24),
-        painter: TrianglePainter(Colors.grey, null,null),
+        painter: TrianglePainter(Colors.grey, null, null),
       ),
     ),
     _ShapeData(
@@ -69,35 +67,35 @@ class _ShapeSelectorWidgetState extends State<ShapeSelectorWidget> {
       "Pentagon",
       CustomPaint(
         size: const Size(24, 24),
-        painter: PentagonPainter(Colors.grey, null,null),
+        painter: PentagonPainter(Colors.grey, null, null),
       ),
     ),
     _ShapeData(
       "Hexagon",
       CustomPaint(
         size: const Size(24, 24),
-        painter: HexagonPainter(Colors.grey, null,null),
+        painter: HexagonPainter(Colors.grey, null, null),
       ),
     ),
     _ShapeData(
       "Star",
       CustomPaint(
         size: const Size(24, 24),
-        painter: StarPainter(Colors.grey, null,null),
+        painter: StarPainter(Colors.grey, null, null),
       ),
     ),
     _ShapeData(
       "Arrow",
       CustomPaint(
         size: const Size(28, 28),
-        painter: ArrowPainter(Colors.grey, null,null),
+        painter: ArrowPainter(Colors.grey, null, null),
       ),
     ),
     _ShapeData(
       "Heart",
       CustomPaint(
         size: const Size(26, 26),
-        painter: HeartPainter(Colors.grey, null,null),
+        painter: HeartPainter(Colors.grey, null, null),
       ),
     ),
   ];
@@ -109,46 +107,44 @@ class _ShapeSelectorWidgetState extends State<ShapeSelectorWidget> {
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: shapes.length,
-       itemBuilder: (context, index) {
-  return GestureDetector(
-    onTap: () {
-      if (shapes[index].name == "Transparent") {
-        final isSelected = selectedIndex == index;
-        setState(() {
-          selectedIndex = isSelected ? null : index;
-        });
-        widget.onShapeSelected(
-          isSelected ? "TransparentOff" : "Transparent",
-        );
-      } else {
-        setState(() {
-          selectedIndex = index;
-        });
-        widget.onShapeSelected(shapes[index].name);
-      }
-    },
-    child: Container(
-      width: 25,
-      margin: const EdgeInsets.symmetric(horizontal: 4.5),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          shapes[index].widget,
-          if (selectedIndex == index)
-            const Positioned(
-            
-              child: Icon(
-                Icons.check,
-                color: Colors.white,
-                size: 20,
+        itemBuilder: (context, index) {
+          return GestureDetector(
+            onTap: () {
+              if (shapes[index].name == "Transparent") {
+                final isSelected = selectedIndex == index;
+                setState(() {
+                  selectedIndex = isSelected ? null : index;
+                });
+                widget.onShapeSelected(
+                  isSelected ? "TransparentOff" : "Transparent",
+                );
+              } else {
+                setState(() {
+                  selectedIndex = index;
+                });
+                widget.onShapeSelected(shapes[index].name);
+              }
+            },
+            child: Container(
+              width: 25,
+              margin: const EdgeInsets.symmetric(horizontal: 4.5),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  shapes[index].widget,
+                  if (selectedIndex == index)
+                    const Positioned(
+                      child: Icon(
+                        Icons.check,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                ],
               ),
             ),
-        ],
-      ),
-    ),
-  );
-},
-
+          );
+        },
       ),
     );
   }
@@ -159,7 +155,6 @@ class _ShapeData {
   final Widget widget;
   _ShapeData(this.name, this.widget);
 }
-
 
 class SquarePainter extends CustomPainter {
   final Color? color;
@@ -198,9 +193,8 @@ class SquarePainter extends CustomPainter {
   }
 }
 
-
 class TrianglePainter extends CustomPainter {
-  final Color ?color;
+  final Color? color;
   final Gradient? gradient;
   final ui.Image? backgroundImage;
 
@@ -227,9 +221,10 @@ class TrianglePainter extends CustomPainter {
     } else {
       final paint = Paint();
       if (gradient != null) {
-        paint.shader = gradient!.createShader(Rect.fromLTWH(0, 0, size.width, size.height));
+        paint.shader = gradient!
+            .createShader(Rect.fromLTWH(0, 0, size.width, size.height));
       } else {
-       paint.color = color??Colors.white;
+        paint.color = color ?? Colors.white;
       }
       canvas.drawPath(path, paint);
     }
@@ -244,7 +239,6 @@ class TrianglePainter extends CustomPainter {
         oldDelegate.backgroundImage != backgroundImage;
   }
 }
-
 
 class DiamondPainter extends CustomPainter {
   final Color? color;
@@ -335,9 +329,10 @@ class PentagonPainter extends CustomPainter {
     } else {
       final paint = Paint();
       if (gradient != null) {
-        paint.shader = gradient!.createShader(Rect.fromLTWH(0, 0, size.width, size.height));
+        paint.shader = gradient!
+            .createShader(Rect.fromLTWH(0, 0, size.width, size.height));
       } else {
-       paint.color = color??Colors.white;
+        paint.color = color ?? Colors.white;
       }
       canvas.drawPath(path, paint);
     }
@@ -353,9 +348,8 @@ class PentagonPainter extends CustomPainter {
   }
 }
 
-
 class HexagonPainter extends CustomPainter {
-  final Color?color;
+  final Color? color;
   final Gradient? gradient;
   final ui.Image? backgroundImage;
 
@@ -392,9 +386,10 @@ class HexagonPainter extends CustomPainter {
     } else {
       final paint = Paint();
       if (gradient != null) {
-        paint.shader = gradient!.createShader(Rect.fromLTWH(0, 0, size.width, size.height));
+        paint.shader = gradient!
+            .createShader(Rect.fromLTWH(0, 0, size.width, size.height));
       } else {
-        paint.color = color??Colors.white;
+        paint.color = color ?? Colors.white;
       }
       canvas.drawPath(path, paint);
     }
@@ -449,10 +444,11 @@ class StarPainter extends CustomPainter {
       );
       canvas.restore();
     } else if (gradient != null) {
-      paint.shader = gradient!.createShader(Rect.fromLTWH(0, 0, size.width, size.height));
+      paint.shader =
+          gradient!.createShader(Rect.fromLTWH(0, 0, size.width, size.height));
       canvas.drawPath(path, paint);
     } else {
-      paint.color = color??Colors.white;
+      paint.color = color ?? Colors.white;
       canvas.drawPath(path, paint);
     }
   }
@@ -553,7 +549,6 @@ class ArrowPainter extends CustomPainter {
 //   bool shouldRepaint(_) => false;
 // }
 
-
 class HeartPainter extends CustomPainter {
   final Color? color;
   final Gradient? gradient;
@@ -573,12 +568,12 @@ class HeartPainter extends CustomPainter {
     path.cubicTo(
       w * 1.1, h * 0.6, // control point 1
       w * 0.8, h * 0.1, // control point 2
-      w / 2, h * 0.3,   // top center
+      w / 2, h * 0.3, // top center
     );
     path.cubicTo(
       w * 0.2, h * 0.1, // control point 1
       -w * 0.1, h * 0.6, // control point 2
-      w / 2, h * 0.9,   // back to bottom tip
+      w / 2, h * 0.9, // back to bottom tip
     );
     path.close();
 
@@ -595,7 +590,8 @@ class HeartPainter extends CustomPainter {
       );
       canvas.restore();
     } else if (gradient != null) {
-      paint.shader = gradient!.createShader(Rect.fromLTWH(0, 0, size.width, size.height));
+      paint.shader =
+          gradient!.createShader(Rect.fromLTWH(0, 0, size.width, size.height));
       canvas.drawPath(path, paint);
     } else {
       paint.color = color ?? Colors.red;

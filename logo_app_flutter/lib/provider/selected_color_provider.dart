@@ -2,27 +2,26 @@ import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:logo_app_flutter/models/logo_state_data.dart';
 
 class SelectedColorProvider extends ChangeNotifier {
-  
-  
-  Color? _selectedColor = null ;
+  Color? _selectedColor = null;
   Gradient? _selectedGradient;
   ui.Image? _backgroundImage;
   double get intensity => _brightness;
   final Map<int, Color> _overrideColors = {};
   final Map<int, Color> _individualElementColors = {};
- int _selectedIndex = 0;
-int get selectedIndex => _selectedIndex;
+  int _selectedIndex = 0;
+  int get selectedIndex => _selectedIndex;
   File? _imageFile;
   Color _companyTextColor = Colors.black;
   Color _sloganColor = Colors.black;
-  Color _shapeColor = Colors.white;
+  Color? _shapeColor;
   Color _customTextColor = Colors.black;
 
   bool _isColorManuallySelected = false;
   // new map to track if user manually changed color
-Map<int, bool> _isElementColorOverridden = {};
+  Map<int, bool> _isElementColorOverridden = {};
 
 // updated getColorForElement
 // Color getColorForElement(int id, {required Color originalColor}) {
@@ -41,14 +40,14 @@ Map<int, bool> _isElementColorOverridden = {};
 
 // optional: reset element to original
 
-void resetAllColors({required Map<int, Color> defaultColors}) {
-  _overrideColors.clear();           // user overrides remove ho jaye
-  _isElementColorOverridden.clear(); // manual flags reset
-  _companyTextColor = defaultColors[0] ?? Colors.black;
-  _sloganColor = defaultColors[1] ?? Colors.black;
-  _shapeColor = defaultColors[2] ?? Colors.white;
-  notifyListeners();
-}
+  void resetAllColors({required Map<int, Color> defaultColors}) {
+    _overrideColors.clear(); // user overrides remove ho jaye
+    _isElementColorOverridden.clear(); // manual flags reset
+    _companyTextColor = defaultColors[0] ?? Colors.black;
+    _sloganColor = defaultColors[1] ?? Colors.black;
+    _shapeColor = defaultColors[2] ?? null;
+    notifyListeners();
+  }
 //  void resetAllColors() {
 //     // reset company, slogan, shape to default
 //     _companyTextColor = _defaultCompanyColor;
@@ -67,21 +66,29 @@ void resetAllColors({required Map<int, Color> defaultColors}) {
 //     notifyListeners();
 //   }
 
+  bool _isCheckerboardVisible = true; // default
+
+  bool get isCheckerboardVisible => _isCheckerboardVisible;
+
+  void setCheckerboardVisibility(bool value) {
+    _isCheckerboardVisible = value;
+    notifyListeners();
+  }
+
   bool get isColorOverrideActive =>
       _selectedGradient != null ||
       _backgroundImage != null ||
       _isColorManuallySelected;
-      
 
   Color get companyTextColor => _companyTextColor;
   Color get sloganColor => _sloganColor;
-  Color get shapeColor => _shapeColor;
+  Color? get shapeColor => _shapeColor;
   Color get customTextColor => _customTextColor;
   int _rotateIndex = 0;
 
   Color _baseColor = Colors.black;
   double _brightness = 0.5;
-bool isColorApplied = false;
+  bool isColorApplied = false;
 
   Color get baseColor => _baseColor;
   double get brightness => _brightness;
@@ -92,10 +99,10 @@ bool isColorApplied = false;
   File? get imageFile => _imageFile;
   int get rotateIndex => _rotateIndex;
 
-    int? _selectedElementId;
+  int? _selectedElementId;
 
   int? get selectedElementId => _selectedElementId;
-   bool _isSvgColorOverridden = false;
+  bool _isSvgColorOverridden = false;
 
   bool get isSvgColorOverridden => _isSvgColorOverridden;
 
@@ -109,51 +116,49 @@ bool isColorApplied = false;
     notifyListeners();
   }
 
-TextAlign _companyNameAlign = TextAlign.center;
-TextAlign _sloganAlign = TextAlign.center;
-TextAlign _customTextAlign = TextAlign.center;
+  TextAlign _companyNameAlign = TextAlign.center;
+  TextAlign _sloganAlign = TextAlign.center;
+  TextAlign _customTextAlign = TextAlign.center;
 
 // GETTERS
-TextAlign get companyNameAlign => _companyNameAlign;
-TextAlign get sloganAlign => _sloganAlign;
-TextAlign get customTextAlign => _customTextAlign;
+  TextAlign get companyNameAlign => _companyNameAlign;
+  TextAlign get sloganAlign => _sloganAlign;
+  TextAlign get customTextAlign => _customTextAlign;
 
 // SETTERS
-void setCompanyNameAlign(TextAlign align) {
-  _companyNameAlign = align;
-  notifyListeners();
-}
+  void setCompanyNameAlign(TextAlign align) {
+    _companyNameAlign = align;
+    notifyListeners();
+  }
 
-void setSloganAlign(TextAlign align) {
-  _sloganAlign = align;
-  notifyListeners();
-}
+  void setSloganAlign(TextAlign align) {
+    _sloganAlign = align;
+    notifyListeners();
+  }
 
-void setCustomTextAlign(TextAlign align) {
-  _customTextAlign = align;
-  notifyListeners();
-}
+  void setCustomTextAlign(TextAlign align) {
+    _customTextAlign = align;
+    notifyListeners();
+  }
 
+  ui.Image? canvasImage;
 
-ui.Image? canvasImage;
+  void setImage(ui.Image image) {
+    canvasImage = image;
+    notifyListeners();
+  }
 
-void setImage(ui.Image image) {
-  canvasImage = image;
-  notifyListeners();
-}
+  void resetImage() {
+    canvasImage = null;
+    notifyListeners();
+  }
 
-void resetImage() {
-  canvasImage = null;
-  notifyListeners();
-}
-
-
- 
   void setColor(Color color) {
     _selectedColor = color;
-     _baseColor = color;
+    _baseColor = color;
     _selectedGradient = null;
     _backgroundImage = null;
+    canvasImage = null;
     _isColorManuallySelected = true;
     notifyListeners();
   }
@@ -161,38 +166,43 @@ void resetImage() {
   void setGradient(Gradient gradient) {
     _selectedGradient = gradient;
     _backgroundImage = null;
+    _selectedColor = null;
+    canvasImage = null;
     _isColorManuallySelected = true;
     notifyListeners();
   }
-  Color getEffectiveColorForElement({
-  required int id,
-  required Color defaultColor,
-}) {
-  return _overrideColors[id] ?? defaultColor;
-}
 
- void setPaletteIndex(int index) {
+  Color getEffectiveColorForElement({
+    required int id,
+    required Color defaultColor,
+  }) {
+    return _overrideColors[id] ?? defaultColor;
+  }
+
+  void setPaletteIndex(int index) {
     _selectedIndex = index;
     notifyListeners(); // UI ko update karne k liye
   }
 
   void setBackgroundImage(ui.Image image, File? file) {
+    canvasImage = image;
     _backgroundImage = image;
     _selectedGradient = null;
-    _selectedColor = Colors.transparent;
+    _selectedColor = null;
     _imageFile = file;
     _isColorManuallySelected = true;
     notifyListeners();
   }
 
   void clearOverrides() {
+    canvasImage = null;
     _selectedColor = Colors.white;
     _selectedGradient = null;
     _backgroundImage = null;
     _imageFile = null;
     _companyTextColor = Colors.black;
     _sloganColor = Colors.black;
-    _shapeColor = Colors.white;
+    // _shapeColor = Colors.white;
     _rotateIndex = 0;
     _isColorManuallySelected = false;
     notifyListeners();
@@ -209,14 +219,14 @@ void resetImage() {
     _isColorManuallySelected = true;
     notifyListeners();
   }
-  void resetColor() {
-  _selectedColor = Colors.white;
-  _selectedGradient = null;
-  _backgroundImage = null;
-  _isColorManuallySelected = false;
-  notifyListeners();
-}
 
+  void resetColor() {
+    _selectedColor = Colors.white;
+    _selectedGradient = null;
+    _backgroundImage = null;
+    _isColorManuallySelected = false;
+    notifyListeners();
+  }
 
   void setCompanyTextColor(Color color) {
     _companyTextColor = color;
@@ -235,12 +245,9 @@ void resetImage() {
     _isColorManuallySelected = true;
     notifyListeners();
   }
+
   // Color? _selectedColor;
   double _opacity = 1.0; // 👈 default 100%
-
-  
-
-
 
   double get opacity => _opacity;
 
@@ -304,7 +311,6 @@ void resetImage() {
 //   notifyListeners();
 // }
 
-
 // void setColorsRotated(List<Color> paletteColors, {List<int>? allElementIds}) {
 //   // 1. Company, Slogan, Shape ke liye rotate karo
 //   _companyTextColor = paletteColors[(_rotateIndex + 1) % paletteColors.length];
@@ -317,7 +323,7 @@ void resetImage() {
 //     for (var elementId in allElementIds) {
 //       // Image ko skip karna hai
 //       if (elementId >= 200 && elementId < 300) {
-//         continue; 
+//         continue;
 //       }
 
 //       _overrideColors[elementId] =
@@ -333,7 +339,7 @@ void resetImage() {
 //   _isColorManuallySelected = true;
 //   notifyListeners();
 // }
- Map<int, Color> _elementColors = {};
+  Map<int, Color> _elementColors = {};
   Map<int, Color> _elementOutlineColors = {};
   Map<int, double> _elementOutlineWidths = {};
 
@@ -347,23 +353,24 @@ void resetImage() {
     _elementOutlineWidths[elementId] = width;
     notifyListeners();
   }
-  
 
   // ========== Outline Getters ==========
   Color getOutlineColor(int elementId) {
     return _elementOutlineColors[elementId] ?? Colors.transparent;
   }
-   double getOutlineWidth(int elementId) {
+
+  double getOutlineWidth(int elementId) {
     return _elementOutlineWidths[elementId] ?? 0.0;
   }
+
   void resetAllOutlines() {
-  _elementOutlineColors.clear();
-  _elementOutlineWidths.clear();
-  notifyListeners();
-}
+    _elementOutlineColors.clear();
+    _elementOutlineWidths.clear();
+    notifyListeners();
+  }
 // final LogoState logoState;
 
-    /// Remove any active selection (editing handles/icons hide ho jaye)
+  /// Remove any active selection (editing handles/icons hide ho jaye)
   void clearSelection() {
     _selectedElementId = null;
     notifyListeners();
@@ -375,46 +382,47 @@ void resetImage() {
     notifyListeners();
   }
 
+  void setInitialColorsFromPalette(
+      List<Color> paletteColors, List<int> allElementIds) {
+    _rotateIndex = 0;
 
-void setInitialColorsFromPalette(List<Color> paletteColors, List<int> allElementIds) {
-  _rotateIndex = 0;
+    // Company / Slogan / Shape ke liye
+    _companyTextColor = paletteColors[1 % paletteColors.length];
+    _sloganColor = paletteColors[2 % paletteColors.length];
+    _shapeColor = paletteColors[0 % paletteColors.length];
 
-  // Company / Slogan / Shape ke liye
-  _companyTextColor = paletteColors[1 % paletteColors.length];
-  _sloganColor = paletteColors[2 % paletteColors.length];
-  _shapeColor = paletteColors[0 % paletteColors.length];
-
-  // Baaki elements ke liye
-  int index = 0;
-  for (var elementId in allElementIds) {
-    if (elementId >= 200 && elementId < 300) continue; // images skip
-    _overrideColors[elementId] = paletteColors[index % paletteColors.length];
-    index++;
-  }
-
-  _isColorManuallySelected = true;
-  notifyListeners();
-}
-
-void setColorsRotated(List<Color> paletteColors, {List<int>? allElementIds}) {
-  _companyTextColor = paletteColors[(_rotateIndex + 1) % paletteColors.length];
-  _sloganColor = paletteColors[(_rotateIndex + 2) % paletteColors.length];
-  _shapeColor = paletteColors[_rotateIndex % paletteColors.length];
-
-  if (allElementIds != null) {
+    // Baaki elements ke liye
     int index = 0;
     for (var elementId in allElementIds) {
       if (elementId >= 200 && elementId < 300) continue; // images skip
-      _overrideColors[elementId] = paletteColors[(index + _rotateIndex) % paletteColors.length];
+      _overrideColors[elementId] = paletteColors[index % paletteColors.length];
       index++;
     }
+
+    _isColorManuallySelected = true;
+    notifyListeners();
   }
 
-  _rotateIndex = (_rotateIndex + 1) % paletteColors.length;
-  _isColorManuallySelected = true;
-  notifyListeners();
-}
+  void setColorsRotated(List<Color> paletteColors, {List<int>? allElementIds}) {
+    _companyTextColor =
+        paletteColors[(_rotateIndex + 1) % paletteColors.length];
+    _sloganColor = paletteColors[(_rotateIndex + 2) % paletteColors.length];
+    _shapeColor = paletteColors[_rotateIndex % paletteColors.length];
 
+    if (allElementIds != null) {
+      int index = 0;
+      for (var elementId in allElementIds) {
+        if (elementId >= 200 && elementId < 300) continue; // images skip
+        _overrideColors[elementId] =
+            paletteColors[(index + _rotateIndex) % paletteColors.length];
+        index++;
+      }
+    }
+
+    _rotateIndex = (_rotateIndex + 1) % paletteColors.length;
+    _isColorManuallySelected = true;
+    notifyListeners();
+  }
 
   void resetRotation() {
     _rotateIndex = 0;
@@ -444,35 +452,111 @@ void setColorsRotated(List<Color> paletteColors, {List<int>? allElementIds}) {
   }
 
   void _applyBrightnessToShapeOnly() {
-  final hsl = HSLColor.fromColor(_baseColor);
-  final adjusted = hsl.withLightness(_brightness).toColor();
+    final hsl = HSLColor.fromColor(_baseColor);
+    final adjusted = hsl.withLightness(_brightness).toColor();
 
-  _shapeColor = adjusted;
-  _isColorManuallySelected = true;
-  notifyListeners();
-}
+    _shapeColor = adjusted;
+    _isColorManuallySelected = true;
+    notifyListeners();
+  }
 
-void setOverrideColorForElement(int id, Color color) {
-  _overrideColors[id] = color;
-  notifyListeners();
-}
-void clearOverrideForElement(int id) {
-  if (_overrideColors.containsKey(id)) {
-    _overrideColors.remove(id);
+  void setOverrideColorForElement(int id, Color color) {
+    _overrideColors[id] = color;
+    _elementColors[id] = color;
+    notifyListeners();
+  }
+
+  void clearOverrideForElement(int id) {
+    if (_overrideColors.containsKey(id)) {
+      _overrideColors.remove(id);
+      notifyListeners();
+    }
+  }
+
+  Color getColorForElement(int id, {required Color fallback}) {
+    return _overrideColors[id] ?? fallback;
+  }
+
+  void setColorForElement(int id, Color color) {
+    _individualElementColors[id] = color;
+    notifyListeners();
+  }
+
+  Map<int, double> _rotationXMap = {};
+  Map<int, double> _rotationYMap = {};
+  Map<int, double> _rotationZMap = {};
+  double getRotationX(int id) => _rotationXMap[id] ?? 0.0;
+  double getRotationY(int id) => _rotationYMap[id] ?? 0.0;
+  double getRotationZ(int id) => _rotationZMap[id] ?? 0.0;
+
+  void applyLogoState(LogoStateData state) {
+    // Clear old data
+    _elementOutlineColors.clear();
+    _elementOutlineWidths.clear();
+    _elementColors.clear();
+    _rotationXMap.clear();
+    _rotationYMap.clear();
+    _rotationZMap.clear();
+    _overrideColors.clear(); // important: reset overrides to reflect new state
+
+    // 1) outlines (convert string keys to int)
+    state.outlineColors.forEach((key, color) {
+      final id = int.tryParse(key);
+      if (id != null) _elementOutlineColors[id] = color;
+    });
+
+    state.outlineWidths.forEach((key, width) {
+      final id = int.tryParse(key);
+      if (id != null) _elementOutlineWidths[id] = width;
+    });
+
+    state.elementColors.forEach((key, color) {
+      final id = int.tryParse(key);
+      if (id != null) {
+        _elementColors[id] = color;
+        _overrideColors[id] = color;
+      } else {
+        final lower = key.toLowerCase();
+        if (lower == 'shape' || lower == 'logo' || lower == 'mainshape') {
+          _shapeColor = color;
+        } else if (lower == 'company' || lower == 'companyname') {
+          _companyTextColor = color;
+        } else if (lower == 'slogan' || lower == 'sloganname') {
+          _sloganColor = color;
+        }
+      }
+    });
+
+    // ✅ FIX: restore shapeColor from top-level state
+    // _shapeColor = state.shapeColor;
+
+    // 3) company/slogan top-level fields (explicit)
+    _companyTextColor = state.companyNameColor;
+    _sloganColor = state.sloganColor;
+
+    // 4) custom texts -> map to ids 100 + index (and mark override)
+    for (int i = 0; i < state.customTexts.length; i++) {
+      final id = 100 + i;
+      final c = state.customTexts[i].color;
+      _overrideColors[id] = c;
+      _elementColors[id] = c;
+    }
+
+    // 5) custom SVGs -> map to ids 300 + index (and mark override)
+    for (int i = 0; i < state.customSVGs.length; i++) {
+      final id = 300 + i;
+      final c = state.customSVGs[i].color ?? Colors.black;
+      _overrideColors[id] = c;
+      _elementColors[id] = c;
+    }
+
+    // 6) any elementColors already parsed into _elementColors used above
+
+    // 7) rotations
+    _rotationXMap.addAll(state.rotationXMap);
+    _rotationYMap.addAll(state.rotationYMap);
+    _rotationZMap.addAll(state.rotationZMap);
+
     notifyListeners();
   }
 }
-Color getColorForElement(int id, {required Color fallback}) {
-  return _overrideColors[id] ?? fallback;
-  
-}
-
-
-void setColorForElement(int id, Color color) {
-  _individualElementColors[id] = color;
-  notifyListeners();
-}
-
-
-}
-
