@@ -183,17 +183,6 @@ class SelectedColorProvider extends ChangeNotifier {
     _selectedIndex = index;
     notifyListeners(); // UI ko update karne k liye
   }
-
-  void setBackgroundImage(ui.Image image, File? file) {
-    canvasImage = image;
-    _backgroundImage = image;
-    _selectedGradient = null;
-    _selectedColor = null;
-    _imageFile = file;
-    _isColorManuallySelected = true;
-    notifyListeners();
-  }
-
   void clearOverrides() {
     canvasImage = null;
     _selectedColor = Colors.white;
@@ -207,6 +196,18 @@ class SelectedColorProvider extends ChangeNotifier {
     _isColorManuallySelected = false;
     notifyListeners();
   }
+
+
+  void setBackgroundImage(ui.Image image, File? file) {
+    canvasImage = image;
+    _backgroundImage = image;
+    _selectedGradient = null;
+    _selectedColor = null;
+    _imageFile = file;
+    _isColorManuallySelected = true;
+    notifyListeners();
+  }
+
 
   void setColorWithBrightness(Color baseColor, double brightnessFactor) {
     brightnessFactor = brightnessFactor.clamp(0.0, 1.0);

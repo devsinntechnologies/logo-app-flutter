@@ -579,3 +579,35 @@ class LogoStateData {
 //         widget.logoState.customTexts[index].copyWith(align: align);
 //   }
 // }
+
+class CanvasState {
+  String? selectedShapeName;
+  Color backgroundColor;
+  Gradient? backgroundGradient;
+  ui.Image? backgroundImage;
+  double checkerboardOpacity;
+  bool isCheckerboardActive;
+  // ... add all other properties
+
+  CanvasState({
+    this.selectedShapeName,
+    required this.backgroundColor,
+    this.backgroundGradient,
+    this.backgroundImage,
+    this.checkerboardOpacity = 1.0,
+    this.isCheckerboardActive = false,
+    // ... other fields
+  });
+
+  CanvasState copy() {
+    return CanvasState(
+      selectedShapeName: selectedShapeName,
+      backgroundColor: backgroundColor,
+      backgroundGradient: backgroundGradient,
+      backgroundImage: backgroundImage,
+      checkerboardOpacity: checkerboardOpacity,
+      isCheckerboardActive: isCheckerboardActive,
+      // ... copy other fields
+    );
+  }
+}

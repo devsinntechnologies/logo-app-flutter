@@ -1,4 +1,3 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:math';
 import 'dart:ui' as ui;
 
@@ -507,48 +506,6 @@ class ArrowPainter extends CustomPainter {
   bool shouldRepaint(_) => false;
 }
 
-// class ArrowPainter extends CustomPainter {
-//   final Color? color;
-//   final Gradient? gradient;
-//   final ui.Image? image;
-
-//   ArrowPainter(this.color, this.gradient, this.image);
-
-//   @override
-//   void paint(Canvas canvas, Size size) {
-//     final path = Path()
-//       ..moveTo(size.width * 0.1, size.height * 0.5)
-//       ..lineTo(size.width * 0.7, size.height * 0.5)
-//       ..lineTo(size.width * 0.7, size.height * 0.3)
-//       ..lineTo(size.width * 0.9, size.height * 0.5)
-//       ..lineTo(size.width * 0.7, size.height * 0.7)
-//       ..lineTo(size.width * 0.7, size.height * 0.5)
-//       ..close();
-
-//     final paint = Paint();
-//     if (image != null) {
-//       canvas.save();
-//       canvas.clipPath(path);
-//       paintImage(
-//         canvas: canvas,
-//         rect: Rect.fromLTWH(0, 0, size.width, size.height),
-//         image: image!,
-//         fit: BoxFit.cover,
-//       );
-//       canvas.restore();
-//     } else if (gradient != null) {
-//       paint.shader = gradient!.createShader(Rect.fromLTWH(0, 0, size.width, size.height));
-//       canvas.drawPath(path, paint);
-//     } else {
-//       paint.color = color ?? Colors.white;
-//       canvas.drawPath(path, paint);
-//     }
-//   }
-
-//   @override
-//   bool shouldRepaint(_) => false;
-// }
-
 class HeartPainter extends CustomPainter {
   final Color? color;
   final Gradient? gradient;
@@ -602,3 +559,45 @@ class HeartPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
+ // ------------------- old code Arrow Painter -------------------
+ // class ArrowPainter extends CustomPainter {
+//   final Color? color;
+//   final Gradient? gradient;
+//   final ui.Image? image;
+
+//   ArrowPainter(this.color, this.gradient, this.image);
+
+//   @override
+//   void paint(Canvas canvas, Size size) {
+//     final path = Path()
+//       ..moveTo(size.width * 0.1, size.height * 0.5)
+//       ..lineTo(size.width * 0.7, size.height * 0.5)
+//       ..lineTo(size.width * 0.7, size.height * 0.3)
+//       ..lineTo(size.width * 0.9, size.height * 0.5)
+//       ..lineTo(size.width * 0.7, size.height * 0.7)
+//       ..lineTo(size.width * 0.7, size.height * 0.5)
+//       ..close();
+
+//     final paint = Paint();
+//     if (image != null) {
+//       canvas.save();
+//       canvas.clipPath(path);
+//       paintImage(
+//         canvas: canvas,
+//         rect: Rect.fromLTWH(0, 0, size.width, size.height),
+//         image: image!,
+//         fit: BoxFit.cover,
+//       );
+//       canvas.restore();
+//     } else if (gradient != null) {
+//       paint.shader = gradient!.createShader(Rect.fromLTWH(0, 0, size.width, size.height));
+//       canvas.drawPath(path, paint);
+//     } else {
+//       paint.color = color ?? Colors.white;
+//       canvas.drawPath(path, paint);
+//     }
+//   }
+
+//   @override
+//   bool shouldRepaint(_) => false;
+// }

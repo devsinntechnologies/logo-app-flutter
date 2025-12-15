@@ -108,136 +108,7 @@ class _LogoCanvasState extends State<LogoCanvas> {
   @override
 
   @override
-Widget build(BuildContext context) {
-  final provider = Provider.of<SelectedColorProvider>(context);
-  final gradient = provider.selectedGradient;
-  final shapeColor = provider.selectedColor ?? Colors.white;
-  final bgImage = provider.canvasImage ?? provider.backgroundImage;
-
-  // Use provider opacity and checkerboard visibility
-  final checkerboardVisible = provider.isCheckerboardVisible;
-  final opacity = provider.opacity;
-
-  final String selectedShape =
-      (widget.selectedShapeName.isEmpty) ? "Square" : widget.selectedShapeName;
-
-  return ValueListenableBuilder<bool>(
-    valueListenable: widget.isExportingNotifier,
-    builder: (context, isExporting, child) {
-      return LayoutBuilder(
-        builder: (context, constraints) {
-          final Size canvasSize = constraints.biggest;
-
-          Widget? getPainterForShape(String shape) {
-            switch (shape) {
-              case "Square":
-              case "Rounded Rect":
-                return CustomPaint(
-                  size: shape == "Square"
-                      ? Size(double.infinity, double.infinity)
-                      : const Size(280, 100),
-                  painter: SquarePainter(shapeColor, gradient, bgImage),
-                );
-              case "Diamond":
-                return CustomPaint(
-                  size: const Size(double.infinity, double.infinity),
-                  painter: DiamondPainter(shapeColor, gradient, bgImage),
-                );
-              case "Triangle":
-                return CustomPaint(
-                  size: const Size(double.infinity, double.infinity),
-                  painter: TrianglePainter(shapeColor, gradient, bgImage),
-                );
-              case "Pentagon":
-                return CustomPaint(
-                  size: const Size(double.infinity, double.infinity),
-                  painter: PentagonPainter(shapeColor, gradient, bgImage),
-                );
-              case "Hexagon":
-                return CustomPaint(
-                  size: const Size(double.infinity, double.infinity),
-                  painter: HexagonPainter(shapeColor, gradient, bgImage),
-                );
-              case "Star":
-                return CustomPaint(
-                  size: const Size(double.infinity, double.infinity),
-                  painter: StarPainter(shapeColor, gradient, bgImage),
-                );
-              case "Arrow":
-                return CustomPaint(
-                  size: const Size(double.infinity, double.infinity),
-                  painter: ArrowPainter(shapeColor, gradient, bgImage),
-                );
-              case "Heart":
-                return CustomPaint(
-                  size: const Size(200, 200),
-                  painter: HeartPainter(shapeColor, gradient, bgImage),
-                );
-              default:
-                return CustomPaint(
-                  size: const Size(double.infinity, double.infinity),
-                  painter: SquarePainter(shapeColor, gradient, bgImage),
-                );
-            }
-          }
-
-          return Stack(
-            children: [
-              if (widget.showGrid)
-                CustomPaint(
-                  painter: GridPainter(
-                    gridColor: Colors.blue,
-                    highlightedHorizontalLine:
-                        widget.highlightedHorizontalGridLineIndex,
-                    highlightedVerticalLine:
-                        widget.highlightedVerticalGridLineIndex,
-                  ),
-                  size: Size.infinite,
-                ),
-
-              // Checkerboard
-              if (checkerboardVisible)
-                Opacity(
-                  opacity: 0.1,
-                  child: Image.asset(
-                    'assets/icons/checkerboard.png',
-                    width: double.infinity,
-                    height: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-
-              if (checkerboardVisible)
-                Opacity(
-                  opacity: opacity,
-                  child: Center(child: getPainterForShape(selectedShape)),
-                ),
-
-              // Individual elements stack
-              Stack(
-                children: [
-                  ...(widget.elementOrder.isNotEmpty
-                          ? widget.elementOrder
-                          : widget.logoState.visibleElementIds)
-                      .map(
-                        (id) => _buildElementById(
-                          id,
-                          canvasSize,
-                          isExporting: isExporting,
-                        ),
-                      )
-                      .whereType<Widget>(),
-                ],
-              ),
-            ],
-          );
-        },
-      );
-    },
-  );
-}
-
-  // Widget build(BuildContext context) {
+   // Widget build(BuildContext context) {
   //   final provider = Provider.of<SelectedColorProvider>(context);
   //   final gradient = provider.selectedGradient;
   //   final providers = Provider.of<SelectedColorProvider>(context);
@@ -399,6 +270,136 @@ Widget build(BuildContext context) {
   //     },
   //   );
   // }
+Widget build(BuildContext context) {
+  final provider = Provider.of<SelectedColorProvider>(context);
+  final gradient = provider.selectedGradient;
+  final shapeColor = provider.selectedColor ?? Colors.white;
+  final bgImage = provider.canvasImage ?? provider.backgroundImage;
+
+  // Use provider opacity and checkerboard visibility
+  final checkerboardVisible = provider.isCheckerboardVisible;
+  final opacity = provider.opacity;
+
+  final String selectedShape =
+      (widget.selectedShapeName.isEmpty) ? "Square" : widget.selectedShapeName;
+
+  return ValueListenableBuilder<bool>(
+    valueListenable: widget.isExportingNotifier,
+    builder: (context, isExporting, child) {
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final Size canvasSize = constraints.biggest;
+
+          Widget? getPainterForShape(String shape) {
+            switch (shape) {
+              case "Square":
+              case "Rounded Rect":
+                return CustomPaint(
+                  size: shape == "Square"
+                      ? Size(double.infinity, double.infinity)
+                      : const Size(280, 100),
+                  painter: SquarePainter(shapeColor, gradient, bgImage),
+                );
+              case "Diamond":
+                return CustomPaint(
+                  size: const Size(double.infinity, double.infinity),
+                  painter: DiamondPainter(shapeColor, gradient, bgImage),
+                );
+              case "Triangle":
+                return CustomPaint(
+                  size: const Size(double.infinity, double.infinity),
+                  painter: TrianglePainter(shapeColor, gradient, bgImage),
+                );
+              case "Pentagon":
+                return CustomPaint(
+                  size: const Size(double.infinity, double.infinity),
+                  painter: PentagonPainter(shapeColor, gradient, bgImage),
+                );
+              case "Hexagon":
+                return CustomPaint(
+                  size: const Size(double.infinity, double.infinity),
+                  painter: HexagonPainter(shapeColor, gradient, bgImage),
+                );
+              case "Star":
+                return CustomPaint(
+                  size: const Size(double.infinity, double.infinity),
+                  painter: StarPainter(shapeColor, gradient, bgImage),
+                );
+              case "Arrow":
+                return CustomPaint(
+                  size: const Size(double.infinity, double.infinity),
+                  painter: ArrowPainter(shapeColor, gradient, bgImage),
+                );
+              case "Heart":
+                return CustomPaint(
+                  size: const Size(200, 200),
+                  painter: HeartPainter(shapeColor, gradient, bgImage),
+                );
+              default:
+                return CustomPaint(
+                  size: const Size(double.infinity, double.infinity),
+                  painter: SquarePainter(shapeColor, gradient, bgImage),
+                );
+            }
+          }
+
+          return Stack(
+            children: [
+              if (widget.showGrid)
+                CustomPaint(
+                  painter: GridPainter(
+                    gridColor: Colors.blue,
+                    highlightedHorizontalLine:
+                        widget.highlightedHorizontalGridLineIndex,
+                    highlightedVerticalLine:
+                        widget.highlightedVerticalGridLineIndex,
+                  ),
+                  size: Size.infinite,
+                ),
+
+              // Checkerboard
+              if (checkerboardVisible)
+                Opacity(
+                  opacity: 0.1,
+                  child: Image.asset(
+                    'assets/icons/checkerboard.png',
+                    width: double.infinity,
+                    height: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+
+              if (checkerboardVisible)
+                Opacity(
+                  opacity: opacity,
+                  child: Center(child: getPainterForShape(selectedShape)),
+                ),
+
+              // Individual elements stack
+              Stack(
+                children: [
+                  ...(widget.elementOrder.isNotEmpty
+                          ? widget.elementOrder
+                          : widget.logoState.visibleElementIds)
+                      .map(
+                        (id) => _buildElementById(
+                          id,
+                          canvasSize,
+                          isExporting: isExporting,
+                        ),
+                      )
+                      .whereType<Widget>(),
+                ],
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+}
+
+ 
 
   Widget? _buildElementById(
     int id,
