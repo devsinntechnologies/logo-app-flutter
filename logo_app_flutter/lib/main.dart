@@ -72,7 +72,7 @@ class _MyAppState extends State<MyApp> {
         debugShowCheckedModeBanner: false,
         title: 'Auto Design Module',
         home: InternetChecker(
-          child: SplashScreen(),
+          child: HomeScreen(),
           // child: SignUpScreen(),
         ),
         // home: SplashScreen(),
@@ -80,33 +80,3 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
-
-// import 'package:flutter/material.dart';
-// import 'package:logo_app_flutter/provider/selected_color_provider.dart';
-// import 'package:logo_app_flutter/screens/home_screen.dart';
-// import 'package:logo_app_flutter/services/internet_checker.dart';
-// import 'package:provider/provider.dart';
-
-// void main() {
-//   runApp(MyApp());
-// }
-
-// class MyApp extends StatelessWidget {
-//   const MyApp({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return MultiProvider(
-//       providers: [
-//         ChangeNotifierProvider(create: (_) => SelectedColorProvider()),
-//       ],
-//       child: MaterialApp(
-//         debugShowCheckedModeBanner: false,
-//         title: 'Auto Design Module',
-//         home: InternetChecker(
-//             child: const HomeScreen()
-//         ),
-//       ),
-//     );
-//   }
-// }

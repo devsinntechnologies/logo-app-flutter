@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:logo_app_flutter/screens/my_design_screen.dart';
 import 'package:logo_app_flutter/utils/theme_colors.dart';
 
 class MyDesignButton extends StatelessWidget {
@@ -9,18 +10,22 @@ class MyDesignButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        SnackBar snackBar = const SnackBar(
-          content: Text('My Design button pressed!'),
-          duration: Duration(milliseconds: 100),
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => MyDesignScreen()),
         );
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+        // SnackBar snackBar = const SnackBar(
+        //   content: Text('My Design button pressed!'),
+        //   duration: Duration(milliseconds: 100),
+        // );
+        // ScaffoldMessenger.of(context).showSnackBar(snackBar);
       },
       child: Container(
-         height: 160,
+        height: 160,
         // padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           gradient: ThemeColors.yellowOrangePink,
-      
           borderRadius: BorderRadius.circular(30),
           boxShadow: [
             BoxShadow(
@@ -32,7 +37,7 @@ class MyDesignButton extends StatelessWidget {
           ],
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20,horizontal: 10),
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center, // optional
             children: [
@@ -54,7 +59,11 @@ class MyDesignButton extends StatelessWidget {
               const Spacer(),
               Column(
                 children: [
-                  const Icon(Icons.chevron_right, color: Colors.white, size: 35,),
+                  const Icon(
+                    Icons.chevron_right,
+                    color: Colors.white,
+                    size: 35,
+                  ),
                 ],
               ),
             ],

@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:logo_app_flutter/components/google_alert.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
 import 'package:logo_app_flutter/screens/art_select_screen.dart';
+import 'package:logo_app_flutter/screens/canvas_upload_service.dart';
 import 'package:logo_app_flutter/screens/movement_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -47,12 +48,12 @@ class _DownloadLogoState extends State<DownloadLogo> {
   late LogoStateData _currentLogoState;
   //  int? _selectedElementId;
   int? selectedElementId;
-  final List<EditorState> _undoStack = [];
-final List<EditorState> _redoStack = [];
+//   final List<EditorState> _undoStack = [];
+// final List<EditorState> _redoStack = [];
 
-late EditorState _currentState;
-  // final List<LogoStateData> _undoStack = [];
-  // final List<LogoStateData> _redoStack = [];
+// late EditorState _currentState;
+  final List<LogoStateData> _undoStack = [];
+  final List<LogoStateData> _redoStack = [];
   final int _maxUndoHistory = 20;
 
   //   List<LogoElement> customTextElements = [];
@@ -187,98 +188,149 @@ late BackgroundState _currentBackgroundState;
     return true; // iOS will handle internally
   }
 
-  void _showSaveConfirmationDialog(BuildContext context, GlobalKey canvasKey) {
-    showDialog(
-      barrierDismissible: true,
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          title: const Text(
-            'Save Logo',
-            style: TextStyle(
-                color: ThemeColors.purple, fontWeight: FontWeight.w500),
+void _showSaveConfirmationDialog(BuildContext context, GlobalKey canvasKey) {
+  showDialog(
+    barrierDismissible: true,
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        backgroundColor: Colors.white,
+        title: const Text(
+          'Save Logo',
+          style: TextStyle(
+            color: ThemeColors.purple,
+            fontWeight: FontWeight.w500,
           ),
-          content: const Text(
-            'Do you want to save this logo to your gallery?',
-            style: TextStyle(
-              fontSize: 16,
-              color: ThemeColors.purple,
-            ),
+        ),
+        content: const Text(
+          'Do you want to save the logo to your gallery or upload it to Supabase?',
+          style: TextStyle(
+            fontSize: 16,
+            color: ThemeColors.purple,
           ),
-          actions: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text(
-                    'Cancel',
-                    style: TextStyle(fontSize: 16, color: ThemeColors.purple),
-                  ),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    final provider = Provider.of<SelectedColorProvider>(
-                      context,
-                      listen: false,
-                    );
+        ),
+        actions: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
 
-                    int? previousSelection = provider.selectedElementId;
+              /// 👉 SUPABASE BUTTON
+              TextButton(
+                onPressed: () async {
 
-                    provider.clearSelection();
+                  final provider = Provider.of<SelectedColorProvider>(
+                    context,
+                    listen: false,
+                  );
 
-                    await WidgetsBinding.instance.endOfFrame;
+                  int? previousSelection = provider.selectedElementId;
+                  provider.clearSelection();
 
-                    await saveCanvasToGallery(canvasKey, isExportingNotifier);
+                  await WidgetsBinding.instance.endOfFrame;
 
-                    if (previousSelection != null) {
-                      provider.setSelectedElement(previousSelection);
-                    }
+                  final imageUrl =
+                      await CanvasUploadService.uploadCanvas(
+                    canvasKey: canvasKey,
+                  );
 
-                    Navigator.of(context).pop();
+                  if (previousSelection != null) {
+                    provider.setSelectedElement(previousSelection);
+                  }
+                  Navigator.of(context).pop();
 
+                  if (imageUrl != null) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        duration: const Duration(seconds: 3),
                         backgroundColor: Colors.white,
                         behavior: SnackBarBehavior.floating,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        margin: const EdgeInsets.all(16),
                         content: Row(
                           children: const [
-                            Icon(Icons.check_circle, color: ThemeColors.purple),
+                            Icon(Icons.cloud_done,
+                                color: ThemeColors.purple),
                             SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                'Logo saved successfully!',
-                                style: TextStyle(
-                                  color: ThemeColors.purple,
-                                  fontSize: 16,
-                                ),
+                            Text(
+                              'Logo uploaded to Supabase!',
+                              style: TextStyle(
+                                color: ThemeColors.purple,
+                                fontSize: 16,
                               ),
                             ),
                           ],
                         ),
                       ),
                     );
-                  },
-                  child: const Text(
-                    'Save',
-                    style: TextStyle(fontSize: 16, color: ThemeColors.purple),
-                  ),
+                  }
+                },
+                child: const Text(
+                  'To Supabase',
+                  style:
+                      TextStyle(fontSize: 16, color: ThemeColors.purple),
                 ),
-              ],
-            ),
-          ],
-        );
-      },
-    );
-  }
+              ),
+
+              /// 👉 GALLERY BUTTON (unchanged)
+              TextButton(
+                onPressed: () async {
+                  final provider = Provider.of<SelectedColorProvider>(
+                    context,
+                    listen: false,
+                  );
+
+                  int? previousSelection = provider.selectedElementId;
+                  provider.clearSelection();
+
+                  await WidgetsBinding.instance.endOfFrame;
+
+                  await saveCanvasToGallery(
+                      canvasKey, isExportingNotifier);
+
+                  if (previousSelection != null) {
+                    provider.setSelectedElement(previousSelection);
+                  }
+
+                  Navigator.of(context).pop();
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      duration: const Duration(seconds: 3),
+                      backgroundColor: Colors.white,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      margin: const EdgeInsets.all(16),
+                      content: Row(
+                        children: const [
+                          Icon(Icons.check_circle,
+                              color: ThemeColors.purple),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Logo saved successfully!',
+                              style: TextStyle(
+                                color: ThemeColors.purple,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+                child: const Text(
+                  'To Gallery',
+                  style:
+                      TextStyle(fontSize: 16, color: ThemeColors.purple),
+                ),
+              ),
+            ],
+          ),
+        ],
+      );
+    },
+  );
+}
 
   @override
   @override
@@ -287,70 +339,88 @@ void initState() {
   super.initState();
 
   // 1️⃣ Initialize logo state first
-  _currentLogoState = LogoStateData(
-    logoPosition: const Offset(150, 100),
-    logoSize: 100,
-    logoRotation: 0,
-    isLogoVisible: true,
-    svgLogo: widget.svgLogo,
-    companyNamePosition: const Offset(160, 200),
-    companyNameSize: 20,
-    companyNameRotation: 0,
-    isCompanyNameVisible: true,
-    companyName: widget.companyName,
-    sloganName: widget.sloganName,
-    sloganPosition: const Offset(150, 240),
-    sloganSize: 18,
-    sloganRotation: 0,
-    isSloganVisible: true,
-    isLogo2Visible: false,
-    isCompanyName2Visible: false,
-    isSlogan2Visible: false,
-    customTexts: [],
-    customImages: [],
-    lockedElements: {},
-    elementOrder: [0, 1, 2],
-  );
-
-  // 2️⃣ Initialize background state safely
-  final provider =
-      Provider.of<SelectedColorProvider>(context, listen: false);
-  _currentBackgroundState = BackgroundState(
-    color: Colors.white,
-    gradient: null,
-    imagePath: null,
-    checkerboardVisible: true,
-  );
-  // 3️⃣ Initialize combined editor state
-  _currentState = EditorState(
-    logo: _currentLogoState.clone(),
-    background: _currentBackgroundState.clone(),
-  );
-
-  // 4️⃣ Post-frame callback for UI updates
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    final colorProvider = Provider.of<SelectedColorProvider>(
-      context,
-      listen: false,
+    _currentLogoState = LogoStateData(
+      logoPosition: const Offset(150, 100),
+      logoSize: 100,
+      logoRotation: 0,
+      isLogoVisible: true,
+      svgLogo: "${widget.svgLogo}",
+      companyNamePosition: const Offset(160, 200),
+      companyNameSize: 20,
+      companyNameRotation: 0,
+      isCompanyNameVisible: true,
+      companyName: widget.companyName,
+      sloganName: widget.sloganName,
+      sloganPosition: const Offset(150, 240),
+      sloganSize: 18,
+      sloganRotation: 0,
+      isSloganVisible: true,
+      isLogo2Visible: false,
+      isCompanyName2Visible: false,
+      isSlogan2Visible: false,
+      customTexts: [],
+      customImages: [],
+      lockedElements: {},
+      elementOrder: [0, 1, 2],
     );
 
-    _undoStack.clear();
-    _redoStack.clear();
 
-    // Push initial states safely
-    _undoStack.add(EditorState(
-      logo: _currentLogoState.clone(),
-      background: _currentBackgroundState.clone(),
-    ));
-
-    colorProvider.resetAllOutlines();
-    colorProvider.resetAllColors(defaultColors: {
-      0: Colors.black,
-      1: Colors.black,
-      2: Colors.white,
+  // 2️⃣ Initialize background state safely
+  // final provider =
+  //     Provider.of<SelectedColorProvider>(context, listen: false);
+  // _currentBackgroundState = BackgroundState(
+  //   color: Colors.white,
+  //   gradient: null,
+  //   imagePath: null,
+  //   checkerboardVisible: true,
+  // );
+  // // 3️⃣ Initialize combined editor state
+  // _currentState = EditorState(
+  //   logo: _currentLogoState.clone(),
+  //   background: _currentBackgroundState.clone(),
+  // );
+ WidgetsBinding.instance.addPostFrameCallback((_) {
+      final colorProvider = Provider.of<SelectedColorProvider>(
+        context,
+        listen: false,
+      );
+      _undoStack.clear();
+      _redoStack.clear();
+      _undoStack.add(_currentLogoState.clone());
+      colorProvider.resetAllOutlines(); // outline reset
+      colorProvider.resetAllColors(defaultColors: {});
+      colorProvider.clearOverrides();
     });
-    colorProvider.clearOverrides();
-  });
+ 
+ 
+
+  // 4️⃣ Post-frame callback for UI updates
+  // WidgetsBinding.instance.addPostFrameCallback((_) {
+  //   final colorProvider = Provider.of<SelectedColorProvider>(
+  //     context,
+  //     listen: false,
+  //   );
+
+  //   _undoStack.clear();
+  //   _redoStack.clear();
+
+  //   // Push initial states safely
+  //   _undoStack.add(EditorState(
+  //     logo: _currentLogoState.clone(),
+  //     background: _currentBackgroundState.clone(),
+  //   ));
+
+  //   colorProvider.resetAllOutlines();
+  //   colorProvider.resetAllColors(defaultColors: {
+  //     0: Colors.black,
+  //     1: Colors.black,
+  //     2: Colors.white,
+  //   });
+  //   colorProvider.clearOverrides();
+  // });
+
+
+
 }
 
   @override
@@ -384,8 +454,8 @@ void initState() {
           // ),
           IconButton(
             icon: const Icon(Icons.save, size: 35),
-            // onPressed: () => _showSaveConfirmationDialog(context, _canvasKey),
-            onPressed: () => showCustomGoogleDialog(context),
+            onPressed: () => _showSaveConfirmationDialog(context, _canvasKey),
+            // onPressed: () => showCustomGoogleDialog(context),
             tooltip: 'Save Logo',
           ),
         ],
@@ -1145,10 +1215,10 @@ void _clearSelection() {
           ..[elementKey] = color,
       );
     });
-    _currentState = EditorState(
-      logo: _currentLogoState.clone(),
-      background: _currentState.background,
-    );
+    // _currentState = EditorState(
+    //   logo: _currentLogoState.clone(),
+    //   background: _currentState.background,
+    // );
   }
 
   void bringToFront(int elementId, dynamic logoState) {
@@ -1316,166 +1386,166 @@ void _clearSelection() {
 
   
 // --------------------old Undo/working code--------------------
-  // // --- State Save/Undo ---
-  // void _saveState() {
-  //   _redoStack.clear();
+  // --- State Save/Undo ---
+  void _saveState() {
+    _redoStack.clear();
 
-  //   if (_undoStack.length >= _maxUndoHistory) {
-  //     _undoStack.removeAt(0);
-  //   }
+    if (_undoStack.length >= _maxUndoHistory) {
+      _undoStack.removeAt(0);
+    }
 
-  //   _undoStack.add(_currentLogoState.clone());
+    _undoStack.add(_currentLogoState.clone());
 
-  //   if (mounted) setState(() {});
-  // }
+    if (mounted) setState(() {});
+  }
 
-  // DateTime? _lastEmptyUndoTime;
-  // DateTime? _lastSuccessUndoTime;
+  DateTime? _lastEmptyUndoTime;
+  DateTime? _lastSuccessUndoTime;
 
-  // void _undo() {
-  //   if (_undoStack.isNotEmpty) {
-  //     _redoStack.add(_currentLogoState.clone());
-  //     _currentLogoState = _undoStack.removeLast();
-  //     Provider.of<SelectedColorProvider>(context, listen: false)
-  //         .applyLogoState(_currentLogoState);
+  void _undo() {
+    if (_undoStack.isNotEmpty) {
+      _redoStack.add(_currentLogoState.clone());
+      _currentLogoState = _undoStack.removeLast();
+      Provider.of<SelectedColorProvider>(context, listen: false)
+          .applyLogoState(_currentLogoState);
 
-  //     setState(() {});
+      setState(() {});
 
-  //     final now = DateTime.now();
-  //     // 👇 APPLY SAME LOGIC FOR SUCCESS MESSAGES
-  //     if (_lastSuccessUndoTime == null ||
-  //         now.difference(_lastSuccessUndoTime!) > const Duration(seconds: 2)) {
-  //       _lastSuccessUndoTime = now;
+      final now = DateTime.now();
+      // 👇 APPLY SAME LOGIC FOR SUCCESS MESSAGES
+      if (_lastSuccessUndoTime == null ||
+          now.difference(_lastSuccessUndoTime!) > const Duration(seconds: 2)) {
+        _lastSuccessUndoTime = now;
 
-  //       ScaffoldMessenger.of(context)
-  //         ..hideCurrentSnackBar()
-  //         ..showSnackBar(
-  //           const SnackBar(
-  //             content: Text('Undo successful!'),
-  //             duration: Duration(seconds: 2),
-  //           ),
-  //         );
-  //     }
-  //   } else {
-  //     final now = DateTime.now();
-  //     if (_lastEmptyUndoTime == null ||
-  //         now.difference(_lastEmptyUndoTime!) > const Duration(seconds: 2)) {
-  //       _lastEmptyUndoTime = now;
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            const SnackBar(
+              content: Text('Undo successful!'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+      }
+    } else {
+      final now = DateTime.now();
+      if (_lastEmptyUndoTime == null ||
+          now.difference(_lastEmptyUndoTime!) > const Duration(seconds: 2)) {
+        _lastEmptyUndoTime = now;
 
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         const SnackBar(
-  //           content: Text('Nothing to undo!'),
-  //           duration: Duration(seconds: 2),
-  //         ),
-  //       );
-  //     }
-  //   }
-  // }
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Nothing to undo!'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
 
-  // DateTime? _lastEmptyRedoTime;
-  // DateTime? _lastSuccessRedoTime;
+  DateTime? _lastEmptyRedoTime;
+  DateTime? _lastSuccessRedoTime;
 
-  // void _redo() {
-  //   if (_redoStack.isNotEmpty) {
-  //     _undoStack.add(_currentLogoState.clone());
-  //     _currentLogoState = _redoStack.removeLast();
-  //     Provider.of<SelectedColorProvider>(context, listen: false)
-  //         .applyLogoState(_currentLogoState);
+  void _redo() {
+    if (_redoStack.isNotEmpty) {
+      _undoStack.add(_currentLogoState.clone());
+      _currentLogoState = _redoStack.removeLast();
+      Provider.of<SelectedColorProvider>(context, listen: false)
+          .applyLogoState(_currentLogoState);
 
-  //     setState(() {});
+      setState(() {});
 
-  //     final now = DateTime.now();
-  //     // 👇 APPLY SAME LOGIC FOR SUCCESS MESSAGES
-  //     if (_lastSuccessRedoTime == null ||
-  //         now.difference(_lastSuccessRedoTime!) > const Duration(seconds: 2)) {
-  //       _lastSuccessRedoTime = now;
+      final now = DateTime.now();
+      // 👇 APPLY SAME LOGIC FOR SUCCESS MESSAGES
+      if (_lastSuccessRedoTime == null ||
+          now.difference(_lastSuccessRedoTime!) > const Duration(seconds: 2)) {
+        _lastSuccessRedoTime = now;
 
-  //       ScaffoldMessenger.of(context)
-  //         ..hideCurrentSnackBar()
-  //         ..showSnackBar(
-  //           const SnackBar(
-  //             content: Text('Redo successful!'),
-  //             duration: Duration(seconds: 2),
-  //           ),
-  //         );
-  //     }
-  //   } else {
-  //     final now = DateTime.now();
-  //     if (_lastEmptyRedoTime == null ||
-  //         now.difference(_lastEmptyRedoTime!) > const Duration(seconds: 2)) {
-  //       _lastEmptyRedoTime = now;
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         const SnackBar(
-  //           content: Text('Nothing to redo!'),
-  //           duration: Duration(seconds: 2),
-  //         ),
-  //       );
-  //     }
-  //   }
-  // }
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            const SnackBar(
+              content: Text('Redo successful!'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+      }
+    } else {
+      final now = DateTime.now();
+      if (_lastEmptyRedoTime == null ||
+          now.difference(_lastEmptyRedoTime!) > const Duration(seconds: 2)) {
+        _lastEmptyRedoTime = now;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Nothing to redo!'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
 
   // --------------------- Old State Save/Undo --------------------
 
-void _saveState() {
-  _redoStack.clear();
-  if (_undoStack.length >= _maxUndoHistory) _undoStack.removeAt(0);
-  _undoStack.add(_currentState.clone());
-}
+// void _saveState() {
+//   _redoStack.clear();
+//   if (_undoStack.length >= _maxUndoHistory) _undoStack.removeAt(0);
+//   _undoStack.add(_currentState.clone());
+// }
 
-void _undo() {
-  if (_undoStack.isEmpty) {
-    _showSnackBar('Nothing to undo!');
-    return;
-  }
+// void _undo() {
+//   if (_undoStack.isEmpty) {
+//     _showSnackBar('Nothing to undo!');
+//     return;
+//   }
 
-  _redoStack.add(_currentState.clone());
-  _currentState = _undoStack.removeLast();
+//   _redoStack.add(_currentState.clone());
+//   _currentState = _undoStack.removeLast();
 
-  // Apply logo
-  _currentLogoState = _currentState.logo.clone();
-  Provider.of<SelectedColorProvider>(context, listen: false)
-      .applyLogoState(_currentLogoState);
+//   // Apply logo
+//   _currentLogoState = _currentState.logo.clone();
+//   Provider.of<SelectedColorProvider>(context, listen: false)
+//       .applyLogoState(_currentLogoState);
 
-  // Apply background
-  _applyBackgroundFromState(_currentState.background);
+//   // Apply background
+//   _applyBackgroundFromState(_currentState.background);
 
-  setState(() {});
-  _showSnackBar('Undo successful!');
-}
+//   setState(() {});
+//   _showSnackBar('Undo successful!');
+// }
 
-void _redo() {
-  if (_redoStack.isEmpty) {
-    _showSnackBar('Nothing to redo!');
-    return;
-  }
+// void _redo() {
+//   if (_redoStack.isEmpty) {
+//     _showSnackBar('Nothing to redo!');
+//     return;
+//   }
 
-  _undoStack.add(_currentState.clone());
-  _currentState = _redoStack.removeLast();
+//   _undoStack.add(_currentState.clone());
+//   _currentState = _redoStack.removeLast();
 
-  _currentLogoState = _currentState.logo.clone();
-  Provider.of<SelectedColorProvider>(context, listen: false)
-      .applyLogoState(_currentLogoState);
+//   _currentLogoState = _currentState.logo.clone();
+//   Provider.of<SelectedColorProvider>(context, listen: false)
+//       .applyLogoState(_currentLogoState);
 
-  _applyBackgroundFromState(_currentState.background);
+//   _applyBackgroundFromState(_currentState.background);
 
-  setState(() {});
-  _showSnackBar('Redo successful!');
-}
+//   setState(() {});
+//   _showSnackBar('Redo successful!');
+// }
 
-// Optional helper for SnackBars with cooldown
-DateTime? _lastSnackBarTime;
-void _showSnackBar(String message) {
-  final now = DateTime.now();
-  if (_lastSnackBarTime == null ||
-      now.difference(_lastSnackBarTime!) > const Duration(seconds: 2)) {
-    _lastSnackBarTime = now;
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
-      );
-  }
-}
+// // Optional helper for SnackBars with cooldown
+// DateTime? _lastSnackBarTime;
+// void _showSnackBar(String message) {
+//   final now = DateTime.now();
+//   if (_lastSnackBarTime == null ||
+//       now.difference(_lastSnackBarTime!) > const Duration(seconds: 2)) {
+//     _lastSnackBarTime = now;
+//     ScaffoldMessenger.of(context)
+//       ..hideCurrentSnackBar()
+//       ..showSnackBar(
+//         SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
+//       );
+//   }
+// }
 
 
 void _applyBackgroundFromState(BackgroundState state) {
@@ -1549,10 +1619,10 @@ void _applyBackgroundFromState(BackgroundState state) {
             elementOrder: updatedElementOrder,
           );
         });
-        _currentState = EditorState(
-          logo: _currentLogoState.clone(),
-          background: _currentState.background,
-        );
+        // _currentState = EditorState(
+        //   logo: _currentLogoState.clone(),
+        //   background: _currentState.background,
+        // );
       }
     }
 
@@ -1639,10 +1709,10 @@ void _applyBackgroundFromState(BackgroundState state) {
               ],
             );
           });
-          _currentState = EditorState(
-            logo: _currentLogoState.clone(),
-            background: _currentState.background,
-          );
+          // _currentState = EditorState(
+          //   logo: _currentLogoState.clone(),
+          //   background: _currentState.background,
+          // );
         }
       }
     }
@@ -1761,10 +1831,10 @@ void _applyBackgroundFromState(BackgroundState state) {
         elementOrder: updatedElementOrder,
       );
     });
-    _currentState = EditorState(
-      logo: _currentLogoState.clone(),
-      background: _currentState.background,
-    );
+    // _currentState = EditorState(
+    //   logo: _currentLogoState.clone(),
+    //   background: _currentState.background,
+    // );
   }
 
   LogoStateData _duplicate3DRotation({
@@ -2171,10 +2241,10 @@ void _applyBackgroundFromState(BackgroundState state) {
       //   context,
       // ).showSnackBar(SnackBar(content: Text(message)));
     });
-    _currentState = EditorState(
-      logo: _currentLogoState.clone(),
-      background: _currentState.background,
-    );
+    // _currentState = EditorState(
+    //   logo: _currentLogoState.clone(),
+    //   background: _currentState.background,
+    // );
   }
 
   void _rotateElementByTap(int id) {
@@ -3167,10 +3237,10 @@ void _applyBackgroundFromState(BackgroundState state) {
             customSVGs: updatedSVGs,
           );
         });
-        _currentState = EditorState(
-          logo: _currentLogoState.clone(),
-          background: _currentState.background,
-        );
+        // _currentState = EditorState(
+        //   logo: _currentLogoState.clone(),
+        //   background: _currentState.background,
+        // );
         print('✅ Updated rotation for SVG id $id to $newRotation');
         return;
       } else {
@@ -3191,10 +3261,10 @@ void _applyBackgroundFromState(BackgroundState state) {
             customTexts: updatedTexts,
           );
         });
-        _currentState = EditorState(
-          logo: _currentLogoState.clone(),
-          background: _currentState.background,
-        );
+        // _currentState = EditorState(
+        //   logo: _currentLogoState.clone(),
+        //   background: _currentState.background,
+        // );
         print('✅ Updated rotation for text id $id to $newRotation');
       }
     } else if (id == 0) {
@@ -3202,20 +3272,20 @@ void _applyBackgroundFromState(BackgroundState state) {
         _currentLogoState =
             _currentLogoState.copyWith(logoRotation: newRotation);
       });
-      _currentState = EditorState(
-        logo: _currentLogoState.clone(),
-        background: _currentState.background,
-      );
+      // _currentState = EditorState(
+      //   logo: _currentLogoState.clone(),
+      //   background: _currentState.background,
+      // );
       print('✅ Updated rotation for main logo to $newRotation');
     } else if (id == 1) {
       setState(() {
         _currentLogoState =
             _currentLogoState.copyWith(companyNameRotation: newRotation);
       });
-      _currentState = EditorState(
-        logo: _currentLogoState.clone(),
-        background: _currentState.background,
-      );
+      // _currentState = EditorState(
+      //   logo: _currentLogoState.clone(),
+      //   background: _currentState.background,
+      // );
       print('✅ Updated rotation for company name to $newRotation');
     } else if (id == 2) {
       setState(() {

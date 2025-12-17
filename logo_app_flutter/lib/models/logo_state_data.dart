@@ -3,17 +3,17 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
-class EditorState {
-  final LogoStateData logo;
-  final BackgroundState background;
+// class EditorState {
+//   final LogoStateData logo;
+//   final BackgroundState background;
 
-  EditorState({required this.logo, required this.background});
+//   EditorState({required this.logo, required this.background});
 
-  EditorState clone() => EditorState(
-        logo: logo.clone(),
-        background: background.clone(),
-      );
-}
+//   EditorState clone() => EditorState(
+//         logo: logo.clone(),
+//         background: background.clone(),
+//       );
+// }
 
 class BackgroundState {
   final Color? color;
