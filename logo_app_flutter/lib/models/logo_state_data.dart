@@ -237,6 +237,8 @@ class LogoStateData {
   final Map<int, double> rotationYMap;
   final Map<int, double> rotationZMap;
   final double perspective;
+  final Color logoColor;
+  final bool isLogoColorOverridden;
   final Color companyNameColor;
   final Color sloganColor;
   final Color companyNameOutlineColor;
@@ -301,6 +303,8 @@ class LogoStateData {
     List<CustomSvgElement>? customSVGs,
     Set<int>? lockedElements,
     List<int>? elementOrder,
+    this.logoColor = Colors.black,
+    this.isLogoColorOverridden = false,
     this.companyNameColor = Colors.black,
     this.sloganColor = Colors.black,
     this.companyNameOutlineColor = Colors.transparent,
@@ -372,6 +376,8 @@ class LogoStateData {
     Map<int, double>? rotationZMap,
 
     double? perspective,
+    Color? logoColor,
+    bool? isLogoColorOverridden,
     Color? companyNameColor,
     Color? companyNameOutlineColor,
     double? companyNameOutlineWidth,
@@ -425,6 +431,8 @@ class LogoStateData {
 
       perspective: perspective ?? this.perspective,
 
+      logoColor: logoColor ?? this.logoColor,
+      isLogoColorOverridden: isLogoColorOverridden ?? this.isLogoColorOverridden,
       companyNameColor: companyNameColor ?? this.companyNameColor,
       companyNameOutlineColor:
           companyNameOutlineColor ?? this.companyNameOutlineColor,
@@ -487,6 +495,8 @@ class LogoStateData {
 
       perspective: perspective ?? this.perspective,
 
+      logoColor: Color(logoColor.value),
+      isLogoColorOverridden: isLogoColorOverridden,
       companyNameColor: Color(companyNameColor.value),
       companyNameOutlineColor: Color(companyNameOutlineColor.value),
       companyNameOutlineWidth: companyNameOutlineWidth,

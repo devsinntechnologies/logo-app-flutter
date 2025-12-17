@@ -470,7 +470,6 @@ class _MovementPanelState extends State<MovementPanel>
                         (color) => GestureDetector(
                           onTap: () {
                             _setColorForElement(provider, elementId, color);
-                            widget.onSaveState?.call();
                           },
                           child: Container(
                             margin: const EdgeInsets.symmetric(
@@ -508,7 +507,7 @@ class _MovementPanelState extends State<MovementPanel>
     int elementId,
   ) {
     if (elementId == 0) {
-       return provider.shapeColor ?? Colors.black;
+       return provider.logoColor;
     } else if (elementId == 1) {
       return provider.companyTextColor;
     } else if (elementId == 2) {
@@ -533,7 +532,7 @@ class _MovementPanelState extends State<MovementPanel>
     Color color,
   ) {
     if (elementId == 0) {
-      provider.setShapeColor(color);
+      provider.setLogoColor(color);
     } else if (elementId == 1) {
       provider.setCompanyTextColor(color);
     } else if (elementId == 2) {
@@ -867,20 +866,12 @@ class _MovementPanelState extends State<MovementPanel>
     return GestureDetector(
       onTap: () {
         if (widget.selectedElementId != null) {
-          widget.onSaveState?.call(); // Save state before color change
           final provider = Provider.of<SelectedColorProvider>(
             context,
             listen: false,
           );
           final elementId = widget.selectedElementId!;
-          if (elementId == 0)
-            provider.setShapeColor(color);
-          else if (elementId == 1)
-            provider.setCompanyTextColor(color);
-          else if (elementId == 2)
-            provider.setSloganColor(color);
-          else
-            provider.setOverrideColorForElement(elementId, color);
+          _setColorForElement(provider, elementId, color);
         }
       },
       child: Container(

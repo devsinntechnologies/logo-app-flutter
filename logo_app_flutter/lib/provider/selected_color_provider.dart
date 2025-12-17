@@ -18,6 +18,7 @@ class SelectedColorProvider extends ChangeNotifier {
   Color _sloganColor = Colors.black;
   Color? _shapeColor;
   Color _customTextColor = Colors.black;
+  Color _logoColor = Colors.black;
 
   bool _isColorManuallySelected = false;
   // new map to track if user manually changed color
@@ -43,9 +44,11 @@ class SelectedColorProvider extends ChangeNotifier {
   void resetAllColors({required Map<int, Color> defaultColors}) {
     _overrideColors.clear(); // user overrides remove ho jaye
     _isElementColorOverridden.clear(); // manual flags reset
-    _companyTextColor = defaultColors[0] ?? Colors.black;
-    _sloganColor = defaultColors[1] ?? Colors.black;
-    _shapeColor = defaultColors[2] ?? null;
+    _logoColor = defaultColors[0] ?? Colors.black;
+    _companyTextColor = defaultColors[1] ?? Colors.black;
+    _sloganColor = defaultColors[2] ?? Colors.black;
+    _shapeColor = defaultColors[3] ?? null;
+    _isLogoColorOverridden = false;
     notifyListeners();
   }
 //  void resetAllColors() {
@@ -84,6 +87,7 @@ class SelectedColorProvider extends ChangeNotifier {
   Color get sloganColor => _sloganColor;
   Color? get shapeColor => _shapeColor;
   Color get customTextColor => _customTextColor;
+  Color get logoColor => _logoColor;
   int _rotateIndex = 0;
 
   Color _baseColor = Colors.black;
@@ -103,8 +107,10 @@ class SelectedColorProvider extends ChangeNotifier {
 
   int? get selectedElementId => _selectedElementId;
   bool _isSvgColorOverridden = false;
+  bool _isLogoColorOverridden = false;
 
   bool get isSvgColorOverridden => _isSvgColorOverridden;
+  bool get isLogoColorOverridden => _isLogoColorOverridden;
 
   void setSvgColorOverridden(bool value) {
     _isSvgColorOverridden = value;
@@ -191,6 +197,8 @@ class SelectedColorProvider extends ChangeNotifier {
     _imageFile = null;
     _companyTextColor = Colors.black;
     _sloganColor = Colors.black;
+    _logoColor = Colors.black;
+    _isLogoColorOverridden = false;
     // _shapeColor = Colors.white;
     _rotateIndex = 0;
     _isColorManuallySelected = false;
@@ -243,6 +251,13 @@ class SelectedColorProvider extends ChangeNotifier {
 
   void setShapeColor(Color color) {
     _shapeColor = color;
+    _isColorManuallySelected = true;
+    notifyListeners();
+  }
+
+  void setLogoColor(Color color) {
+    _logoColor = color;
+    _isLogoColorOverridden = true;
     _isColorManuallySelected = true;
     notifyListeners();
   }
@@ -387,7 +402,9 @@ class SelectedColorProvider extends ChangeNotifier {
       List<Color> paletteColors, List<int> allElementIds) {
     _rotateIndex = 0;
 
-    // Company / Slogan / Shape ke liye
+    // Logo / Company / Slogan / Shape ke liye
+    _logoColor = paletteColors[0 % paletteColors.length];
+    _isLogoColorOverridden = true;
     _companyTextColor = paletteColors[1 % paletteColors.length];
     _sloganColor = paletteColors[2 % paletteColors.length];
     _shapeColor = paletteColors[0 % paletteColors.length];
@@ -405,6 +422,8 @@ class SelectedColorProvider extends ChangeNotifier {
   }
 
   void setColorsRotated(List<Color> paletteColors, {List<int>? allElementIds}) {
+    _logoColor = paletteColors[_rotateIndex % paletteColors.length];
+    _isLogoColorOverridden = true;
     _companyTextColor =
         paletteColors[(_rotateIndex + 1) % paletteColors.length];
     _sloganColor = paletteColors[(_rotateIndex + 2) % paletteColors.length];
@@ -530,6 +549,10 @@ class SelectedColorProvider extends ChangeNotifier {
 
     // ✅ FIX: restore shapeColor from top-level state
     // _shapeColor = state.shapeColor;
+
+    // 2) logo color and override flag
+    _logoColor = state.logoColor;
+    _isLogoColorOverridden = state.isLogoColorOverridden;
 
     // 3) company/slogan top-level fields (explicit)
     _companyTextColor = state.companyNameColor;

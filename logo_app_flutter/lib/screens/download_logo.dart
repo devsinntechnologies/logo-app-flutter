@@ -61,10 +61,9 @@ class _DownloadLogoState extends State<DownloadLogo> {
   //   LogoElement? _getElementById(int id) {
   //   return customTextElements.firstWhereOrNull((e) => e.id == id);
   // }
-String _selectedBackgroundShape = 'Square';
+  String _selectedBackgroundShape = 'Square';
 
-late BackgroundState _currentBackgroundState;
-
+  late BackgroundState _currentBackgroundState;
 
   final List<Color> colorList = [
     Colors.red,
@@ -188,157 +187,154 @@ late BackgroundState _currentBackgroundState;
     return true; // iOS will handle internally
   }
 
-void _showSaveConfirmationDialog(BuildContext context, GlobalKey canvasKey) {
-  showDialog(
-    barrierDismissible: true,
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        backgroundColor: Colors.white,
-        title: const Text(
-          'Save Logo',
-          style: TextStyle(
-            color: ThemeColors.purple,
-            fontWeight: FontWeight.w500,
+  void _showSaveConfirmationDialog(BuildContext context, GlobalKey canvasKey) {
+    showDialog(
+      barrierDismissible: true,
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          title: const Text(
+            'Save Logo',
+            style: TextStyle(
+              color: ThemeColors.purple,
+              fontWeight: FontWeight.w500,
+            ),
           ),
-        ),
-        content: const Text(
-          'Do you want to save the logo to your gallery or upload it to Supabase?',
-          style: TextStyle(
-            fontSize: 16,
-            color: ThemeColors.purple,
+          content: const Text(
+            'Do you want to save the logo to your gallery or upload it to Supabase?',
+            style: TextStyle(
+              fontSize: 16,
+              color: ThemeColors.purple,
+            ),
           ),
-        ),
-        actions: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                /// 👉 SUPABASE BUTTON
+                TextButton(
+                  onPressed: () async {
+                    final provider = Provider.of<SelectedColorProvider>(
+                      context,
+                      listen: false,
+                    );
 
-              /// 👉 SUPABASE BUTTON
-              TextButton(
-                onPressed: () async {
+                    int? previousSelection = provider.selectedElementId;
+                    
+                    provider.clearSelection();
 
-                  final provider = Provider.of<SelectedColorProvider>(
-                    context,
-                    listen: false,
-                  );
+                    provider.clearSelection();
 
-                  int? previousSelection = provider.selectedElementId;
-                  provider.clearSelection();
+                    // wait for UI to rebuild (IMPORTANT)
+                    await WidgetsBinding.instance.endOfFrame;
+                    await WidgetsBinding.instance.endOfFrame;
 
-                  await WidgetsBinding.instance.endOfFrame;
+                    final imageUrl = await CanvasUploadService.uploadCanvas(
+                      canvasKey: canvasKey,
+                    );
 
-                  final imageUrl =
-                      await CanvasUploadService.uploadCanvas(
-                    canvasKey: canvasKey,
-                  );
+                    if (previousSelection != null) {
+                      provider.setSelectedElement(previousSelection);
+                    }
+                    Navigator.of(context).pop();
 
-                  if (previousSelection != null) {
-                    provider.setSelectedElement(previousSelection);
-                  }
-                  Navigator.of(context).pop();
+                    if (imageUrl != null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          backgroundColor: Colors.white,
+                          behavior: SnackBarBehavior.floating,
+                          content: Row(
+                            children: const [
+                              Icon(Icons.cloud_done, color: ThemeColors.purple),
+                              SizedBox(width: 12),
+                              Text(
+                                'Logo uploaded to Supabase!',
+                                style: TextStyle(
+                                  color: ThemeColors.purple,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                  child: const Text(
+                    'To Supabase',
+                    style: TextStyle(fontSize: 16, color: ThemeColors.purple),
+                  ),
+                ),
 
-                  if (imageUrl != null) {
+                /// 👉 GALLERY BUTTON (unchanged)
+                TextButton(
+                  onPressed: () async {
+                    final provider = Provider.of<SelectedColorProvider>(
+                      context,
+                      listen: false,
+                    );
+
+                    int? previousSelection = provider.selectedElementId;
+                    provider.clearSelection();
+
+                    await WidgetsBinding.instance.endOfFrame;
+
+                    await saveCanvasToGallery(canvasKey, isExportingNotifier);
+
+                    if (previousSelection != null) {
+                      provider.setSelectedElement(previousSelection);
+                    }
+
+                    Navigator.of(context).pop();
+
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
+                        duration: const Duration(seconds: 3),
                         backgroundColor: Colors.white,
                         behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        margin: const EdgeInsets.all(16),
                         content: Row(
                           children: const [
-                            Icon(Icons.cloud_done,
-                                color: ThemeColors.purple),
+                            Icon(Icons.check_circle, color: ThemeColors.purple),
                             SizedBox(width: 12),
-                            Text(
-                              'Logo uploaded to Supabase!',
-                              style: TextStyle(
-                                color: ThemeColors.purple,
-                                fontSize: 16,
+                            Expanded(
+                              child: Text(
+                                'Logo saved successfully!',
+                                style: TextStyle(
+                                  color: ThemeColors.purple,
+                                  fontSize: 16,
+                                ),
                               ),
                             ),
                           ],
                         ),
                       ),
                     );
-                  }
-                },
-                child: const Text(
-                  'To Supabase',
-                  style:
-                      TextStyle(fontSize: 16, color: ThemeColors.purple),
+                  },
+                  child: const Text(
+                    'To Gallery',
+                    style: TextStyle(fontSize: 16, color: ThemeColors.purple),
+                  ),
                 ),
-              ),
-
-              /// 👉 GALLERY BUTTON (unchanged)
-              TextButton(
-                onPressed: () async {
-                  final provider = Provider.of<SelectedColorProvider>(
-                    context,
-                    listen: false,
-                  );
-
-                  int? previousSelection = provider.selectedElementId;
-                  provider.clearSelection();
-
-                  await WidgetsBinding.instance.endOfFrame;
-
-                  await saveCanvasToGallery(
-                      canvasKey, isExportingNotifier);
-
-                  if (previousSelection != null) {
-                    provider.setSelectedElement(previousSelection);
-                  }
-
-                  Navigator.of(context).pop();
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      duration: const Duration(seconds: 3),
-                      backgroundColor: Colors.white,
-                      behavior: SnackBarBehavior.floating,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      margin: const EdgeInsets.all(16),
-                      content: Row(
-                        children: const [
-                          Icon(Icons.check_circle,
-                              color: ThemeColors.purple),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              'Logo saved successfully!',
-                              style: TextStyle(
-                                color: ThemeColors.purple,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-                child: const Text(
-                  'To Gallery',
-                  style:
-                      TextStyle(fontSize: 16, color: ThemeColors.purple),
-                ),
-              ),
-            ],
-          ),
-        ],
-      );
-    },
-  );
-}
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   @override
-@override
-void initState() {
-  super.initState();
+  @override
+  void initState() {
+    super.initState();
 
-  // 1️⃣ Initialize logo state first
+    // 1️⃣ Initialize logo state first
     _currentLogoState = LogoStateData(
       logoPosition: const Offset(150, 100),
       logoSize: 100,
@@ -364,22 +360,21 @@ void initState() {
       elementOrder: [0, 1, 2],
     );
 
-
-  // 2️⃣ Initialize background state safely
-  // final provider =
-  //     Provider.of<SelectedColorProvider>(context, listen: false);
-  // _currentBackgroundState = BackgroundState(
-  //   color: Colors.white,
-  //   gradient: null,
-  //   imagePath: null,
-  //   checkerboardVisible: true,
-  // );
-  // // 3️⃣ Initialize combined editor state
-  // _currentState = EditorState(
-  //   logo: _currentLogoState.clone(),
-  //   background: _currentBackgroundState.clone(),
-  // );
- WidgetsBinding.instance.addPostFrameCallback((_) {
+    // 2️⃣ Initialize background state safely
+    // final provider =
+    //     Provider.of<SelectedColorProvider>(context, listen: false);
+    // _currentBackgroundState = BackgroundState(
+    //   color: Colors.white,
+    //   gradient: null,
+    //   imagePath: null,
+    //   checkerboardVisible: true,
+    // );
+    // // 3️⃣ Initialize combined editor state
+    // _currentState = EditorState(
+    //   logo: _currentLogoState.clone(),
+    //   background: _currentBackgroundState.clone(),
+    // );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       final colorProvider = Provider.of<SelectedColorProvider>(
         context,
         listen: false,
@@ -391,37 +386,32 @@ void initState() {
       colorProvider.resetAllColors(defaultColors: {});
       colorProvider.clearOverrides();
     });
- 
- 
 
-  // 4️⃣ Post-frame callback for UI updates
-  // WidgetsBinding.instance.addPostFrameCallback((_) {
-  //   final colorProvider = Provider.of<SelectedColorProvider>(
-  //     context,
-  //     listen: false,
-  //   );
+    // 4️⃣ Post-frame callback for UI updates
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   final colorProvider = Provider.of<SelectedColorProvider>(
+    //     context,
+    //     listen: false,
+    //   );
 
-  //   _undoStack.clear();
-  //   _redoStack.clear();
+    //   _undoStack.clear();
+    //   _redoStack.clear();
 
-  //   // Push initial states safely
-  //   _undoStack.add(EditorState(
-  //     logo: _currentLogoState.clone(),
-  //     background: _currentBackgroundState.clone(),
-  //   ));
+    //   // Push initial states safely
+    //   _undoStack.add(EditorState(
+    //     logo: _currentLogoState.clone(),
+    //     background: _currentBackgroundState.clone(),
+    //   ));
 
-  //   colorProvider.resetAllOutlines();
-  //   colorProvider.resetAllColors(defaultColors: {
-  //     0: Colors.black,
-  //     1: Colors.black,
-  //     2: Colors.white,
-  //   });
-  //   colorProvider.clearOverrides();
-  // });
-
-
-
-}
+    //   colorProvider.resetAllOutlines();
+    //   colorProvider.resetAllColors(defaultColors: {
+    //     0: Colors.black,
+    //     1: Colors.black,
+    //     2: Colors.white,
+    //   });
+    //   colorProvider.clearOverrides();
+    // });
+  }
 
   @override
   void dispose() {
@@ -821,7 +811,7 @@ void initState() {
                 },
               ),
             ),
-            // if (selectedElement == null)
+          // if (selectedElement == null)
           Align(
             alignment: Alignment.bottomCenter,
             child: AnimatedSlide(
@@ -829,7 +819,6 @@ void initState() {
               offset: (showDropUp || showPaletteBar || showEffectPanel)
                   ? Offset.zero
                   : const Offset(0, 1),
-                  
               curve: Curves.easeInOut,
               child: Material(
                 color: Colors.transparent,
@@ -1019,7 +1008,6 @@ void initState() {
                                   ),
                                 ),
                               ),
-                           
                             ],
                           ),
                         if (showEffectPanel)
@@ -1038,8 +1026,6 @@ void initState() {
               ),
             ),
           ),
-        
-        
         ],
       ),
       bottomNavigationBar: LogoBottomNavBar(
@@ -1049,11 +1035,12 @@ void initState() {
       ),
     );
   }
-void _clearSelection() {
-  setState(() {
-    selectedElement = null; // ya null agar nullable hai
-  });
-}
+
+  void _clearSelection() {
+    setState(() {
+      selectedElement = null; // ya null agar nullable hai
+    });
+  }
 
   void updateOpacity(double value) {
     setState(() {
@@ -1384,7 +1371,6 @@ void _clearSelection() {
     );
   }
 
-  
 // --------------------old Undo/working code--------------------
   // --- State Save/Undo ---
   void _saveState() {
@@ -1393,6 +1379,15 @@ void _clearSelection() {
     if (_undoStack.length >= _maxUndoHistory) {
       _undoStack.removeAt(0);
     }
+
+    // Capture current logo color and override flag from provider before saving
+    final provider = Provider.of<SelectedColorProvider>(context, listen: false);
+    _currentLogoState = _currentLogoState.copyWith(
+      logoColor: provider.logoColor,
+      isLogoColorOverridden: provider.isLogoColorOverridden,
+      companyNameColor: provider.companyTextColor,
+      sloganColor: provider.sloganColor,
+    );
 
     _undoStack.add(_currentLogoState.clone());
 
@@ -1547,29 +1542,28 @@ void _clearSelection() {
 //   }
 // }
 
+  void _applyBackgroundFromState(BackgroundState state) {
+    final provider = Provider.of<SelectedColorProvider>(context, listen: false);
 
-void _applyBackgroundFromState(BackgroundState state) {
-  final provider = Provider.of<SelectedColorProvider>(context, listen: false);
-
-  if (state.imagePath != null) {
-    // Load image from file path
-    final file = File(state.imagePath!);
-    if (file.existsSync()) {
-      final bytes = file.readAsBytesSync();
-      ui.instantiateImageCodec(bytes).then((codec) async {
-        final frame = await codec.getNextFrame();
-        final image = frame.image;
-        provider.setBackgroundImage(image, file);
-      });
+    if (state.imagePath != null) {
+      // Load image from file path
+      final file = File(state.imagePath!);
+      if (file.existsSync()) {
+        final bytes = file.readAsBytesSync();
+        ui.instantiateImageCodec(bytes).then((codec) async {
+          final frame = await codec.getNextFrame();
+          final image = frame.image;
+          provider.setBackgroundImage(image, file);
+        });
+      }
+    } else if (state.gradient != null) {
+      provider.setGradient(state.gradient!);
+    } else if (state.color != null) {
+      provider.setColor(state.color!);
     }
-  } else if (state.gradient != null) {
-    provider.setGradient(state.gradient!);
-  } else if (state.color != null) {
-    provider.setColor(state.color!);
-  }
 
-  provider.setCheckerboardVisibility(state.checkerboardVisible);
-}
+    provider.setCheckerboardVisibility(state.checkerboardVisible);
+  }
 
   void _handleBottomNavTap(int index) async {
     if (selectedIndex == index) {

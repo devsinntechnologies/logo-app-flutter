@@ -114,6 +114,7 @@ class _LogoCanvasState extends State<LogoCanvas> {
     final providers = Provider.of<SelectedColorProvider>(context);
     final shapeColor =
         Provider.of<SelectedColorProvider>(context).selectedColor;
+    final logoColor = provider.logoColor;
 
     final String selectedShape = (widget.selectedShapeName.isEmpty)
         ? "Square"
@@ -608,10 +609,8 @@ final Color? shapeColor = provider.shapeColor;
                 widget.logoState.logoPosition == null)
             ? _centerAlign(canvasSize, shapeSize)
             : widget.logoState.logoPosition;
-        // final elementColor = provider.getColorForElement(
-        //   id,
-        //   fallback: Colors.black,
-        // );
+        // Only apply color if it has been manually overridden
+        final Color? appliedLogoColor = provider.isLogoColorOverridden ? provider.logoColor : null;
         return widget.logoState.isLogoVisible
             ? wrap(
                 StrokedSvg(
@@ -620,8 +619,7 @@ final Color? shapeColor = provider.shapeColor;
                   height: logoSize,
                   strokeColor: outlineColor,
                   strokeWidth: outlineWidth,
-
-                  // fillColor: elementColor,
+                  fillColor: appliedLogoColor,
                 ),
                 centerPosition: centerPosition,
                 rotation: widget.logoState.logoRotation,
