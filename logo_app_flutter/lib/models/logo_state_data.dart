@@ -288,6 +288,12 @@ class LogoStateData {
   final TextAlign companyNameTextAlign; // ← add this
   final TextAlign sloganTextAlign;
 
+  // Background state fields
+  final String? selectedShapeName;
+  final Color? backgroundColor;
+  final Gradient? backgroundGradient;
+  final String? backgroundImagePath;
+
   LogoStateData({
     this.elementColors = const {},
 
@@ -341,6 +347,10 @@ class LogoStateData {
     required this.isSlogan2Visible,
     this.companyNameTextAlign = TextAlign.center,
     this.sloganTextAlign = TextAlign.center,
+    this.selectedShapeName,
+    this.backgroundColor,
+    this.backgroundGradient,
+    this.backgroundImagePath,
   }) : customTexts = customTexts ?? [],
        customImages = customImages ?? [],
        customSVGs = customSVGs ?? [],
@@ -420,6 +430,10 @@ class LogoStateData {
     List<CustomSvgElement>? customSVGs,
     Set<int>? lockedElements,
     List<int>? elementOrder,
+    String? selectedShapeName,
+    Color? backgroundColor,
+    Gradient? backgroundGradient,
+    String? backgroundImagePath,
   }) {
     return LogoStateData(
       elementColors: elementColors ?? this.elementColors,
@@ -481,6 +495,10 @@ class LogoStateData {
 
       companyNameTextAlign: companyNameTextAlign ?? this.companyNameTextAlign,
       sloganTextAlign: sloganTextAlign ?? this.sloganTextAlign,
+      selectedShapeName: selectedShapeName ?? this.selectedShapeName,
+      backgroundColor: backgroundColor ?? this.backgroundColor,
+      backgroundGradient: backgroundGradient ?? this.backgroundGradient,
+      backgroundImagePath: backgroundImagePath ?? this.backgroundImagePath,
     );
   }
 
@@ -570,6 +588,10 @@ class LogoStateData {
 
       companyNameTextAlign: companyNameTextAlign,
       sloganTextAlign: sloganTextAlign,
+      selectedShapeName: selectedShapeName,
+      backgroundColor: backgroundColor != null ? Color(backgroundColor!.value) : null,
+      backgroundGradient: backgroundGradient,
+      backgroundImagePath: backgroundImagePath,
     );
   }
 }

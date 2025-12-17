@@ -920,6 +920,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
                                               _currentLogoState.elementOrder,
                                             );
                                           });
+                                          _saveState(); // Save state for undo/redo
                                         },
                                         child: Container(
                                           height: 35,
@@ -1380,13 +1381,39 @@ class _DownloadLogoState extends State<DownloadLogo> {
       _undoStack.removeAt(0);
     }
 
-    // Capture current logo color and override flag from provider before saving
+    // Capture current provider state into _currentLogoState before saving
     final provider = Provider.of<SelectedColorProvider>(context, listen: false);
+    
+    // Sync custom text colors from provider
+    final updatedCustomTexts = _currentLogoState.customTexts.asMap().entries.map((entry) {
+      final index = entry.key;
+      final text = entry.value;
+      final elementId = 100 + index;
+      final colorFromProvider = provider.getColorForElement(elementId, fallback: text.color);
+      return text.copyWith(color: colorFromProvider);
+    }).toList();
+    
+    // Sync custom SVG colors from provider
+    final updatedCustomSVGs = _currentLogoState.customSVGs.asMap().entries.map((entry) {
+      final index = entry.key;
+      final svg = entry.value;
+      final elementId = 300 + index;
+      final colorFromProvider = provider.getColorForElement(elementId, fallback: svg.color ?? Colors.black);
+      return svg.copyWith(color: colorFromProvider);
+    }).toList();
+    
+    // Update _currentLogoState with all current provider values
     _currentLogoState = _currentLogoState.copyWith(
       logoColor: provider.logoColor,
       isLogoColorOverridden: provider.isLogoColorOverridden,
       companyNameColor: provider.companyTextColor,
       sloganColor: provider.sloganColor,
+      selectedShapeName: selectedShapeName,
+      backgroundColor: provider.selectedColor,
+      backgroundGradient: provider.selectedGradient,
+      backgroundImagePath: provider.imageFile?.path,
+      customTexts: updatedCustomTexts,
+      customSVGs: updatedCustomSVGs,
     );
 
     _undoStack.add(_currentLogoState.clone());
@@ -1403,6 +1430,9 @@ class _DownloadLogoState extends State<DownloadLogo> {
       _currentLogoState = _undoStack.removeLast();
       Provider.of<SelectedColorProvider>(context, listen: false)
           .applyLogoState(_currentLogoState);
+
+      // Restore selectedShapeName
+      selectedShapeName = _currentLogoState.selectedShapeName ?? "";
 
       setState(() {});
 
@@ -1446,6 +1476,9 @@ class _DownloadLogoState extends State<DownloadLogo> {
       _currentLogoState = _redoStack.removeLast();
       Provider.of<SelectedColorProvider>(context, listen: false)
           .applyLogoState(_currentLogoState);
+
+      // Restore selectedShapeName
+      selectedShapeName = _currentLogoState.selectedShapeName ?? "";
 
       setState(() {});
 

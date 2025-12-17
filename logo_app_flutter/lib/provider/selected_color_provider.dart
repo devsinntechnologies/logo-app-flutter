@@ -581,6 +581,44 @@ class SelectedColorProvider extends ChangeNotifier {
     _rotationYMap.addAll(state.rotationYMap);
     _rotationZMap.addAll(state.rotationZMap);
 
+    // 8) restore background state
+    // Reset all background states first
+    _selectedColor = state.backgroundColor;
+    _selectedGradient = state.backgroundGradient;
+    
+    // Handle image restoration
+    if (state.backgroundImagePath != null && state.backgroundImagePath!.isNotEmpty) {
+      _imageFile = File(state.backgroundImagePath!);
+      _isColorManuallySelected = true;
+      // Load image asynchronously but don't wait
+      _loadImageFromPath(state.backgroundImagePath!);
+    } else {
+      _backgroundImage = null;
+      canvasImage = null;
+      _imageFile = null;
+      if (state.backgroundColor != null || state.backgroundGradient != null) {
+        _isColorManuallySelected = true;
+      } else {
+        _isColorManuallySelected = false;
+      }
+    }
+
     notifyListeners();
+  }
+
+  Future<void> _loadImageFromPath(String path) async {
+    try {
+      final file = File(path);
+      if (await file.exists()) {
+        final bytes = await file.readAsBytes();
+        final codec = await ui.instantiateImageCodec(bytes);
+        final frame = await codec.getNextFrame();
+        _backgroundImage = frame.image;
+        canvasImage = frame.image;
+        notifyListeners();
+      }
+    } catch (e) {
+      print('Error loading image from path: $e');
+    }
   }
 }

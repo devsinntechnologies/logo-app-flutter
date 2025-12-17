@@ -292,6 +292,9 @@ class _DropUpPanelState extends State<DropUpPanel> {
         listen: false,
       );
       provider.setBackgroundImage(image, file);
+      
+      // Save state for undo/redo
+      widget.onSaveState?.call();
     }
   }
 
@@ -358,7 +361,7 @@ class _DropUpPanelState extends State<DropUpPanel> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => ColorScreen()),
-                      );
+                      ).then((_) => widget.onSaveState?.call());
                     },
                   ),
                   _TopOption(
@@ -369,7 +372,7 @@ class _DropUpPanelState extends State<DropUpPanel> {
                         MaterialPageRoute(
                           builder: (context) => GradientPickerScreen(),
                         ),
-                      );
+                      ).then((_) => widget.onSaveState?.call());
                     },
                   ),
                   _TopOption(
@@ -380,7 +383,7 @@ class _DropUpPanelState extends State<DropUpPanel> {
                         MaterialPageRoute(
                           builder: (context) => SelectBgImages(),
                         ),
-                      );
+                      ).then((_) => widget.onSaveState?.call());
                     },
                   ),
                   _TopOption(
@@ -391,7 +394,7 @@ class _DropUpPanelState extends State<DropUpPanel> {
                         MaterialPageRoute(
                           builder: (context) => SelectTextureImages(),
                         ),
-                      );
+                      ).then((_) => widget.onSaveState?.call());
                     },
                   ),
                   _TopOption(
@@ -451,8 +454,6 @@ class _DropUpPanelState extends State<DropUpPanel> {
                 height: 50,
                 child: ShapeSelectorWidget(
                   onShapeSelected: (shapeName) {
-                    // widget.onSaveState?.call();
-
                     if (shapeName == "Transparent") {
                       widget.onToggleCheckerboard(true);
                     } else if (shapeName == "TransparentOff") {
@@ -461,6 +462,8 @@ class _DropUpPanelState extends State<DropUpPanel> {
                       widget.onToggleCheckerboard(true);
                       widget.onShapeSelected(shapeName);
                     }
+                    
+                    widget.onSaveState?.call(); // Save AFTER shape change
                   },
                 ),
               ),
