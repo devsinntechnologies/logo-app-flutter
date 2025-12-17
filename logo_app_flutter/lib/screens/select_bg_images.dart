@@ -57,6 +57,7 @@ class _SelectBgImagesState extends State<SelectBgImages> {
               provider.setBackgroundImage(
                 uiImage,
                 null,
+                assetPath: images[index],
               ); 
               Navigator.pop(context);
             },

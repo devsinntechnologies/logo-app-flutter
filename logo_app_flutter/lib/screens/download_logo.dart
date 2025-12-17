@@ -1345,7 +1345,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
                         final uiImage = await loadUiImageFromAsset(imagePath);
 
-                        provider.setImage(uiImage);
+                        provider.setImage(uiImage, assetPath: imagePath);
                       },
                       child: Container(
                         width: 50,
@@ -1403,6 +1403,9 @@ class _DownloadLogoState extends State<DownloadLogo> {
     }).toList();
     
     // Update _currentLogoState with all current provider values
+    // Capture asset path OR file path (whichever is set)
+    final imagePath = provider.assetImagePath ?? provider.imageFile?.path;
+    
     _currentLogoState = _currentLogoState.copyWith(
       logoColor: provider.logoColor,
       isLogoColorOverridden: provider.isLogoColorOverridden,
@@ -1411,7 +1414,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
       selectedShapeName: selectedShapeName,
       backgroundColor: provider.selectedColor,
       backgroundGradient: provider.selectedGradient,
-      backgroundImagePath: provider.imageFile?.path,
+      backgroundImagePath: imagePath,
       customTexts: updatedCustomTexts,
       customSVGs: updatedCustomSVGs,
     );
@@ -1426,10 +1429,44 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
   void _undo() {
     if (_undoStack.isNotEmpty) {
+      // Capture current provider state before saving to redo stack
+      final provider = Provider.of<SelectedColorProvider>(context, listen: false);
+      
+      final updatedCustomTexts = _currentLogoState.customTexts.asMap().entries.map((entry) {
+        final index = entry.key;
+        final text = entry.value;
+        final elementId = 100 + index;
+        final colorFromProvider = provider.getColorForElement(elementId, fallback: text.color);
+        return text.copyWith(color: colorFromProvider);
+      }).toList();
+      
+      final updatedCustomSVGs = _currentLogoState.customSVGs.asMap().entries.map((entry) {
+        final index = entry.key;
+        final svg = entry.value;
+        final elementId = 300 + index;
+        final colorFromProvider = provider.getColorForElement(elementId, fallback: svg.color ?? Colors.black);
+        return svg.copyWith(color: colorFromProvider);
+      }).toList();
+      
+      // Capture asset path OR file path (whichever is set)
+      final imagePath = provider.assetImagePath ?? provider.imageFile?.path;
+      
+      _currentLogoState = _currentLogoState.copyWith(
+        logoColor: provider.logoColor,
+        isLogoColorOverridden: provider.isLogoColorOverridden,
+        companyNameColor: provider.companyTextColor,
+        sloganColor: provider.sloganColor,
+        selectedShapeName: selectedShapeName,
+        backgroundColor: provider.selectedColor,
+        backgroundGradient: provider.selectedGradient,
+        backgroundImagePath: imagePath,
+        customTexts: updatedCustomTexts,
+        customSVGs: updatedCustomSVGs,
+      );
+      
       _redoStack.add(_currentLogoState.clone());
       _currentLogoState = _undoStack.removeLast();
-      Provider.of<SelectedColorProvider>(context, listen: false)
-          .applyLogoState(_currentLogoState);
+      provider.applyLogoState(_currentLogoState);
 
       // Restore selectedShapeName
       selectedShapeName = _currentLogoState.selectedShapeName ?? "";
@@ -1472,10 +1509,44 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
   void _redo() {
     if (_redoStack.isNotEmpty) {
+      // Capture current provider state before saving to undo stack
+      final provider = Provider.of<SelectedColorProvider>(context, listen: false);
+      
+      final updatedCustomTexts = _currentLogoState.customTexts.asMap().entries.map((entry) {
+        final index = entry.key;
+        final text = entry.value;
+        final elementId = 100 + index;
+        final colorFromProvider = provider.getColorForElement(elementId, fallback: text.color);
+        return text.copyWith(color: colorFromProvider);
+      }).toList();
+      
+      final updatedCustomSVGs = _currentLogoState.customSVGs.asMap().entries.map((entry) {
+        final index = entry.key;
+        final svg = entry.value;
+        final elementId = 300 + index;
+        final colorFromProvider = provider.getColorForElement(elementId, fallback: svg.color ?? Colors.black);
+        return svg.copyWith(color: colorFromProvider);
+      }).toList();
+      
+      // Capture asset path OR file path (whichever is set)
+      final imagePath = provider.assetImagePath ?? provider.imageFile?.path;
+      
+      _currentLogoState = _currentLogoState.copyWith(
+        logoColor: provider.logoColor,
+        isLogoColorOverridden: provider.isLogoColorOverridden,
+        companyNameColor: provider.companyTextColor,
+        sloganColor: provider.sloganColor,
+        selectedShapeName: selectedShapeName,
+        backgroundColor: provider.selectedColor,
+        backgroundGradient: provider.selectedGradient,
+        backgroundImagePath: imagePath,
+        customTexts: updatedCustomTexts,
+        customSVGs: updatedCustomSVGs,
+      );
+      
       _undoStack.add(_currentLogoState.clone());
       _currentLogoState = _redoStack.removeLast();
-      Provider.of<SelectedColorProvider>(context, listen: false)
-          .applyLogoState(_currentLogoState);
+      provider.applyLogoState(_currentLogoState);
 
       // Restore selectedShapeName
       selectedShapeName = _currentLogoState.selectedShapeName ?? "";

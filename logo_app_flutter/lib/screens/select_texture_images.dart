@@ -57,7 +57,8 @@ class SelectTextureImagesState extends State<SelectTextureImages> {
               provider.setBackgroundImage(
                 uiImage,
                 null,
-              ); // You can pass `null` for File since it's an asset
+                assetPath: images[index],
+              ); // Pass asset path for undo/redo
               Navigator.pop(context);
             },
 

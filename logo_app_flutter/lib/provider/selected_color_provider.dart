@@ -14,6 +14,7 @@ class SelectedColorProvider extends ChangeNotifier {
   int _selectedIndex = 0;
   int get selectedIndex => _selectedIndex;
   File? _imageFile;
+  String? _assetImagePath; // Track asset image paths for undo/redo
   Color _companyTextColor = Colors.black;
   Color _sloganColor = Colors.black;
   Color? _shapeColor;
@@ -101,6 +102,7 @@ class SelectedColorProvider extends ChangeNotifier {
   Gradient? get selectedGradient => _selectedGradient;
   ui.Image? get backgroundImage => _backgroundImage;
   File? get imageFile => _imageFile;
+  String? get assetImagePath => _assetImagePath;
   int get rotateIndex => _rotateIndex;
 
   int? _selectedElementId;
@@ -149,8 +151,14 @@ class SelectedColorProvider extends ChangeNotifier {
 
   ui.Image? canvasImage;
 
-  void setImage(ui.Image image) {
+  void setImage(ui.Image image, {String? assetPath}) {
     canvasImage = image;
+    _backgroundImage = image;
+    _assetImagePath = assetPath; // Store asset path if provided
+    _selectedColor = null;
+    _selectedGradient = null;
+    _imageFile = null;
+    _isColorManuallySelected = true;
     notifyListeners();
   }
 
@@ -206,16 +214,16 @@ class SelectedColorProvider extends ChangeNotifier {
   }
 
 
-  void setBackgroundImage(ui.Image image, File? file) {
+  void setBackgroundImage(ui.Image image, File? file, {String? assetPath}) {
     canvasImage = image;
     _backgroundImage = image;
     _selectedGradient = null;
     _selectedColor = null;
     _imageFile = file;
+    _assetImagePath = assetPath; // Store asset path if provided
     _isColorManuallySelected = true;
     notifyListeners();
   }
-
 
   void setColorWithBrightness(Color baseColor, double brightnessFactor) {
     brightnessFactor = brightnessFactor.clamp(0.0, 1.0);
@@ -582,20 +590,34 @@ class SelectedColorProvider extends ChangeNotifier {
     _rotationZMap.addAll(state.rotationZMap);
 
     // 8) restore background state
-    // Reset all background states first
-    _selectedColor = state.backgroundColor;
-    _selectedGradient = state.backgroundGradient;
-    
-    // Handle image restoration
+    // Handle image restoration first
     if (state.backgroundImagePath != null && state.backgroundImagePath!.isNotEmpty) {
-      _imageFile = File(state.backgroundImagePath!);
+      // Clear other background states when restoring image
+      _selectedColor = null;
+      _selectedGradient = null;
       _isColorManuallySelected = true;
-      // Load image asynchronously but don't wait
-      _loadImageFromPath(state.backgroundImagePath!);
+      
+      // Check if it's an asset path or file path
+      if (state.backgroundImagePath!.startsWith('assets/')) {
+        // It's an asset path - load from assets
+        _assetImagePath = state.backgroundImagePath;
+        _imageFile = null;
+        _loadImageFromAsset(state.backgroundImagePath!);
+      } else {
+        // It's a file path - load from file system
+        _imageFile = File(state.backgroundImagePath!);
+        _assetImagePath = null;
+        _loadImageFromPath(state.backgroundImagePath!);
+      }
     } else {
+      // Clear image states when restoring color/gradient
       _backgroundImage = null;
       canvasImage = null;
       _imageFile = null;
+      _assetImagePath = null;
+      // Set color or gradient if present
+      _selectedColor = state.backgroundColor;
+      _selectedGradient = state.backgroundGradient;
       if (state.backgroundColor != null || state.backgroundGradient != null) {
         _isColorManuallySelected = true;
       } else {
@@ -619,6 +641,19 @@ class SelectedColorProvider extends ChangeNotifier {
       }
     } catch (e) {
       print('Error loading image from path: $e');
+    }
+  }
+
+  Future<void> _loadImageFromAsset(String assetPath) async {
+    try {
+      final ByteData data = await rootBundle.load(assetPath);
+      final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
+      final frame = await codec.getNextFrame();
+      _backgroundImage = frame.image;
+      canvasImage = frame.image;
+      notifyListeners();
+    } catch (e) {
+      print('Error loading image from asset: $e');
     }
   }
 }
