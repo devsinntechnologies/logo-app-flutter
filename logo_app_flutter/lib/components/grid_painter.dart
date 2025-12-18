@@ -28,6 +28,9 @@ class GridPainter extends CustomPainter {
     // **********************************************
     // 👇 STEP 2 — Draw background image on canvas
     // **********************************************
+
+      canvas.clipRect(  Rect.fromLTWH(0, 0, size.width, size.height));
+
     if (image != null) {
       // Draw image covering full canvas
       canvas.drawImageRect(

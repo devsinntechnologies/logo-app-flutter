@@ -463,49 +463,52 @@ class _DownloadLogoState extends State<DownloadLogo> {
                     alignment: Alignment.center,
                     children: [
                       Center(
-                        child: RepaintBoundary(
-                          key: _canvasKey,
-                          child: Center(
-                            child: LogoCanvas(
-                              selectedShapeName: selectedShapeName,
-                              isExportingNotifier: isExportingNotifier,
-                              logoState: _currentLogoState,
-                              svgLogo: widget.svgLogo,
-                              companyName: widget.companyName,
-                              sloganName: widget.sloganName,
-                              showGrid: _showGrid,
-                              isEditingMode: true,
-                              selectedElementId: selectedElement,
-                              highlightedHorizontalGridLineIndex:
-                                  _highlightedHorizontalGridLineIndex,
-                              highlightedVerticalGridLineIndex:
-                                  _highlightedVerticalGridLineIndex,
-                              isLayersRibbonExtended: _isLayersPanelVisible,
-                              onToggleGrid: () =>
-                                  setState(() => _showGrid = !_showGrid),
-                              onToggleLayersRibbon: () => setState(
-                                () => _isLayersPanelVisible =
-                                    !_isLayersPanelVisible,
+                        child: ClipRect(
+                          child: RepaintBoundary(
+                            key: _canvasKey,
+                            child: SizedBox(
+                             width:  MediaQuery.of(context).size.width,
+                              child: LogoCanvas(
+                                selectedShapeName: selectedShapeName,
+                                isExportingNotifier: isExportingNotifier,
+                                logoState: _currentLogoState,
+                                svgLogo: widget.svgLogo,
+                                companyName: widget.companyName,
+                                sloganName: widget.sloganName,
+                                showGrid: _showGrid,
+                                isEditingMode: true,
+                                selectedElementId: selectedElement,
+                                highlightedHorizontalGridLineIndex:
+                                    _highlightedHorizontalGridLineIndex,
+                                highlightedVerticalGridLineIndex:
+                                    _highlightedVerticalGridLineIndex,
+                                isLayersRibbonExtended: _isLayersPanelVisible,
+                                onToggleGrid: () =>
+                                    setState(() => _showGrid = !_showGrid),
+                                onToggleLayersRibbon: () => setState(
+                                  () => _isLayersPanelVisible =
+                                      !_isLayersPanelVisible,
+                                ),
+                                onElementPanStart: _onPanStart,
+                                onElementPanUpdate: _updateElementPosition,
+                                onElementPanEnd: _onPanEnd,
+                                onElementTap: _elementSelect,
+                                onElementDelete: _deleteElement,
+                                onElementSplit: _splitElement,
+                                onElementRotateTap: _rotateElementByTap,
+                                onElementRotatePanStart: _onRotatePanStart,
+                                onElementRotatePanUpdate: _onRotatePanUpdate,
+                                onElementRotatePanEnd: _onPanEnd,
+                                onElementResizeTap: _resizeElementByTap,
+                                onElementResizePanStart: _onResizePanStart,
+                                onElementResizePanUpdate: _onResizePanUpdate,
+                                onElementResizePanEnd: _onPanEnd,
+                                isCheckerboardActive: true,
+                                checkerboardOpacity: checkerboardOpacity,
+                                isCheckerboardVisible: isCheckerboardVisible,
+                                lockedElements: _currentLogoState.lockedElements,
+                                elementOrder: _currentLogoState.elementOrder,
                               ),
-                              onElementPanStart: _onPanStart,
-                              onElementPanUpdate: _updateElementPosition,
-                              onElementPanEnd: _onPanEnd,
-                              onElementTap: _elementSelect,
-                              onElementDelete: _deleteElement,
-                              onElementSplit: _splitElement,
-                              onElementRotateTap: _rotateElementByTap,
-                              onElementRotatePanStart: _onRotatePanStart,
-                              onElementRotatePanUpdate: _onRotatePanUpdate,
-                              onElementRotatePanEnd: _onPanEnd,
-                              onElementResizeTap: _resizeElementByTap,
-                              onElementResizePanStart: _onResizePanStart,
-                              onElementResizePanUpdate: _onResizePanUpdate,
-                              onElementResizePanEnd: _onPanEnd,
-                              isCheckerboardActive: true,
-                              checkerboardOpacity: checkerboardOpacity,
-                              isCheckerboardVisible: isCheckerboardVisible,
-                              lockedElements: _currentLogoState.lockedElements,
-                              elementOrder: _currentLogoState.elementOrder,
                             ),
                           ),
                         ),

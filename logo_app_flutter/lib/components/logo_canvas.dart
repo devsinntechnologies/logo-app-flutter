@@ -106,9 +106,8 @@ class _LogoCanvasState extends State<LogoCanvas> {
   }
 
   @override
-
   @override
-   Widget build(BuildContext context) {
+  Widget build(BuildContext context) {
     final provider = Provider.of<SelectedColorProvider>(context);
     final gradient = provider.selectedGradient;
     final providers = Provider.of<SelectedColorProvider>(context);
@@ -129,17 +128,26 @@ class _LogoCanvasState extends State<LogoCanvas> {
             final bgImage = providers.canvasImage ?? providers.backgroundImage;
             final Size canvasSize = constraints.biggest;
             return Stack(
+              // clipBehavior: Clip.hardEdge,
+                clipBehavior: Clip.none,
               children: [
                 if (widget.showGrid)
-                  CustomPaint(
-                    painter: GridPainter(
-                      gridColor: Colors.blue,
-                      highlightedHorizontalLine:
-                          widget.highlightedHorizontalGridLineIndex,
-                      highlightedVerticalLine:
-                          widget.highlightedVerticalGridLineIndex,
+                  ClipRect(
+                    child: RepaintBoundary(
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        child: CustomPaint(
+                          painter: GridPainter(
+                            gridColor: Colors.blue,
+                            highlightedHorizontalLine:
+                                widget.highlightedHorizontalGridLineIndex,
+                            highlightedVerticalLine:
+                                widget.highlightedVerticalGridLineIndex,
+                          ),
+                          size: Size.infinite,
+                        ),
+                      ),
                     ),
-                    size: Size.infinite,
                   ),
 
                 if (widget.isCheckerboardVisible)
@@ -250,6 +258,7 @@ class _LogoCanvasState extends State<LogoCanvas> {
                 // NOTE: Removed the big Transform around the whole stack.
                 // Build elements individually — rotation will be applied per-selected-element
                 Stack(
+                    clipBehavior: Clip.none,
                   children: [
                     ...(widget.elementOrder.isNotEmpty
                             ? widget.elementOrder
@@ -400,8 +409,6 @@ class _LogoCanvasState extends State<LogoCanvas> {
 //   );
 // }
 
- 
-
   Widget? _buildElementById(
     int id,
     Size canvasSize, {
@@ -412,8 +419,7 @@ class _LogoCanvasState extends State<LogoCanvas> {
     final outlineColor = provider.getOutlineColor(id);
     final outlineWidth = provider.getOutlineWidth(id);
     // const Color highlightColor = Colors.red;
-final Color? shapeColor = provider.shapeColor;
-
+    final Color? shapeColor = provider.shapeColor;
 
     final Color companyColor = provider.companyTextColor;
     final Color customTextColor = provider.customTextColor;
@@ -610,7 +616,8 @@ final Color? shapeColor = provider.shapeColor;
             ? _centerAlign(canvasSize, shapeSize)
             : widget.logoState.logoPosition;
         // Only apply color if it has been manually overridden
-        final Color? appliedLogoColor = provider.isLogoColorOverridden ? provider.logoColor : null;
+        final Color? appliedLogoColor =
+            provider.isLogoColorOverridden ? provider.logoColor : null;
         return widget.logoState.isLogoVisible
             ? wrap(
                 StrokedSvg(

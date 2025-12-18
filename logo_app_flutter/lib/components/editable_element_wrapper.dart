@@ -68,10 +68,19 @@ class EditableElementWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool canInteract =
         !isLocked && isEditingMode && isSelected && !isExporting;
+    final double clampedX = position.dx.clamp(
+      0.0,
+      canvasSize.width,
+    );
+
+    final double clampedY = position.dy.clamp(
+      0.0,
+      canvasSize.height,
+    );
 
     return Positioned(
-      left: position.dx,
-      top: position.dy,
+      left: clampedX,
+      top: clampedY,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
@@ -96,12 +105,13 @@ class EditableElementWrapper extends StatelessWidget {
                         ),
                         borderRadius: BorderRadius.circular(6),
                       )
-                    : null,
-                padding: const EdgeInsets.all(2),
+                    :  
+                null,
+                // padding: const EdgeInsets.all(2),
                 child: Transform.rotate(
                   angle: rotation * pi / 180,
                   child: Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(16),
                     child: child,
                   ),
                 ),
