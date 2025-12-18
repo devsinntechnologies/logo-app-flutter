@@ -1697,7 +1697,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
       });
 
       if (result != null && result.isNotEmpty) {
-        _saveState();
         setState(() {
           final newTextElement = CustomTextElement(
             text: result,
@@ -1717,6 +1716,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
             elementOrder: updatedElementOrder,
           );
         });
+        _saveState(); // Save state AFTER text is added
         // _currentState = EditorState(
         //   logo: _currentLogoState.clone(),
         //   background: _currentState.background,
@@ -1853,6 +1853,10 @@ class _DownloadLogoState extends State<DownloadLogo> {
   void _elementSelect(int id) {
     setState(() {
       selectedElement = id;
+      // Close dropup/effects/palette panels when element is selected
+      showDropUp = false;
+      showEffectPanel = false;
+      showPaletteBar = false;
       //     _currentLogoState= _currentLogoState.copyWith(
       //   rotation3DX: 0,
       //   rotation3DY: 0,
