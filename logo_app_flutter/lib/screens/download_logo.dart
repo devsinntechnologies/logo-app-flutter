@@ -670,7 +670,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
                                     backgroundColor: Colors.white,
                                     child: Icon(
                                       Icons.replay,
-                                      color: _undoStack.isNotEmpty
+                                      color: _undoStack.length > 1
                                           ? Colors.black
                                           : Colors.grey,
                                     ),
@@ -864,6 +864,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
                                 selectedShapeName = shapeName;
                               });
                             },
+                            onSaveState: _saveState, // Pass the save state callback
                           ),
                         if (showPaletteBar)
                           Column(
@@ -1334,6 +1335,9 @@ class _DownloadLogoState extends State<DownloadLogo> {
                             context,
                             listen: false,
                           ).resetImage(); // reset image
+                          
+                          // Save state for undo/redo after resetting effect
+                          _saveState();
                         },
                         child: Container(
                           width: 40,
@@ -1367,6 +1371,9 @@ class _DownloadLogoState extends State<DownloadLogo> {
                         final uiImage = await loadUiImageFromAsset(imagePath);
 
                         provider.setImage(uiImage, assetPath: imagePath);
+                        
+                        // Save state for undo/redo after applying effect
+                        _saveState();
                       },
                       child: Container(
                         width: 50,
@@ -1430,6 +1437,11 @@ class _DownloadLogoState extends State<DownloadLogo> {
     // Capture asset path OR file path (whichever is set)
     final imagePath = provider.assetImagePath ?? provider.imageFile?.path;
     
+    // ✅ Explicitly preserve rotation maps to ensure they're not lost
+    final currentRotationX = Map<int, double>.from(_currentLogoState.rotationXMap);
+    final currentRotationY = Map<int, double>.from(_currentLogoState.rotationYMap);
+    final currentRotationZ = Map<int, double>.from(_currentLogoState.rotationZMap);
+    
     _currentLogoState = _currentLogoState.copyWith(
       logoColor: provider.logoColor,
       isLogoColorOverridden: provider.isLogoColorOverridden,
@@ -1441,18 +1453,24 @@ class _DownloadLogoState extends State<DownloadLogo> {
       backgroundImagePath: imagePath,
       customTexts: updatedCustomTexts,
       customSVGs: updatedCustomSVGs,
+      rotationXMap: currentRotationX,
+      rotationYMap: currentRotationY,
+      rotationZMap: currentRotationZ,
     );
 
     _undoStack.add(_currentLogoState.clone());
 
-    if (mounted) setState(() {});
+    // Force rebuild to update undo/redo button states
+    setState(() {
+      // Trigger rebuild to update button states based on stack lengths
+    });
   }
 
   DateTime? _lastEmptyUndoTime;
   DateTime? _lastSuccessUndoTime;
 
   void _undo() {
-    if (_undoStack.isNotEmpty) {
+    if (_undoStack.length > 1) {  // Need at least 2 items (current + previous)
       // Capture current provider state before saving to redo stack
       final provider = Provider.of<SelectedColorProvider>(context, listen: false);
       
@@ -1475,6 +1493,11 @@ class _DownloadLogoState extends State<DownloadLogo> {
       // Capture asset path OR file path (whichever is set)
       final imagePath = provider.assetImagePath ?? provider.imageFile?.path;
       
+      // ✅ Explicitly preserve rotation maps
+      final currentRotationX = Map<int, double>.from(_currentLogoState.rotationXMap);
+      final currentRotationY = Map<int, double>.from(_currentLogoState.rotationYMap);
+      final currentRotationZ = Map<int, double>.from(_currentLogoState.rotationZMap);
+      
       _currentLogoState = _currentLogoState.copyWith(
         logoColor: provider.logoColor,
         isLogoColorOverridden: provider.isLogoColorOverridden,
@@ -1486,15 +1509,28 @@ class _DownloadLogoState extends State<DownloadLogo> {
         backgroundImagePath: imagePath,
         customTexts: updatedCustomTexts,
         customSVGs: updatedCustomSVGs,
+        rotationXMap: currentRotationX,
+        rotationYMap: currentRotationY,
+        rotationZMap: currentRotationZ,
       );
       
       _redoStack.add(_currentLogoState.clone());
-      _currentLogoState = _undoStack.removeLast();
-      provider.applyLogoState(_currentLogoState);
+      
+      // Remove current state from undo stack (last item is current)
+      if (_undoStack.isNotEmpty) {
+        _undoStack.removeLast();
+      }
+      
+      // Now get the previous state
+      if (_undoStack.isNotEmpty) {
+        _currentLogoState = _undoStack.last.clone();
+        provider.applyLogoState(_currentLogoState);
 
-      // Restore selectedShapeName
-      selectedShapeName = _currentLogoState.selectedShapeName ?? "";
-
+        // Restore selectedShapeName
+        selectedShapeName = _currentLogoState.selectedShapeName ?? "";
+      }
+      
+      // Always call setState to update button states
       setState(() {});
 
       final now = DateTime.now();
@@ -1555,6 +1591,11 @@ class _DownloadLogoState extends State<DownloadLogo> {
       // Capture asset path OR file path (whichever is set)
       final imagePath = provider.assetImagePath ?? provider.imageFile?.path;
       
+      // ✅ Explicitly preserve rotation maps
+      final currentRotationX = Map<int, double>.from(_currentLogoState.rotationXMap);
+      final currentRotationY = Map<int, double>.from(_currentLogoState.rotationYMap);
+      final currentRotationZ = Map<int, double>.from(_currentLogoState.rotationZMap);
+      
       _currentLogoState = _currentLogoState.copyWith(
         logoColor: provider.logoColor,
         isLogoColorOverridden: provider.isLogoColorOverridden,
@@ -1566,15 +1607,26 @@ class _DownloadLogoState extends State<DownloadLogo> {
         backgroundImagePath: imagePath,
         customTexts: updatedCustomTexts,
         customSVGs: updatedCustomSVGs,
+        rotationXMap: currentRotationX,
+        rotationYMap: currentRotationY,
+        rotationZMap: currentRotationZ,
       );
       
+      // Add current to undo
       _undoStack.add(_currentLogoState.clone());
+      
+      // Get the redo state
       _currentLogoState = _redoStack.removeLast();
+      
+      // Add it to undo as well (so undo stack always contains current)
+      _undoStack.add(_currentLogoState.clone());
+      
       provider.applyLogoState(_currentLogoState);
 
       // Restore selectedShapeName
       selectedShapeName = _currentLogoState.selectedShapeName ?? "";
-
+      
+      // Always call setState to update button states
       setState(() {});
 
       final now = DateTime.now();

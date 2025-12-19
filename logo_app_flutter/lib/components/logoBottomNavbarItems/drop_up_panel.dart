@@ -357,44 +357,52 @@ class _DropUpPanelState extends State<DropUpPanel> {
                 children: [
                   _TopOption(
                     label: options[0],
-                    onTap: () {
-                      Navigator.push(
+                    onTap: () async {
+                      await Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => ColorScreen()),
-                      ).then((_) => widget.onSaveState?.call());
+                      );
+                      // Save state after returning and trigger UI update
+                      widget.onSaveState?.call();
                     },
                   ),
                   _TopOption(
                     label: options[1],
-                    onTap: () {
-                      Navigator.push(
+                    onTap: () async {
+                      await Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => GradientPickerScreen(),
                         ),
-                      ).then((_) => widget.onSaveState?.call());
+                      );
+                      // Save state after returning and trigger UI update
+                      widget.onSaveState?.call();
                     },
                   ),
                   _TopOption(
                     label: options[2],
-                    onTap: () {
-                      Navigator.push(
+                    onTap: () async {
+                      await Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => SelectBgImages(),
                         ),
-                      ).then((_) => widget.onSaveState?.call());
+                      );
+                      // Save state after returning and trigger UI update
+                      widget.onSaveState?.call();
                     },
                   ),
                   _TopOption(
                     label: options[3],
-                    onTap: () {
-                      Navigator.push(
+                    onTap: () async {
+                      await Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => SelectTextureImages(),
                         ),
-                      ).then((_) => widget.onSaveState?.call());
+                      );
+                      // Save state after returning and trigger UI update
+                      widget.onSaveState?.call();
                     },
                   ),
                   _TopOption(
