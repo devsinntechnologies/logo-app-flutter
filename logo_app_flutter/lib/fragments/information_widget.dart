@@ -2,8 +2,17 @@ import 'package:flutter/material.dart';
 
 class InformationWidget extends StatefulWidget {
   final Function(String, String, String) onSave;
+  final String? initialName;
+  final String? initialSlogan;
+  final String? initialCategory;
 
-  const InformationWidget({super.key, required this.onSave});
+  const InformationWidget({
+    super.key, 
+    required this.onSave,
+    this.initialName,
+    this.initialSlogan,
+    this.initialCategory,
+  });
 
   @override
   State<InformationWidget> createState() => _InformationWidgetState();
@@ -13,6 +22,21 @@ class _InformationWidgetState extends State<InformationWidget> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController sloganController = TextEditingController();
   String selectedCategory = 'Beauty & Massage';
+
+  @override
+  void initState() {
+    super.initState();
+    // Load initial values if provided
+    if (widget.initialName != null && widget.initialName!.isNotEmpty) {
+      nameController.text = widget.initialName!;
+    }
+    if (widget.initialSlogan != null && widget.initialSlogan!.isNotEmpty) {
+      sloganController.text = widget.initialSlogan!;
+    }
+    if (widget.initialCategory != null && widget.initialCategory!.isNotEmpty) {
+      selectedCategory = widget.initialCategory!;
+    }
+  }
 
   final List<String> categories = [
     'Automotive & Transportation',

@@ -501,6 +501,10 @@ class SelectedColorProvider extends ChangeNotifier {
     }
   }
 
+  bool hasColorOverride(int id) {
+    return _overrideColors.containsKey(id);
+  }
+
   Color getColorForElement(int id, {required Color fallback}) {
     return _overrideColors[id] ?? fallback;
   }

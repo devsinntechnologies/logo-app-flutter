@@ -32,6 +32,7 @@ class LogoCanvas extends StatefulWidget {
 
   final VoidCallback onToggleGrid;
   final VoidCallback onToggleLayersRibbon;
+  final VoidCallback? onCanvasTap;
   final ElementTapCallback onElementTap;
   final ElementPanStartCallback onElementPanStart;
   final ElementPanUpdateCallback onElementPanUpdate;
@@ -68,6 +69,7 @@ class LogoCanvas extends StatefulWidget {
     this.lockedElements = const {},
     required this.onToggleGrid,
     required this.onToggleLayersRibbon,
+    this.onCanvasTap,
     required this.onElementTap,
     required this.onElementPanStart,
     required this.onElementPanUpdate,
@@ -127,10 +129,13 @@ class _LogoCanvasState extends State<LogoCanvas> {
           builder: (context, constraints) {
             final bgImage = providers.canvasImage ?? providers.backgroundImage;
             final Size canvasSize = constraints.biggest;
-            return Stack(
-              // clipBehavior: Clip.hardEdge,
+            return GestureDetector(
+              onTap: widget.onCanvasTap,
+              behavior: HitTestBehavior.translucent,
+              child: Stack(
+                // clipBehavior: Clip.hardEdge,
                 clipBehavior: Clip.none,
-              children: [
+                children: [
                 if (widget.showGrid)
                   ClipRect(
                     child: RepaintBoundary(
@@ -274,6 +279,7 @@ class _LogoCanvasState extends State<LogoCanvas> {
                   ],
                 ),
               ],
+              ),
             );
           },
         );
@@ -581,10 +587,13 @@ class _LogoCanvasState extends State<LogoCanvas> {
       if (index >= widget.logoState.customSVGs.length) return null;
       final svgElement = widget.logoState.customSVGs[index];
       if (!svgElement.isVisible) return null;
-      final elementColor = provider.getColorForElement(
-        id,
-        fallback: Colors.black,
-      );
+      
+      // Check if there's a color override in provider, otherwise use the SVG element's stored color
+      final hasOverride = provider.hasColorOverride(id);
+      final Color? elementColor = hasOverride 
+          ? provider.getColorForElement(id, fallback: Colors.black)
+          : svgElement.color;
+      
       final svgSize = Size(svgElement.size, svgElement.size);
       final centerPosition = (svgElement.position == Offset.zero)
           ? _centerAlign(canvasSize, svgSize)
@@ -597,7 +606,7 @@ class _LogoCanvasState extends State<LogoCanvas> {
           height: svgElement.size,
           strokeColor: outlineColor,
           strokeWidth: outlineWidth,
-          // fillColor: elementColor,
+          fillColor: elementColor,
         ),
         centerPosition: centerPosition,
         rotation: svgElement.rotation,

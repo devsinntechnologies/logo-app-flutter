@@ -72,7 +72,7 @@ class _MyAppState extends State<MyApp> {
         debugShowCheckedModeBanner: false,
         title: 'Auto Design Module',
         home: InternetChecker(
-          child: SplashScreen(),
+          child: HomeScreen(),
           // child: SignUpScreen(),
         ),
         // home: SplashScreen(),

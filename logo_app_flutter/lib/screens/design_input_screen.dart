@@ -138,6 +138,9 @@ class _DesignInputScreenState extends State<DesignInputScreen> {
     switch (index) {
       case 0:
         return InformationWidget(
+          initialName: companyName,
+          initialSlogan: slogan,
+          initialCategory: category,
           onSave: (String name, String slogan, String category) {
             setState(() {
               companyName = name;

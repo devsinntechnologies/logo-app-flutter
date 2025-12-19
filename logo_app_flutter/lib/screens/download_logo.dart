@@ -54,7 +54,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
 // late EditorState _currentState;
   final List<LogoStateData> _undoStack = [];
   final List<LogoStateData> _redoStack = [];
-  final int _maxUndoHistory = 20;
+  final int _maxUndoHistory = 50;
 
   //   List<LogoElement> customTextElements = [];
   //   List<LogoElement> customImageElements = [];
@@ -104,6 +104,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
   bool showPaletteBar = false;
   int selectedPaletteIndex = -1;
+  int selectedEffectIndex = -1;
 
   // --- Movement Panel Toggle ---
   bool isMovementPanelVisible = true;
@@ -374,17 +375,21 @@ class _DownloadLogoState extends State<DownloadLogo> {
     //   logo: _currentLogoState.clone(),
     //   background: _currentBackgroundState.clone(),
     // );
+    
+    // Clear provider states immediately to prevent old backgrounds from persisting
+    final colorProvider = Provider.of<SelectedColorProvider>(
+      context,
+      listen: false,
+    );
+    colorProvider.resetAllOutlines();
+    colorProvider.resetAllColors(defaultColors: {});
+    colorProvider.clearOverrides();
+    
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final colorProvider = Provider.of<SelectedColorProvider>(
-        context,
-        listen: false,
-      );
+      // Clear undo/redo stacks and initialize with clean state
       _undoStack.clear();
       _redoStack.clear();
       _undoStack.add(_currentLogoState.clone());
-      colorProvider.resetAllOutlines(); // outline reset
-      colorProvider.resetAllColors(defaultColors: {});
-      colorProvider.clearOverrides();
     });
 
     // 4️⃣ Post-frame callback for UI updates
@@ -489,6 +494,11 @@ class _DownloadLogoState extends State<DownloadLogo> {
                                   () => _isLayersPanelVisible =
                                       !_isLayersPanelVisible,
                                 ),
+                                onCanvasTap: () {
+                                  setState(() {
+                                    selectedElement = null;
+                                  });
+                                },
                                 onElementPanStart: _onPanStart,
                                 onElementPanUpdate: _updateElementPosition,
                                 onElementPanEnd: _onPanEnd,
@@ -1317,6 +1327,9 @@ class _DownloadLogoState extends State<DownloadLogo> {
                     if (index == 0) {
                       return GestureDetector(
                         onTap: () {
+                          setState(() {
+                            selectedEffectIndex = -1;
+                          });
                           Provider.of<SelectedColorProvider>(
                             context,
                             listen: false,
@@ -1339,8 +1352,13 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
                     // SHOW IMAGE TILES
                     final imagePath = imageList[index - 1];
+                    final isSelected = selectedEffectIndex == index - 1;
                     return GestureDetector(
                       onTap: () async {
+                        setState(() {
+                          selectedEffectIndex = index - 1;
+                        });
+                        
                         final provider = Provider.of<SelectedColorProvider>(
                           context,
                           listen: false,
@@ -1354,7 +1372,10 @@ class _DownloadLogoState extends State<DownloadLogo> {
                         width: 50,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.grey.shade400),
+                          border: Border.all(
+                            color: isSelected ? Colors.black : Colors.grey.shade400,
+                            width: isSelected ? 3 : 1,
+                          ),
                           color: Colors.white,
                         ),
                         child: ClipRRect(
@@ -1860,6 +1881,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
       showDropUp = false;
       showEffectPanel = false;
       showPaletteBar = false;
+      selectedIndex = -1; // Reset bottom nav selection
       //     _currentLogoState= _currentLogoState.copyWith(
       //   rotation3DX: 0,
       //   rotation3DY: 0,
@@ -1991,10 +2013,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
       // Duplicate main Logo
       final outlineColor = provider.getOutlineColor(0);
       final outlineWidth = provider.getOutlineWidth(0);
-      final originalColor = provider.getColorForElement(
-        0,
-        fallback: provider.shapeColor ?? Colors.black,
-      );
+      // Only use logoColor if it has been manually overridden, otherwise null (use SVG's original color)
+      final originalColor = provider.isLogoColorOverridden ? provider.logoColor : null;
 
       String svgString = updatedState.svgLogo ?? '';
       if (svgString.isEmpty) {
@@ -2039,7 +2059,10 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
       provider.setOutlineColor(newElementId, outlineColor);
       provider.setOutlineWidth(newElementId, outlineWidth);
-      provider.setOverrideColorForElement(newElementId, originalColor);
+      // Only set color override if the logo color was manually changed
+      if (originalColor != null) {
+        provider.setOverrideColorForElement(newElementId, originalColor);
+      }
       updatedState = _duplicate3DRotation(
         oldId: id,
         newId: newElementId,
@@ -2097,6 +2120,49 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
       debugPrint(
         '✅ Duplicated Custom SVG with id: $newElementId at position: $newCenterPosition',
+      );
+    }
+    // Duplicate Custom Images (id 200–299)
+    else if (id >= 200 && id < 300) {
+      final index = id - 200;
+      if (index >= updatedState.customImages.length) return;
+
+      final original = updatedState.customImages[index].clone();
+
+      // Calculate proper duplicate position
+      final originalSize = Size(
+        original.size ?? 100,
+        original.size ?? 100,
+      );
+      final originalTopLeft = getTopLeftPosition(
+        original.position,
+        originalSize,
+      );
+      final newTopLeft = originalTopLeft + const Offset(30, 30);
+      final newCenterPosition = getCenterPosition(newTopLeft, originalSize);
+
+      final newImage = original.copyWith(
+        position: newCenterPosition, // Store as center position
+      );
+
+      final updatedImages =
+          updatedState.customImages.map((e) => e.clone()).toList()
+            ..add(newImage);
+      newElementId = generateNewId(200, updatedImages.length - 1);
+
+      updatedState = updatedState.copyWith(
+        customImages: updatedImages,
+        elementOrder: [...updatedState.elementOrder, newElementId],
+      );
+
+      updatedState = _duplicate3DRotation(
+        oldId: id,
+        newId: newElementId,
+        state: updatedState,
+      );
+
+      debugPrint(
+        '✅ Duplicated Custom Image with id: $newElementId at position: $newCenterPosition',
       );
     }
     // Duplicate Custom Texts (id 100–199)
@@ -3352,7 +3418,28 @@ class _DownloadLogoState extends State<DownloadLogo> {
         print(
             '⚠️  Cannot update rotation: ID $id (index $index) not found in customSVGs list');
       }
-    } else if (id >= 100) {
+    } else if (id >= 200 && id < 300) {
+      // Handle custom images (art images)
+      final index = id - 200;
+      if (index >= 0 && index < _currentLogoState.customImages.length) {
+        final updatedImages = List<CustomImageElement>.from(
+          _currentLogoState.customImages,
+        );
+        updatedImages[index] =
+            updatedImages[index].copyWith(rotation: newRotation);
+
+        setState(() {
+          _currentLogoState = _currentLogoState.copyWith(
+            customImages: updatedImages,
+          );
+        });
+        print('✅ Updated rotation for image id $id to $newRotation');
+        return;
+      } else {
+        print(
+            '⚠️  Cannot update rotation: ID $id (index $index) not found in customImages list');
+      }
+    } else if (id >= 100 && id < 200) {
       final index = id - 100;
       if (index < _currentLogoState.customTexts.length) {
         final updatedTexts = List<CustomTextElement>.from(
