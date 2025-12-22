@@ -203,7 +203,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
             ),
           ),
           content: const Text(
-            'Do you want to save the logo to your gallery or upload it to Supabase?',
+            'Do you want to save the logo to your gallery to My Design?',
             style: TextStyle(
               fontSize: 16,
               color: ThemeColors.purple,
@@ -222,7 +222,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
                     );
 
                     int? previousSelection = provider.selectedElementId;
-                    
+
                     provider.clearSelection();
 
                     provider.clearSelection();
@@ -250,7 +250,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
                               Icon(Icons.cloud_done, color: ThemeColors.purple),
                               SizedBox(width: 12),
                               Text(
-                                'Logo uploaded to Supabase!',
+                                'Logo saved successfully!',
                                 style: TextStyle(
                                   color: ThemeColors.purple,
                                   fontSize: 16,
@@ -263,7 +263,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
                     }
                   },
                   child: const Text(
-                    'To Supabase',
+                    'To My Design',
                     style: TextStyle(fontSize: 16, color: ThemeColors.purple),
                   ),
                 ),
@@ -375,7 +375,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
     //   logo: _currentLogoState.clone(),
     //   background: _currentBackgroundState.clone(),
     // );
-    
+
     // Clear provider states immediately to prevent old backgrounds from persisting
     final colorProvider = Provider.of<SelectedColorProvider>(
       context,
@@ -384,7 +384,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
     colorProvider.resetAllOutlines();
     colorProvider.resetAllColors(defaultColors: {});
     colorProvider.clearOverrides();
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Clear undo/redo stacks and initialize with clean state
       _undoStack.clear();
@@ -472,7 +472,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
                           child: RepaintBoundary(
                             key: _canvasKey,
                             child: SizedBox(
-                             width:  MediaQuery.of(context).size.width,
+                              width: MediaQuery.of(context).size.width,
                               child: LogoCanvas(
                                 selectedShapeName: selectedShapeName,
                                 isExportingNotifier: isExportingNotifier,
@@ -516,7 +516,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
                                 isCheckerboardActive: true,
                                 checkerboardOpacity: checkerboardOpacity,
                                 isCheckerboardVisible: isCheckerboardVisible,
-                                lockedElements: _currentLogoState.lockedElements,
+                                lockedElements:
+                                    _currentLogoState.lockedElements,
                                 elementOrder: _currentLogoState.elementOrder,
                               ),
                             ),
@@ -864,7 +865,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
                                 selectedShapeName = shapeName;
                               });
                             },
-                            onSaveState: _saveState, // Pass the save state callback
+                            onSaveState:
+                                _saveState, // Pass the save state callback
                           ),
                         if (showPaletteBar)
                           Column(
@@ -1335,7 +1337,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
                             context,
                             listen: false,
                           ).resetImage(); // reset image
-                          
+
                           // Save state for undo/redo after resetting effect
                           _saveState();
                         },
@@ -1362,7 +1364,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
                         setState(() {
                           selectedEffectIndex = index - 1;
                         });
-                        
+
                         final provider = Provider.of<SelectedColorProvider>(
                           context,
                           listen: false,
@@ -1371,7 +1373,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
                         final uiImage = await loadUiImageFromAsset(imagePath);
 
                         provider.setImage(uiImage, assetPath: imagePath);
-                        
+
                         // Save state for undo/redo after applying effect
                         _saveState();
                       },
@@ -1380,7 +1382,9 @@ class _DownloadLogoState extends State<DownloadLogo> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
-                            color: isSelected ? Colors.black : Colors.grey.shade400,
+                            color: isSelected
+                                ? Colors.black
+                                : Colors.grey.shade400,
                             width: isSelected ? 3 : 1,
                           ),
                           color: Colors.white,
@@ -1414,34 +1418,41 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
     // Capture current provider state into _currentLogoState before saving
     final provider = Provider.of<SelectedColorProvider>(context, listen: false);
-    
+
     // Sync custom text colors from provider
-    final updatedCustomTexts = _currentLogoState.customTexts.asMap().entries.map((entry) {
+    final updatedCustomTexts =
+        _currentLogoState.customTexts.asMap().entries.map((entry) {
       final index = entry.key;
       final text = entry.value;
       final elementId = 100 + index;
-      final colorFromProvider = provider.getColorForElement(elementId, fallback: text.color);
+      final colorFromProvider =
+          provider.getColorForElement(elementId, fallback: text.color);
       return text.copyWith(color: colorFromProvider);
     }).toList();
-    
+
     // Sync custom SVG colors from provider
-    final updatedCustomSVGs = _currentLogoState.customSVGs.asMap().entries.map((entry) {
+    final updatedCustomSVGs =
+        _currentLogoState.customSVGs.asMap().entries.map((entry) {
       final index = entry.key;
       final svg = entry.value;
       final elementId = 300 + index;
-      final colorFromProvider = provider.getColorForElement(elementId, fallback: svg.color ?? Colors.black);
+      final colorFromProvider = provider.getColorForElement(elementId,
+          fallback: svg.color ?? Colors.black);
       return svg.copyWith(color: colorFromProvider);
     }).toList();
-    
+
     // Update _currentLogoState with all current provider values
     // Capture asset path OR file path (whichever is set)
     final imagePath = provider.assetImagePath ?? provider.imageFile?.path;
-    
+
     // ✅ Explicitly preserve rotation maps to ensure they're not lost
-    final currentRotationX = Map<int, double>.from(_currentLogoState.rotationXMap);
-    final currentRotationY = Map<int, double>.from(_currentLogoState.rotationYMap);
-    final currentRotationZ = Map<int, double>.from(_currentLogoState.rotationZMap);
-    
+    final currentRotationX =
+        Map<int, double>.from(_currentLogoState.rotationXMap);
+    final currentRotationY =
+        Map<int, double>.from(_currentLogoState.rotationYMap);
+    final currentRotationZ =
+        Map<int, double>.from(_currentLogoState.rotationZMap);
+
     _currentLogoState = _currentLogoState.copyWith(
       logoColor: provider.logoColor,
       isLogoColorOverridden: provider.isLogoColorOverridden,
@@ -1470,34 +1481,43 @@ class _DownloadLogoState extends State<DownloadLogo> {
   DateTime? _lastSuccessUndoTime;
 
   void _undo() {
-    if (_undoStack.length > 1) {  // Need at least 2 items (current + previous)
+    if (_undoStack.length > 1) {
+      // Need at least 2 items (current + previous)
       // Capture current provider state before saving to redo stack
-      final provider = Provider.of<SelectedColorProvider>(context, listen: false);
-      
-      final updatedCustomTexts = _currentLogoState.customTexts.asMap().entries.map((entry) {
+      final provider =
+          Provider.of<SelectedColorProvider>(context, listen: false);
+
+      final updatedCustomTexts =
+          _currentLogoState.customTexts.asMap().entries.map((entry) {
         final index = entry.key;
         final text = entry.value;
         final elementId = 100 + index;
-        final colorFromProvider = provider.getColorForElement(elementId, fallback: text.color);
+        final colorFromProvider =
+            provider.getColorForElement(elementId, fallback: text.color);
         return text.copyWith(color: colorFromProvider);
       }).toList();
-      
-      final updatedCustomSVGs = _currentLogoState.customSVGs.asMap().entries.map((entry) {
+
+      final updatedCustomSVGs =
+          _currentLogoState.customSVGs.asMap().entries.map((entry) {
         final index = entry.key;
         final svg = entry.value;
         final elementId = 300 + index;
-        final colorFromProvider = provider.getColorForElement(elementId, fallback: svg.color ?? Colors.black);
+        final colorFromProvider = provider.getColorForElement(elementId,
+            fallback: svg.color ?? Colors.black);
         return svg.copyWith(color: colorFromProvider);
       }).toList();
-      
+
       // Capture asset path OR file path (whichever is set)
       final imagePath = provider.assetImagePath ?? provider.imageFile?.path;
-      
+
       // ✅ Explicitly preserve rotation maps
-      final currentRotationX = Map<int, double>.from(_currentLogoState.rotationXMap);
-      final currentRotationY = Map<int, double>.from(_currentLogoState.rotationYMap);
-      final currentRotationZ = Map<int, double>.from(_currentLogoState.rotationZMap);
-      
+      final currentRotationX =
+          Map<int, double>.from(_currentLogoState.rotationXMap);
+      final currentRotationY =
+          Map<int, double>.from(_currentLogoState.rotationYMap);
+      final currentRotationZ =
+          Map<int, double>.from(_currentLogoState.rotationZMap);
+
       _currentLogoState = _currentLogoState.copyWith(
         logoColor: provider.logoColor,
         isLogoColorOverridden: provider.isLogoColorOverridden,
@@ -1513,14 +1533,14 @@ class _DownloadLogoState extends State<DownloadLogo> {
         rotationYMap: currentRotationY,
         rotationZMap: currentRotationZ,
       );
-      
+
       _redoStack.add(_currentLogoState.clone());
-      
+
       // Remove current state from undo stack (last item is current)
       if (_undoStack.isNotEmpty) {
         _undoStack.removeLast();
       }
-      
+
       // Now get the previous state
       if (_undoStack.isNotEmpty) {
         _currentLogoState = _undoStack.last.clone();
@@ -1529,7 +1549,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
         // Restore selectedShapeName
         selectedShapeName = _currentLogoState.selectedShapeName ?? "";
       }
-      
+
       // Always call setState to update button states
       setState(() {});
 
@@ -1570,32 +1590,40 @@ class _DownloadLogoState extends State<DownloadLogo> {
   void _redo() {
     if (_redoStack.isNotEmpty) {
       // Capture current provider state before saving to undo stack
-      final provider = Provider.of<SelectedColorProvider>(context, listen: false);
-      
-      final updatedCustomTexts = _currentLogoState.customTexts.asMap().entries.map((entry) {
+      final provider =
+          Provider.of<SelectedColorProvider>(context, listen: false);
+
+      final updatedCustomTexts =
+          _currentLogoState.customTexts.asMap().entries.map((entry) {
         final index = entry.key;
         final text = entry.value;
         final elementId = 100 + index;
-        final colorFromProvider = provider.getColorForElement(elementId, fallback: text.color);
+        final colorFromProvider =
+            provider.getColorForElement(elementId, fallback: text.color);
         return text.copyWith(color: colorFromProvider);
       }).toList();
-      
-      final updatedCustomSVGs = _currentLogoState.customSVGs.asMap().entries.map((entry) {
+
+      final updatedCustomSVGs =
+          _currentLogoState.customSVGs.asMap().entries.map((entry) {
         final index = entry.key;
         final svg = entry.value;
         final elementId = 300 + index;
-        final colorFromProvider = provider.getColorForElement(elementId, fallback: svg.color ?? Colors.black);
+        final colorFromProvider = provider.getColorForElement(elementId,
+            fallback: svg.color ?? Colors.black);
         return svg.copyWith(color: colorFromProvider);
       }).toList();
-      
+
       // Capture asset path OR file path (whichever is set)
       final imagePath = provider.assetImagePath ?? provider.imageFile?.path;
-      
+
       // ✅ Explicitly preserve rotation maps
-      final currentRotationX = Map<int, double>.from(_currentLogoState.rotationXMap);
-      final currentRotationY = Map<int, double>.from(_currentLogoState.rotationYMap);
-      final currentRotationZ = Map<int, double>.from(_currentLogoState.rotationZMap);
-      
+      final currentRotationX =
+          Map<int, double>.from(_currentLogoState.rotationXMap);
+      final currentRotationY =
+          Map<int, double>.from(_currentLogoState.rotationYMap);
+      final currentRotationZ =
+          Map<int, double>.from(_currentLogoState.rotationZMap);
+
       _currentLogoState = _currentLogoState.copyWith(
         logoColor: provider.logoColor,
         isLogoColorOverridden: provider.isLogoColorOverridden,
@@ -1611,21 +1639,21 @@ class _DownloadLogoState extends State<DownloadLogo> {
         rotationYMap: currentRotationY,
         rotationZMap: currentRotationZ,
       );
-      
+
       // Add current to undo
       _undoStack.add(_currentLogoState.clone());
-      
+
       // Get the redo state
       _currentLogoState = _redoStack.removeLast();
-      
+
       // Add it to undo as well (so undo stack always contains current)
       _undoStack.add(_currentLogoState.clone());
-      
+
       provider.applyLogoState(_currentLogoState);
 
       // Restore selectedShapeName
       selectedShapeName = _currentLogoState.selectedShapeName ?? "";
-      
+
       // Always call setState to update button states
       setState(() {});
 
@@ -1776,7 +1804,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
         setState(() {
           final newTextElement = CustomTextElement(
             text: result,
-            position: _getCanvasCenter() ?? const Offset(150, 150),
+            position: _currentLogoState.logoPosition ?? const Offset(150, 100),
             size: 22,
             rotation: 0,
           );
@@ -1869,7 +1897,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
           final imageIndex = _currentLogoState.customImages.length;
           final newImage = CustomImageElement(
             path: pickedFile.path,
-            position: _getCanvasCenter() ?? const Offset(100, 100),
+            position: _getCanvasCenter(),
             size: 100,
             rotation: 0,
           );
@@ -1991,7 +2019,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
     final index = _currentLogoState.customImages.length;
     final newImage = CustomImageElement(
       path: imagePath,
-      position: _getCanvasCenter() ?? const Offset(150, 150),
+      position: _getCanvasCenter(),
       rotation: 0,
       size: 120,
     );
@@ -2066,7 +2094,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
       final outlineColor = provider.getOutlineColor(0);
       final outlineWidth = provider.getOutlineWidth(0);
       // Only use logoColor if it has been manually overridden, otherwise null (use SVG's original color)
-      final originalColor = provider.isLogoColorOverridden ? provider.logoColor : null;
+      final originalColor =
+          provider.isLogoColorOverridden ? provider.logoColor : null;
 
       String svgString = updatedState.svgLogo ?? '';
       if (svgString.isEmpty) {
@@ -2197,9 +2226,10 @@ class _DownloadLogoState extends State<DownloadLogo> {
         position: newCenterPosition, // Store as center position
       );
 
-      final updatedImages =
-          updatedState.customImages.map((e) => e.clone()).toList()
-            ..add(newImage);
+      final updatedImages = updatedState.customImages
+          .map((e) => e.clone())
+          .toList()
+        ..add(newImage);
       newElementId = generateNewId(200, updatedImages.length - 1);
 
       updatedState = updatedState.copyWith(
@@ -2968,14 +2998,18 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
   // --- Getters & Helpers ---
 
-  Offset? _getCanvasCenter() {
+  Offset _getCanvasCenter() {
     final RenderBox? renderBox =
         _canvasKey.currentContext?.findRenderObject() as RenderBox?;
     if (renderBox != null) {
       final size = renderBox.size;
       return Offset(size.width / 2, size.height / 2);
     }
-    return null;
+    // Fallback: use MediaQuery to get screen center
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    // Return center of the screen, which is typically where the canvas is
+    return Offset(screenWidth / 2, screenHeight / 2);
   }
 
   // Offset _limitOffset(

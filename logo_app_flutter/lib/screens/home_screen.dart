@@ -6,6 +6,7 @@ import 'package:logo_app_flutter/components/GridButtons/my_design_button.dart';
 import 'package:logo_app_flutter/components/GridButtons/my_logo_button.dart';
 import 'package:logo_app_flutter/components/drawer_items.dart';
 import 'package:logo_app_flutter/screens/google_sign_in_button.dart';
+import 'package:logo_app_flutter/screens/my_account_screen.dart';
 import 'package:logo_app_flutter/utils/theme_colors.dart';
 
 
@@ -76,17 +77,30 @@ class HomeScreen extends StatelessWidget {
             ),
             Expanded(
               child: ListView(
-                children: const [
+                children: [
                   // DrawerItem(icon: Icons.workspace_premium, text: "Get PRO"),
                   // DrawerItem(icon: Icons.image, text: "My Logo"),
 
-                  DrawerItem(icon: Icons.design_services, text: "My Design"),
-                  DrawerItem(icon: Icons.create, text: "Create Logo"),
-                  DrawerItem(icon: Icons.auto_awesome, text: "Auto Design"),
-                  DrawerItem(icon: Icons.language, text: "Language"),
+                  const DrawerItem(icon: Icons.design_services, text: "My Design"),
+                  const DrawerItem(icon: Icons.create, text: "Create Logo"),
+                  const DrawerItem(icon: Icons.auto_awesome, text: "Auto Design"),
+                  const DrawerItem(icon: Icons.language, text: "Language"),
                   // DrawerItem(icon: Icons.apps, text: "More Apps"),
-                  DrawerItem(icon: Icons.share, text: "Share"),
-                  DrawerItem(icon: Icons.privacy_tip, text: "Privacy Policy"),
+                  const DrawerItem(icon: Icons.share, text: "Share"),
+                  const DrawerItem(icon: Icons.privacy_tip, text: "Privacy Policy"),
+                  DrawerItem(
+                    icon: Icons.person,
+                    text: "My Account",
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const MyAccountScreen(),
+                        ),
+                      );
+                    },
+                  ),
+
                 ],
               ),
             ),

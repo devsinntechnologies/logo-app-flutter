@@ -15,17 +15,21 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
   final AuthService authService = AuthService();
   final _supabase = Supabase.instance.client;
   bool _isLoading = false;
+  bool _isLoggedIn = false;
 
   @override
   void initState() {
     super.initState();
 
+    // Check initial auth state
+    _isLoggedIn = _supabase.auth.currentSession != null;
+
     _supabase.auth.onAuthStateChange.listen((data) {
       final session = data.session;
-      if (session != null && mounted) {
-        // ScaffoldMessenger.of(context).showSnackBar(
-        //   const SnackBar(content: Text("Signed in successfully!")),
-        // );
+      if (mounted) {
+        setState(() {
+          _isLoggedIn = session != null;
+        });
       }
     });
   }
@@ -122,6 +126,11 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
 
   @override
   Widget build(BuildContext context) {
+    // Don't show the button if user is already logged in
+    if (_isLoggedIn) {
+      return const SizedBox.shrink();
+    }
+    
     return _isLoading
         ? const CircularProgressIndicator()
         : GestureDetector(
