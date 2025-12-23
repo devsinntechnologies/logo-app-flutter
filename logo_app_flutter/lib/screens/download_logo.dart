@@ -1589,80 +1589,22 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
   void _redo() {
     if (_redoStack.isNotEmpty) {
-      // Capture current provider state before saving to undo stack
-      final provider =
-          Provider.of<SelectedColorProvider>(context, listen: false);
-
-      final updatedCustomTexts =
-          _currentLogoState.customTexts.asMap().entries.map((entry) {
-        final index = entry.key;
-        final text = entry.value;
-        final elementId = 100 + index;
-        final colorFromProvider =
-            provider.getColorForElement(elementId, fallback: text.color);
-        return text.copyWith(color: colorFromProvider);
-      }).toList();
-
-      final updatedCustomSVGs =
-          _currentLogoState.customSVGs.asMap().entries.map((entry) {
-        final index = entry.key;
-        final svg = entry.value;
-        final elementId = 300 + index;
-        final colorFromProvider = provider.getColorForElement(elementId,
-            fallback: svg.color ?? Colors.black);
-        return svg.copyWith(color: colorFromProvider);
-      }).toList();
-
-      // Capture asset path OR file path (whichever is set)
-      final imagePath = provider.assetImagePath ?? provider.imageFile?.path;
-
-      // ✅ Explicitly preserve rotation maps
-      final currentRotationX =
-          Map<int, double>.from(_currentLogoState.rotationXMap);
-      final currentRotationY =
-          Map<int, double>.from(_currentLogoState.rotationYMap);
-      final currentRotationZ =
-          Map<int, double>.from(_currentLogoState.rotationZMap);
-
-      _currentLogoState = _currentLogoState.copyWith(
-        logoColor: provider.logoColor,
-        isLogoColorOverridden: provider.isLogoColorOverridden,
-        companyNameColor: provider.companyTextColor,
-        sloganColor: provider.sloganColor,
-        selectedShapeName: selectedShapeName,
-        backgroundColor: provider.selectedColor,
-        backgroundGradient: provider.selectedGradient,
-        backgroundImagePath: imagePath,
-        customTexts: updatedCustomTexts,
-        customSVGs: updatedCustomSVGs,
-        rotationXMap: currentRotationX,
-        rotationYMap: currentRotationY,
-        rotationZMap: currentRotationZ,
-      );
-
-      // Add current to undo
+      // Save current state to undo stack before redo
       _undoStack.add(_currentLogoState.clone());
 
-      // Get the redo state
+      // Pop the redo state and set as current
       _currentLogoState = _redoStack.removeLast();
 
-      // Add it to undo as well (so undo stack always contains current)
-      _undoStack.add(_currentLogoState.clone());
-
+      final provider = Provider.of<SelectedColorProvider>(context, listen: false);
       provider.applyLogoState(_currentLogoState);
-
-      // Restore selectedShapeName
       selectedShapeName = _currentLogoState.selectedShapeName ?? "";
 
-      // Always call setState to update button states
       setState(() {});
 
       final now = DateTime.now();
-      // 👇 APPLY SAME LOGIC FOR SUCCESS MESSAGES
       if (_lastSuccessRedoTime == null ||
           now.difference(_lastSuccessRedoTime!) > const Duration(seconds: 2)) {
         _lastSuccessRedoTime = now;
-
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
           ..showSnackBar(
