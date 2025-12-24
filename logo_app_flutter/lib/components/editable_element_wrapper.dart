@@ -5,11 +5,11 @@ import 'corner_action_icon.dart';
 typedef ElementTapCallback = void Function(int id);
 typedef ElementPanUpdateCallback = void Function(int id, Offset delta);
 typedef ElementPanStartCallback = void Function(
-    int id, DragStartDetails details);
+int id, DragStartDetails details);
 typedef ElementPanEndCallback = void Function(int id);
 typedef ElementActionCallback = void Function(int id);
 typedef ElementDragUpdateCallback = void Function(
-    int id, DragUpdateDetails details);
+int id, DragUpdateDetails details);
 
 class EditableElementWrapper extends StatelessWidget {
   final int id;
@@ -79,8 +79,8 @@ class EditableElementWrapper extends StatelessWidget {
     );
 
     return Positioned(
-      left: clampedX,
-      top: clampedY,
+       left: position.dx,
+      top: position.dy,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
@@ -98,10 +98,11 @@ class EditableElementWrapper extends StatelessWidget {
               child: Container(
                 decoration: (!isExporting && isSelected && isEditingMode)
                     ? BoxDecoration(
+                      color: Colors.blueGrey.shade200,
                         border: Border.all(
                           color:
-                              isLocked ? Colors.red.shade300 : Colors.black38,
-                          width: 3,
+                              isLocked ? Colors.red.shade300 : Colors.black,
+                          width: 1.5,
                         ),
                         borderRadius: BorderRadius.circular(6),
                       )
@@ -111,7 +112,10 @@ class EditableElementWrapper extends StatelessWidget {
                 child: Transform.rotate(
                   angle: rotation * pi / 180,
                   child: Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 35,
+                      vertical: 5
+                    ),
                     child: child,
                   ),
                 ),

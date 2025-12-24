@@ -64,7 +64,7 @@ class ArtSelectScreen extends StatelessWidget {
                           },
                           child: Image.asset(
                             images[index],
-                            fit: BoxFit.contain,
+                            fit: BoxFit.cover,
                           ),
                         ),
                       ),

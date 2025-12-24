@@ -26,12 +26,12 @@ class CornerActionIcon extends StatelessWidget {
       onPanEnd: onPanEnd,
       child: Container(
         // color: Colors.red, // Set background to test hitbox visibility
-        width: 30,
-        height: 30,
+        width: 22,
+        height: 22,
         decoration: BoxDecoration(
           color: Colors.white,
           shape: BoxShape.circle,
-          border: Border.all(color: Colors.black, width: 2),
+          border: Border.all(color: Colors.black, width: 1),
           boxShadow: const [
             BoxShadow(
               color: Colors.black26,
@@ -40,7 +40,7 @@ class CornerActionIcon extends StatelessWidget {
             ),
           ],
         ),
-        child: Icon(icon, size: 20, color: Colors.black),
+        child: Icon(icon, size: 16, color: Colors.black),
       ),
       
     );
