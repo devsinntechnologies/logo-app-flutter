@@ -17,6 +17,8 @@ class MovementPanel extends StatefulWidget {
   final Function(String) onDirectionPressed;
   final VoidCallback onDuplicatePressed;
   final bool isVisible;
+  final VoidCallback onBringForwardPressed;
+  final VoidCallback onSendBackwardPressed;
   final VoidCallback onBringToFrontPressed;
   final VoidCallback onSendToBackPressed;
   final VoidCallback? onSaveState;
@@ -44,6 +46,8 @@ class MovementPanel extends StatefulWidget {
     this.onSaveState,
     this.onElement3DRotationUpdate,
     this.onElement3DReset,
+    required this.onBringForwardPressed,
+    required this.onSendBackwardPressed,
   }) : super(key: key);
 
   @override
@@ -54,7 +58,7 @@ class _MovementPanelState extends State<MovementPanel>
     with SingleTickerProviderStateMixin {
   TextAlign _selectedTextAlign = TextAlign.left;
   Timer? _timer;
-String activeLayerButton = "";
+  String activeLayerButton = "";
   @override
   void dispose() {
     _stopMoving();
@@ -173,6 +177,15 @@ String activeLayerButton = "";
     return Consumer<SelectedColorProvider>(
       builder: (context, provider, _) {
         final int selectedElement = widget.selectedElementId ?? 0;
+        final order = widget.logoState.elementOrder;
+
+        final int index = widget.selectedElementId == null
+            ? -1
+            : order.indexOf(widget.selectedElementId!);
+
+        final bool canForward = index != -1 && index < order.length - 1;
+
+        final bool canBackward = index != -1 && index > 0;
 
         return Column(
           children: [
@@ -219,69 +232,60 @@ String activeLayerButton = "";
                   ),
 
                   // layer controls
-               Column(
-  children: [
-    GestureDetector(
-      onTap: () {
-        setState(() {
-          activeLayerButton = "up"; // mark as active
-        });
-        widget.onSaveState?.call();
-        widget.onBringToFrontPressed();
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: activeLayerButton == "up" ? Colors.black : Colors.grey,
-            width: 2,
-          ),
-        ),
-        padding: const EdgeInsets.all(5),
-        child: Icon(
-          Icons.layers_outlined,
-          color: activeLayerButton == "up" ? Colors.black : Colors.grey,
-          size: 18,
-        ),
-      ),
-    ),
-    const Text(
-      "Layer Up",
-      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-    ),
-    const SizedBox(height: 10),
-    GestureDetector(
-      onTap: () {
-        setState(() {
-          activeLayerButton = "down"; // mark as active
-        });
-        widget.onSaveState?.call();
-        widget.onSendToBackPressed();
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: activeLayerButton == "down" ? Colors.black : Colors.grey,
-            width: 2,
-          ),
-        ),
-        padding: const EdgeInsets.all(5),
-        child: Icon(
-          Icons.layers_outlined,
-          color: activeLayerButton == "down" ? Colors.black : Colors.grey,
-          size: 18,
-        ),
-      ),
-    ),
-    const Text(
-      "Layer Down",
-      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-    ),
-  ],
-),
+                  Row(
+                    children: [
+                      Column(
+                        children: [
+                          // Layer Up (Front)
+                          layerButton(
+                            id: "up",
+                            icon: Icons.keyboard_double_arrow_up,
+                            label: "Up",
+                            enabled: canForward,
+                            onTap: widget.onBringToFrontPressed,
+                          ),
+
+                          const SizedBox(height: 10),
+
+                          // Layer Forward (one step)
+                          layerButton(
+                            id: "down",
+                            icon: Icons.keyboard_double_arrow_down,
+                            label: "Down",
+                            enabled: canBackward,
+                            onTap: widget.onSendToBackPressed,
+                          ),
+
+                          const SizedBox(height: 10),
+                        ],
+                      ),
+                      const SizedBox(width: 10),
+                      // Layer Backward (one step)
+                      Column(
+                        children: [
+                          layerButton(
+                            id: "forward",
+                            icon: Icons.keyboard_arrow_up,
+                            label: "Forward",
+                            enabled: canForward,
+                            onTap: widget.onBringForwardPressed,
+                          ),
+                          const SizedBox(height: 10),
+
+                          // Layer Down (Back)
+                          layerButton(
+                            id: "backward",
+                            icon: Icons.keyboard_arrow_down,
+                            label: "Backward",
+                            enabled: canBackward,
+                            onTap: widget.onSendBackwardPressed,
+                          ),
+                          const SizedBox(height: 10),
+                        ],
+                      ),
+                    ],
+                  ),
+
                   Column(
                     children: [
                       // if (widget.selectedElementId != 0)
@@ -434,6 +438,63 @@ String activeLayerButton = "";
     );
   }
 
+  bool canBringForward(int id, dynamic logoState) {
+    final i = logoState.elementOrder.indexOf(id);
+    return i != -1 && i < logoState.elementOrder.length - 1;
+  }
+
+  bool canSendBackward(int id, dynamic logoState) {
+    final i = logoState.elementOrder.indexOf(id);
+    return i != -1 && i > 0;
+  }
+
+  Widget layerButton({
+    required String id,
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    required bool enabled,
+  }) {
+    return Column(
+      children: [
+        GestureDetector(
+          onTap: enabled
+              ? () {
+                  setState(() => activeLayerButton = id);
+                  widget.onSaveState?.call();
+                  onTap();
+                }
+              : null,
+          child: Container(
+            padding: const EdgeInsets.all(5),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white,
+              border: Border.all(
+                color: enabled
+                    ? (activeLayerButton == id ? Colors.black : Colors.grey)
+                    : Colors.grey.shade300,
+                width: 2,
+              ),
+            ),
+            child: Icon(
+              icon,
+              size: 18,
+              color: enabled ? Colors.black : Colors.grey.shade400,
+            ),
+          ),
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: enabled ? Colors.black : Colors.grey,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildColorsTab(BuildContext context) {
     return Consumer<SelectedColorProvider>(
       builder: (context, provider, _) {
@@ -512,7 +573,7 @@ String activeLayerButton = "";
     int elementId,
   ) {
     if (elementId == 0) {
-       return provider.logoColor;
+      return provider.logoColor;
     } else if (elementId == 1) {
       return provider.companyTextColor;
     } else if (elementId == 2) {

@@ -752,10 +752,18 @@ class _DownloadLogoState extends State<DownloadLogo> {
                   print('Duplicate called for $selectedElement');
                   duplicateSelectedElement(selectedElement!);
                 },
-                onBringToFrontPressed: () =>
-                    bringToFront(selectedElement!, _currentLogoState),
-                onSendToBackPressed: () =>
-                    sendToBack(selectedElement!, _currentLogoState),
+              onBringToFrontPressed: () =>
+    bringToFront(selectedElement!, _currentLogoState),
+
+onSendToBackPressed: () =>
+    sendToBack(selectedElement!, _currentLogoState),
+
+onBringForwardPressed: () =>
+    bringForward(selectedElement!, _currentLogoState),
+
+onSendBackwardPressed: () =>
+    sendBackward(selectedElement!, _currentLogoState),
+
                 onSaveState: _saveState,
                 logoState: _currentLogoState,
                 selectedElementId: selectedElement,
@@ -1242,6 +1250,24 @@ class _DownloadLogoState extends State<DownloadLogo> {
       setState(() {});
     }
   }
+  void bringForward(int elementId, dynamic logoState) {
+  final index = logoState.elementOrder.indexOf(elementId);
+  if (index != -1 && index < logoState.elementOrder.length - 1) {
+    logoState.elementOrder.removeAt(index);
+    logoState.elementOrder.insert(index + 1, elementId);
+    setState(() {});
+  }
+}
+
+void sendBackward(int elementId, dynamic logoState) {
+  final index = logoState.elementOrder.indexOf(elementId);
+  if (index != -1 && index > 0) {
+    logoState.elementOrder.removeAt(index);
+    logoState.elementOrder.insert(index - 1, elementId);
+    setState(() {});
+  }
+}
+
 
   Widget _buildEffectPanel({required VoidCallback onClose}) {
     return Column(
