@@ -54,7 +54,7 @@ class _MovementPanelState extends State<MovementPanel>
     with SingleTickerProviderStateMixin {
   TextAlign _selectedTextAlign = TextAlign.left;
   Timer? _timer;
-
+String activeLayerButton = "";
   @override
   void dispose() {
     _stopMoving();
@@ -219,64 +219,69 @@ class _MovementPanelState extends State<MovementPanel>
                   ),
 
                   // layer controls
-                  Column(
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          widget.onSaveState?.call();
-                          widget.onBringToFrontPressed();
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.black, width: 1),
-                          ),
-                          padding: const EdgeInsets.all(5),
-                          child: const Icon(
-                            Icons.layers_outlined,
-                            color: Colors.black,
-                            size: 18,
-                          ),
-                        ),
-                      ),
-                      const Text(
-                        "Layer Up",
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      GestureDetector(
-                        onTap: () {
-                          widget.onSaveState?.call();
-                          widget.onSendToBackPressed();
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.black, width: 1),
-                          ),
-                          padding: const EdgeInsets.all(5),
-                          child: const Icon(
-                            Icons.layers_outlined,
-                            color: Colors.black,
-                            size: 18,
-                          ),
-                        ),
-                      ),
-                      const Text(
-                        "Layer Down",
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-
+               Column(
+  children: [
+    GestureDetector(
+      onTap: () {
+        setState(() {
+          activeLayerButton = "up"; // mark as active
+        });
+        widget.onSaveState?.call();
+        widget.onBringToFrontPressed();
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: activeLayerButton == "up" ? Colors.black : Colors.grey,
+            width: 2,
+          ),
+        ),
+        padding: const EdgeInsets.all(5),
+        child: Icon(
+          Icons.layers_outlined,
+          color: activeLayerButton == "up" ? Colors.black : Colors.grey,
+          size: 18,
+        ),
+      ),
+    ),
+    const Text(
+      "Layer Up",
+      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+    ),
+    const SizedBox(height: 10),
+    GestureDetector(
+      onTap: () {
+        setState(() {
+          activeLayerButton = "down"; // mark as active
+        });
+        widget.onSaveState?.call();
+        widget.onSendToBackPressed();
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: activeLayerButton == "down" ? Colors.black : Colors.grey,
+            width: 2,
+          ),
+        ),
+        padding: const EdgeInsets.all(5),
+        child: Icon(
+          Icons.layers_outlined,
+          color: activeLayerButton == "down" ? Colors.black : Colors.grey,
+          size: 18,
+        ),
+      ),
+    ),
+    const Text(
+      "Layer Down",
+      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+    ),
+  ],
+),
                   Column(
                     children: [
                       // if (widget.selectedElementId != 0)

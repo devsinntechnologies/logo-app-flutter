@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:logo_app_flutter/utils/gradient_persistence.dart';
 
 class GradientPickerScreen extends StatefulWidget {
   const GradientPickerScreen({super.key});
@@ -17,21 +18,38 @@ class _GradientPickerScreenState extends State<GradientPickerScreen> {
   double angle = 0;
   bool isLinear = true;
 
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedGradient();
+  }
+
+  Future<void> _loadSavedGradient() async {
+    final data = await GradientPersistence.loadGradient();
+    if (data != null) {
+      setState(() {
+        startColor = data.startColor;
+        endColor = data.endColor;
+        angle = data.angle;
+        isLinear = data.isLinear;
+      });
+    }
+  }
+
   void pickColor(bool isStartColor) async {
     Color? picked = await showDialog(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text("Select Color"),
-            content: SingleChildScrollView(
-              child: BlockPicker(
-                pickerColor: isStartColor ? startColor : endColor,
-                onColorChanged: (color) {
-                  Navigator.of(context).pop(color);
-                },
-              ),
-            ),
+      builder: (context) => AlertDialog(
+        title: const Text("Select Color"),
+        content: SingleChildScrollView(
+          child: BlockPicker(
+            pickerColor: isStartColor ? startColor : endColor,
+            onColorChanged: (color) {
+              Navigator.of(context).pop(color);
+            },
           ),
+        ),
+      ),
     );
     if (picked != null) {
       setState(() {
@@ -41,6 +59,8 @@ class _GradientPickerScreenState extends State<GradientPickerScreen> {
           endColor = picked;
         }
       });
+      // Save the picked colors
+      // GradientPersistence.saveGradientColors([startColor, endColor]);
     }
   }
 
@@ -48,22 +68,21 @@ class _GradientPickerScreenState extends State<GradientPickerScreen> {
   Widget build(BuildContext context) {
     // ✅ Linear → use GradientRotation(angle)
     // ✅ Radial → use Alignment from angle
-    final gradient =
-        isLinear
-            ? LinearGradient(
-              colors: [startColor, endColor],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              transform: GradientRotation(angle),
-            )
-            : RadialGradient(
-              colors: [startColor, endColor],
-              center: Alignment(
-                math.cos(angle), // X direction
-                math.sin(angle), // Y direction
-              ),
-              radius: 1.0,
-            );
+    final gradient = isLinear
+        ? LinearGradient(
+            colors: [startColor, endColor],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            transform: GradientRotation(angle),
+          )
+        : RadialGradient(
+            colors: [startColor, endColor],
+            center: Alignment(
+              math.cos(angle), // X direction
+              math.sin(angle), // Y direction
+            ),
+            radius: 1.0,
+          );
 
     return Scaffold(
       appBar: AppBar(
@@ -95,7 +114,6 @@ class _GradientPickerScreenState extends State<GradientPickerScreen> {
             ),
             const SizedBox(height: 30),
 
-       
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -263,7 +281,14 @@ class _GradientPickerScreenState extends State<GradientPickerScreen> {
 
             // Apply Button
             GestureDetector(
-              onTap: () {
+              onTap: () async {
+                await GradientPersistence.saveGradient(
+                  startColor: startColor,
+                  endColor: endColor,
+                  angle: angle,
+                  isLinear: isLinear,
+                );
+
                 Provider.of<SelectedColorProvider>(
                   context,
                   listen: false,
