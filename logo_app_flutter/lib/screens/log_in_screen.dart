@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:logo_app_flutter/screens/home_screen.dart';
 import 'package:logo_app_flutter/screens/sign_up_screen.dart';
 import 'package:logo_app_flutter/services/auth_service.dart';
 import 'package:logo_app_flutter/utils/theme_colors.dart';
@@ -118,10 +117,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             content: Text("Logged in successfully!")),
                       );
 
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (_) => const HomeScreen()),
-                      );
+                     Navigator.pop(context);
                     }
                   } catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(

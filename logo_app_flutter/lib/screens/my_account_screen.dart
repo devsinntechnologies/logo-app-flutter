@@ -106,8 +106,11 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
 
   Widget _buildLoggedInView() {
     final email = _user?.email ?? 'No email';
-    final name = _user?.userMetadata?['full_name'] ?? _user?.userMetadata?['name'] ?? 'User';
-    final avatarUrl = _user?.userMetadata?['avatar_url'] ?? _user?.userMetadata?['picture'];
+    final name = _user?.userMetadata?['full_name'] ??
+        _user?.userMetadata?['name'] ??
+        'User';
+    final avatarUrl =
+        _user?.userMetadata?['avatar_url'] ?? _user?.userMetadata?['picture'];
     final userId = _user?.id ?? '';
 
     return SingleChildScrollView(
@@ -186,13 +189,19 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
             // Sign Out Button
             GestureDetector(
               onTap: () async {
+                if (!mounted) return;
+
+                // Pop and show Snackbar immediately
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Signed out successfully')),
+                );
+
+                // Wait a tiny moment so UI updates instantly
+                await Future.delayed(const Duration(milliseconds: 100));
+
+                // Perform sign out
                 await _supabase.auth.signOut();
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Signed out successfully')),
-                  );
-                  Navigator.pop(context);
-                }
               },
               child: Container(
                 width: double.infinity,

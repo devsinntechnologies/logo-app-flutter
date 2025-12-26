@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:logo_app_flutter/provider/selected_color_provider.dart';
 import 'package:logo_app_flutter/screens/download_logo.dart';
 import 'package:logo_app_flutter/services/logo_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:logo_app_flutter/utils/theme_colors.dart';
+import 'package:provider/provider.dart';
 
 class TemplateWidget extends StatefulWidget {
   final String companyName;
@@ -116,6 +118,39 @@ class _TemplateWidgetState extends State<TemplateWidget> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    // final provider = Provider.of<SelectedColorProvider>(context);
+    // final companyFontFamily = provider.companyFontFamily;
+    // final sloganFontFamily = provider.sloganFontFamily;
+
+    // TextStyle getFontStyle(String? fontFamily, double fontSize) {
+    //   if (fontFamily != null) {
+    //     switch (fontFamily) {
+    //       case 'Roboto':
+    //         return GoogleFonts.roboto(fontSize: fontSize, color: Colors.black87, fontWeight: FontWeight.bold, letterSpacing: 1.2);
+    //       case 'Pacifico':
+    //         return GoogleFonts.pacifico(fontSize: fontSize, color: Colors.black87, letterSpacing: 1.2);
+    //       case 'Poppins':
+    //         return GoogleFonts.poppins(fontSize: fontSize, color: Colors.black87, fontWeight: FontWeight.bold, letterSpacing: 1.2);
+    //       case 'DancingScript':
+    //         return GoogleFonts.dancingScript(fontSize: fontSize, color: Colors.black87, letterSpacing: 1.2);
+    //       case 'Satisfy':
+    //         return GoogleFonts.satisfy(fontSize: fontSize, color: Colors.black87, letterSpacing: 1.2);
+    //       case 'Lato':
+    //         return GoogleFonts.lato(fontSize: fontSize, color: Colors.black87, letterSpacing: 1.2);
+    //       case 'Orbitron':
+    //         return GoogleFonts.orbitron(fontSize: fontSize, color: Colors.black87, letterSpacing: 1.2);
+    //       case 'OpenSans':
+    //         return GoogleFonts.openSans(fontSize: fontSize, color: Colors.black87, letterSpacing: 1.2);
+    //       case 'BebasNeue':
+    //         return GoogleFonts.bebasNeue(fontSize: fontSize, color: Colors.black87, letterSpacing: 1.2);
+    //       case 'PressStart2P':
+    //         return GoogleFonts.pressStart2p(fontSize: fontSize - 2, color: Colors.black87, letterSpacing: 1.2);
+    //       default:
+    //         return TextStyle(fontSize: fontSize, color: Colors.black87);
+    //     }
+    //   }
+    //   return TextStyle(fontSize: fontSize, color: Colors.black87);
+    // }
 
     return Scaffold(
       body: FutureBuilder<List<String>>(
@@ -199,7 +234,7 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                                 textAlign: TextAlign.center,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: _getFontStyle(
+                                   style: _getFontStyle(
                                   widget.selectedFontIndex,
                                   fontSize: 14,
                                 ),
@@ -212,7 +247,7 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                                 textAlign: TextAlign.center,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
-                                style: _getFontStyle(
+                                   style: _getFontStyle(
                                   widget.selectedFontIndex,
                                   fontSize: 10,
                                 ),

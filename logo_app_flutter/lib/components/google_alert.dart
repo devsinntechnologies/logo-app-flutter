@@ -18,6 +18,7 @@ void showCustomGoogleDialog(BuildContext context) {
             SizedBox(height: 10),
             InkWell(
               onTap: () {
+                Navigator.pop(context);
                 Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -58,6 +59,7 @@ void showCustomGoogleDialog(BuildContext context) {
             SizedBox(height: 20),
             InkWell(
               onTap: () {
+                Navigator.pop(context);
                 Navigator.push(
                     context,
                     MaterialPageRoute(

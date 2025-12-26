@@ -1,19 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:logo_app_flutter/components/google_alert.dart';
 import 'package:logo_app_flutter/screens/my_design_screen.dart';
 import 'package:logo_app_flutter/utils/theme_colors.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class MyDesignButton extends StatelessWidget {
   const MyDesignButton({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final user = Supabase.instance.client.auth.currentUser;
+    final GlobalKey canvasKey = GlobalKey();
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => MyDesignScreen()),
-        );
+        if (user != null) {
+          // User is logged in → navigate normally
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => MyDesignScreen(canvasKey: canvasKey),
+            ),
+          );
+        } else {
+          // User not logged in → show login/signup dialog
+          showCustomGoogleDialog(context);
+        }
 
         // SnackBar snackBar = const SnackBar(
         //   content: Text('My Design button pressed!'),

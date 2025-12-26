@@ -5,7 +5,9 @@ import 'package:logo_app_flutter/fragments/choose_fonts_widget.dart';
 import 'package:logo_app_flutter/fragments/information_widget.dart';
 import 'package:logo_app_flutter/fragments/template_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:logo_app_flutter/provider/selected_color_provider.dart';
 import 'package:logo_app_flutter/utils/theme_colors.dart';
+import 'package:provider/provider.dart';
 
 class DesignInputScreen extends StatefulWidget {
   const DesignInputScreen({super.key});

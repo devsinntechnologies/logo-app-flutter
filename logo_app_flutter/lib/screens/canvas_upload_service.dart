@@ -5,41 +5,31 @@ import 'package:flutter/widgets.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CanvasUploadService {
-  static Future<String?> uploadCanvas({
-    required GlobalKey canvasKey,
-  }) async {
+  /// Upload canvas image to Supabase under the current user's folder
+  static Future<String?> uploadCanvas({required GlobalKey canvasKey}) async {
     try {
       await WidgetsBinding.instance.endOfFrame;
 
-      final boundary = canvasKey.currentContext!
-          .findRenderObject() as RenderRepaintBoundary;
-
-      final ui.Image image =
-          await boundary.toImage(pixelRatio: 3);
-
-      final byteData =
-          await image.toByteData(format: ui.ImageByteFormat.png);
-
-      final Uint8List pngBytes =
-          byteData!.buffer.asUint8List();
+      final boundary =
+          canvasKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      final ui.Image image = await boundary.toImage(pixelRatio: 3);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      final Uint8List pngBytes = byteData!.buffer.asUint8List();
 
       final supabase = Supabase.instance.client;
+      final uid = supabase.auth.currentUser!.id;
+      final fileName = 'logo_${DateTime.now().millisecondsSinceEpoch}.png';
+      final filePath = 'logos/$uid/$fileName';
 
-      final fileName =
-          'logo_${DateTime.now().millisecondsSinceEpoch}.png';
-
-      await supabase.storage
-          .from('logos')
-          .uploadBinary(
-            'logos/$fileName',
+      await supabase.storage.from('logos').uploadBinary(
+            filePath,
             pngBytes,
-            fileOptions:
-                const FileOptions(contentType: 'image/png'),
+            fileOptions: const FileOptions(contentType: 'image/png'),
           );
 
-      return supabase.storage
-          .from('your_bucket_name')
-          .getPublicUrl('logos/$fileName');
+      final url = supabase.storage.from('logos').getPublicUrl(filePath);
+      print('✅ Uploaded logo URL: $url');
+      return url;
     } catch (e) {
       print('❌ Canvas upload error: $e');
       return null;

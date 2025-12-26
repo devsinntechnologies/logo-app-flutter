@@ -21,6 +21,7 @@ import 'package:logo_app_flutter/utils/theme_colors.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../components/logoBottomNavbarItems/drop_up_panel.dart';
 import '../components/logo_canvas.dart';
 import '../utils/text_size_util.dart';
@@ -447,12 +448,21 @@ class _DownloadLogoState extends State<DownloadLogo> {
           //   onPressed: _undo,
           //   tooltip: 'Undo last change',
           // ),
-          IconButton(
-            icon: const Icon(Icons.save, size: 35),
-            onPressed: () => _showSaveConfirmationDialog(context, _canvasKey),
-            // onPressed: () => showCustomGoogleDialog(context),
-            tooltip: 'Save Logo',
-          ),
+         IconButton(
+  icon: const Icon(Icons.save, size: 35),
+  onPressed: () {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user != null) {
+      // User is logged in → show save confirmation
+      _showSaveConfirmationDialog(context, _canvasKey);
+    } else {
+      // User not logged in → show login dialog
+      showCustomGoogleDialog(context);
+    }
+  },
+  tooltip: 'Save Logo',
+)
+
         ],
       ),
       body: Stack(
@@ -1802,6 +1812,7 @@ void sendBackward(int elementId, dynamic logoState) {
         MaterialPageRoute(
           builder: (context) => ArtSelectScreen(
             images: [
+              'assets/icons/logo.png',
               'assets/logo_images/logo_1.png',
               'assets/logo_images/logo_2.png',
               'assets/logo_images/logo_3.png',
@@ -2300,7 +2311,7 @@ void sendBackward(int elementId, dynamic logoState) {
         size: original.companyNameSize,
         color: originalColor,
         isVisible: true,
-        fontWeight: FontWeight.w900,
+        // fontWeight: FontWeight.w900,
         opacity: 1,
         isOutlined: outlineWidth > 0,
         outlineColor: outlineColor,
@@ -2863,13 +2874,18 @@ void sendBackward(int elementId, dynamic logoState) {
     Size canvasSize,
   ) {
     final newOffset = original + delta;
+    // Allow the object's center to reach the canvas edge (not just top-left)
+    // This prevents large objects from being blocked at the right/bottom
+    const double bottomMargin = 60.0;
+    final halfWidth = elementSize.width / 2;
+    final halfHeight = elementSize.height / 2;
     final clampedDx = newOffset.dx.clamp(
-      0.0,
-      canvasSize.width - elementSize.width,
+      -halfWidth,
+      canvasSize.width - halfWidth,
     );
     final clampedDy = newOffset.dy.clamp(
-      0.0,
-      canvasSize.height - elementSize.height,
+      -halfHeight,
+      canvasSize.height - halfHeight + bottomMargin,
     );
     return Offset(clampedDx, clampedDy);
   }
