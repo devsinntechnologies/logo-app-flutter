@@ -31,12 +31,14 @@ class DownloadLogo extends StatefulWidget {
   final String svgLogo;
   final String companyName;
   final String sloganName;
+  final int selectedFontIndex;
 
   const DownloadLogo({
     super.key,
     required this.svgLogo,
     required this.companyName,
     required this.sloganName,
+    this.selectedFontIndex = 0,
   });
 
   @override
@@ -385,6 +387,10 @@ class _DownloadLogoState extends State<DownloadLogo> {
     colorProvider.resetAllOutlines();
     colorProvider.resetAllColors(defaultColors: {});
     colorProvider.clearOverrides();
+    
+    // Set the selected font index for company name and slogan
+    colorProvider.setCompanyFontIndex(widget.selectedFontIndex);
+    colorProvider.setSloganFontIndex(widget.selectedFontIndex);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Clear undo/redo stacks and initialize with clean state
@@ -1780,11 +1786,13 @@ void sendBackward(int elementId, dynamic logoState) {
 
       if (result != null && result.isNotEmpty) {
         setState(() {
+          final provider = Provider.of<SelectedColorProvider>(context, listen: false);
           final newTextElement = CustomTextElement(
             text: result,
             position: _currentLogoState.logoPosition ?? const Offset(150, 100),
             size: 22,
             rotation: 0,
+            fontIndex: provider.companyFontIndex,
           );
           final updatedCustomTexts = List<CustomTextElement>.from(
             _currentLogoState.customTexts,
@@ -2316,6 +2324,7 @@ void sendBackward(int elementId, dynamic logoState) {
         isOutlined: outlineWidth > 0,
         outlineColor: outlineColor,
         strokeWidth: outlineWidth,
+        fontIndex: provider.companyFontIndex,
       );
 
       final updatedTexts =
@@ -2371,6 +2380,7 @@ void sendBackward(int elementId, dynamic logoState) {
         isOutlined: outlineWidth > 0,
         outlineColor: outlineColor,
         strokeWidth: outlineWidth,
+        fontIndex: provider.sloganFontIndex,
       );
 
       final updatedTexts =

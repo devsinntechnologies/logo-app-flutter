@@ -513,50 +513,43 @@ class _LogoCanvasState extends State<LogoCanvas> {
         id,
         fallback: provider.customTextColor,
       );
-          final textStyle = TextStyle(
-        fontSize: customText.size,
-        color: elementColor,
-        fontWeight: FontWeight.w500,
-      );
-      // TextStyle textStyle;
-      // if (customText.fontFamily != null) {
-      //   switch (customText.fontFamily) {
-      //     case 'Roboto':
-      //       textStyle = GoogleFonts.roboto(fontSize: customText.size, color: elementColor, fontWeight: customText.fontWeight);
-      //       break;
-      //     case 'Pacifico':
-      //       textStyle = GoogleFonts.pacifico(fontSize: customText.size, color: elementColor);
-      //       break;
-      //     case 'Poppins':
-      //       textStyle = GoogleFonts.poppins(fontSize: customText.size, color: elementColor, fontWeight: customText.fontWeight);
-      //       break;
-      //     case 'DancingScript':
-      //       textStyle = GoogleFonts.dancingScript(fontSize: customText.size, color: elementColor);
-      //       break;
-      //     case 'Satisfy':
-      //       textStyle = GoogleFonts.satisfy(fontSize: customText.size, color: elementColor);
-      //       break;
-      //     case 'Lato':
-      //       textStyle = GoogleFonts.lato(fontSize: customText.size, color: elementColor, fontWeight: customText.fontWeight);
-      //       break;
-      //     case 'Orbitron':
-      //       textStyle = GoogleFonts.orbitron(fontSize: customText.size, color: elementColor, fontWeight: customText.fontWeight);
-      //       break;
-      //     case 'OpenSans':
-      //       textStyle = GoogleFonts.openSans(fontSize: customText.size, color: elementColor, fontWeight: customText.fontWeight);
-      //       break;
-      //     case 'BebasNeue':
-      //       textStyle = GoogleFonts.bebasNeue(fontSize: customText.size, color: elementColor);
-      //       break;
-      //     case 'PressStart2P':
-      //       textStyle = GoogleFonts.pressStart2p(fontSize: customText.size, color: elementColor);
-      //       break;
-      //     default:
-      //       textStyle = TextStyle(fontSize: customText.size, color: elementColor, fontWeight: customText.fontWeight);
-      //   }
-      // } else {
-      //   textStyle = TextStyle(fontSize: customText.size, color: elementColor, fontWeight: customText.fontWeight);
-      // }
+      
+      // Get the font style based on the fontIndex from the element
+      TextStyle textStyle;
+      switch (customText.fontIndex) {
+        case 0:
+          textStyle = GoogleFonts.roboto(fontSize: customText.size, color: elementColor, fontWeight: customText.fontWeight);
+          break;
+        case 1:
+          textStyle = GoogleFonts.pacifico(fontSize: customText.size, color: elementColor);
+          break;
+        case 2:
+          textStyle = GoogleFonts.poppins(fontSize: customText.size, color: elementColor, fontWeight: customText.fontWeight);
+          break;
+        case 3:
+          textStyle = GoogleFonts.dancingScript(fontSize: customText.size, color: elementColor);
+          break;
+        case 4:
+          textStyle = GoogleFonts.satisfy(fontSize: customText.size, color: elementColor);
+          break;
+        case 5:
+          textStyle = GoogleFonts.lato(fontSize: customText.size, color: elementColor, fontWeight: customText.fontWeight);
+          break;
+        case 6:
+          textStyle = GoogleFonts.orbitron(fontSize: customText.size, color: elementColor, fontWeight: customText.fontWeight);
+          break;
+        case 7:
+          textStyle = GoogleFonts.openSans(fontSize: customText.size, color: elementColor, fontWeight: customText.fontWeight);
+          break;
+        case 8:
+          textStyle = GoogleFonts.bebasNeue(fontSize: customText.size, color: elementColor);
+          break;
+        case 9:
+          textStyle = GoogleFonts.pressStart2p(fontSize: customText.size, color: elementColor);
+          break;
+        default:
+          textStyle = TextStyle(fontSize: customText.size, color: elementColor, fontWeight: customText.fontWeight);
+      }
       final measuredSize = _calculateTextSize(customText.text, textStyle);
       final textSize = Size(
         measuredSize.width * scaleFactor,
@@ -775,51 +768,44 @@ class _LogoCanvasState extends State<LogoCanvas> {
       case 1: // Company Name
         final nameText = widget.logoState.companyName ?? '';
         final nameSize = widget.logoState.companyNameSize;
-             final textStyle = TextStyle(
-          fontSize: nameSize,
-          fontWeight: FontWeight.bold,
-          color: companyColor,
-        );
-        // TextStyle textStyle;
-        // final fontFamily = provider.companyFontFamily;
-        // if (fontFamily != null) {
-        //   switch (fontFamily) {
-        //     case 'Roboto':
-        //       textStyle = GoogleFonts.roboto(fontSize: nameSize, color: companyColor, fontWeight: FontWeight.bold);
-        //       break;
-        //     case 'Pacifico':
-        //       textStyle = GoogleFonts.pacifico(fontSize: nameSize, color: companyColor);
-        //       break;
-        //     case 'Poppins':
-        //       textStyle = GoogleFonts.poppins(fontSize: nameSize, color: companyColor, fontWeight: FontWeight.bold);
-        //       break;
-        //     case 'DancingScript':
-        //       textStyle = GoogleFonts.dancingScript(fontSize: nameSize, color: companyColor);
-        //       break;
-        //     case 'Satisfy':
-        //       textStyle = GoogleFonts.satisfy(fontSize: nameSize, color: companyColor);
-        //       break;
-        //     case 'Lato':
-        //       textStyle = GoogleFonts.lato(fontSize: nameSize, color: companyColor, fontWeight: FontWeight.bold);
-        //       break;
-        //     case 'Orbitron':
-        //       textStyle = GoogleFonts.orbitron(fontSize: nameSize, color: companyColor, fontWeight: FontWeight.bold);
-        //       break;
-        //     case 'OpenSans':
-        //       textStyle = GoogleFonts.openSans(fontSize: nameSize, color: companyColor, fontWeight: FontWeight.bold);
-        //       break;
-        //     case 'BebasNeue':
-        //       textStyle = GoogleFonts.bebasNeue(fontSize: nameSize, color: companyColor);
-        //       break;
-        //     case 'PressStart2P':
-        //       textStyle = GoogleFonts.pressStart2p(fontSize: nameSize, color: companyColor);
-        //       break;
-        //     default:
-        //       textStyle = TextStyle(fontSize: nameSize, color: companyColor, fontWeight: FontWeight.bold);
-        //   }
-        // } else {
-        //   textStyle = TextStyle(fontSize: nameSize, color: companyColor, fontWeight: FontWeight.bold);
-        // }
+        
+        // Get the font style based on the selected font index from provider
+        TextStyle textStyle;
+        final fontIndex = provider.companyFontIndex;
+        switch (fontIndex) {
+          case 0:
+            textStyle = GoogleFonts.roboto(fontSize: nameSize, color: companyColor, fontWeight: FontWeight.bold);
+            break;
+          case 1:
+            textStyle = GoogleFonts.pacifico(fontSize: nameSize, color: companyColor);
+            break;
+          case 2:
+            textStyle = GoogleFonts.poppins(fontSize: nameSize, color: companyColor, fontWeight: FontWeight.bold);
+            break;
+          case 3:
+            textStyle = GoogleFonts.dancingScript(fontSize: nameSize, color: companyColor);
+            break;
+          case 4:
+            textStyle = GoogleFonts.satisfy(fontSize: nameSize, color: companyColor);
+            break;
+          case 5:
+            textStyle = GoogleFonts.lato(fontSize: nameSize, color: companyColor, fontWeight: FontWeight.bold);
+            break;
+          case 6:
+            textStyle = GoogleFonts.orbitron(fontSize: nameSize, color: companyColor, fontWeight: FontWeight.bold);
+            break;
+          case 7:
+            textStyle = GoogleFonts.openSans(fontSize: nameSize, color: companyColor, fontWeight: FontWeight.bold);
+            break;
+          case 8:
+            textStyle = GoogleFonts.bebasNeue(fontSize: nameSize, color: companyColor);
+            break;
+          case 9:
+            textStyle = GoogleFonts.pressStart2p(fontSize: nameSize, color: companyColor);
+            break;
+          default:
+            textStyle = TextStyle(fontSize: nameSize, color: companyColor, fontWeight: FontWeight.bold);
+        }
         final textSize = _calculateTextSize(nameText, textStyle) * 1.09;
         final centerPosition =
             (widget.logoState.companyNamePosition == Offset.zero ||
@@ -846,47 +832,44 @@ class _LogoCanvasState extends State<LogoCanvas> {
       case 2: // Slogan
         final sloganText = widget.logoState.sloganName ?? '';
         final sloganSize = widget.logoState.sloganSize;
-         final sloganStyle = TextStyle(fontSize: sloganSize, color: sloganColor);
-        // TextStyle sloganStyle;
-        // final fontFamily = provider.sloganFontFamily;
-        // if (fontFamily != null) {
-        //   switch (fontFamily) {
-        //     case 'Roboto':
-        //       sloganStyle = GoogleFonts.roboto(fontSize: sloganSize, color: sloganColor, fontWeight: FontWeight.w500);
-        //       break;
-        //     case 'Pacifico':
-        //       sloganStyle = GoogleFonts.pacifico(fontSize: sloganSize, color: sloganColor);
-        //       break;
-        //     case 'Poppins':
-        //       sloganStyle = GoogleFonts.poppins(fontSize: sloganSize, color: sloganColor, fontWeight: FontWeight.w500);
-        //       break;
-        //     case 'DancingScript':
-        //       sloganStyle = GoogleFonts.dancingScript(fontSize: sloganSize, color: sloganColor);
-        //       break;
-        //     case 'Satisfy':
-        //       sloganStyle = GoogleFonts.satisfy(fontSize: sloganSize, color: sloganColor);
-        //       break;
-        //     case 'Lato':
-        //       sloganStyle = GoogleFonts.lato(fontSize: sloganSize, color: sloganColor, fontWeight: FontWeight.w500);
-        //       break;
-        //     case 'Orbitron':
-        //       sloganStyle = GoogleFonts.orbitron(fontSize: sloganSize, color: sloganColor, fontWeight: FontWeight.w500);
-        //       break;
-        //     case 'OpenSans':
-        //       sloganStyle = GoogleFonts.openSans(fontSize: sloganSize, color: sloganColor, fontWeight: FontWeight.w500);
-        //       break;
-        //     case 'BebasNeue':
-        //       sloganStyle = GoogleFonts.bebasNeue(fontSize: sloganSize, color: sloganColor);
-        //       break;
-        //     case 'PressStart2P':
-        //       sloganStyle = GoogleFonts.pressStart2p(fontSize: sloganSize, color: sloganColor);
-        //       break;
-        //     default:
-        //       sloganStyle = TextStyle(fontSize: sloganSize, color: sloganColor, fontWeight: FontWeight.w500);
-        //   }
-        // } else {
-        //   sloganStyle = TextStyle(fontSize: sloganSize, color: sloganColor, fontWeight: FontWeight.w500);
-        // }
+        
+        // Get the font style based on the selected font index from provider
+        TextStyle sloganStyle;
+        final sloganFontIndex = provider.sloganFontIndex;
+        switch (sloganFontIndex) {
+          case 0:
+            sloganStyle = GoogleFonts.roboto(fontSize: sloganSize, color: sloganColor, fontWeight: FontWeight.w500);
+            break;
+          case 1:
+            sloganStyle = GoogleFonts.pacifico(fontSize: sloganSize, color: sloganColor);
+            break;
+          case 2:
+            sloganStyle = GoogleFonts.poppins(fontSize: sloganSize, color: sloganColor, fontWeight: FontWeight.w500);
+            break;
+          case 3:
+            sloganStyle = GoogleFonts.dancingScript(fontSize: sloganSize, color: sloganColor);
+            break;
+          case 4:
+            sloganStyle = GoogleFonts.satisfy(fontSize: sloganSize, color: sloganColor);
+            break;
+          case 5:
+            sloganStyle = GoogleFonts.lato(fontSize: sloganSize, color: sloganColor, fontWeight: FontWeight.w500);
+            break;
+          case 6:
+            sloganStyle = GoogleFonts.orbitron(fontSize: sloganSize, color: sloganColor, fontWeight: FontWeight.w500);
+            break;
+          case 7:
+            sloganStyle = GoogleFonts.openSans(fontSize: sloganSize, color: sloganColor, fontWeight: FontWeight.w500);
+            break;
+          case 8:
+            sloganStyle = GoogleFonts.bebasNeue(fontSize: sloganSize, color: sloganColor);
+            break;
+          case 9:
+            sloganStyle = GoogleFonts.pressStart2p(fontSize: sloganSize, color: sloganColor);
+            break;
+          default:
+            sloganStyle = TextStyle(fontSize: sloganSize, color: sloganColor, fontWeight: FontWeight.w500);
+        }
         final sloganMeasured = _calculateTextSize(sloganText, sloganStyle);
         final centerPosition =
             (widget.logoState.sloganPosition == Offset.zero ||

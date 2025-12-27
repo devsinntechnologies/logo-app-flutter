@@ -48,6 +48,7 @@ class CustomTextElement {
   final int? layerIndex;
   final Color color;
   final FontWeight fontWeight;
+  final int fontIndex;
 
   final bool isOutlined;
   final Color outlineColor;
@@ -67,6 +68,7 @@ class CustomTextElement {
     this.outlineColor = Colors.black,
     this.strokeWidth = 1.0,
     this.fontWeight = FontWeight.normal,
+    this.fontIndex = 0,
   });
 
   CustomTextElement copyWith({
@@ -83,6 +85,7 @@ class CustomTextElement {
     Color? outlineColor,
     double? strokeWidth,
     FontWeight? fontWeight,
+    int? fontIndex,
   }) {
     return CustomTextElement(
       textAlign: textAlign ?? this.textAlign,
@@ -98,6 +101,7 @@ class CustomTextElement {
       outlineColor: outlineColor ?? this.outlineColor,
       strokeWidth: strokeWidth ?? this.strokeWidth,
       fontWeight: fontWeight ?? this.fontWeight,
+      fontIndex: fontIndex ?? this.fontIndex,
     );
   }
 
@@ -113,6 +117,7 @@ class CustomTextElement {
       layerIndex: layerIndex,
       color: Color(color.value),
       fontWeight: fontWeight,
+      fontIndex: fontIndex,
       isOutlined: isOutlined,
       outlineColor: Color(outlineColor.value),
       strokeWidth: strokeWidth,

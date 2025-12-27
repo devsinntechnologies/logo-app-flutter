@@ -190,6 +190,7 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                                 svgLogo: selectedSvg,
                                 companyName: widget.companyName,
                                 sloganName: widget.slogan,
+                                selectedFontIndex: widget.selectedFontIndex,
                               ),
                         ),
                       );
@@ -295,6 +296,7 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                                           svgLogo: selectedSvg,
                                           companyName: widget.companyName,
                                           sloganName: widget.slogan,
+                                          selectedFontIndex: widget.selectedFontIndex,
                                         ),
                                   ),
                                 );

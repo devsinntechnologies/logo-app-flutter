@@ -20,6 +20,13 @@ class SelectedColorProvider extends ChangeNotifier {
   Color? _shapeColor;
   Color _customTextColor = Colors.black;
   Color _logoColor = Colors.black;
+  
+  // Font family properties
+  int _companyFontIndex = 0;
+  int _sloganFontIndex = 0;
+  
+  int get companyFontIndex => _companyFontIndex;
+  int get sloganFontIndex => _sloganFontIndex;
 
   bool _isColorManuallySelected = false;
   // new map to track if user manually changed color
@@ -197,6 +204,17 @@ class SelectedColorProvider extends ChangeNotifier {
     _selectedIndex = index;
     notifyListeners(); // UI ko update karne k liye
   }
+
+  void setCompanyFontIndex(int index) {
+    _companyFontIndex = index;
+    notifyListeners();
+  }
+
+  void setSloganFontIndex(int index) {
+    _sloganFontIndex = index;
+    notifyListeners();
+  }
+
   void clearOverrides() {
     canvasImage = null;
     _selectedColor = Colors.white;

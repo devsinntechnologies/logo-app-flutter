@@ -110,15 +110,20 @@ import 'package:logo_app_flutter/utils/theme_colors.dart';
 
 class ChooseFontsWidget extends StatefulWidget {
   final Function(int) onFontSelected;
+  final int initialSelectedIndex;
 
-  const ChooseFontsWidget({super.key, required this.onFontSelected});
+  const ChooseFontsWidget({
+    super.key,
+    required this.onFontSelected,
+    this.initialSelectedIndex = 0,
+  });
 
   @override
   State<ChooseFontsWidget> createState() => _ChooseFontsWidgetState();
 }
 
 class _ChooseFontsWidgetState extends State<ChooseFontsWidget> {
-  int selectedIndex = 0;
+  late int selectedIndex;
 
   final List<String> fontNames = [
     'MODERN',         // 0
@@ -157,6 +162,12 @@ class _ChooseFontsWidgetState extends State<ChooseFontsWidget> {
         ),
       ],
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    selectedIndex = widget.initialSelectedIndex;
   }
 
   TextStyle _getFontStyle(int index) {

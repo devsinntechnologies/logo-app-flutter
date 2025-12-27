@@ -153,6 +153,7 @@ class _DesignInputScreenState extends State<DesignInputScreen> {
         );
       case 1:
         return ChooseFontsWidget(
+          initialSelectedIndex: selectedFontIndex,
           onFontSelected: (int index) {
             setState(() {
               selectedFontIndex = index;
