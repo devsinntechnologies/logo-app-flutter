@@ -670,7 +670,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
                   children: [
                     Container(
                       height:
-                          (MediaQuery.of(context).size.height > 500) ? 300 : 30,
+                          (MediaQuery.of(context).size.height > 500) ? 250 : 30,
                       color: Colors.grey.shade200,
                       child: Padding(
                         padding: const EdgeInsets.all(12.0),
@@ -1014,6 +1014,9 @@ onSendBackwardPressed: () =>
                                                               _currentLogoState
                                                                   .elementOrder,
                                                         );
+                                                          // Save this rotation as a separate undo step
+                                                          _saveState();
+                                                          setState(() {});
                                                       },
                                                       child: Container(
                                                         decoration:
@@ -1034,7 +1037,7 @@ onSendBackwardPressed: () =>
                                                         ),
                                                         child: const Icon(
                                                           Icons.refresh,
-                                                          size: 10,
+                                                          size: 15,
                                                           color: Colors.orange,
                                                         ),
                                                       ),

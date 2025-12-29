@@ -456,9 +456,15 @@ class _LogoCanvasState extends State<LogoCanvas> {
     }
 
     Offset _centerAlign(Size canvasSize, Size childSize) {
+      // Use the device's horizontal center to ensure visual centering
+      // across different mobile screen sizes while keeping vertical
+      // centering relative to the canvas area.
+      final double screenWidth = MediaQuery.of(context).size.width -
+          MediaQuery.of(context).padding.left -
+          MediaQuery.of(context).padding.right;
       return Offset(
-        (canvasSize.width - childSize.width) / 2,
-        (canvasSize.height - childSize.height) / 2,
+        screenWidth / 2,
+        canvasSize.height / 2,
       );
     }
 

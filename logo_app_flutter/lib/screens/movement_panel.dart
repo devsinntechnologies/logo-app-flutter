@@ -94,7 +94,7 @@ class _MovementPanelState extends State<MovementPanel>
       children: [
         Container(
           width: MediaQuery.of(context).size.width,
-          height: 30,
+          height: 25,
           color: Colors.grey.shade200,
           child: Align(
             alignment: Alignment.topRight,
@@ -102,12 +102,12 @@ class _MovementPanelState extends State<MovementPanel>
               onTap: widget.onClose,
               child: Container(
                 width: 25,
-                height: 30,
+                // height: 25,
                 decoration: BoxDecoration(
                   color: Colors.grey.shade100,
                   borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(9),
-                    topRight: Radius.circular(9),
+                    topLeft: Radius.circular(4),
+                    topRight: Radius.circular(4),
                   ),
                 ),
                 child: const Icon(
@@ -122,7 +122,7 @@ class _MovementPanelState extends State<MovementPanel>
         Align(
           alignment: Alignment.bottomCenter,
           child: Padding(
-            padding: const EdgeInsets.only(bottom: 50),
+            padding: const EdgeInsets.only(bottom: 35),
             child: Container(
               width: MediaQuery.of(context).size.width,
               decoration: BoxDecoration(color: Colors.white),
