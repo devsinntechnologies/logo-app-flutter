@@ -94,20 +94,20 @@ class _MovementPanelState extends State<MovementPanel>
       children: [
         Container(
           width: MediaQuery.of(context).size.width,
-          height: 25,
-          color: Colors.grey.shade200,
+          // height: 25,
+          color: Colors.transparent,
           child: Align(
             alignment: Alignment.topRight,
             child: InkWell(
               onTap: widget.onClose,
               child: Container(
-                width: 25,
-                // height: 25,
+                width: 27,
+                height: 27,
                 decoration: BoxDecoration(
                   color: Colors.grey.shade100,
                   borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(4),
-                    topRight: Radius.circular(4),
+                    topLeft: Radius.circular(5),
+                    topRight: Radius.circular(5),
                   ),
                 ),
                 child: const Icon(
@@ -135,20 +135,23 @@ class _MovementPanelState extends State<MovementPanel>
                       color: Colors.grey.shade100,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 9.0),
-                        child: const TabBar(
-                          indicatorColor: ThemeColors.purple,
-                          labelColor: ThemeColors.purple,
-                          unselectedLabelColor: Colors.grey,
-                          labelPadding: EdgeInsets.symmetric(vertical: 0),
-                          tabs: [
-                            Tab(text: 'Controls'),
-                            Tab(text: 'Colors'),
-                            Tab(text: 'Outlines'),
-                            Padding(
-                              padding: EdgeInsets.only(right: 0),
-                              child: Tab(text: '3D'),
-                            ),
-                          ],
+                        child: SizedBox(
+                          height: 40,
+                          child: const TabBar(
+                            indicatorColor: ThemeColors.purple,
+                            labelColor: ThemeColors.purple,
+                            unselectedLabelColor: Colors.grey,
+                            labelPadding: EdgeInsets.symmetric(vertical: 0),
+                            tabs: [
+                              Tab(text: 'Controls'),
+                              Tab(text: 'Colors'),
+                              Tab(text: 'Outlines'),
+                              Padding(
+                                padding: EdgeInsets.only(right: 0),
+                                child: Tab(text: '3D'),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -166,6 +169,8 @@ class _MovementPanelState extends State<MovementPanel>
                   ],
                 ),
               ),
+           
+           
             ),
           ),
         ),

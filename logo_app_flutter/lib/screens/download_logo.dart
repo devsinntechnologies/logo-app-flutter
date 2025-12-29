@@ -111,6 +111,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
   // --- Movement Panel Toggle ---
   bool isMovementPanelVisible = true;
+  // Show grid while moving elements
+  bool _isMoving = false;
 
   // --- Background Toggles ---
   bool isCheckerboardActive = false;
@@ -496,7 +498,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
                                 svgLogo: widget.svgLogo,
                                 companyName: widget.companyName,
                                 sloganName: widget.sloganName,
-                                showGrid: _showGrid,
+                                // Show grid when toggled ON or while moving elements
+                                showGrid: (_showGrid || _isMoving),
                                 isEditingMode: true,
                                 selectedElementId: selectedElement,
                                 highlightedHorizontalGridLineIndex:
@@ -670,14 +673,15 @@ class _DownloadLogoState extends State<DownloadLogo> {
                   children: [
                     Container(
                       height:
-                          (MediaQuery.of(context).size.height > 500) ? 250 : 30,
+                          (MediaQuery.of(context).size.height > 500) ? 220 : 30,
                       color: Colors.grey.shade200,
                       child: Padding(
-                        padding: const EdgeInsets.all(12.0),
+                        padding: const EdgeInsets.all(5.0),
                         child: Align(
                           alignment: Alignment.topRight,
                           child: Row(
                             children: [
+                              SizedBox(width: 4),
                               Tooltip(
                                 message: "undo last change",
                                 child: InkWell(
@@ -2721,6 +2725,7 @@ void sendBackward(int elementId, dynamic logoState) {
     debugPrint('Pan started for id=$id');
     setState(() {
       selectedElement = id;
+      _isMoving = true;
     });
 
     _saveState();
@@ -2878,6 +2883,11 @@ void sendBackward(int elementId, dynamic logoState) {
     _initialDragPoint = null;
     _initialElementValue = null;
     _clearGridAlignment();
+    if (_isMoving) {
+      setState(() {
+        _isMoving = false;
+      });
+    }
   }
 
   Offset _limitOffset(
@@ -3042,8 +3052,8 @@ void sendBackward(int elementId, dynamic logoState) {
     Size elementSize,
     Size canvasSize,
   ) {
-    // Remove this line if you want alignment to work even when grid icon is off
-    if (!_showGrid) return;
+    // Respect user toggle but also allow alignment while dragging
+    if (!(_showGrid || _isMoving)) return;
 
     int? newH, newV;
     const tolerance = 10.0;

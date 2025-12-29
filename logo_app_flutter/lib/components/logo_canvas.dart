@@ -137,24 +137,9 @@ class _LogoCanvasState extends State<LogoCanvas> {
                 // clipBehavior: Clip.hardEdge,
                 clipBehavior: Clip.none,
                 children: [
-                  if (widget.showGrid)
-                    ClipRect(
-                      child: RepaintBoundary(
-                        child: SizedBox(
-                          width: MediaQuery.of(context).size.width,
-                          child: CustomPaint(
-                            painter: GridPainter(
-                              gridColor: Colors.blue,
-                              highlightedHorizontalLine:
-                                  widget.highlightedHorizontalGridLineIndex,
-                              highlightedVerticalLine:
-                                  widget.highlightedVerticalGridLineIndex,
-                            ),
-                            size: Size.infinite,
-                          ),
-                        ),
-                      ),
-                    ),
+                  // Grid will be drawn as an overlay after elements to ensure
+                  // visibility above background shapes. (See overlay block
+                  // below where it's rendered on top with IgnorePointer.)
 
                   if (widget.isCheckerboardVisible)
                     Opacity(
@@ -283,6 +268,24 @@ class _LogoCanvasState extends State<LogoCanvas> {
                           .whereType<Widget>(),
                     ],
                   ),
+                  // Draw grid on top of elements so it's always visible.
+                  if (widget.showGrid)
+                    IgnorePointer(
+                      child: SizedBox(
+                        width: canvasSize.width,
+                        height: canvasSize.height,
+                        child: CustomPaint(
+                          painter: GridPainter(
+                            gridColor: Colors.grey,
+                            highlightedHorizontalLine:
+                                widget.highlightedHorizontalGridLineIndex,
+                            highlightedVerticalLine:
+                                widget.highlightedVerticalGridLineIndex,
+                          ),
+                          size: canvasSize,
+                        ),
+                      ),
+                    ),
                 ],
               ),
             );
