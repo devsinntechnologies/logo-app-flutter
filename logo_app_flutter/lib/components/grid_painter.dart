@@ -16,8 +16,8 @@ class GridPainter extends CustomPainter {
     this.image,
   });
 
-  final double _dashWidth = 4.0;
-  final double _dashSpace = 4.0;
+  final double _dashWidth = 5.0;
+  final double _dashSpace = 4.5;
   final double _strokeWidth = 2.0;
   final double _highlightStrokeWidth = 3.0;
   final Color _highlightColor = Colors.redAccent;

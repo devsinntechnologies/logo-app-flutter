@@ -98,7 +98,7 @@ class EditableElementWrapper extends StatelessWidget {
               child: Container(
                 decoration: (!isExporting && isSelected && isEditingMode)
                     ? BoxDecoration(
-                      color: Colors.blueGrey.shade200,
+                      color: Color(0xffCDCDCD),
                         border: Border.all(
                           color:
                               isLocked ? Colors.red.shade300 : Colors.black,

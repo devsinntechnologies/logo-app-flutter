@@ -276,7 +276,7 @@ class _LogoCanvasState extends State<LogoCanvas> {
                         height: canvasSize.height,
                         child: CustomPaint(
                           painter: GridPainter(
-                            gridColor: Colors.grey,
+                            gridColor: Colors.grey[850]!,
                             highlightedHorizontalLine:
                                 widget.highlightedHorizontalGridLineIndex,
                             highlightedVerticalLine:

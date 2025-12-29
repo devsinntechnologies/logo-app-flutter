@@ -42,6 +42,7 @@ Future<List<String>> fetchLogoSVGs(String companyName, String slogan) async {
    if (response.statusCode == 200) {
     final decoded = jsonDecode(response.body);
     final List logos = decoded["data"];
+    print("Logos,$logos");
     final List<String> svgList = [];
 
     for (var item in logos) {
@@ -49,6 +50,7 @@ Future<List<String>> fetchLogoSVGs(String companyName, String slogan) async {
         svgList.add(item["icon_normal"]["source_code"]);
       }
     }
+    print("svgList: ${svgList[0]}");
     return svgList;
   } else {
     throw Exception('Failed to load logos');
