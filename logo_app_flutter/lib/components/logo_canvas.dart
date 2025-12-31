@@ -780,7 +780,8 @@ class _LogoCanvasState extends State<LogoCanvas> {
         
         // Get the font style based on the selected font index from provider
         TextStyle textStyle;
-        final fontIndex = provider.companyFontIndex;
+        // Prefer provider value (current session) but fall back to saved state font index
+        final fontIndex = (provider.companyFontIndex != 0) ? provider.companyFontIndex : (widget.logoState.companyFontIndex ?? 0);
         switch (fontIndex) {
           case 0:
             textStyle = GoogleFonts.roboto(fontSize: nameSize, color: companyColor, fontWeight: FontWeight.bold);
@@ -844,7 +845,8 @@ class _LogoCanvasState extends State<LogoCanvas> {
         
         // Get the font style based on the selected font index from provider
         TextStyle sloganStyle;
-        final sloganFontIndex = provider.sloganFontIndex;
+        // Prefer provider value (current session) but fall back to saved state font index
+        final sloganFontIndex = (provider.sloganFontIndex != 0) ? provider.sloganFontIndex : (widget.logoState.sloganFontIndex ?? 0);
         switch (sloganFontIndex) {
           case 0:
             sloganStyle = GoogleFonts.roboto(fontSize: sloganSize, color: sloganColor, fontWeight: FontWeight.w500);

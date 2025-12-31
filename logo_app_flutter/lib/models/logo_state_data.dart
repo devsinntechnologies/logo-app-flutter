@@ -292,6 +292,8 @@ class LogoStateData {
   final List<int> elementOrder;
   final TextAlign companyNameTextAlign; // ← add this
   final TextAlign sloganTextAlign;
+  final int companyFontIndex;
+  final int sloganFontIndex;
 
   // Background state fields
   final String? selectedShapeName;
@@ -352,6 +354,8 @@ class LogoStateData {
     required this.isSlogan2Visible,
     this.companyNameTextAlign = TextAlign.center,
     this.sloganTextAlign = TextAlign.center,
+    this.companyFontIndex = 0,
+    this.sloganFontIndex = 0,
     this.selectedShapeName,
     this.backgroundColor,
     this.backgroundGradient,
@@ -389,7 +393,6 @@ class LogoStateData {
     Map<int, double>? rotationXMap,
     Map<int, double>? rotationYMap,
     Map<int, double>? rotationZMap,
-
     double? perspective,
     Color? logoColor,
     bool? isLogoColorOverridden,
@@ -435,6 +438,8 @@ class LogoStateData {
     List<CustomSvgElement>? customSVGs,
     Set<int>? lockedElements,
     List<int>? elementOrder,
+    int? companyFontIndex,
+    int? sloganFontIndex,
     String? selectedShapeName,
     Color? backgroundColor,
     Gradient? backgroundGradient,
@@ -500,6 +505,8 @@ class LogoStateData {
 
       companyNameTextAlign: companyNameTextAlign ?? this.companyNameTextAlign,
       sloganTextAlign: sloganTextAlign ?? this.sloganTextAlign,
+      companyFontIndex: companyFontIndex ?? this.companyFontIndex,
+      sloganFontIndex: sloganFontIndex ?? this.sloganFontIndex,
       selectedShapeName: selectedShapeName ?? this.selectedShapeName,
       backgroundColor: backgroundColor ?? this.backgroundColor,
       backgroundGradient: backgroundGradient ?? this.backgroundGradient,
@@ -593,6 +600,8 @@ class LogoStateData {
 
       companyNameTextAlign: companyNameTextAlign,
       sloganTextAlign: sloganTextAlign,
+      companyFontIndex: companyFontIndex,
+      sloganFontIndex: sloganFontIndex,
       selectedShapeName: selectedShapeName,
       backgroundColor: backgroundColor != null ? Color(backgroundColor!.value) : null,
       backgroundGradient: backgroundGradient,
@@ -674,6 +683,8 @@ class LogoStateData {
       'elementOrder': elementOrder,
       'companyNameTextAlign': companyNameTextAlign.toString(),
       'sloganTextAlign': sloganTextAlign.toString(),
+      'companyFontIndex': companyFontIndex,
+      'sloganFontIndex': sloganFontIndex,
       'selectedShapeName': selectedShapeName,
       'backgroundColor': backgroundColor?.value,
       'backgroundImagePath': backgroundImagePath,
@@ -695,6 +706,14 @@ class LogoStateData {
         } catch (_) {}
       }
       if (v is Map && v.containsKey('value')) return Color(v['value']);
+      return fallback;
+    }
+
+    int parseInt(dynamic v, [int fallback = 0]) {
+      if (v == null) return fallback;
+      if (v is int) return v;
+      if (v is num) return v.toInt();
+      if (v is String) return int.tryParse(v) ?? fallback;
       return fallback;
     }
 
@@ -885,6 +904,9 @@ class LogoStateData {
       isCompanyNameVisible: json['isCompanyNameVisible'] ?? true,
       companyName: json['companyName'] as String?,
       sloganPosition: parseOffset(json['sloganPosition'], const Offset(0, 0)),
+      // restore saved font indices if present (robust parsing)
+      companyFontIndex: parseInt(json['companyFontIndex'], 0),
+      sloganFontIndex: parseInt(json['sloganFontIndex'], 0),
       sloganSize: (json['sloganSize'] as num?)?.toDouble() ?? 16.0,
       sloganRotation: (json['sloganRotation'] as num?)?.toDouble() ?? 0.0,
       isSloganVisible: json['isSloganVisible'] ?? true,

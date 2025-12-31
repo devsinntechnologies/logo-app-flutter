@@ -587,6 +587,12 @@ class SelectedColorProvider extends ChangeNotifier {
     // 3) company/slogan top-level fields (explicit)
     _companyTextColor = state.companyNameColor;
     _sloganColor = state.sloganColor;
+    // restore font indices for company and slogan
+    _companyFontIndex = state.companyFontIndex;
+    _sloganFontIndex = state.sloganFontIndex;
+    // Debug: log restored font indices
+    // ignore: avoid_print
+    print('🔁 applyLogoState restored fonts -> company:${_companyFontIndex} slogan:${_sloganFontIndex}');
 
     // 4) custom texts -> map to ids 100 + index (and mark override)
     for (int i = 0; i < state.customTexts.length; i++) {

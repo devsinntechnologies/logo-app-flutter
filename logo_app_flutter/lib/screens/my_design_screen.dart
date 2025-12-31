@@ -181,6 +181,9 @@ Future<void> fetchLogos() async {
                                       }
                                       if (dj is Map<String, dynamic>) {
                                         final state = LogoStateData.fromJson(dj);
+                                        // Debug: log design id and parsed font index before navigating
+                                        // ignore: avoid_print
+                                        print('NAVIGATE -> design id:${matchedDesign?["id"]} companyFont:${state.companyFontIndex} sloganFont:${state.sloganFontIndex}');
                                         await Navigator.push(
                                           context,
                                           MaterialPageRoute(
@@ -188,7 +191,7 @@ Future<void> fetchLogos() async {
                                               svgLogo: state.svgLogo ?? '',
                                               companyName: state.companyName ?? '',
                                               sloganName: state.sloganName ?? '',
-                                              selectedFontIndex: 0,
+                                              selectedFontIndex: state.companyFontIndex,
                                               initialLogoState: state,
                                               designId: matchedDesign?['id']?.toString(),
                                             ),
@@ -244,14 +247,17 @@ Future<void> fetchLogos() async {
                                           }
                                           if (dj is Map<String, dynamic>) {
                                             final state = LogoStateData.fromJson(dj);
-                                            await Navigator.push(
+                                          // Debug: log design id and parsed font index before navigating (edit button)
+                                          // ignore: avoid_print
+                                          print('NAVIGATE(edit) -> design id:${matchedDesign?["id"]} companyFont:${state.companyFontIndex} sloganFont:${state.sloganFontIndex}');
+                                              await Navigator.push(
                                               context,
                                               MaterialPageRoute(
                                                 builder: (_) => DownloadLogo(
                                                   svgLogo: state.svgLogo ?? '',
                                                   companyName: state.companyName ?? '',
                                                   sloganName: state.sloganName ?? '',
-                                                  selectedFontIndex: 0,
+                                                  selectedFontIndex: state.companyFontIndex,
                                                   initialLogoState: state,
                                                   designId: matchedDesign?['id']?.toString(),
                                                 ),

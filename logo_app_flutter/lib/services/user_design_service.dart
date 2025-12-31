@@ -50,6 +50,11 @@ class UserDesignService {
   /// Returns a map with 'filePath' and 'url'
   Future<Map<String, String>?> uploadCanvasImage({required GlobalKey canvasKey, String? targetPath}) async {
     try {
+      // Ensure UI has finished any pending rebuilds (selection box cleared)
+      // Wait a couple of frames and small delays to let provider.clearSelection() propagate.
+      await Future.delayed(const Duration(milliseconds: 50));
+      await WidgetsBinding.instance.endOfFrame;
+      await Future.delayed(const Duration(milliseconds: 50));
       await WidgetsBinding.instance.endOfFrame;
 
       final boundary =

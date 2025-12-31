@@ -239,8 +239,16 @@ void _showSaveConfirmationDialog(BuildContext context, GlobalKey canvasKey) {
                   await WidgetsBinding.instance.endOfFrame;
                   await WidgetsBinding.instance.endOfFrame;
 
-                  try {
+                    try {
+                    // Ensure current provider font selections are written into the state before saving
+                    _currentLogoState = _currentLogoState.copyWith(
+                      companyFontIndex: provider.companyFontIndex,
+                      sloganFontIndex: provider.sloganFontIndex,
+                    );
                     final designJson = _currentLogoState.toJson();
+                    // Debug: log font indices to help diagnose persistence
+                    debugPrint('💾 Saving design fonts -> provider.company:${provider.companyFontIndex} provider.slogan:${provider.sloganFontIndex}');
+                    debugPrint('💾 designJson companyFontIndex: ${designJson["companyFontIndex"]} sloganFontIndex: ${designJson["sloganFontIndex"]}');
                     final svc = UserDesignService();
 
                     if (widget.designId != null) {
@@ -418,6 +426,9 @@ void _showSaveConfirmationDialog(BuildContext context, GlobalKey canvasKey) {
     // If an initial state is provided (editing an existing design), use it
     if (widget.initialLogoState != null) {
       _currentLogoState = widget.initialLogoState!.clone();
+      // Debug: log that initState received an initial logo state
+      // ignore: avoid_print
+      print('DownloadLogo.initState -> initialLogoState companyFont:${widget.initialLogoState?.companyFontIndex} sloganFont:${widget.initialLogoState?.sloganFontIndex} selectedFontIndex:${widget.selectedFontIndex}');
       // Apply colors/backgrounds to provider after frame
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final colorProvider = Provider.of<SelectedColorProvider>(context, listen: false);
@@ -425,6 +436,9 @@ void _showSaveConfirmationDialog(BuildContext context, GlobalKey canvasKey) {
         colorProvider.resetAllColors(defaultColors: {});
         colorProvider.clearOverrides();
         colorProvider.applyLogoState(_currentLogoState);
+        // ensure provider font indices explicitly match saved state
+        colorProvider.setCompanyFontIndex(_currentLogoState.companyFontIndex);
+        colorProvider.setSloganFontIndex(_currentLogoState.sloganFontIndex);
       });
     }
 
@@ -452,9 +466,11 @@ void _showSaveConfirmationDialog(BuildContext context, GlobalKey canvasKey) {
     colorProvider.resetAllColors(defaultColors: {});
     colorProvider.clearOverrides();
     
-    // Set the selected font index for company name and slogan
-    colorProvider.setCompanyFontIndex(widget.selectedFontIndex);
-    colorProvider.setSloganFontIndex(widget.selectedFontIndex);
+    // Set the selected font index for company name and slogan (prefer initial state)
+    final startCompanyFont = widget.initialLogoState?.companyFontIndex ?? widget.selectedFontIndex;
+    final startSloganFont = widget.initialLogoState?.sloganFontIndex ?? widget.selectedFontIndex;
+    colorProvider.setCompanyFontIndex(startCompanyFont);
+    colorProvider.setSloganFontIndex(startSloganFont);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Clear undo/redo stacks and initialize with clean state
