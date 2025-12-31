@@ -66,8 +66,9 @@ class EditableElementWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool canInteract =
-        !isLocked && isEditingMode && isSelected && !isExporting;
+    final bool canInteract = !isLocked && isEditingMode && isSelected && !isExporting;
+    // Allow dragging even if element is not selected yet; we'll auto-select on pan start
+    final bool canDragWithoutSelection = !isLocked && isEditingMode && !isExporting;
     final double clampedX = position.dx.clamp(
       0.0,
       canvasSize.width,
@@ -85,16 +86,21 @@ class EditableElementWrapper extends StatelessWidget {
         clipBehavior: Clip.none,
         children: [
           // Main content
-          Listener(
+            Listener(
             behavior: HitTestBehavior.translucent,
             child: GestureDetector(
               onTap: !isLocked && !isExporting ? () => onTap(id) : null,
-              onPanStart:
-                  canInteract ? (details) => onPanStart(id, details) : null,
-              onPanUpdate: canInteract
-                  ? (details) => onPanUpdate(id, details.delta)
-                  : null,
-              onPanEnd: canInteract ? (details) => onPanEnd(id) : null,
+              onPanStart: canDragWithoutSelection
+                ? (details) {
+                  // Auto-select on drag start if not already selected
+                  if (!isSelected) onTap(id);
+                  onPanStart(id, details);
+                }
+                : null,
+              onPanUpdate: canDragWithoutSelection
+                ? (details) => onPanUpdate(id, details.delta)
+                : null,
+              onPanEnd: canDragWithoutSelection ? (details) => onPanEnd(id) : null,
               child: Container(
                 decoration: (!isExporting && isSelected && isEditingMode)
                     ? BoxDecoration(

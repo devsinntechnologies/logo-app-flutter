@@ -605,9 +605,12 @@ class SelectedColorProvider extends ChangeNotifier {
     // 5) custom SVGs -> map to ids 300 + index (and mark override)
     for (int i = 0; i < state.customSVGs.length; i++) {
       final id = 300 + i;
-      final c = state.customSVGs[i].color ?? Colors.black;
-      _overrideColors[id] = c;
-      _elementColors[id] = c;
+      final c = state.customSVGs[i].color;
+      // Only set an override if the saved state includes an explicit color.
+      if (c != null) {
+        _overrideColors[id] = c;
+        _elementColors[id] = c;
+      }
     }
 
     // 6) any elementColors already parsed into _elementColors used above

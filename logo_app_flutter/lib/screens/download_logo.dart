@@ -229,59 +229,50 @@ void _showSaveConfirmationDialog(BuildContext context, GlobalKey canvasKey) {
               /// 👉 SAVE / UPDATE TO SUPABASE
               TextButton(
                 onPressed: () async {
-                  final provider =
-                      Provider.of<SelectedColorProvider>(context, listen: false);
-
+                  final provider = Provider.of<SelectedColorProvider>(context, listen: false);
                   int? previousSelection = provider.selectedElementId;
-                  provider.clearSelection();
-
-                  // UI ko stable hone do (IMPORTANT)
-                  await WidgetsBinding.instance.endOfFrame;
-                  await WidgetsBinding.instance.endOfFrame;
-
-                    try {
+                  bool hadSelection = previousSelection != null;
+                  if (hadSelection) provider.clearSelection();
+                  // Wait for UI to clear selection box
+                  if (hadSelection) {
+                    await Future.delayed(const Duration(milliseconds: 50));
+                    await WidgetsBinding.instance.endOfFrame;
+                  }
+                  try {
                     // Ensure current provider font selections are written into the state before saving
                     _currentLogoState = _currentLogoState.copyWith(
                       companyFontIndex: provider.companyFontIndex,
                       sloganFontIndex: provider.sloganFontIndex,
                     );
                     final designJson = _currentLogoState.toJson();
-                    // Debug: log font indices to help diagnose persistence
                     debugPrint('💾 Saving design fonts -> provider.company:${provider.companyFontIndex} provider.slogan:${provider.sloganFontIndex}');
                     debugPrint('💾 designJson companyFontIndex: ${designJson["companyFontIndex"]} sloganFontIndex: ${designJson["sloganFontIndex"]}');
                     final svc = UserDesignService();
-
                     if (widget.designId != null) {
-                      /// ✅ UPDATE EXISTING DESIGN
                       await svc.updateDesign(
                         designId: widget.designId!,
                         updatedJson: designJson,
-                        canvasKey: canvasKey, 
-                        // imagePath: widget.imagePath,  // 👈 image regenerate
-                        updateImage: true,      // 👈 force overwrite
+                        canvasKey: canvasKey,
+                        updateImage: true,
                       );
                     } else {
-                      /// ✅ SAVE NEW DESIGN
                       await svc.saveNewDesign(
                         canvasKey: canvasKey,
                         designJson: designJson,
                       );
                     }
-
-                    if (previousSelection != null) {
+                    // Restore selection after save
+                    if (hadSelection && previousSelection != null) {
                       provider.setSelectedElement(previousSelection);
                     }
-
                     Navigator.of(context).pop();
-
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         backgroundColor: Colors.white,
                         behavior: SnackBarBehavior.floating,
                         content: Row(
                           children: const [
-                            Icon(Icons.cloud_done,
-                                color: ThemeColors.purple),
+                            Icon(Icons.cloud_done, color: ThemeColors.purple),
                             SizedBox(width: 12),
                             Text(
                               'Logo saved successfully!',
@@ -295,23 +286,19 @@ void _showSaveConfirmationDialog(BuildContext context, GlobalKey canvasKey) {
                       ),
                     );
                   } catch (e) {
-                    if (previousSelection != null) {
+                    if (hadSelection && previousSelection != null) {
                       provider.setSelectedElement(previousSelection);
                     }
                     Navigator.of(context).pop();
-
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         backgroundColor: Colors.white,
                         behavior: SnackBarBehavior.floating,
                         content: Row(
                           children: [
-                            const Icon(Icons.error,
-                                color: ThemeColors.purple),
+                            const Icon(Icons.error, color: ThemeColors.purple),
                             const SizedBox(width: 12),
-                            Expanded(
-                              child: Text('Error saving logo: $e'),
-                            ),
+                            Expanded(child: Text('Error saving logo: $e')),
                           ],
                         ),
                       ),
@@ -1547,24 +1534,24 @@ void sendBackward(int elementId, dynamic logoState) {
     final provider = Provider.of<SelectedColorProvider>(context, listen: false);
 
     // Sync custom text colors from provider
-    final updatedCustomTexts =
-        _currentLogoState.customTexts.asMap().entries.map((entry) {
+    final updatedCustomTexts = _currentLogoState.customTexts.asMap().entries.map((entry) {
       final index = entry.key;
       final text = entry.value;
       final elementId = 100 + index;
-      final colorFromProvider =
-          provider.getColorForElement(elementId, fallback: text.color);
+      final Color colorFromProvider = provider.hasColorOverride(elementId)
+          ? provider.getColorForElement(elementId, fallback: text.color)
+          : text.color;
       return text.copyWith(color: colorFromProvider);
     }).toList();
 
     // Sync custom SVG colors from provider
-    final updatedCustomSVGs =
-        _currentLogoState.customSVGs.asMap().entries.map((entry) {
+    final updatedCustomSVGs = _currentLogoState.customSVGs.asMap().entries.map((entry) {
       final index = entry.key;
       final svg = entry.value;
       final elementId = 300 + index;
-      final colorFromProvider = provider.getColorForElement(elementId,
-          fallback: svg.color ?? Colors.black);
+      final Color? colorFromProvider = provider.hasColorOverride(elementId)
+          ? provider.getColorForElement(elementId, fallback: svg.color ?? Colors.black)
+          : svg.color;
       return svg.copyWith(color: colorFromProvider);
     }).toList();
 
@@ -1614,23 +1601,23 @@ void sendBackward(int elementId, dynamic logoState) {
       final provider =
           Provider.of<SelectedColorProvider>(context, listen: false);
 
-      final updatedCustomTexts =
-          _currentLogoState.customTexts.asMap().entries.map((entry) {
+      final updatedCustomTexts = _currentLogoState.customTexts.asMap().entries.map((entry) {
         final index = entry.key;
         final text = entry.value;
         final elementId = 100 + index;
-        final colorFromProvider =
-            provider.getColorForElement(elementId, fallback: text.color);
+        final Color colorFromProvider = provider.hasColorOverride(elementId)
+            ? provider.getColorForElement(elementId, fallback: text.color)
+            : text.color;
         return text.copyWith(color: colorFromProvider);
       }).toList();
 
-      final updatedCustomSVGs =
-          _currentLogoState.customSVGs.asMap().entries.map((entry) {
+      final updatedCustomSVGs = _currentLogoState.customSVGs.asMap().entries.map((entry) {
         final index = entry.key;
         final svg = entry.value;
         final elementId = 300 + index;
-        final colorFromProvider = provider.getColorForElement(elementId,
-            fallback: svg.color ?? Colors.black);
+        final Color? colorFromProvider = provider.hasColorOverride(elementId)
+            ? provider.getColorForElement(elementId, fallback: svg.color ?? Colors.black)
+            : svg.color;
         return svg.copyWith(color: colorFromProvider);
       }).toList();
 
@@ -2493,6 +2480,12 @@ void sendBackward(int elementId, dynamic logoState) {
     // Update state and select new element
     setState(() => _currentLogoState = updatedState);
 
+    // Push post-operation state to undo stack so undo/redo capture the change
+    if (_undoStack.length >= _maxUndoHistory) {
+      _undoStack.removeAt(0);
+    }
+    _undoStack.add(_currentLogoState.clone());
+
     if (newElementId != null) {
       provider.selectedElementId = newElementId;
       debugPrint('🎯 Selected duplicated element: $newElementId');
@@ -2965,6 +2958,11 @@ void sendBackward(int elementId, dynamic logoState) {
       setState(() {
         _isMoving = false;
       });
+      // After finishing a drag, record the new state for undo/redo
+      if (_undoStack.length >= _maxUndoHistory) {
+        _undoStack.removeAt(0);
+      }
+      _undoStack.add(_currentLogoState.clone());
     }
   }
 
