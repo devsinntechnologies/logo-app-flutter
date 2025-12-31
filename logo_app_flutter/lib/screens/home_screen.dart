@@ -88,18 +88,6 @@ class HomeScreen extends StatelessWidget {
                   // DrawerItem(icon: Icons.apps, text: "More Apps"),
                   const DrawerItem(icon: Icons.share, text: "Share"),
                   const DrawerItem(icon: Icons.privacy_tip, text: "Privacy Policy"),
-                  DrawerItem(
-                    icon: Icons.person,
-                    text: "My Account",
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const MyAccountScreen(),
-                        ),
-                      );
-                    },
-                  ),
 
                 ],
               ),

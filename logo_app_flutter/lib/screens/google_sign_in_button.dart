@@ -3,6 +3,7 @@ import 'package:logo_app_flutter/components/google_alert.dart';
 import 'package:logo_app_flutter/services/auth_service.dart';
 import 'package:logo_app_flutter/utils/theme_colors.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:logo_app_flutter/screens/my_account_screen.dart';
 
 class GoogleSignInButton extends StatefulWidget {
   const GoogleSignInButton({super.key});
@@ -126,36 +127,50 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
 
   @override
   Widget build(BuildContext context) {
-    // Don't show the button if user is already logged in
-    if (_isLoggedIn) {
-      return const SizedBox.shrink();
-    }
-    
-    return _isLoading
-        ? const CircularProgressIndicator()
-        : GestureDetector(
-            onTap: () => showCustomGoogleDialog(context),
+    if (_isLoading) return const CircularProgressIndicator();
 
-            child: Padding(
-              padding: const EdgeInsets.only(right: 6.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: ThemeColors.textGradient,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Padding(
-                  padding: EdgeInsets.all(6.0),
-                  child: Text(
-                    "Login",
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+    // When logged out: show Login button. When logged in: show account icon.
+    if (_isLoggedIn) {
+      final user = _supabase.auth.currentUser;
+      final avatarLabel = (user?.email != null && user!.email!.isNotEmpty) ? user.email![0].toUpperCase() : '';
+      return IconButton(
+        tooltip: 'My Account',
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const MyAccountScreen()),
+          );
+        },
+        icon: CircleAvatar(
+          radius: 16,
+          child: Text(avatarLabel, style: const TextStyle(color: Colors.white)),
+          backgroundColor: ThemeColors.purple,
+        ),
+      );
+    }
+
+    return GestureDetector(
+      onTap: () => showCustomGoogleDialog(context),
+      child: Padding(
+        padding: const EdgeInsets.only(right: 6.0),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: ThemeColors.textGradient,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: const Padding(
+            padding: EdgeInsets.all(6.0),
+            child: Text(
+              "Login",
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
               ),
             ),
-          );
+          ),
+        ),
+      ),
+    );
   }
 }

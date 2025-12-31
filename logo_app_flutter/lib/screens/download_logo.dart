@@ -7,7 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:logo_app_flutter/components/google_alert.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
 import 'package:logo_app_flutter/screens/art_select_screen.dart';
-import 'package:logo_app_flutter/screens/canvas_upload_service.dart';
+import 'package:logo_app_flutter/services/canvas_upload_service.dart';
 import 'package:logo_app_flutter/screens/movement_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -22,6 +22,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:logo_app_flutter/services/user_design_service.dart';
 import '../components/logoBottomNavbarItems/drop_up_panel.dart';
 import '../components/logo_canvas.dart';
 import '../utils/text_size_util.dart';
@@ -32,6 +33,9 @@ class DownloadLogo extends StatefulWidget {
   final String companyName;
   final String sloganName;
   final int selectedFontIndex;
+  final String? designId;
+  final LogoStateData? initialLogoState;
+  final String? imagePath; 
 
   const DownloadLogo({
     super.key,
@@ -39,6 +43,9 @@ class DownloadLogo extends StatefulWidget {
     required this.companyName,
     required this.sloganName,
     this.selectedFontIndex = 0,
+    this.initialLogoState,
+    this.designId,
+    this.imagePath,
   });
 
   @override
@@ -193,100 +200,65 @@ class _DownloadLogoState extends State<DownloadLogo> {
     return true; // iOS will handle internally
   }
 
-  void _showSaveConfirmationDialog(BuildContext context, GlobalKey canvasKey) {
-    showDialog(
-      barrierDismissible: true,
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          title: const Text(
-            'Save Logo',
-            style: TextStyle(
-              color: ThemeColors.purple,
-              fontWeight: FontWeight.w500,
-            ),
+void _showSaveConfirmationDialog(BuildContext context, GlobalKey canvasKey) {
+  showDialog(
+    barrierDismissible: true,
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        backgroundColor: Colors.white,
+        title: const Text(
+          'Save Logo',
+          style: TextStyle(
+            color: ThemeColors.purple,
+            fontWeight: FontWeight.w500,
           ),
-          content: const Text(
-            'Do you want to save the logo to your gallery to My Design?',
-            style: TextStyle(
-              fontSize: 16,
-              color: ThemeColors.purple,
-            ),
+        ),
+        content: const Text(
+          'Do you want to save the logo to your gallery to My Design?',
+          style: TextStyle(
+            fontSize: 16,
+            color: ThemeColors.purple,
           ),
-          actions: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                /// 👉 SUPABASE BUTTON
-                TextButton(
-                  onPressed: () async {
-                    final provider = Provider.of<SelectedColorProvider>(
-                      context,
-                      listen: false,
-                    );
+        ),
+        actions: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
 
-                    int? previousSelection = provider.selectedElementId;
+              /// 👉 SAVE / UPDATE TO SUPABASE
+              TextButton(
+                onPressed: () async {
+                  final provider =
+                      Provider.of<SelectedColorProvider>(context, listen: false);
 
-                    provider.clearSelection();
+                  int? previousSelection = provider.selectedElementId;
+                  provider.clearSelection();
 
-                    provider.clearSelection();
+                  // UI ko stable hone do (IMPORTANT)
+                  await WidgetsBinding.instance.endOfFrame;
+                  await WidgetsBinding.instance.endOfFrame;
 
-                    // wait for UI to rebuild (IMPORTANT)
-                    await WidgetsBinding.instance.endOfFrame;
-                    await WidgetsBinding.instance.endOfFrame;
+                  try {
+                    final designJson = _currentLogoState.toJson();
+                    final svc = UserDesignService();
 
-                    final imageUrl = await CanvasUploadService.uploadCanvas(
-                      canvasKey: canvasKey,
-                    );
-
-                    if (previousSelection != null) {
-                      provider.setSelectedElement(previousSelection);
-                    }
-                    Navigator.of(context).pop();
-
-                    if (imageUrl != null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          backgroundColor: Colors.white,
-                          behavior: SnackBarBehavior.floating,
-                          content: Row(
-                            children: const [
-                              Icon(Icons.cloud_done, color: ThemeColors.purple),
-                              SizedBox(width: 12),
-                              Text(
-                                'Logo saved successfully!',
-                                style: TextStyle(
-                                  color: ThemeColors.purple,
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                    if (widget.designId != null) {
+                      /// ✅ UPDATE EXISTING DESIGN
+                      await svc.updateDesign(
+                        designId: widget.designId!,
+                        updatedJson: designJson,
+                        canvasKey: canvasKey, 
+                        // imagePath: widget.imagePath,  // 👈 image regenerate
+                        updateImage: true,      // 👈 force overwrite
+                      );
+                    } else {
+                      /// ✅ SAVE NEW DESIGN
+                      await svc.saveNewDesign(
+                        canvasKey: canvasKey,
+                        designJson: designJson,
                       );
                     }
-                  },
-                  child: const Text(
-                    'To My Design',
-                    style: TextStyle(fontSize: 16, color: ThemeColors.purple),
-                  ),
-                ),
-
-                /// 👉 GALLERY BUTTON (unchanged)
-                TextButton(
-                  onPressed: () async {
-                    final provider = Provider.of<SelectedColorProvider>(
-                      context,
-                      listen: false,
-                    );
-
-                    int? previousSelection = provider.selectedElementId;
-                    provider.clearSelection();
-
-                    await WidgetsBinding.instance.endOfFrame;
-
-                    await saveCanvasToGallery(canvasKey, isExportingNotifier);
 
                     if (previousSelection != null) {
                       provider.setSelectedElement(previousSelection);
@@ -296,43 +268,120 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        duration: const Duration(seconds: 3),
                         backgroundColor: Colors.white,
                         behavior: SnackBarBehavior.floating,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        margin: const EdgeInsets.all(16),
                         content: Row(
                           children: const [
-                            Icon(Icons.check_circle, color: ThemeColors.purple),
+                            Icon(Icons.cloud_done,
+                                color: ThemeColors.purple),
                             SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                'Logo saved successfully!',
-                                style: TextStyle(
-                                  color: ThemeColors.purple,
-                                  fontSize: 16,
-                                ),
+                            Text(
+                              'Logo saved successfully!',
+                              style: TextStyle(
+                                color: ThemeColors.purple,
+                                fontSize: 16,
                               ),
                             ),
                           ],
                         ),
                       ),
                     );
-                  },
-                  child: const Text(
-                    'To Gallery',
-                    style: TextStyle(fontSize: 16, color: ThemeColors.purple),
+                  } catch (e) {
+                    if (previousSelection != null) {
+                      provider.setSelectedElement(previousSelection);
+                    }
+                    Navigator.of(context).pop();
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        backgroundColor: Colors.white,
+                        behavior: SnackBarBehavior.floating,
+                        content: Row(
+                          children: [
+                            const Icon(Icons.error,
+                                color: ThemeColors.purple),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text('Error saving logo: $e'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+                },
+                child: Text(
+                  widget.designId != null ? 'Update' : 'To My Design',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: ThemeColors.purple,
                   ),
                 ),
-              ],
-            ),
-          ],
-        );
-      },
-    );
-  }
+              ),
+
+              /// 👉 SAVE TO DEVICE GALLERY (UNCHANGED)
+              TextButton(
+                onPressed: () async {
+                  final provider =
+                      Provider.of<SelectedColorProvider>(context, listen: false);
+
+                  int? previousSelection = provider.selectedElementId;
+                  provider.clearSelection();
+
+                  await WidgetsBinding.instance.endOfFrame;
+
+                  await saveCanvasToGallery(
+                      canvasKey, isExportingNotifier);
+
+                  if (previousSelection != null) {
+                    provider.setSelectedElement(previousSelection);
+                  }
+
+                  Navigator.of(context).pop();
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      duration: const Duration(seconds: 3),
+                      backgroundColor: Colors.white,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      margin: const EdgeInsets.all(16),
+                      content: Row(
+                        children: const [
+                          Icon(Icons.check_circle,
+                              color: ThemeColors.purple),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Logo saved successfully!',
+                              style: TextStyle(
+                                color: ThemeColors.purple,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+                child: const Text(
+                  'To Gallery',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: ThemeColors.purple,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      );
+    },
+  );
+}
 
   @override
   @override
@@ -365,6 +414,19 @@ class _DownloadLogoState extends State<DownloadLogo> {
       lockedElements: {},
       elementOrder: [0, 1, 2],
     );
+
+    // If an initial state is provided (editing an existing design), use it
+    if (widget.initialLogoState != null) {
+      _currentLogoState = widget.initialLogoState!.clone();
+      // Apply colors/backgrounds to provider after frame
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final colorProvider = Provider.of<SelectedColorProvider>(context, listen: false);
+        colorProvider.resetAllOutlines();
+        colorProvider.resetAllColors(defaultColors: {});
+        colorProvider.clearOverrides();
+        colorProvider.applyLogoState(_currentLogoState);
+      });
+    }
 
     // 2️⃣ Initialize background state safely
     // final provider =

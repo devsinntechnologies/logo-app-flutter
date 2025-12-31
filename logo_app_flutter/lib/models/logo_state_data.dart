@@ -599,6 +599,315 @@ class LogoStateData {
       backgroundImagePath: backgroundImagePath,
     );
   }
+
+  /// Serialize to JSON-friendly map
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> mapColor(Map<String, Color> m) => m.map((k, v) => MapEntry(k, v.value));
+
+    return {
+      'elementColors': mapColor(elementColors),
+      'outlineWidths': outlineWidths,
+      'outlineColors': outlineColors.map((k, v) => MapEntry(k, v.value)),
+      'rotationXMap': rotationXMap,
+      'rotationYMap': rotationYMap,
+      'rotationZMap': rotationZMap,
+      'perspective': perspective,
+      'logoColor': logoColor.value,
+      'isLogoColorOverridden': isLogoColorOverridden,
+      'companyNameColor': companyNameColor.value,
+      'sloganColor': sloganColor.value,
+      'companyNameOutlineColor': companyNameOutlineColor.value,
+      'companyNameOutlineWidth': companyNameOutlineWidth,
+      'sloganOutlineColor': sloganOutlineColor.value,
+      'sloganOutlineWidth': sloganOutlineWidth,
+      'logoPosition': {'dx': logoPosition.dx, 'dy': logoPosition.dy},
+      'logoSize': logoSize,
+      'logoRotation': logoRotation,
+      'isLogoVisible': isLogoVisible,
+      'svgLogo': svgLogo,
+      'companyNamePosition': {'dx': companyNamePosition.dx, 'dy': companyNamePosition.dy},
+      'companyNameSize': companyNameSize,
+      'companyNameRotation': companyNameRotation,
+      'isCompanyNameVisible': isCompanyNameVisible,
+      'companyName': companyName,
+      'sloganPosition': {'dx': sloganPosition.dx, 'dy': sloganPosition.dy},
+      'sloganSize': sloganSize,
+      'sloganRotation': sloganRotation,
+      'isSloganVisible': isSloganVisible,
+      'sloganName': sloganName,
+      'customTexts': customTexts.map((t) => {
+            'textAlign': t.textAlign.toString(),
+            'text': t.text,
+            'position': {'dx': t.position.dx, 'dy': t.position.dy},
+            'size': t.size,
+            'rotation': t.rotation,
+            'opacity': t.opacity,
+            'isVisible': t.isVisible,
+            'layerIndex': t.layerIndex,
+            'color': t.color.value,
+            'isOutlined': t.isOutlined,
+            'outlineColor': t.outlineColor.value,
+            'strokeWidth': t.strokeWidth,
+            'fontWeight': t.fontWeight.index,
+            'fontIndex': t.fontIndex,
+          }).toList(),
+      'customImages': customImages.map((i) => {
+            'path': i.path,
+            'position': {'dx': i.position.dx, 'dy': i.position.dy},
+            'rotation': i.rotation,
+            'size': i.size,
+            'opacity': i.opacity,
+            'isVisible': i.isVisible,
+            'layerIndex': i.layerIndex,
+          }).toList(),
+      'customSVGs': customSVGs.map((s) => {
+            'svgString': s.svgString,
+            'position': {'dx': s.position.dx, 'dy': s.position.dy},
+            'color': s.color?.value,
+            'size': s.size,
+            'rotation': s.rotation,
+            'opacity': s.opacity,
+            'isVisible': s.isVisible,
+            'layerIndex': s.layerIndex,
+          }).toList(),
+      'lockedElements': lockedElements.toList(),
+      'elementOrder': elementOrder,
+      'companyNameTextAlign': companyNameTextAlign.toString(),
+      'sloganTextAlign': sloganTextAlign.toString(),
+      'selectedShapeName': selectedShapeName,
+      'backgroundColor': backgroundColor?.value,
+      'backgroundImagePath': backgroundImagePath,
+    };
+  }
+
+  /// Create LogoStateData from JSON map (robust / tolerant)
+  factory LogoStateData.fromJson(Map<String, dynamic> json) {
+    Color parseColor(dynamic v, [Color fallback = Colors.black]) {
+      if (v == null) return fallback;
+      if (v is int) return Color(v);
+      if (v is String) {
+        final parsed = int.tryParse(v);
+        if (parsed != null) return Color(parsed);
+        // hex string like #FF00FF
+        try {
+          final hex = v.replaceAll('#', '');
+          return Color(int.parse(hex, radix: 16));
+        } catch (_) {}
+      }
+      if (v is Map && v.containsKey('value')) return Color(v['value']);
+      return fallback;
+    }
+
+    Offset parseOffset(dynamic o, [Offset fallback = Offset.zero]) {
+      if (o == null) return fallback;
+      if (o is Map && o.containsKey('dx') && o.containsKey('dy')) {
+        return Offset((o['dx'] as num).toDouble(), (o['dy'] as num).toDouble());
+      }
+      if (o is List && o.length >= 2) return Offset((o[0] as num).toDouble(), (o[1] as num).toDouble());
+      return fallback;
+    }
+
+    Map<String, Color> elementColors = {};
+    if (json['elementColors'] is Map) {
+      (json['elementColors'] as Map).forEach((k, v) {
+        elementColors[k.toString()] = parseColor(v);
+      });
+    }
+
+    Map<String, double> outlineWidths = {};
+    if (json['outlineWidths'] is Map) {
+      (json['outlineWidths'] as Map).forEach((k, v) {
+        outlineWidths[k.toString()] = (v as num).toDouble();
+      });
+    }
+
+    Map<String, Color> outlineColors = {};
+    if (json['outlineColors'] is Map) {
+      (json['outlineColors'] as Map).forEach((k, v) {
+        outlineColors[k.toString()] = parseColor(v, Colors.transparent);
+      });
+    }
+
+    Map<int, double> rotationXMap = {};
+    if (json['rotationXMap'] is Map) {
+      (json['rotationXMap'] as Map).forEach((k, v) {
+        final key = int.tryParse(k.toString());
+        if (key != null) rotationXMap[key] = (v as num).toDouble();
+      });
+    }
+
+    Map<int, double> rotationYMap = {};
+    if (json['rotationYMap'] is Map) {
+      (json['rotationYMap'] as Map).forEach((k, v) {
+        final key = int.tryParse(k.toString());
+        if (key != null) rotationYMap[key] = (v as num).toDouble();
+      });
+    }
+
+    Map<int, double> rotationZMap = {};
+    if (json['rotationZMap'] is Map) {
+      (json['rotationZMap'] as Map).forEach((k, v) {
+        final key = int.tryParse(k.toString());
+        if (key != null) rotationZMap[key] = (v as num).toDouble();
+      });
+    }
+
+    final customTexts = <CustomTextElement>[];
+    if (json['customTexts'] is List) {
+      for (final t in json['customTexts']) {
+        try {
+          FontWeight parseFontWeight(dynamic v) {
+            if (v is int) {
+              switch (v) {
+                case 0:
+                  return FontWeight.w100;
+                case 1:
+                  return FontWeight.w200;
+                case 2:
+                  return FontWeight.w300;
+                case 3:
+                  return FontWeight.normal;
+                case 4:
+                  return FontWeight.w500;
+                case 5:
+                  return FontWeight.w600;
+                case 6:
+                  return FontWeight.w700;
+                case 7:
+                  return FontWeight.w800;
+                case 8:
+                  return FontWeight.w900;
+                default:
+                  return FontWeight.normal;
+              }
+            }
+            return FontWeight.normal;
+          }
+
+          customTexts.add(CustomTextElement(
+            text: t['text'] ?? '',
+            position: parseOffset(t['position'], Offset.zero),
+            size: (t['size'] as num?)?.toDouble() ?? 14.0,
+            rotation: (t['rotation'] as num?)?.toDouble() ?? 0.0,
+            opacity: (t['opacity'] as num?)?.toDouble() ?? 1.0,
+            isVisible: t['isVisible'] ?? true,
+            layerIndex: t['layerIndex'] as int?,
+            color: parseColor(t['color'], Colors.black),
+            isOutlined: t['isOutlined'] ?? false,
+            outlineColor: parseColor(t['outlineColor'], Colors.black),
+            strokeWidth: (t['strokeWidth'] as num?)?.toDouble() ?? 1.0,
+            fontWeight: parseFontWeight(t['fontWeight']),
+            fontIndex: (t['fontIndex'] as int?) ?? 0,
+          ));
+        } catch (_) {}
+      }
+    }
+
+    final customImages = <CustomImageElement>[];
+    if (json['customImages'] is List) {
+      for (final i in json['customImages']) {
+        try {
+          customImages.add(CustomImageElement(
+            path: i['path'] ?? '',
+            position: parseOffset(i['position'], Offset.zero),
+            rotation: (i['rotation'] as num?)?.toDouble() ?? 0.0,
+            size: (i['size'] as num?)?.toDouble(),
+            opacity: (i['opacity'] as num?)?.toDouble() ?? 1.0,
+            isVisible: i['isVisible'] ?? true,
+            layerIndex: i['layerIndex'] as int?,
+          ));
+        } catch (_) {}
+      }
+    }
+
+    final customSVGs = <CustomSvgElement>[];
+    if (json['customSVGs'] is List) {
+      for (final s in json['customSVGs']) {
+        try {
+          customSVGs.add(CustomSvgElement(
+            svgString: s['svgString'] ?? '',
+            position: parseOffset(s['position'], Offset.zero),
+            color: s['color'] == null ? null : parseColor(s['color'], Colors.black),
+            size: (s['size'] as num?)?.toDouble() ?? 64.0,
+            rotation: (s['rotation'] as num?)?.toDouble() ?? 0.0,
+            opacity: (s['opacity'] as num?)?.toDouble() ?? 1.0,
+            isVisible: s['isVisible'] ?? true,
+            layerIndex: s['layerIndex'] as int?,
+          ));
+        } catch (_) {}
+      }
+    }
+
+    final locked = <int>{};
+    if (json['lockedElements'] is List) {
+      for (final li in json['lockedElements']) {
+        final val = (li as num).toInt();
+        locked.add(val);
+      }
+    }
+
+    final elementOrder = <int>[];
+    if (json['elementOrder'] is List) {
+      for (final el in json['elementOrder']) {
+        elementOrder.add((el as num).toInt());
+      }
+    }
+
+    return LogoStateData(
+      elementColors: elementColors,
+      outlineWidths: outlineWidths,
+      outlineColors: outlineColors,
+      rotationXMap: rotationXMap,
+      rotationYMap: rotationYMap,
+      rotationZMap: rotationZMap,
+      perspective: (json['perspective'] as num?)?.toDouble() ?? 0.001,
+      customTexts: customTexts,
+      customImages: customImages,
+      customSVGs: customSVGs,
+      lockedElements: locked,
+      elementOrder: elementOrder,
+      logoColor: parseColor(json['logoColor'], Colors.black),
+      isLogoColorOverridden: json['isLogoColorOverridden'] ?? false,
+      companyNameColor: parseColor(json['companyNameColor'], Colors.black),
+      sloganColor: parseColor(json['sloganColor'], Colors.black),
+      companyNameOutlineColor: parseColor(json['companyNameOutlineColor'], Colors.transparent),
+      companyNameOutlineWidth: (json['companyNameOutlineWidth'] as num?)?.toDouble() ?? 0.0,
+      sloganOutlineColor: parseColor(json['sloganOutlineColor'], Colors.transparent),
+      sloganOutlineWidth: (json['sloganOutlineWidth'] as num?)?.toDouble() ?? 0.0,
+      logoPosition: parseOffset(json['logoPosition'], const Offset(150, 100)),
+      logoSize: (json['logoSize'] as num?)?.toDouble() ?? 150.0,
+      logoRotation: (json['logoRotation'] as num?)?.toDouble() ?? 0.0,
+      isLogoVisible: json['isLogoVisible'] ?? true,
+      svgLogo: json['svgLogo'] as String?,
+      companyNamePosition: parseOffset(json['companyNamePosition'], const Offset(0, 0)),
+      companyNameSize: (json['companyNameSize'] as num?)?.toDouble() ?? 20.0,
+      companyNameRotation: (json['companyNameRotation'] as num?)?.toDouble() ?? 0.0,
+      isCompanyNameVisible: json['isCompanyNameVisible'] ?? true,
+      companyName: json['companyName'] as String?,
+      sloganPosition: parseOffset(json['sloganPosition'], const Offset(0, 0)),
+      sloganSize: (json['sloganSize'] as num?)?.toDouble() ?? 16.0,
+      sloganRotation: (json['sloganRotation'] as num?)?.toDouble() ?? 0.0,
+      isSloganVisible: json['isSloganVisible'] ?? true,
+      sloganName: json['sloganName'] as String?,
+      logo2Position: json['logo2Position'] == null ? null : parseOffset(json['logo2Position']),
+      logo2Size: (json['logo2Size'] as num?)?.toDouble(),
+      logo2Rotation: (json['logo2Rotation'] as num?)?.toDouble(),
+      isLogo2Visible: json['isLogo2Visible'] ?? false,
+      companyName2Position: json['companyName2Position'] == null ? null : parseOffset(json['companyName2Position']),
+      companyName2Size: (json['companyName2Size'] as num?)?.toDouble(),
+      companyName2Rotation: (json['companyName2Rotation'] as num?)?.toDouble(),
+      isCompanyName2Visible: json['isCompanyName2Visible'] ?? false,
+      slogan2Position: json['slogan2Position'] == null ? null : parseOffset(json['slogan2Position']),
+      slogan2Size: (json['slogan2Size'] as num?)?.toDouble(),
+      slogan2Rotation: (json['slogan2Rotation'] as num?)?.toDouble(),
+      isSlogan2Visible: json['isSlogan2Visible'] ?? false,
+      companyNameTextAlign: TextAlign.center,
+      sloganTextAlign: TextAlign.center,
+      selectedShapeName: json['selectedShapeName'] as String?,
+      backgroundColor: json['backgroundColor'] == null ? null : parseColor(json['backgroundColor'], Colors.white),
+      backgroundImagePath: json['backgroundImagePath'] as String?,
+    );
+  }
 }
 
 
