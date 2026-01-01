@@ -171,6 +171,10 @@ class SelectedColorProvider extends ChangeNotifier {
 
   void resetImage() {
     canvasImage = null;
+    _backgroundImage = null;
+    _imageFile = null;
+    _assetImagePath = null;
+    _isColorManuallySelected = false;
     notifyListeners();
   }
 

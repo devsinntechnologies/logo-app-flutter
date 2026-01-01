@@ -39,17 +39,158 @@ class _GradientPickerScreenState extends State<GradientPickerScreen> {
   void pickColor(bool isStartColor) async {
     Color? picked = await showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Select Color"),
-        content: SingleChildScrollView(
-          child: BlockPicker(
-            pickerColor: isStartColor ? startColor : endColor,
-            onColorChanged: (color) {
-              Navigator.of(context).pop(color);
-            },
-          ),
-        ),
-      ),
+      builder: (context) {
+        Color tempColor = isStartColor ? startColor : endColor;
+
+        List<Color> generateShades(Color base) {
+          final hsl = HSLColor.fromColor(base);
+          return List.generate(9, (i) {
+            final t = (i) / 8.0; // 0..1
+            final lightness = (0.08 + t * 0.84).clamp(0.0, 1.0);
+            return hsl.withLightness(lightness).toColor();
+          });
+        }
+
+        return StatefulBuilder(builder: (context, setState) {
+          final shades = generateShades(tempColor);
+          return AlertDialog(
+            title: const Text("Select Color"),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    height: 250,
+                    child: BlockPicker(
+                      pickerColor: tempColor,
+                      onColorChanged: (color) {
+                        setState(() => tempColor = color);
+                      },
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+                  // Shades horizontal lane
+                  SizedBox(
+                    height: 40,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemBuilder: (ctx, idx) {
+                        final c = shades[idx];
+                        return GestureDetector(
+                          onTap: () => setState(() => tempColor = c),
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: c,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                      color: Colors.grey.shade300, width: 1.5),
+                                ),
+                              ),
+                              if (tempColor.value == c.value)
+                                Icon(
+                                  Icons.check,
+                                  color: c.computeLuminance() > 0.6
+                                      ? Colors.black
+                                      : Colors.white,
+                                  size: 18,
+                                ),
+                            ],
+                          ),
+                        );
+                      },
+                      separatorBuilder: (_, __) => const SizedBox(width: 8),
+                      itemCount: shades.length,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                child: const Text('CUSTOM'),
+                onPressed: () async {
+                  // Open full color picker with hex input
+                  final Color? custom = await showDialog(
+                    context: context,
+                    builder: (ctx) {
+                      Color current = tempColor;
+                      final controller = TextEditingController(
+                          text:
+                              '#${current.value.toRadixString(16).padLeft(8, '0').toUpperCase()}');
+                      return StatefulBuilder(builder: (c2, setState2) {
+                        return AlertDialog(
+                          title: const Text('Custom Color'),
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ColorPicker(
+                                pickerColor: current,
+                                onColorChanged: (col) {
+                                  setState2(() {
+                                    current = col;
+                                    controller.text =
+                                        '#${current.value.toRadixString(16).padLeft(8, '0').toUpperCase()}';
+                                  });
+                                },
+                                showLabel: false,
+                                pickerAreaHeightPercent: 0.6,
+                              ),
+                              // const SizedBox(height: 8),
+                              TextField(
+                                controller: controller,
+                                decoration: const InputDecoration(
+                                    labelText: 'Hex (eg. #FF00FF)'),
+                                onChanged: (val) {
+                                  final v = val.replaceAll('#', '').trim();
+                                  if (v.length == 6 || v.length == 8) {
+                                    try {
+                                      final parsed = int.parse(v, radix: 16);
+                                      setState2(() {
+                                        current = Color(v.length == 6
+                                            ? 0xFF000000 | parsed
+                                            : parsed);
+                                      });
+                                    } catch (_) {}
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
+                          actions: [
+                            TextButton(
+                                onPressed: () => Navigator.of(ctx).pop(),
+                                child: const Text('CANCEL')),
+                            TextButton(
+                                onPressed: () => Navigator.of(ctx).pop(current),
+                                child: const Text('SELECT')),
+                          ],
+                        );
+                      });
+                    },
+                  );
+                  if (custom != null) {
+                    setState(() => tempColor = custom);
+                  }
+                },
+              ),
+              // TextButton(
+              //   child: const Text('CANCEL'),
+              //   onPressed: () => Navigator.of(context).pop(),
+              // ),
+              TextButton(
+                child: const Text('SELECT'),
+                onPressed: () => Navigator.of(context).pop(tempColor),
+              ),
+            ],
+          );
+        });
+      },
     );
     if (picked != null) {
       setState(() {
