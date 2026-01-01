@@ -1856,12 +1856,15 @@ void sendBackward(int elementId, dynamic logoState) {
         selectedIndex = -1;
       });
 
-      if (result != null && result.isNotEmpty) {
+          if (result != null && result.isNotEmpty) {
         setState(() {
           final provider = Provider.of<SelectedColorProvider>(context, listen: false);
+          // Offset new text slightly to the left and top (8px each)
+          final basePos = _currentLogoState.companyNamePosition;
+          final adjustedPos = basePos - const Offset(35, 35);
           final newTextElement = CustomTextElement(
             text: result,
-            position: _currentLogoState.companyNamePosition ?? _currentLogoState.logoPosition ?? const Offset(160, 200),
+            position: adjustedPos,
             size: 22,
             rotation: 0,
             fontIndex: provider.companyFontIndex,
