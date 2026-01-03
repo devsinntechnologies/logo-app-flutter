@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class ArtSelectScreen extends StatelessWidget {
   final List<String> images; // ✅ Pass image paths here (e.g., assets/icons/...)
@@ -59,10 +60,16 @@ class ArtSelectScreen extends StatelessWidget {
                           onTap: () {
                             Navigator.pop(context, images[index]); // ✅ Return selected image path
                           },
-                          child: Image.asset(
-                            images[index],
-                            fit: BoxFit.cover,
-                          ),
+                         child: images[index].endsWith('.svg')
+    ? SvgPicture.asset(
+        images[index],
+        fit: BoxFit.contain,
+      )
+    : Image.asset(
+        images[index],
+        fit: BoxFit.cover,
+      ),
+
                         ),
                       ),
                       if (index.isEven) // crown icon for demo

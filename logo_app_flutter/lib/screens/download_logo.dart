@@ -1895,7 +1895,9 @@ void sendBackward(int elementId, dynamic logoState) {
         MaterialPageRoute(
           builder: (context) => ArtSelectScreen(
             images: [
-              'assets/icons/logo.png',
+                            'assets/logo_images/art1.svg',
+              'assets/logo_images/art2.svg',
+              'assets/logo_images/art3.svg',
               'assets/logo_images/logo_1.png',
               'assets/logo_images/logo_2.png',
               'assets/logo_images/logo_3.png',
@@ -1916,7 +1918,7 @@ void sendBackward(int elementId, dynamic logoState) {
       });
 
       if (selectedImagePath != null && mounted) {
-        _addImageToCanvas(selectedImagePath);
+        await _addImageToCanvas(selectedImagePath);
       }
     }
 
@@ -2077,7 +2079,49 @@ void sendBackward(int elementId, dynamic logoState) {
     });
   }
 
-  void _addImageToCanvas(String imagePath) {
+  Future<void> _addImageToCanvas(String imagePath) async {
+    // SVG path -> add to customSVGs (300+). Raster -> add to customImages (200+).
+    if (imagePath.toLowerCase().endsWith('.svg')) {
+      String svgString = '';
+      try {
+        if (imagePath.startsWith('assets/')) {
+          svgString = await rootBundle.loadString(imagePath);
+        } else {
+          svgString = await File(imagePath).readAsString();
+        }
+      } catch (e) {
+        print('Failed to load SVG: $e');
+        svgString = '';
+      }
+
+      if (svgString.isNotEmpty) {
+        final index = _currentLogoState.customSVGs.length;
+        final newSvg = CustomSvgElement(
+          svgString: svgString,
+          position: _getCanvasCenter(),
+          size: 120,
+          rotation: 0,
+        );
+
+        _saveState();
+        setState(() {
+          final updatedCustomSVGs = List<CustomSvgElement>.from(
+            _currentLogoState.customSVGs,
+          )..add(newSvg);
+          final newElementId = 300 + index;
+          final updatedElementOrder = List<int>.from(_currentLogoState.elementOrder)
+            ..add(newElementId);
+
+          _currentLogoState = _currentLogoState.copyWith(
+            customSVGs: updatedCustomSVGs,
+            elementOrder: updatedElementOrder,
+          );
+        });
+        return;
+      }
+      // if svgString empty, fall through to raster handler
+    }
+
     final index = _currentLogoState.customImages.length;
     final newImage = CustomImageElement(
       path: imagePath,
@@ -2224,10 +2268,13 @@ void sendBackward(int elementId, dynamic logoState) {
       final original = updatedState.customSVGs[index].clone();
       final outlineColor = provider.getOutlineColor(id);
       final outlineWidth = provider.getOutlineWidth(id);
-      final originalColor = provider.getColorForElement(
-        id,
-        fallback: original.color ?? Colors.black,
-      );
+      // Determine if the original element had a manual override. If so,
+      // preserve that color on the duplicate. If not, leave color null so
+      // the SVG's embedded colors are used.
+      final bool hadOverride = provider.hasColorOverride(id);
+      final Color? originalColor = hadOverride
+          ? provider.getColorForElement(id, fallback: original.color ?? Colors.black)
+          : null;
 
       // Calculate proper duplicate position
       final originalSize = Size(original.size, original.size);
@@ -2254,7 +2301,9 @@ void sendBackward(int elementId, dynamic logoState) {
 
       provider.setOutlineColor(newElementId, outlineColor);
       provider.setOutlineWidth(newElementId, outlineWidth);
-      provider.setOverrideColorForElement(newElementId, originalColor);
+      if (hadOverride && originalColor != null) {
+        provider.setOverrideColorForElement(newElementId, originalColor);
+      }
       updatedState = _duplicate3DRotation(
         oldId: id,
         newId: newElementId,
