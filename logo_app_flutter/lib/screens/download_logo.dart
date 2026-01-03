@@ -463,7 +463,7 @@ void _showSaveConfirmationDialog(BuildContext context, GlobalKey canvasKey) {
       // Clear undo/redo stacks and initialize with clean state
       _undoStack.clear();
       _redoStack.clear();
-      _undoStack.add(_currentLogoState.clone());
+      _pushCurrentStateToUndoStack(clearRedo: true);
     });
 
     // 4️⃣ Post-frame callback for UI updates
@@ -1581,6 +1581,8 @@ void sendBackward(int elementId, dynamic logoState) {
       rotationXMap: currentRotationX,
       rotationYMap: currentRotationY,
       rotationZMap: currentRotationZ,
+      companyFontIndex: provider.companyFontIndex,
+      sloganFontIndex: provider.sloganFontIndex,
     );
 
     _undoStack.add(_currentLogoState.clone());
@@ -1589,6 +1591,20 @@ void sendBackward(int elementId, dynamic logoState) {
     setState(() {
       // Trigger rebuild to update button states based on stack lengths
     });
+  }
+
+  void _pushCurrentStateToUndoStack({bool clearRedo = false}) {
+    final provider = Provider.of<SelectedColorProvider>(context, listen: false);
+    if (clearRedo) _redoStack.clear();
+
+    // Ensure current LogoState captures current provider font selections
+    _currentLogoState = _currentLogoState.copyWith(
+      companyFontIndex: provider.companyFontIndex,
+      sloganFontIndex: provider.sloganFontIndex,
+    );
+
+    if (_undoStack.length >= _maxUndoHistory) _undoStack.removeAt(0);
+    _undoStack.add(_currentLogoState.clone());
   }
 
   DateTime? _lastEmptyUndoTime;
@@ -1646,6 +1662,8 @@ void sendBackward(int elementId, dynamic logoState) {
         rotationXMap: currentRotationX,
         rotationYMap: currentRotationY,
         rotationZMap: currentRotationZ,
+        companyFontIndex: provider.companyFontIndex,
+        sloganFontIndex: provider.sloganFontIndex,
       );
 
       _redoStack.add(_currentLogoState.clone());
@@ -1658,7 +1676,12 @@ void sendBackward(int elementId, dynamic logoState) {
       // Now get the previous state
       if (_undoStack.isNotEmpty) {
         _currentLogoState = _undoStack.last.clone();
+        // Preserve user's currently selected fonts across undo of unrelated actions
+        final int savedCompanyFont = provider.companyFontIndex;
+        final int savedSloganFont = provider.sloganFontIndex;
         provider.applyLogoState(_currentLogoState);
+        provider.setCompanyFontIndex(savedCompanyFont);
+        provider.setSloganFontIndex(savedSloganFont);
 
         // Restore selectedShapeName
         selectedShapeName = _currentLogoState.selectedShapeName ?? "";
@@ -1704,13 +1727,17 @@ void sendBackward(int elementId, dynamic logoState) {
   void _redo() {
     if (_redoStack.isNotEmpty) {
       // Save current state to undo stack before redo
-      _undoStack.add(_currentLogoState.clone());
+      _pushCurrentStateToUndoStack();
 
       // Pop the redo state and set as current
       _currentLogoState = _redoStack.removeLast();
 
       final provider = Provider.of<SelectedColorProvider>(context, listen: false);
+      final int savedCompanyFont = provider.companyFontIndex;
+      final int savedSloganFont = provider.sloganFontIndex;
       provider.applyLogoState(_currentLogoState);
+      provider.setCompanyFontIndex(savedCompanyFont);
+      provider.setSloganFontIndex(savedSloganFont);
       selectedShapeName = _currentLogoState.selectedShapeName ?? "";
 
       setState(() {});
@@ -2533,10 +2560,10 @@ void sendBackward(int elementId, dynamic logoState) {
     setState(() => _currentLogoState = updatedState);
 
     // Push post-operation state to undo stack so undo/redo capture the change
-    if (_undoStack.length >= _maxUndoHistory) {
-      _undoStack.removeAt(0);
-    }
-    _undoStack.add(_currentLogoState.clone());
+      if (_undoStack.length >= _maxUndoHistory) {
+        _undoStack.removeAt(0);
+      }
+      _pushCurrentStateToUndoStack();
 
     if (newElementId != null) {
       provider.selectedElementId = newElementId;
@@ -3011,10 +3038,10 @@ void sendBackward(int elementId, dynamic logoState) {
         _isMoving = false;
       });
       // After finishing a drag, record the new state for undo/redo
-      if (_undoStack.length >= _maxUndoHistory) {
-        _undoStack.removeAt(0);
-      }
-      _undoStack.add(_currentLogoState.clone());
+    if (_undoStack.length >= _maxUndoHistory) {
+      _undoStack.removeAt(0);
+    }
+    _pushCurrentStateToUndoStack();
     }
   }
 
