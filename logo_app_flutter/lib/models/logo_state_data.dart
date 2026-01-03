@@ -133,6 +133,11 @@ class CustomImageElement {
   final double opacity;
   final bool isVisible;
   final int? layerIndex;
+  final Color? color; // optional tint color for the image
+  final Color? outlineColor;
+  final double outlineWidth;
+  final BoxFit fit;
+  final double? aspectRatio; // width / height, nullable to keep square by default
 
   const CustomImageElement({
     required this.path,
@@ -142,6 +147,11 @@ class CustomImageElement {
     this.opacity = 1.0,
     this.isVisible = true,
     this.layerIndex,
+    this.color,
+    this.outlineColor,
+    this.outlineWidth = 0,
+    this.fit = BoxFit.contain,
+    this.aspectRatio,
   });
 
   CustomImageElement copyWith({
@@ -152,6 +162,11 @@ class CustomImageElement {
     double? opacity,
     bool? isVisible,
     int? layerIndex,
+    Color? color,
+    Color? outlineColor,
+    double? outlineWidth,
+    BoxFit? fit,
+    double? aspectRatio,
   }) {
     return CustomImageElement(
       path: path ?? this.path,
@@ -161,6 +176,11 @@ class CustomImageElement {
       opacity: opacity ?? this.opacity,
       isVisible: isVisible ?? this.isVisible,
       layerIndex: layerIndex ?? this.layerIndex,
+      color: color ?? this.color,
+      outlineColor: outlineColor ?? this.outlineColor,
+      outlineWidth: outlineWidth ?? this.outlineWidth,
+      fit: fit ?? this.fit,
+      aspectRatio: aspectRatio ?? this.aspectRatio,
     );
   }
 
@@ -173,6 +193,11 @@ class CustomImageElement {
       opacity: opacity,
       isVisible: isVisible,
       layerIndex: layerIndex,
+      color: color,
+      outlineColor: outlineColor,
+      outlineWidth: outlineWidth,
+      fit: fit,
+      aspectRatio: aspectRatio,
     );
   }
 }

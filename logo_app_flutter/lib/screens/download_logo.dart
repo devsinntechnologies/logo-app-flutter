@@ -35,7 +35,7 @@ class DownloadLogo extends StatefulWidget {
   final int selectedFontIndex;
   final String? designId;
   final LogoStateData? initialLogoState;
-  final String? imagePath; 
+  final String? imagePath;
 
   const DownloadLogo({
     super.key,
@@ -200,183 +200,184 @@ class _DownloadLogoState extends State<DownloadLogo> {
     return true; // iOS will handle internally
   }
 
-void _showSaveConfirmationDialog(BuildContext context, GlobalKey canvasKey) {
-  showDialog(
-    barrierDismissible: true,
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        backgroundColor: Colors.white,
-        title: const Text(
-          'Save Logo',
-          style: TextStyle(
-            color: ThemeColors.purple,
-            fontWeight: FontWeight.w500,
+  void _showSaveConfirmationDialog(BuildContext context, GlobalKey canvasKey) {
+    showDialog(
+      barrierDismissible: true,
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          title: const Text(
+            'Save Logo',
+            style: TextStyle(
+              color: ThemeColors.purple,
+              fontWeight: FontWeight.w500,
+            ),
           ),
-        ),
-        content: const Text(
-          'Do you want to save the logo to your gallery to My Design?',
-          style: TextStyle(
-            fontSize: 16,
-            color: ThemeColors.purple,
+          content: const Text(
+            'Do you want to save the logo to your gallery to My Design?',
+            style: TextStyle(
+              fontSize: 16,
+              color: ThemeColors.purple,
+            ),
           ),
-        ),
-        actions: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-
-              /// 👉 SAVE / UPDATE TO SUPABASE
-              TextButton(
-                onPressed: () async {
-                  final provider = Provider.of<SelectedColorProvider>(context, listen: false);
-                  int? previousSelection = provider.selectedElementId;
-                  bool hadSelection = previousSelection != null;
-                  if (hadSelection) provider.clearSelection();
-                  // Wait for UI to clear selection box
-                  if (hadSelection) {
-                    await Future.delayed(const Duration(milliseconds: 50));
-                    await WidgetsBinding.instance.endOfFrame;
-                  }
-                  try {
-                    // Ensure current provider font selections are written into the state before saving
-                    _currentLogoState = _currentLogoState.copyWith(
-                      companyFontIndex: provider.companyFontIndex,
-                      sloganFontIndex: provider.sloganFontIndex,
-                    );
-                    final designJson = _currentLogoState.toJson();
-                    debugPrint('💾 Saving design fonts -> provider.company:${provider.companyFontIndex} provider.slogan:${provider.sloganFontIndex}');
-                    debugPrint('💾 designJson companyFontIndex: ${designJson["companyFontIndex"]} sloganFontIndex: ${designJson["sloganFontIndex"]}');
-                    final svc = UserDesignService();
-                    if (widget.designId != null) {
-                      await svc.updateDesign(
-                        designId: widget.designId!,
-                        updatedJson: designJson,
-                        canvasKey: canvasKey,
-                        updateImage: true,
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                /// 👉 SAVE / UPDATE TO SUPABASE
+                TextButton(
+                  onPressed: () async {
+                    final provider = Provider.of<SelectedColorProvider>(context,
+                        listen: false);
+                    int? previousSelection = provider.selectedElementId;
+                    bool hadSelection = previousSelection != null;
+                    if (hadSelection) provider.clearSelection();
+                    // Wait for UI to clear selection box
+                    if (hadSelection) {
+                      await Future.delayed(const Duration(milliseconds: 50));
+                      await WidgetsBinding.instance.endOfFrame;
+                    }
+                    try {
+                      // Ensure current provider font selections are written into the state before saving
+                      _currentLogoState = _currentLogoState.copyWith(
+                        companyFontIndex: provider.companyFontIndex,
+                        sloganFontIndex: provider.sloganFontIndex,
                       );
-                    } else {
-                      await svc.saveNewDesign(
-                        canvasKey: canvasKey,
-                        designJson: designJson,
+                      final designJson = _currentLogoState.toJson();
+                      debugPrint(
+                          '💾 Saving design fonts -> provider.company:${provider.companyFontIndex} provider.slogan:${provider.sloganFontIndex}');
+                      debugPrint(
+                          '💾 designJson companyFontIndex: ${designJson["companyFontIndex"]} sloganFontIndex: ${designJson["sloganFontIndex"]}');
+                      final svc = UserDesignService();
+                      if (widget.designId != null) {
+                        await svc.updateDesign(
+                          designId: widget.designId!,
+                          updatedJson: designJson,
+                          canvasKey: canvasKey,
+                          updateImage: true,
+                        );
+                      } else {
+                        await svc.saveNewDesign(
+                          canvasKey: canvasKey,
+                          designJson: designJson,
+                        );
+                      }
+                      // Restore selection after save
+                      if (hadSelection && previousSelection != null) {
+                        provider.setSelectedElement(previousSelection);
+                      }
+                      Navigator.of(context).pop();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          backgroundColor: Colors.white,
+                          behavior: SnackBarBehavior.floating,
+                          content: Row(
+                            children: const [
+                              Icon(Icons.cloud_done, color: ThemeColors.purple),
+                              SizedBox(width: 12),
+                              Text(
+                                'Logo saved successfully!',
+                                style: TextStyle(
+                                  color: ThemeColors.purple,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    } catch (e) {
+                      if (hadSelection && previousSelection != null) {
+                        provider.setSelectedElement(previousSelection);
+                      }
+                      Navigator.of(context).pop();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          backgroundColor: Colors.white,
+                          behavior: SnackBarBehavior.floating,
+                          content: Row(
+                            children: [
+                              const Icon(Icons.error,
+                                  color: ThemeColors.purple),
+                              const SizedBox(width: 12),
+                              Expanded(child: Text('Error saving logo: $e')),
+                            ],
+                          ),
+                        ),
                       );
                     }
-                    // Restore selection after save
-                    if (hadSelection && previousSelection != null) {
+                  },
+                  child: Text(
+                    widget.designId != null ? 'Update' : 'To My Design',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: ThemeColors.purple,
+                    ),
+                  ),
+                ),
+
+                /// 👉 SAVE TO DEVICE GALLERY (UNCHANGED)
+                TextButton(
+                  onPressed: () async {
+                    final provider = Provider.of<SelectedColorProvider>(context,
+                        listen: false);
+
+                    int? previousSelection = provider.selectedElementId;
+                    provider.clearSelection();
+
+                    await WidgetsBinding.instance.endOfFrame;
+
+                    await saveCanvasToGallery(canvasKey, isExportingNotifier);
+
+                    if (previousSelection != null) {
                       provider.setSelectedElement(previousSelection);
                     }
+
                     Navigator.of(context).pop();
+
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
+                        duration: const Duration(seconds: 3),
                         backgroundColor: Colors.white,
                         behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        margin: const EdgeInsets.all(16),
                         content: Row(
                           children: const [
-                            Icon(Icons.cloud_done, color: ThemeColors.purple),
+                            Icon(Icons.check_circle, color: ThemeColors.purple),
                             SizedBox(width: 12),
-                            Text(
-                              'Logo saved successfully!',
-                              style: TextStyle(
-                                color: ThemeColors.purple,
-                                fontSize: 16,
+                            Expanded(
+                              child: Text(
+                                'Logo saved successfully!',
+                                style: TextStyle(
+                                  color: ThemeColors.purple,
+                                  fontSize: 16,
+                                ),
                               ),
                             ),
                           ],
                         ),
                       ),
                     );
-                  } catch (e) {
-                    if (hadSelection && previousSelection != null) {
-                      provider.setSelectedElement(previousSelection);
-                    }
-                    Navigator.of(context).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        backgroundColor: Colors.white,
-                        behavior: SnackBarBehavior.floating,
-                        content: Row(
-                          children: [
-                            const Icon(Icons.error, color: ThemeColors.purple),
-                            const SizedBox(width: 12),
-                            Expanded(child: Text('Error saving logo: $e')),
-                          ],
-                        ),
-                      ),
-                    );
-                  }
-                },
-                child: Text(
-                  widget.designId != null ? 'Update' : 'To My Design',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: ThemeColors.purple,
-                  ),
-                ),
-              ),
-
-              /// 👉 SAVE TO DEVICE GALLERY (UNCHANGED)
-              TextButton(
-                onPressed: () async {
-                  final provider =
-                      Provider.of<SelectedColorProvider>(context, listen: false);
-
-                  int? previousSelection = provider.selectedElementId;
-                  provider.clearSelection();
-
-                  await WidgetsBinding.instance.endOfFrame;
-
-                  await saveCanvasToGallery(
-                      canvasKey, isExportingNotifier);
-
-                  if (previousSelection != null) {
-                    provider.setSelectedElement(previousSelection);
-                  }
-
-                  Navigator.of(context).pop();
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      duration: const Duration(seconds: 3),
-                      backgroundColor: Colors.white,
-                      behavior: SnackBarBehavior.floating,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      margin: const EdgeInsets.all(16),
-                      content: Row(
-                        children: const [
-                          Icon(Icons.check_circle,
-                              color: ThemeColors.purple),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              'Logo saved successfully!',
-                              style: TextStyle(
-                                color: ThemeColors.purple,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                  },
+                  child: const Text(
+                    'To Gallery',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: ThemeColors.purple,
                     ),
-                  );
-                },
-                child: const Text(
-                  'To Gallery',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: ThemeColors.purple,
                   ),
                 ),
-              ),
-            ],
-          ),
-        ],
-      );
-    },
-  );
-}
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   @override
@@ -415,10 +416,12 @@ void _showSaveConfirmationDialog(BuildContext context, GlobalKey canvasKey) {
       _currentLogoState = widget.initialLogoState!.clone();
       // Debug: log that initState received an initial logo state
       // ignore: avoid_print
-      print('DownloadLogo.initState -> initialLogoState companyFont:${widget.initialLogoState?.companyFontIndex} sloganFont:${widget.initialLogoState?.sloganFontIndex} selectedFontIndex:${widget.selectedFontIndex}');
+      print(
+          'DownloadLogo.initState -> initialLogoState companyFont:${widget.initialLogoState?.companyFontIndex} sloganFont:${widget.initialLogoState?.sloganFontIndex} selectedFontIndex:${widget.selectedFontIndex}');
       // Apply colors/backgrounds to provider after frame
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        final colorProvider = Provider.of<SelectedColorProvider>(context, listen: false);
+        final colorProvider =
+            Provider.of<SelectedColorProvider>(context, listen: false);
         colorProvider.resetAllOutlines();
         colorProvider.resetAllColors(defaultColors: {});
         colorProvider.clearOverrides();
@@ -452,10 +455,12 @@ void _showSaveConfirmationDialog(BuildContext context, GlobalKey canvasKey) {
     colorProvider.resetAllOutlines();
     colorProvider.resetAllColors(defaultColors: {});
     colorProvider.clearOverrides();
-    
+
     // Set the selected font index for company name and slogan (prefer initial state)
-    final startCompanyFont = widget.initialLogoState?.companyFontIndex ?? widget.selectedFontIndex;
-    final startSloganFont = widget.initialLogoState?.sloganFontIndex ?? widget.selectedFontIndex;
+    final startCompanyFont =
+        widget.initialLogoState?.companyFontIndex ?? widget.selectedFontIndex;
+    final startSloganFont =
+        widget.initialLogoState?.sloganFontIndex ?? widget.selectedFontIndex;
     colorProvider.setCompanyFontIndex(startCompanyFont);
     colorProvider.setSloganFontIndex(startSloganFont);
 
@@ -521,21 +526,20 @@ void _showSaveConfirmationDialog(BuildContext context, GlobalKey canvasKey) {
           //   onPressed: _undo,
           //   tooltip: 'Undo last change',
           // ),
-         IconButton(
-  icon: const Icon(Icons.save, size: 35),
-  onPressed: () {
-    final user = Supabase.instance.client.auth.currentUser;
-    if (user != null) {
-      // User is logged in → show save confirmation
-      _showSaveConfirmationDialog(context, _canvasKey);
-    } else {
-      // User not logged in → show login dialog
-      showCustomGoogleDialog(context);
-    }
-  },
-  tooltip: 'Save Logo',
-)
-
+          IconButton(
+            icon: const Icon(Icons.save, size: 35),
+            onPressed: () {
+              final user = Supabase.instance.client.auth.currentUser;
+              if (user != null) {
+                // User is logged in → show save confirmation
+                _showSaveConfirmationDialog(context, _canvasKey);
+              } else {
+                // User not logged in → show login dialog
+                showCustomGoogleDialog(context);
+              }
+            },
+            tooltip: 'Save Logo',
+          )
         ],
       ),
       body: Stack(
@@ -837,18 +841,14 @@ void _showSaveConfirmationDialog(BuildContext context, GlobalKey canvasKey) {
                   print('Duplicate called for $selectedElement');
                   duplicateSelectedElement(selectedElement!);
                 },
-              onBringToFrontPressed: () =>
-    bringToFront(selectedElement!, _currentLogoState),
-
-onSendToBackPressed: () =>
-    sendToBack(selectedElement!, _currentLogoState),
-
-onBringForwardPressed: () =>
-    bringForward(selectedElement!, _currentLogoState),
-
-onSendBackwardPressed: () =>
-    sendBackward(selectedElement!, _currentLogoState),
-
+                onBringToFrontPressed: () =>
+                    bringToFront(selectedElement!, _currentLogoState),
+                onSendToBackPressed: () =>
+                    sendToBack(selectedElement!, _currentLogoState),
+                onBringForwardPressed: () =>
+                    bringForward(selectedElement!, _currentLogoState),
+                onSendBackwardPressed: () =>
+                    sendBackward(selectedElement!, _currentLogoState),
                 onSaveState: _saveState,
                 logoState: _currentLogoState,
                 selectedElementId: selectedElement,
@@ -1083,9 +1083,9 @@ onSendBackwardPressed: () =>
                                                               _currentLogoState
                                                                   .elementOrder,
                                                         );
-                                                          // Save this rotation as a separate undo step
-                                                          _saveState();
-                                                          setState(() {});
+                                                        // Save this rotation as a separate undo step
+                                                        _saveState();
+                                                        setState(() {});
                                                       },
                                                       child: Container(
                                                         decoration:
@@ -1338,24 +1338,24 @@ onSendBackwardPressed: () =>
       setState(() {});
     }
   }
+
   void bringForward(int elementId, dynamic logoState) {
-  final index = logoState.elementOrder.indexOf(elementId);
-  if (index != -1 && index < logoState.elementOrder.length - 1) {
-    logoState.elementOrder.removeAt(index);
-    logoState.elementOrder.insert(index + 1, elementId);
-    setState(() {});
+    final index = logoState.elementOrder.indexOf(elementId);
+    if (index != -1 && index < logoState.elementOrder.length - 1) {
+      logoState.elementOrder.removeAt(index);
+      logoState.elementOrder.insert(index + 1, elementId);
+      setState(() {});
+    }
   }
-}
 
-void sendBackward(int elementId, dynamic logoState) {
-  final index = logoState.elementOrder.indexOf(elementId);
-  if (index != -1 && index > 0) {
-    logoState.elementOrder.removeAt(index);
-    logoState.elementOrder.insert(index - 1, elementId);
-    setState(() {});
+  void sendBackward(int elementId, dynamic logoState) {
+    final index = logoState.elementOrder.indexOf(elementId);
+    if (index != -1 && index > 0) {
+      logoState.elementOrder.removeAt(index);
+      logoState.elementOrder.insert(index - 1, elementId);
+      setState(() {});
+    }
   }
-}
-
 
   Widget _buildEffectPanel({required VoidCallback onClose}) {
     return Column(
@@ -1534,7 +1534,8 @@ void sendBackward(int elementId, dynamic logoState) {
     final provider = Provider.of<SelectedColorProvider>(context, listen: false);
 
     // Sync custom text colors from provider
-    final updatedCustomTexts = _currentLogoState.customTexts.asMap().entries.map((entry) {
+    final updatedCustomTexts =
+        _currentLogoState.customTexts.asMap().entries.map((entry) {
       final index = entry.key;
       final text = entry.value;
       final elementId = 100 + index;
@@ -1545,12 +1546,14 @@ void sendBackward(int elementId, dynamic logoState) {
     }).toList();
 
     // Sync custom SVG colors from provider
-    final updatedCustomSVGs = _currentLogoState.customSVGs.asMap().entries.map((entry) {
+    final updatedCustomSVGs =
+        _currentLogoState.customSVGs.asMap().entries.map((entry) {
       final index = entry.key;
       final svg = entry.value;
       final elementId = 300 + index;
       final Color? colorFromProvider = provider.hasColorOverride(elementId)
-          ? provider.getColorForElement(elementId, fallback: svg.color ?? Colors.black)
+          ? provider.getColorForElement(elementId,
+              fallback: svg.color ?? Colors.black)
           : svg.color;
       return svg.copyWith(color: colorFromProvider);
     }).toList();
@@ -1617,7 +1620,8 @@ void sendBackward(int elementId, dynamic logoState) {
       final provider =
           Provider.of<SelectedColorProvider>(context, listen: false);
 
-      final updatedCustomTexts = _currentLogoState.customTexts.asMap().entries.map((entry) {
+      final updatedCustomTexts =
+          _currentLogoState.customTexts.asMap().entries.map((entry) {
         final index = entry.key;
         final text = entry.value;
         final elementId = 100 + index;
@@ -1627,12 +1631,14 @@ void sendBackward(int elementId, dynamic logoState) {
         return text.copyWith(color: colorFromProvider);
       }).toList();
 
-      final updatedCustomSVGs = _currentLogoState.customSVGs.asMap().entries.map((entry) {
+      final updatedCustomSVGs =
+          _currentLogoState.customSVGs.asMap().entries.map((entry) {
         final index = entry.key;
         final svg = entry.value;
         final elementId = 300 + index;
         final Color? colorFromProvider = provider.hasColorOverride(elementId)
-            ? provider.getColorForElement(elementId, fallback: svg.color ?? Colors.black)
+            ? provider.getColorForElement(elementId,
+                fallback: svg.color ?? Colors.black)
             : svg.color;
         return svg.copyWith(color: colorFromProvider);
       }).toList();
@@ -1732,7 +1738,8 @@ void sendBackward(int elementId, dynamic logoState) {
       // Pop the redo state and set as current
       _currentLogoState = _redoStack.removeLast();
 
-      final provider = Provider.of<SelectedColorProvider>(context, listen: false);
+      final provider =
+          Provider.of<SelectedColorProvider>(context, listen: false);
       final int savedCompanyFont = provider.companyFontIndex;
       final int savedSloganFont = provider.sloganFontIndex;
       provider.applyLogoState(_currentLogoState);
@@ -1883,9 +1890,10 @@ void sendBackward(int elementId, dynamic logoState) {
         selectedIndex = -1;
       });
 
-          if (result != null && result.isNotEmpty) {
+      if (result != null && result.isNotEmpty) {
         setState(() {
-          final provider = Provider.of<SelectedColorProvider>(context, listen: false);
+          final provider =
+              Provider.of<SelectedColorProvider>(context, listen: false);
           // Offset new text slightly to the left and top (8px each)
           final basePos = _currentLogoState.companyNamePosition;
           final adjustedPos = basePos - const Offset(35, 35);
@@ -1922,7 +1930,7 @@ void sendBackward(int elementId, dynamic logoState) {
         MaterialPageRoute(
           builder: (context) => ArtSelectScreen(
             images: [
-                            'assets/logo_images/art1.svg',
+              'assets/logo_images/art1.svg',
               'assets/logo_images/art2.svg',
               'assets/logo_images/art3.svg',
               'assets/logo_images/logo_1.png',
@@ -1986,11 +1994,17 @@ void sendBackward(int elementId, dynamic logoState) {
         final pickedFile = await picker.pickImage(source: selectedSource);
         if (pickedFile != null) {
           final imageIndex = _currentLogoState.customImages.length;
+          final config = await _showImageLayoutDialog(context, pickedFile.path);
           final newImage = CustomImageElement(
             path: pickedFile.path,
             position: _getCanvasCenter(),
             size: 100,
             rotation: 0,
+            fit: config != null && config['fit'] != null
+                ? config['fit'] as BoxFit
+                : BoxFit.contain,
+            aspectRatio:
+                config != null ? config['aspectRatio'] as double? : null,
           );
           _saveState();
           setState(() {
@@ -2136,8 +2150,8 @@ void sendBackward(int elementId, dynamic logoState) {
             _currentLogoState.customSVGs,
           )..add(newSvg);
           final newElementId = 300 + index;
-          final updatedElementOrder = List<int>.from(_currentLogoState.elementOrder)
-            ..add(newElementId);
+          final updatedElementOrder =
+              List<int>.from(_currentLogoState.elementOrder)..add(newElementId);
 
           _currentLogoState = _currentLogoState.copyWith(
             customSVGs: updatedCustomSVGs,
@@ -2150,11 +2164,24 @@ void sendBackward(int elementId, dynamic logoState) {
     }
 
     final index = _currentLogoState.customImages.length;
+    // If this is a file (likely picked from gallery), ask layout/aspect choices
+    BoxFit chosenFit = BoxFit.contain;
+    double? chosenAspect;
+    if (!imagePath.startsWith('assets/')) {
+      final cfg = await _showImageLayoutDialog(context, imagePath);
+      if (cfg != null) {
+        chosenFit = cfg['fit'] as BoxFit? ?? BoxFit.contain;
+        chosenAspect = cfg['aspectRatio'] as double?;
+      }
+    }
+
     final newImage = CustomImageElement(
       path: imagePath,
       position: _getCanvasCenter(),
       rotation: 0,
       size: 120,
+      fit: chosenFit,
+      aspectRatio: chosenAspect,
     );
 
     _saveState();
@@ -2300,7 +2327,8 @@ void sendBackward(int elementId, dynamic logoState) {
       // the SVG's embedded colors are used.
       final bool hadOverride = provider.hasColorOverride(id);
       final Color? originalColor = hadOverride
-          ? provider.getColorForElement(id, fallback: original.color ?? Colors.black)
+          ? provider.getColorForElement(id,
+              fallback: original.color ?? Colors.black)
           : null;
 
       // Calculate proper duplicate position
@@ -2360,6 +2388,15 @@ void sendBackward(int elementId, dynamic logoState) {
       final newTopLeft = originalTopLeft + const Offset(30, 30);
       final newCenterPosition = getCenterPosition(newTopLeft, originalSize);
 
+      // preserve provider overrides (outline + tint) similar to SVG duplication
+      final outlineColor = provider.getOutlineColor(id);
+      final outlineWidth = provider.getOutlineWidth(id);
+      final bool hadOverride = provider.hasColorOverride(id);
+      final Color? originalColor = hadOverride
+          ? provider.getColorForElement(id,
+              fallback: original.color ?? Colors.transparent)
+          : null;
+
       final newImage = original.copyWith(
         position: newCenterPosition, // Store as center position
       );
@@ -2374,6 +2411,13 @@ void sendBackward(int elementId, dynamic logoState) {
         customImages: updatedImages,
         elementOrder: [...updatedState.elementOrder, newElementId],
       );
+
+      // Apply provider overrides to the duplicated element so color/outline persist
+      provider.setOutlineColor(newElementId, outlineColor);
+      provider.setOutlineWidth(newElementId, outlineWidth);
+      if (hadOverride && originalColor != null) {
+        provider.setOverrideColorForElement(newElementId, originalColor);
+      }
 
       updatedState = _duplicate3DRotation(
         oldId: id,
@@ -2560,10 +2604,10 @@ void sendBackward(int elementId, dynamic logoState) {
     setState(() => _currentLogoState = updatedState);
 
     // Push post-operation state to undo stack so undo/redo capture the change
-      if (_undoStack.length >= _maxUndoHistory) {
-        _undoStack.removeAt(0);
-      }
-      _pushCurrentStateToUndoStack();
+    if (_undoStack.length >= _maxUndoHistory) {
+      _undoStack.removeAt(0);
+    }
+    _pushCurrentStateToUndoStack();
 
     if (newElementId != null) {
       provider.selectedElementId = newElementId;
@@ -3038,10 +3082,10 @@ void sendBackward(int elementId, dynamic logoState) {
         _isMoving = false;
       });
       // After finishing a drag, record the new state for undo/redo
-    if (_undoStack.length >= _maxUndoHistory) {
-      _undoStack.removeAt(0);
-    }
-    _pushCurrentStateToUndoStack();
+      if (_undoStack.length >= _maxUndoHistory) {
+        _undoStack.removeAt(0);
+      }
+      _pushCurrentStateToUndoStack();
     }
   }
 
@@ -3245,6 +3289,237 @@ void sendBackward(int elementId, dynamic logoState) {
         elementOrder: [..._currentLogoState.elementOrder, 200 + index], // ✅
       );
     });
+  }
+
+  /// Shows a small dialog allowing the user to choose an aspect ratio
+  /// and BoxFit layout for a picked gallery image. Returns a map with
+  /// keys 'fit' and 'aspectRatio' or null if cancelled.
+  Future<Map<String, Object?>?> _showImageLayoutDialog(
+    BuildContext ctx,
+    String imagePath,
+  ) async {
+    BoxFit selectedFit = BoxFit.cover;
+    double? selectedAspect; // null -> original
+
+    final ImageProvider imageProvider = imagePath.startsWith('assets/')
+        ? AssetImage(imagePath)
+        : FileImage(File(imagePath));
+
+    return await showDialog<Map<String, Object?>?>(
+      context: ctx,
+      barrierDismissible: true,
+      builder: (context) {
+        return StatefulBuilder(builder: (context, setState) {
+          Widget preview() {
+            final previewCard = Container(
+              decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Colors.white24),
+              ),
+              clipBehavior: Clip.hardEdge,
+              child: SizedBox(
+                width: double.infinity,
+                height: 260,
+                child: selectedAspect != null
+                    ? AspectRatio(
+                        aspectRatio: selectedAspect!,
+                        child: Container(
+                          color: Colors.black,
+                          child: Image(
+                            image: imageProvider,
+                            fit: selectedFit,
+                          ),
+                        ),
+                      )
+                    : FittedBox(
+                        fit: BoxFit.contain,
+                        child: SizedBox(
+                          width: 360,
+                          child: Image(
+                            image: imageProvider,
+                            fit: selectedFit,
+                          ),
+                        ),
+                      ),
+              ),
+            );
+
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: previewCard,
+            );
+          }
+
+          Widget aspectButtons() {
+            final items = <Map<String, dynamic>>[
+              {'label': 'Original', 'value': null},
+              {'label': '1:1', 'value': 1.0},
+              {'label': '16:9', 'value': 16 / 9},
+              {'label': '4:3', 'value': 4 / 3},
+            ];
+
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: items.map((it) {
+                final bool sel = selectedAspect == it['value'];
+                return Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(0, 32), // ⬅ height kam
+                        padding: const EdgeInsets.symmetric(vertical: 6),
+                        backgroundColor: sel ? Colors.purple : Colors.grey[200],
+                        foregroundColor: sel ? Colors.white : Colors.black87,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8)),
+                        elevation: sel ? 6 : 1,
+                      ),
+                      onPressed: () => setState(
+                          () => selectedAspect = it['value'] as double?),
+                      child: Text(it['label'],
+                          style: const TextStyle(fontSize: 12)),
+                    ),
+                  ),
+                );
+              }).toList(),
+            );
+          }
+
+          Widget layoutButtons() {
+            final layouts = <Map<String, dynamic>>[
+              {
+                'icon': Icons.crop_free,
+                'label': 'Contain',
+                'value': BoxFit.contain
+              },
+              {
+                'icon': Icons.crop_square,
+                'label': 'Cover',
+                'value': BoxFit.cover
+              },
+              {'icon': Icons.straighten, 'label': 'Fill', 'value': BoxFit.fill},
+              {
+                'icon': Icons.swap_vert,
+                'label': 'Fit W',
+                'value': BoxFit.fitWidth
+              },
+              {
+                'icon': Icons.swap_horiz,
+                'label': 'Fit H',
+                'value': BoxFit.fitHeight
+              },
+            ];
+
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: layouts.map((it) {
+                final bool sel = selectedFit == it['value'];
+                return Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(0, 32), // ⬅ height kam
+                        padding: const EdgeInsets.symmetric(vertical: 6),
+                          backgroundColor: sel ? Colors.purple : Colors.grey[200],
+
+                        foregroundColor: sel ? Colors.white : Colors.black,
+                        side: BorderSide(
+                            color: sel ? Colors.white54 : Colors.white24),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8)),
+                        elevation: sel ? 6 : 1,
+
+                      ),
+                      onPressed: () =>
+                          setState(() => selectedFit = it['value'] as BoxFit),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(it['icon'], size: 18),
+                          const SizedBox(height: 4),
+                          Text(it['label'],
+                              style: const TextStyle(fontSize: 11))
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            );
+          }
+
+          return Dialog(
+            backgroundColor: Colors.white,
+            insetPadding:
+                const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // header
+                  Row(
+                    children: [
+                      SizedBox(width: 10),
+                      const Expanded(
+                          child: Text('Preview & Layout',
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold))),
+                      IconButton(
+                        icon: const Icon(Icons.close, color: Colors.black),
+                        onPressed: () => Navigator.pop(context, null),
+                      )
+                    ],
+                  ),
+                  // preview
+                  preview(),
+                  const SizedBox(height: 8),
+                  // Aspect buttons (Instagram-style pill buttons)
+                  aspectButtons(),
+                  const SizedBox(height: 12),
+                  // Layout buttons (icons)
+                  layoutButtons(),
+                  const SizedBox(height: 12),
+                  // actions
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextButton(
+                          style: TextButton.styleFrom(
+                              foregroundColor: Colors.black),
+                          onPressed: () => Navigator.pop(context, null),
+                          child: const Text('Cancel'),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.purple),
+                        onPressed: () => Navigator.pop(context, {
+                          'fit': selectedFit,
+                          'aspectRatio': selectedAspect
+                        }),
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 16.0, vertical: 12.0),
+                          child: Text('Apply',
+                              style: TextStyle(color: Colors.white)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+      },
+    );
   }
 
   // Offset _getElementPosition(int id) {

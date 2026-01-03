@@ -601,23 +601,30 @@ class _LogoCanvasState extends State<LogoCanvas> {
           ? _centerAlign(canvasSize, imageSize)
           : image.position;
 
+      // Check provider overrides for image tint (color)
+      final hasOverride = provider.hasColorOverride(id);
+      final Color? tintColor = hasOverride
+          ? provider.getColorForElement(id, fallback: Colors.white)
+          : image.color;
+      final Color finalStrokeColor = provider.getOutlineColor(id) ?? image.outlineColor ?? Colors.transparent;
+      final double finalStrokeWidth = provider.getOutlineWidth(id) ?? image.outlineWidth;
+
       return wrap(
         Center(
           child: Opacity(
             opacity: image.opacity?.clamp(0.0, 1.0) ?? 1.0,
-            child: image.path.startsWith('assets/')
-                ? Image.asset(
-                    image.path,
-                    width: imageSize.width,
-                    height: imageSize.height,
-                    fit: BoxFit.contain,
-                  )
-                : Image.file(
-                    File(image.path),
-                    width: imageSize.width,
-                    height: imageSize.height,
-                    fit: BoxFit.contain,
-                  ),
+            
+            child: StrokedImage(
+              path: image.path,
+              width: imageSize.width,
+              height: image.size != null && image.aspectRatio != null
+                  ? (image.size! / (image.aspectRatio ?? 1.0))
+                  : imageSize.height,
+              fit: image.fit,
+              tintColor: tintColor,
+              strokeColor: finalStrokeColor,
+              strokeWidth: finalStrokeWidth,
+            ),
           ),
         ),
         centerPosition: centerPosition,
@@ -1046,6 +1053,90 @@ class StrokedSvg extends StatelessWidget {
               ? ColorFilter.mode(fillColor!, BlendMode.srcIn)
               : null,
         ),
+      ],
+    );
+  }
+}
+
+class StrokedImage extends StatelessWidget {
+  final String path;
+  final double width;
+  final double height;
+  final BoxFit fit;
+  final Color? tintColor;
+  final Color strokeColor;
+  final double strokeWidth;
+
+  const StrokedImage({
+    super.key,
+    required this.path,
+    required this.width,
+    required this.height,
+    this.fit = BoxFit.contain,
+    this.tintColor,
+    this.strokeColor = Colors.transparent,
+    this.strokeWidth = 0,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final imageWidget = path.startsWith('assets/')
+      ? Image.asset(
+        path,
+        width: width,
+        height: height,
+        fit: fit,
+        color: tintColor,
+        colorBlendMode: tintColor != null ? BlendMode.srcIn : null,
+        )
+      : Image.file(
+        File(path),
+        width: width,
+        height: height,
+        fit: fit,
+        color: tintColor,
+        colorBlendMode: tintColor != null ? BlendMode.srcIn : null,
+        );
+
+    if (strokeWidth <= 0) return imageWidget;
+
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        // create stroke by drawing offset tinted copies behind the image
+        ...[
+          Offset(-strokeWidth, 0),
+          Offset(strokeWidth, 0),
+          Offset(0, -strokeWidth),
+          Offset(0, strokeWidth),
+          Offset(-strokeWidth, -strokeWidth),
+          Offset(-strokeWidth, strokeWidth),
+          Offset(strokeWidth, -strokeWidth),
+          Offset(strokeWidth, strokeWidth),
+        ].map(
+          (offset) => Transform.translate(
+            offset: offset,
+            child: path.startsWith('assets/')
+                ? Image.asset(
+                    path,
+                    width: width,
+                    height: height,
+                    fit: fit,
+                    color: strokeColor,
+                    colorBlendMode: BlendMode.srcIn,
+                  )
+                : Image.file(
+                    File(path),
+                    width: width,
+                    height: height,
+                    fit: fit,
+                    color: strokeColor,
+                    colorBlendMode: BlendMode.srcIn,
+                  ),
+          ),
+        ),
+        // main image (with optional tint)
+        imageWidget,
       ],
     );
   }
