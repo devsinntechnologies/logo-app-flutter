@@ -1523,17 +1523,10 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
 // --------------------old Undo/working code--------------------
   // --- State Save/Undo ---
-  void _saveState() {
-    _redoStack.clear();
-
-    if (_undoStack.length >= _maxUndoHistory) {
-      _undoStack.removeAt(0);
-    }
-
-    // Capture current provider state into _currentLogoState before saving
+  /// Capture provider-driven values into a new LogoStateData instance.
+  LogoStateData _captureStateFromProvider() {
     final provider = Provider.of<SelectedColorProvider>(context, listen: false);
 
-    // Sync custom text colors from provider
     final updatedCustomTexts =
         _currentLogoState.customTexts.asMap().entries.map((entry) {
       final index = entry.key;
@@ -1545,7 +1538,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
       return text.copyWith(color: colorFromProvider);
     }).toList();
 
-    // Sync custom SVG colors from provider
     final updatedCustomSVGs =
         _currentLogoState.customSVGs.asMap().entries.map((entry) {
       final index = entry.key;
@@ -1558,19 +1550,62 @@ class _DownloadLogoState extends State<DownloadLogo> {
       return svg.copyWith(color: colorFromProvider);
     }).toList();
 
-    // Update _currentLogoState with all current provider values
-    // Capture asset path OR file path (whichever is set)
+    final updatedCustomImages =
+        _currentLogoState.customImages.asMap().entries.map((entry) {
+      final index = entry.key;
+      final img = entry.value;
+      final elementId = 200 + index;
+      final Color? colorFromProvider = provider.hasColorOverride(elementId)
+          ? provider.getColorForElement(elementId,
+              fallback: img.color ?? Colors.transparent)
+          : img.color;
+      final Color outlineColorFromProvider = provider.getOutlineColor(elementId);
+      final double outlineWidthFromProvider = provider.getOutlineWidth(elementId);
+      return img.copyWith(
+          position: img.position,
+          rotation: img.rotation,
+          size: img.size,
+          opacity: img.opacity,
+          isVisible: img.isVisible,
+          layerIndex: img.layerIndex,
+          color: colorFromProvider,
+          outlineColor: outlineColorFromProvider,
+          outlineWidth: outlineWidthFromProvider,
+          fit: img.fit,
+          aspectRatio: img.aspectRatio);
+    }).toList();
+
+    final Map<String, Color> elementColors = {};
+    final Map<String, Color> outlineColors = {};
+    final Map<String, double> outlineWidths = {};
+
+    for (int i = 0; i < updatedCustomTexts.length; i++) {
+      final id = 100 + i;
+      final c = updatedCustomTexts[i].color;
+      elementColors['$id'] = c;
+    }
+    for (int i = 0; i < updatedCustomSVGs.length; i++) {
+      final id = 300 + i;
+      final c = updatedCustomSVGs[i].color;
+      if (c != null) elementColors['$id'] = c;
+    }
+    for (int i = 0; i < updatedCustomImages.length; i++) {
+      final id = 200 + i;
+      final c = updatedCustomImages[i].color;
+      if (c != null) elementColors['$id'] = c;
+      final oc = updatedCustomImages[i].outlineColor;
+      final ow = updatedCustomImages[i].outlineWidth;
+      if (oc != null) outlineColors['$id'] = oc;
+      if (ow != null && ow > 0) outlineWidths['$id'] = ow;
+    }
+
     final imagePath = provider.assetImagePath ?? provider.imageFile?.path;
 
-    // ✅ Explicitly preserve rotation maps to ensure they're not lost
-    final currentRotationX =
-        Map<int, double>.from(_currentLogoState.rotationXMap);
-    final currentRotationY =
-        Map<int, double>.from(_currentLogoState.rotationYMap);
-    final currentRotationZ =
-        Map<int, double>.from(_currentLogoState.rotationZMap);
+    final currentRotationX = Map<int, double>.from(_currentLogoState.rotationXMap);
+    final currentRotationY = Map<int, double>.from(_currentLogoState.rotationYMap);
+    final currentRotationZ = Map<int, double>.from(_currentLogoState.rotationZMap);
 
-    _currentLogoState = _currentLogoState.copyWith(
+    final newState = _currentLogoState.copyWith(
       logoColor: provider.logoColor,
       isLogoColorOverridden: provider.isLogoColorOverridden,
       companyNameColor: provider.companyTextColor,
@@ -1581,6 +1616,10 @@ class _DownloadLogoState extends State<DownloadLogo> {
       backgroundImagePath: imagePath,
       customTexts: updatedCustomTexts,
       customSVGs: updatedCustomSVGs,
+      customImages: updatedCustomImages,
+      elementColors: elementColors,
+      outlineColors: outlineColors,
+      outlineWidths: outlineWidths,
       rotationXMap: currentRotationX,
       rotationYMap: currentRotationY,
       rotationZMap: currentRotationZ,
@@ -1588,6 +1627,21 @@ class _DownloadLogoState extends State<DownloadLogo> {
       sloganFontIndex: provider.sloganFontIndex,
     );
 
+    // Debug log
+    // ignore: avoid_print
+    print('🔁 captureState -> bgColor:${newState.backgroundColor} bgGrad:${newState.backgroundGradient != null} bgImagePath:${newState.backgroundImagePath}');
+
+    return newState;
+  }
+
+  void _saveState() {
+    _redoStack.clear();
+
+    if (_undoStack.length >= _maxUndoHistory) {
+      _undoStack.removeAt(0);
+    }
+
+    _currentLogoState = _captureStateFromProvider();
     _undoStack.add(_currentLogoState.clone());
 
     // Force rebuild to update undo/redo button states
@@ -1597,15 +1651,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
   }
 
   void _pushCurrentStateToUndoStack({bool clearRedo = false}) {
-    final provider = Provider.of<SelectedColorProvider>(context, listen: false);
     if (clearRedo) _redoStack.clear();
-
-    // Ensure current LogoState captures current provider font selections
-    _currentLogoState = _currentLogoState.copyWith(
-      companyFontIndex: provider.companyFontIndex,
-      sloganFontIndex: provider.sloganFontIndex,
-    );
-
+    _currentLogoState = _captureStateFromProvider();
     if (_undoStack.length >= _maxUndoHistory) _undoStack.removeAt(0);
     _undoStack.add(_currentLogoState.clone());
   }
@@ -1616,63 +1663,12 @@ class _DownloadLogoState extends State<DownloadLogo> {
   void _undo() {
     if (_undoStack.length > 1) {
       // Need at least 2 items (current + previous)
-      // Capture current provider state before saving to redo stack
-      final provider =
-          Provider.of<SelectedColorProvider>(context, listen: false);
-
-      final updatedCustomTexts =
-          _currentLogoState.customTexts.asMap().entries.map((entry) {
-        final index = entry.key;
-        final text = entry.value;
-        final elementId = 100 + index;
-        final Color colorFromProvider = provider.hasColorOverride(elementId)
-            ? provider.getColorForElement(elementId, fallback: text.color)
-            : text.color;
-        return text.copyWith(color: colorFromProvider);
-      }).toList();
-
-      final updatedCustomSVGs =
-          _currentLogoState.customSVGs.asMap().entries.map((entry) {
-        final index = entry.key;
-        final svg = entry.value;
-        final elementId = 300 + index;
-        final Color? colorFromProvider = provider.hasColorOverride(elementId)
-            ? provider.getColorForElement(elementId,
-                fallback: svg.color ?? Colors.black)
-            : svg.color;
-        return svg.copyWith(color: colorFromProvider);
-      }).toList();
-
-      // Capture asset path OR file path (whichever is set)
-      final imagePath = provider.assetImagePath ?? provider.imageFile?.path;
-
-      // ✅ Explicitly preserve rotation maps
-      final currentRotationX =
-          Map<int, double>.from(_currentLogoState.rotationXMap);
-      final currentRotationY =
-          Map<int, double>.from(_currentLogoState.rotationYMap);
-      final currentRotationZ =
-          Map<int, double>.from(_currentLogoState.rotationZMap);
-
-      _currentLogoState = _currentLogoState.copyWith(
-        logoColor: provider.logoColor,
-        isLogoColorOverridden: provider.isLogoColorOverridden,
-        companyNameColor: provider.companyTextColor,
-        sloganColor: provider.sloganColor,
-        selectedShapeName: selectedShapeName,
-        backgroundColor: provider.selectedColor,
-        backgroundGradient: provider.selectedGradient,
-        backgroundImagePath: imagePath,
-        customTexts: updatedCustomTexts,
-        customSVGs: updatedCustomSVGs,
-        rotationXMap: currentRotationX,
-        rotationYMap: currentRotationY,
-        rotationZMap: currentRotationZ,
-        companyFontIndex: provider.companyFontIndex,
-        sloganFontIndex: provider.sloganFontIndex,
-      );
-
-      _redoStack.add(_currentLogoState.clone());
+      // Capture current provider state into a LogoStateData snapshot and
+      // push it onto the redo stack. Use the centralized helper so capture
+      // logic stays consistent across save/undo/redo.
+      final provider = Provider.of<SelectedColorProvider>(context, listen: false);
+      final LogoStateData captured = _captureStateFromProvider();
+      _redoStack.add(captured.clone());
 
       // Remove current state from undo stack (last item is current)
       if (_undoStack.isNotEmpty) {
@@ -1686,6 +1682,14 @@ class _DownloadLogoState extends State<DownloadLogo> {
         final int savedCompanyFont = provider.companyFontIndex;
         final int savedSloganFont = provider.sloganFontIndex;
         provider.applyLogoState(_currentLogoState);
+        // Also explicitly apply the background so color/gradient/image are
+        // applied immediately (fixes redo/undo background inconsistencies).
+        _applyBackgroundFromState(BackgroundState(
+          color: _currentLogoState.backgroundColor,
+          gradient: _currentLogoState.backgroundGradient,
+          imagePath: _currentLogoState.backgroundImagePath,
+          checkerboardVisible: Provider.of<SelectedColorProvider>(context, listen: false).isCheckerboardVisible,
+        ));
         provider.setCompanyFontIndex(savedCompanyFont);
         provider.setSloganFontIndex(savedSloganFont);
 
@@ -1738,11 +1742,22 @@ class _DownloadLogoState extends State<DownloadLogo> {
       // Pop the redo state and set as current
       _currentLogoState = _redoStack.removeLast();
 
-      final provider =
+        // Debug: log redo target background
+        // ignore: avoid_print
+        print('🔁 _redo -> restoring bgColor:${_currentLogoState.backgroundColor} bgGrad:${_currentLogoState.backgroundGradient != null} bgImage:${_currentLogoState.backgroundImagePath}');
+
+        final provider =
           Provider.of<SelectedColorProvider>(context, listen: false);
       final int savedCompanyFont = provider.companyFontIndex;
       final int savedSloganFont = provider.sloganFontIndex;
       provider.applyLogoState(_currentLogoState);
+      // Explicitly reapply background (color/gradient/image)
+      _applyBackgroundFromState(BackgroundState(
+        color: _currentLogoState.backgroundColor,
+        gradient: _currentLogoState.backgroundGradient,
+        imagePath: _currentLogoState.backgroundImagePath,
+        checkerboardVisible: Provider.of<SelectedColorProvider>(context, listen: false).isCheckerboardVisible,
+      ));
       provider.setCompanyFontIndex(savedCompanyFont);
       provider.setSloganFontIndex(savedSloganFont);
       selectedShapeName = _currentLogoState.selectedShapeName ?? "";
@@ -1842,23 +1857,16 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
   void _applyBackgroundFromState(BackgroundState state) {
     final provider = Provider.of<SelectedColorProvider>(context, listen: false);
+    // Debug: log incoming background state
+    // ignore: avoid_print
+    print('🔁 _applyBackgroundFromState -> image:${state.imagePath} gradient:${state.gradient != null} color:${state.color} checker:${state.checkerboardVisible}');
 
-    if (state.imagePath != null) {
-      // Load image from file path
-      final file = File(state.imagePath!);
-      if (file.existsSync()) {
-        final bytes = file.readAsBytesSync();
-        ui.instantiateImageCodec(bytes).then((codec) async {
-          final frame = await codec.getNextFrame();
-          final image = frame.image;
-          provider.setBackgroundImage(image, file);
-        });
-      }
-    } else if (state.gradient != null) {
-      provider.setGradient(state.gradient!);
-    } else if (state.color != null) {
-      provider.setColor(state.color!);
-    }
+    provider.setBackgroundFromValues(
+      color: state.color,
+      gradient: state.gradient,
+      imagePath: state.imagePath,
+      checkerboardVisible: state.checkerboardVisible,
+    );
 
     provider.setCheckerboardVisibility(state.checkerboardVisible);
   }
@@ -2006,7 +2014,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
             aspectRatio:
                 config != null ? config['aspectRatio'] as double? : null,
           );
-          _saveState();
           setState(() {
             _currentLogoState = _currentLogoState.copyWith(
               customImages: [..._currentLogoState.customImages, newImage],
@@ -2016,6 +2023,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
               ],
             );
           });
+          // Save state AFTER adding the image so the undo stack contains the image
+          _saveState();
           // _currentState = EditorState(
           //   logo: _currentLogoState.clone(),
           //   background: _currentState.background,
@@ -2144,7 +2153,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
           rotation: 0,
         );
 
-        _saveState();
         setState(() {
           final updatedCustomSVGs = List<CustomSvgElement>.from(
             _currentLogoState.customSVGs,
@@ -2158,6 +2166,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
             elementOrder: updatedElementOrder,
           );
         });
+        // Save AFTER adding the new SVG so undo preserves it
+        _saveState();
         return;
       }
       // if svgString empty, fall through to raster handler
@@ -2183,8 +2193,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
       fit: chosenFit,
       aspectRatio: chosenAspect,
     );
-
-    _saveState();
     setState(() {
       final updatedCustomImages = List<CustomImageElement>.from(
         _currentLogoState.customImages,
@@ -2198,6 +2206,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
         elementOrder: updatedElementOrder,
       );
     });
+    // Save AFTER adding the new image so undo preserves it
+    _saveState();
     // _currentState = EditorState(
     //   logo: _currentLogoState.clone(),
     //   background: _currentState.background,

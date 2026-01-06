@@ -8,6 +8,10 @@ class SelectedColorProvider extends ChangeNotifier {
   Color? _selectedColor = null;
   Gradient? _selectedGradient;
   ui.Image? _backgroundImage;
+  // Token to ignore stale async image loads. Incrementing this invalidates
+  // any previously-started image decode tasks so they don't overwrite newer
+  // user actions (fixes redo/undo race conditions).
+  int _imageLoadToken = 0;
   double get intensity => _brightness;
   final Map<int, Color> _overrideColors = {};
   final Map<int, Color> _individualElementColors = {};
@@ -166,6 +170,8 @@ class SelectedColorProvider extends ChangeNotifier {
     _selectedGradient = null;
     _imageFile = null;
     _isColorManuallySelected = true;
+    // Invalidate any pending async loads
+    _imageLoadToken++;
     notifyListeners();
   }
 
@@ -184,7 +190,11 @@ class SelectedColorProvider extends ChangeNotifier {
     _selectedGradient = null;
     _backgroundImage = null;
     canvasImage = null;
+    _imageFile = null;
+    _assetImagePath = null;
     _isColorManuallySelected = true;
+    // Cancel any pending image loads so they don't overwrite this color
+    _imageLoadToken++;
     notifyListeners();
   }
 
@@ -193,7 +203,11 @@ class SelectedColorProvider extends ChangeNotifier {
     _backgroundImage = null;
     _selectedColor = null;
     canvasImage = null;
+    _imageFile = null;
+    _assetImagePath = null;
     _isColorManuallySelected = true;
+    // Cancel pending image loads
+    _imageLoadToken++;
     notifyListeners();
   }
 
@@ -244,7 +258,42 @@ class SelectedColorProvider extends ChangeNotifier {
     _imageFile = file;
     _assetImagePath = assetPath; // Store asset path if provided
     _isColorManuallySelected = true;
+    // Invalidate pending async loads
+    _imageLoadToken++;
     notifyListeners();
+  }
+
+  /// Apply background values deterministically. If `imagePath` is provided
+  /// it starts an async load (asset or file). Otherwise applies gradient
+  /// or color. This centralizes background restoration and keeps token
+  /// invalidation in one place.
+  void setBackgroundFromValues({Color? color, Gradient? gradient, String? imagePath, bool checkerboardVisible = true}) {
+    if (imagePath != null && imagePath.isNotEmpty) {
+      // Invalidate prior async loads
+      _imageLoadToken++;
+      // Decide asset vs file
+      if (imagePath.startsWith('assets/')) {
+        _assetImagePath = imagePath;
+        _imageFile = null;
+        _selectedColor = null;
+        _selectedGradient = null;
+        _isColorManuallySelected = true;
+        _loadImageFromAsset(imagePath);
+      } else {
+        _imageFile = File(imagePath);
+        _assetImagePath = null;
+        _selectedColor = null;
+        _selectedGradient = null;
+        _isColorManuallySelected = true;
+        _loadImageFromPath(imagePath);
+      }
+    } else if (gradient != null) {
+      setGradient(gradient);
+    } else if (color != null) {
+      setColor(color);
+    }
+
+    setCheckerboardVisibility(checkerboardVisible);
   }
 
   void setColorWithBrightness(Color baseColor, double brightnessFactor) {
@@ -255,6 +304,8 @@ class SelectedColorProvider extends ChangeNotifier {
     _selectedColor = adjustedColor;
     _selectedGradient = null;
     _backgroundImage = null;
+    _imageFile = null;
+    _assetImagePath = null;
     _isColorManuallySelected = true;
     notifyListeners();
   }
@@ -624,52 +675,27 @@ class SelectedColorProvider extends ChangeNotifier {
     _rotationYMap.addAll(state.rotationYMap);
     _rotationZMap.addAll(state.rotationZMap);
 
-    // 8) restore background state
-    // Handle image restoration first
-    if (state.backgroundImagePath != null && state.backgroundImagePath!.isNotEmpty) {
-      // Clear other background states when restoring image
-      _selectedColor = null;
-      _selectedGradient = null;
-      _isColorManuallySelected = true;
-      
-      // Check if it's an asset path or file path
-      if (state.backgroundImagePath!.startsWith('assets/')) {
-        // It's an asset path - load from assets
-        _assetImagePath = state.backgroundImagePath;
-        _imageFile = null;
-        _loadImageFromAsset(state.backgroundImagePath!);
-      } else {
-        // It's a file path - load from file system
-        _imageFile = File(state.backgroundImagePath!);
-        _assetImagePath = null;
-        _loadImageFromPath(state.backgroundImagePath!);
-      }
-    } else {
-      // Clear image states when restoring color/gradient
-      _backgroundImage = null;
-      canvasImage = null;
-      _imageFile = null;
-      _assetImagePath = null;
-      // Set color or gradient if present
-      _selectedColor = state.backgroundColor;
-      _selectedGradient = state.backgroundGradient;
-      if (state.backgroundColor != null || state.backgroundGradient != null) {
-        _isColorManuallySelected = true;
-      } else {
-        _isColorManuallySelected = false;
-      }
-    }
+    // 8) restore background state via centralized helper
+    setBackgroundFromValues(
+      color: state.backgroundColor,
+      gradient: state.backgroundGradient,
+      imagePath: state.backgroundImagePath,
+      checkerboardVisible: true,
+    );
 
     notifyListeners();
   }
 
   Future<void> _loadImageFromPath(String path) async {
     try {
+      final int token = _imageLoadToken;
       final file = File(path);
       if (await file.exists()) {
         final bytes = await file.readAsBytes();
         final codec = await ui.instantiateImageCodec(bytes);
         final frame = await codec.getNextFrame();
+        // If a newer load or user action happened, ignore this result
+        if (token != _imageLoadToken) return;
         _backgroundImage = frame.image;
         canvasImage = frame.image;
         notifyListeners();
@@ -681,9 +707,11 @@ class SelectedColorProvider extends ChangeNotifier {
 
   Future<void> _loadImageFromAsset(String assetPath) async {
     try {
+      final int token = _imageLoadToken;
       final ByteData data = await rootBundle.load(assetPath);
       final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
       final frame = await codec.getNextFrame();
+      if (token != _imageLoadToken) return;
       _backgroundImage = frame.image;
       canvasImage = frame.image;
       notifyListeners();
