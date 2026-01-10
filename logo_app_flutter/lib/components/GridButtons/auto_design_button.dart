@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:logo_app_flutter/screens/design_input_screen.dart';
+import 'package:logo_app_flutter/services/ad_mob_service.dart';
 import 'package:logo_app_flutter/utils/theme_colors.dart';
 
 class AutoDesignButton extends StatelessWidget {
@@ -8,12 +10,27 @@ class AutoDesignButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const DesignInputScreen()),
-        );
-      },
+     onTap: () {
+  // Navigate immediately
+  Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => const DesignInputScreen()),
+  );
+
+  // AdMobService.loadInterstitial(
+  //   onLoaded: (InterstitialAd ad) {
+  //     ad.fullScreenContentCallback = FullScreenContentCallback(
+  //       onAdDismissedFullScreenContent: (ad) {
+  //         ad.dispose();
+  //       },
+  //       onAdFailedToShowFullScreenContent: (ad, error) {
+  //         ad.dispose();
+  //       },
+  //     );
+  //     ad.show();
+  //   },
+  // );
+},
       child: Center(
         child: Padding(
           padding: const EdgeInsets.all(8.0),

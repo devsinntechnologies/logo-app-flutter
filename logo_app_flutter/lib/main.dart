@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
 import 'package:logo_app_flutter/screens/Splash_screen.dart';
 import 'package:logo_app_flutter/screens/home_screen.dart';
@@ -10,6 +11,12 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+    MobileAds.instance.initialize();
+     // ✅ Mark your device as test device
+  final requestConfig = RequestConfiguration(
+    testDeviceIds: ['DC255CC5EA7AC8D46B45CD0260ECECCC'], // from log
+  );
+  MobileAds.instance.updateRequestConfiguration(requestConfig);
   await Supabase.initialize(
     url: 'https://sobkonycxgkklpmxpphn.supabase.co',
     anonKey:

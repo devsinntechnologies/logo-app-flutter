@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:logo_app_flutter/components/GridButtons/auto_design_button.dart';
 import 'package:logo_app_flutter/components/GridButtons/create_logo_button.dart';
 import 'package:logo_app_flutter/components/GridButtons/my_design_button.dart';
@@ -7,11 +8,40 @@ import 'package:logo_app_flutter/components/GridButtons/my_logo_button.dart';
 import 'package:logo_app_flutter/components/drawer_items.dart';
 import 'package:logo_app_flutter/screens/google_sign_in_button.dart';
 import 'package:logo_app_flutter/screens/my_account_screen.dart';
+import 'package:logo_app_flutter/services/ad_mob_service.dart';
 import 'package:logo_app_flutter/utils/theme_colors.dart';
 
-
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  late BannerAd _bannerAd;
+  bool _isBannerLoaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // 🔹 Load banner from service
+    _bannerAd = AdMobService.bannerAd(
+      size: AdSize.banner,
+      onLoaded: (_) {
+        setState(() {
+          _isBannerLoaded = true;
+        });
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _bannerAd.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,18 +55,17 @@ class HomeScreen extends StatelessWidget {
               width: double.infinity,
               height: (MediaQuery.of(context).size.height > 500) ? 260 : 150,
               decoration: BoxDecoration(
-                // color: Color(0xff16182D),
+                  // color: Color(0xff16182D),
 
-                // gradient: LinearGradient(
-                //   colors: [
-                //     Color(0xFF16182D),
-                //     Color(0xFF2A2D4F),
-                //   ],
-                //   begin: Alignment.topCenter,
-                //   end: Alignment.bottomCenter,
-                // ),
-                gradient: ThemeColors.customGradient
-              ),
+                  // gradient: LinearGradient(
+                  //   colors: [
+                  //     Color(0xFF16182D),
+                  //     Color(0xFF2A2D4F),
+                  //   ],
+                  //   begin: Alignment.topCenter,
+                  //   end: Alignment.bottomCenter,
+                  // ),
+                  gradient: ThemeColors.customGradient),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 spacing: 20,
@@ -81,14 +110,16 @@ class HomeScreen extends StatelessWidget {
                   // DrawerItem(icon: Icons.workspace_premium, text: "Get PRO"),
                   // DrawerItem(icon: Icons.image, text: "My Logo"),
 
-                  const DrawerItem(icon: Icons.design_services, text: "My Design"),
+                  const DrawerItem(
+                      icon: Icons.design_services, text: "My Design"),
                   const DrawerItem(icon: Icons.create, text: "Create Logo"),
-                  const DrawerItem(icon: Icons.auto_awesome, text: "Auto Design"),
+                  const DrawerItem(
+                      icon: Icons.auto_awesome, text: "Auto Design"),
                   const DrawerItem(icon: Icons.language, text: "Language"),
                   // DrawerItem(icon: Icons.apps, text: "More Apps"),
                   const DrawerItem(icon: Icons.share, text: "Share"),
-                  const DrawerItem(icon: Icons.privacy_tip, text: "Privacy Policy"),
-
+                  const DrawerItem(
+                      icon: Icons.privacy_tip, text: "Privacy Policy"),
                 ],
               ),
             ),
@@ -106,17 +137,16 @@ class HomeScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Builder(
-                    builder:
-                        (context) => IconButton(
-                          icon: Image.asset(
-                            "assets/icons/menu.png",
-                            width: 30,
-                            height: 30,
-                          ),
-                          onPressed: () {
-                            Scaffold.of(context).openDrawer();
-                          },
-                        ),
+                    builder: (context) => IconButton(
+                      icon: Image.asset(
+                        "assets/icons/menu.png",
+                        width: 30,
+                        height: 30,
+                      ),
+                      onPressed: () {
+                        Scaffold.of(context).openDrawer();
+                      },
+                    ),
                   ),
                   Center(
                     child: Row(
@@ -138,7 +168,7 @@ class HomeScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-                 GoogleSignInButton(),
+                  GoogleSignInButton(),
                   // SizedBox(width: 1),
                 ],
               ),
@@ -222,18 +252,20 @@ class HomeScreen extends StatelessWidget {
               //     ),
               //   ),
               // ),
-            
+
               AutoDesignButton(),
               SizedBox(height: 4),
-          
+
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Row(
                   // crossAxisAlignment: CrossAxisAlignment.center,
                   // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [Expanded(child: CreateLogoButton()), 
-                  SizedBox(width: 10),
-                  Expanded(child: MyDesignButton())],
+                  children: [
+                    Expanded(child: CreateLogoButton()),
+                    SizedBox(width: 10),
+                    Expanded(child: MyDesignButton())
+                  ],
                 ),
               ),
               SizedBox(height: 30),
@@ -246,6 +278,13 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
       ),
+      bottomNavigationBar: _isBannerLoaded
+          ? SizedBox(
+              height: _bannerAd.size.height.toDouble(),
+              width: _bannerAd.size.width.toDouble(),
+              child: AdWidget(ad: _bannerAd),
+            )
+          : null,
     );
   }
 }

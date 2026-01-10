@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:logo_app_flutter/components/google_alert.dart';
 import 'package:logo_app_flutter/screens/my_design_screen.dart';
+import 'package:logo_app_flutter/services/ad_mob_service.dart';
 import 'package:logo_app_flutter/utils/theme_colors.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -32,6 +34,19 @@ class MyDesignButton extends StatelessWidget {
         //   duration: Duration(milliseconds: 100),
         // );
         // ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        AdMobService.loadInterstitial(
+    onLoaded: (InterstitialAd ad) {
+      ad.fullScreenContentCallback = FullScreenContentCallback(
+        onAdDismissedFullScreenContent: (ad) {
+          ad.dispose();
+        },
+        onAdFailedToShowFullScreenContent: (ad, error) {
+          ad.dispose();
+        },
+      );
+      ad.show();
+    },
+  );
       },
       child: Container(
         height: 160,

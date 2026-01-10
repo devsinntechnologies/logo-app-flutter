@@ -4,9 +4,11 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/services.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:logo_app_flutter/components/google_alert.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
 import 'package:logo_app_flutter/screens/art_select_screen.dart';
+import 'package:logo_app_flutter/services/ad_mob_service.dart';
 import 'package:logo_app_flutter/services/canvas_upload_service.dart';
 import 'package:logo_app_flutter/screens/movement_panel.dart';
 import 'package:flutter/material.dart';
@@ -531,8 +533,33 @@ class _DownloadLogoState extends State<DownloadLogo> {
             onPressed: () {
               final user = Supabase.instance.client.auth.currentUser;
               if (user != null) {
-                // User is logged in → show save confirmation
-                _showSaveConfirmationDialog(context, _canvasKey);
+                // ✅ Load rewarded ad first
+                AdMobService.loadRewarded(
+                  onLoaded: (RewardedAd ad) {
+                    ad.fullScreenContentCallback = FullScreenContentCallback(
+                      onAdDismissedFullScreenContent: (ad) {
+                        ad.dispose();
+                        // After ad is closed → show save confirmation
+                        _showSaveConfirmationDialog(context, _canvasKey);
+                      },
+                      onAdFailedToShowFullScreenContent: (ad, error) {
+                        ad.dispose();
+                        // If ad fails → still show save confirmation
+                        _showSaveConfirmationDialog(context, _canvasKey);
+                      },
+                    );
+
+                    // Show the rewarded ad
+                    ad.show(
+                      onUserEarnedReward:
+                          (AdWithoutView ad, RewardItem reward) {
+                        // Optional: you can give extra rewards here if needed
+                        print(
+                            'User earned reward: ${reward.amount} ${reward.type}');
+                      },
+                    );
+                  },
+                );
               } else {
                 // User not logged in → show login dialog
                 showCustomGoogleDialog(context);
@@ -1559,8 +1586,10 @@ class _DownloadLogoState extends State<DownloadLogo> {
           ? provider.getColorForElement(elementId,
               fallback: img.color ?? Colors.transparent)
           : img.color;
-      final Color outlineColorFromProvider = provider.getOutlineColor(elementId);
-      final double outlineWidthFromProvider = provider.getOutlineWidth(elementId);
+      final Color outlineColorFromProvider =
+          provider.getOutlineColor(elementId);
+      final double outlineWidthFromProvider =
+          provider.getOutlineWidth(elementId);
       return img.copyWith(
           position: img.position,
           rotation: img.rotation,
@@ -1601,9 +1630,12 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
     final imagePath = provider.assetImagePath ?? provider.imageFile?.path;
 
-    final currentRotationX = Map<int, double>.from(_currentLogoState.rotationXMap);
-    final currentRotationY = Map<int, double>.from(_currentLogoState.rotationYMap);
-    final currentRotationZ = Map<int, double>.from(_currentLogoState.rotationZMap);
+    final currentRotationX =
+        Map<int, double>.from(_currentLogoState.rotationXMap);
+    final currentRotationY =
+        Map<int, double>.from(_currentLogoState.rotationYMap);
+    final currentRotationZ =
+        Map<int, double>.from(_currentLogoState.rotationZMap);
 
     final newState = _currentLogoState.copyWith(
       logoColor: provider.logoColor,
@@ -1629,7 +1661,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
     // Debug log
     // ignore: avoid_print
-    print('🔁 captureState -> bgColor:${newState.backgroundColor} bgGrad:${newState.backgroundGradient != null} bgImagePath:${newState.backgroundImagePath}');
+    print(
+        '🔁 captureState -> bgColor:${newState.backgroundColor} bgGrad:${newState.backgroundGradient != null} bgImagePath:${newState.backgroundImagePath}');
 
     return newState;
   }
@@ -1666,7 +1699,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
       // Capture current provider state into a LogoStateData snapshot and
       // push it onto the redo stack. Use the centralized helper so capture
       // logic stays consistent across save/undo/redo.
-      final provider = Provider.of<SelectedColorProvider>(context, listen: false);
+      final provider =
+          Provider.of<SelectedColorProvider>(context, listen: false);
       final LogoStateData captured = _captureStateFromProvider();
       _redoStack.add(captured.clone());
 
@@ -1688,7 +1722,9 @@ class _DownloadLogoState extends State<DownloadLogo> {
           color: _currentLogoState.backgroundColor,
           gradient: _currentLogoState.backgroundGradient,
           imagePath: _currentLogoState.backgroundImagePath,
-          checkerboardVisible: Provider.of<SelectedColorProvider>(context, listen: false).isCheckerboardVisible,
+          checkerboardVisible:
+              Provider.of<SelectedColorProvider>(context, listen: false)
+                  .isCheckerboardVisible,
         ));
         provider.setCompanyFontIndex(savedCompanyFont);
         provider.setSloganFontIndex(savedSloganFont);
@@ -1742,11 +1778,12 @@ class _DownloadLogoState extends State<DownloadLogo> {
       // Pop the redo state and set as current
       _currentLogoState = _redoStack.removeLast();
 
-        // Debug: log redo target background
-        // ignore: avoid_print
-        print('🔁 _redo -> restoring bgColor:${_currentLogoState.backgroundColor} bgGrad:${_currentLogoState.backgroundGradient != null} bgImage:${_currentLogoState.backgroundImagePath}');
+      // Debug: log redo target background
+      // ignore: avoid_print
+      print(
+          '🔁 _redo -> restoring bgColor:${_currentLogoState.backgroundColor} bgGrad:${_currentLogoState.backgroundGradient != null} bgImage:${_currentLogoState.backgroundImagePath}');
 
-        final provider =
+      final provider =
           Provider.of<SelectedColorProvider>(context, listen: false);
       final int savedCompanyFont = provider.companyFontIndex;
       final int savedSloganFont = provider.sloganFontIndex;
@@ -1756,7 +1793,9 @@ class _DownloadLogoState extends State<DownloadLogo> {
         color: _currentLogoState.backgroundColor,
         gradient: _currentLogoState.backgroundGradient,
         imagePath: _currentLogoState.backgroundImagePath,
-        checkerboardVisible: Provider.of<SelectedColorProvider>(context, listen: false).isCheckerboardVisible,
+        checkerboardVisible:
+            Provider.of<SelectedColorProvider>(context, listen: false)
+                .isCheckerboardVisible,
       ));
       provider.setCompanyFontIndex(savedCompanyFont);
       provider.setSloganFontIndex(savedSloganFont);
@@ -1859,7 +1898,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
     final provider = Provider.of<SelectedColorProvider>(context, listen: false);
     // Debug: log incoming background state
     // ignore: avoid_print
-    print('🔁 _applyBackgroundFromState -> image:${state.imagePath} gradient:${state.gradient != null} color:${state.color} checker:${state.checkerboardVisible}');
+    print(
+        '🔁 _applyBackgroundFromState -> image:${state.imagePath} gradient:${state.gradient != null} color:${state.color} checker:${state.checkerboardVisible}');
 
     provider.setBackgroundFromValues(
       color: state.color,
@@ -3433,7 +3473,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
                       style: OutlinedButton.styleFrom(
                         minimumSize: const Size(0, 32), // ⬅ height kam
                         padding: const EdgeInsets.symmetric(vertical: 6),
-                          backgroundColor: sel ? Colors.purple : Colors.grey[200],
+                        backgroundColor: sel ? Colors.purple : Colors.grey[200],
 
                         foregroundColor: sel ? Colors.white : Colors.black,
                         side: BorderSide(
@@ -3441,7 +3481,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8)),
                         elevation: sel ? 6 : 1,
-
                       ),
                       onPressed: () =>
                           setState(() => selectedFit = it['value'] as BoxFit),

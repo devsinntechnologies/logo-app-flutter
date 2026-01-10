@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
 import 'package:logo_app_flutter/screens/download_logo.dart';
+import 'package:logo_app_flutter/services/ad_mob_service.dart';
 import 'package:logo_app_flutter/services/logo_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:logo_app_flutter/utils/theme_colors.dart';
@@ -42,77 +44,77 @@ class _TemplateWidgetState extends State<TemplateWidget> {
     );
   }
 
- TextStyle _getFontStyle(int index, {double fontSize = 14}) {
-  switch (index) {
-    case 0:
-      return GoogleFonts.roboto(
-        fontSize: fontSize,
-        color: Colors.black87,
-        fontWeight: FontWeight.bold,
-        letterSpacing: 1.2,
-      );
-    case 1:
-      return GoogleFonts.pacifico(
-        fontSize: fontSize,
-        color: Colors.black87,
-        letterSpacing: 1.2,
-      );
-    case 2:
-      return GoogleFonts.poppins(
-        fontSize: fontSize,
-        color: Colors.black87,
-        fontWeight: FontWeight.normal,
-        letterSpacing: 1.2,
-      );
-    case 3:
-      return GoogleFonts.dancingScript(
-        fontSize: fontSize,
-        color: Colors.black87,
-        letterSpacing: 1.2,
-      );
-    case 4:
-      return GoogleFonts.satisfy(
-        fontSize: fontSize,
-        color: Colors.black87,
-        letterSpacing: 1.2,
-      );
-    case 5:
-      return GoogleFonts.lato(
-        fontSize: fontSize,
-        color: Colors.black87,
-        letterSpacing: 1.2,
-      );
-    case 6:
-      return GoogleFonts.orbitron(
-        fontSize: fontSize,
-        color: Colors.black87,
-        letterSpacing: 1.2,
-      );
-    case 7:
-      return GoogleFonts.openSans(
-        fontSize: fontSize,
-        color: Colors.black87,
-        letterSpacing: 1.2,
-      );
-    case 8:
-      return GoogleFonts.bebasNeue(
-        fontSize: fontSize,
-        color: Colors.black87,
-        letterSpacing: 1.2,
-      );
-    case 9:
-      return GoogleFonts.pressStart2p(
-        fontSize: fontSize - 2, // this font is blocky, reduce size a bit
-        color: Colors.black87,
-        letterSpacing: 1.2,
-      );
-    default:
-      return TextStyle(
-        fontSize: fontSize,
-        color: Colors.black87,
-      );
+  TextStyle _getFontStyle(int index, {double fontSize = 14}) {
+    switch (index) {
+      case 0:
+        return GoogleFonts.roboto(
+          fontSize: fontSize,
+          color: Colors.black87,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 1.2,
+        );
+      case 1:
+        return GoogleFonts.pacifico(
+          fontSize: fontSize,
+          color: Colors.black87,
+          letterSpacing: 1.2,
+        );
+      case 2:
+        return GoogleFonts.poppins(
+          fontSize: fontSize,
+          color: Colors.black87,
+          fontWeight: FontWeight.normal,
+          letterSpacing: 1.2,
+        );
+      case 3:
+        return GoogleFonts.dancingScript(
+          fontSize: fontSize,
+          color: Colors.black87,
+          letterSpacing: 1.2,
+        );
+      case 4:
+        return GoogleFonts.satisfy(
+          fontSize: fontSize,
+          color: Colors.black87,
+          letterSpacing: 1.2,
+        );
+      case 5:
+        return GoogleFonts.lato(
+          fontSize: fontSize,
+          color: Colors.black87,
+          letterSpacing: 1.2,
+        );
+      case 6:
+        return GoogleFonts.orbitron(
+          fontSize: fontSize,
+          color: Colors.black87,
+          letterSpacing: 1.2,
+        );
+      case 7:
+        return GoogleFonts.openSans(
+          fontSize: fontSize,
+          color: Colors.black87,
+          letterSpacing: 1.2,
+        );
+      case 8:
+        return GoogleFonts.bebasNeue(
+          fontSize: fontSize,
+          color: Colors.black87,
+          letterSpacing: 1.2,
+        );
+      case 9:
+        return GoogleFonts.pressStart2p(
+          fontSize: fontSize - 2, // this font is blocky, reduce size a bit
+          color: Colors.black87,
+          letterSpacing: 1.2,
+        );
+      default:
+        return TextStyle(
+          fontSize: fontSize,
+          color: Colors.black87,
+        );
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -163,35 +165,47 @@ class _TemplateWidgetState extends State<TemplateWidget> {
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('No logos found.'));
           }
-      
+
           final svgList = snapshot.data!;
-      
+
           return Padding(
             padding: const EdgeInsets.all(16.0),
             child: GridView.builder(
               itemCount: svgList.length,
-              gridDelegate:  SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: screenWidth >= 500 ? 4 : 2,
                 crossAxisSpacing: 3,
                 mainAxisSpacing: 3,
                 childAspectRatio: screenWidth >= 500 ? 1 : 0.82,
-      
               ),
               itemBuilder: (context, index) {
                 return InkWell(
                   onTap: () {
+                       AdMobService.loadInterstitial(
+                      onLoaded: (InterstitialAd ad) {
+                        ad.fullScreenContentCallback =
+                            FullScreenContentCallback(
+                          onAdDismissedFullScreenContent: (ad) {
+                            ad.dispose();
+                          },
+                          onAdFailedToShowFullScreenContent: (ad, error) {
+                            ad.dispose();
+                          },
+                        );
+                        ad.show();
+                      },
+                    );
                     if (selectedIndex == index) {
                       final selectedSvg = svgList[index];
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder:
-                              (context) => DownloadLogo(
-                                svgLogo: selectedSvg,
-                                companyName: widget.companyName,
-                                sloganName: widget.slogan,
-                                selectedFontIndex: widget.selectedFontIndex,
-                              ),
+                          builder: (context) => DownloadLogo(
+                            svgLogo: selectedSvg,
+                            companyName: widget.companyName,
+                            sloganName: widget.slogan,
+                            selectedFontIndex: widget.selectedFontIndex,
+                          ),
                         ),
                       );
                     } else {
@@ -199,6 +213,7 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                         selectedIndex = index;
                       });
                     }
+                 
                   },
                   child: Stack(
                     alignment: Alignment.center,
@@ -206,13 +221,11 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                       Container(
                         padding: EdgeInsets.all(10),
                         width: screenWidth * 1.7,
-      
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color:
-                                selectedIndex == index
-                                    ? ThemeColors.darkPrimaryColor
-                                    : Colors.grey.shade300,
+                            color: selectedIndex == index
+                                ? ThemeColors.darkPrimaryColor
+                                : Colors.grey.shade300,
                             width: selectedIndex == index ? 2.5 : 1,
                           ),
                           borderRadius: BorderRadius.circular(5),
@@ -221,10 +234,9 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                           children: [
                             SvgPicture.string(
                               svgList[index],
-                              placeholderBuilder:
-                                  (context) => const Center(
-                                    child: CircularProgressIndicator(),
-                                  ),
+                              placeholderBuilder: (context) => const Center(
+                                child: CircularProgressIndicator(),
+                              ),
                               height: 80,
                               width: 80,
                             ),
@@ -235,7 +247,7 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                                 textAlign: TextAlign.center,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                   style: _getFontStyle(
+                                style: _getFontStyle(
                                   widget.selectedFontIndex,
                                   fontSize: 14,
                                 ),
@@ -248,7 +260,7 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                                 textAlign: TextAlign.center,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
-                                   style: _getFontStyle(
+                                style: _getFontStyle(
                                   widget.selectedFontIndex,
                                   fontSize: 10,
                                 ),
@@ -271,13 +283,11 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                           ],
                         ),
                       ),
-      
                       if (selectedIndex == index)
                         Positioned(
                           bottom: 20,
                           child: SizedBox(
                             height: 30,
-      
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: ThemeColors.purple,
@@ -291,13 +301,13 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder:
-                                        (context) => DownloadLogo(
-                                          svgLogo: selectedSvg,
-                                          companyName: widget.companyName,
-                                          sloganName: widget.slogan,
-                                          selectedFontIndex: widget.selectedFontIndex,
-                                        ),
+                                    builder: (context) => DownloadLogo(
+                                      svgLogo: selectedSvg,
+                                      companyName: widget.companyName,
+                                      sloganName: widget.slogan,
+                                      selectedFontIndex:
+                                          widget.selectedFontIndex,
+                                    ),
                                   ),
                                 );
                               },
@@ -317,10 +327,8 @@ class _TemplateWidgetState extends State<TemplateWidget> {
               },
             ),
           );
-          
         },
       ),
-    
     );
   }
 }
