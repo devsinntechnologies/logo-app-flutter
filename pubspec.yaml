@@ -52,7 +52,7 @@ dependencies:
   gallery_saver_plus: ^3.2.8
   permission_handler: ^11.0.1
   # no_screenshot: ^0.3.1
-  collection: ^1.19.1
+  collection: ^1.18.0
   image_cropper: ^9.1.0
   video_player: ^2.8.2
   google_mobile_ads: ^5.0.0

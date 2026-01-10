@@ -102,8 +102,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 onTap: () async {
                   final email = emailController.text.trim();
                   final password = passwordController.text.trim();
-                  print("email: ${emailController.text}");
-                  print("password: ${passwordController.text}");
+                  // Debug logging removed for production
                   try {
                     final auth = AuthService();
                     final response = await auth.loginWithEmail(

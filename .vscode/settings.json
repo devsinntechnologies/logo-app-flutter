@@ -1,4 +1,5 @@
 {
     "cmake.sourceDirectory": "C:/Users/Admin/Documents/GitHub/logo-app-flutter/logo_app_flutter/linux",
-    "explorer.excludeGitIgnore": false
+    "explorer.excludeGitIgnore": false,
+    "dart.flutterSdkPath": "~/Documents/flutter-sdk/3.32.2"
 }

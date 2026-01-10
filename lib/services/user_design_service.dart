@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:logo_app_flutter/utils/app_logger.dart';
 
 class UserDesignService {
   final supabase = Supabase.instance.client;
@@ -41,7 +42,7 @@ class UserDesignService {
 
       return normalized;
     } catch (e) {
-      print('❌ Fetch designs error: $e');
+      AppLogger.error('Fetch designs error', tag: 'UserDesignService', error: e);
       return [];
     }
   }
@@ -81,12 +82,12 @@ class UserDesignService {
 
       final url = supabase.storage.from('logos').getPublicUrl(filePath);
 
-      print('✅ Uploaded logo path: $filePath');
-      print('✅ Public URL: $url');
+      AppLogger.storage('Uploaded logo path: $filePath');
+      AppLogger.storage('Public URL: $url');
 
       return {'filePath': filePath, 'url': url};
     } catch (e) {
-      print('❌ Canvas upload error: $e');
+      AppLogger.error('Canvas upload error', tag: 'UserDesignService', error: e);
       return null;
     }
   }
@@ -108,9 +109,9 @@ class UserDesignService {
         'design_json': jsonEncode(designJson),
       });
 
-      print('✅ Design saved successfully');
+      AppLogger.success('Design saved successfully', tag: 'UserDesignService');
     } catch (e) {
-      print('❌ Save new design error: $e');
+      AppLogger.error('Save new design error', tag: 'UserDesignService', error: e);
     }
   }
 
@@ -164,9 +165,9 @@ Future<void> updateDesign({
         .eq('id', designId)
         .eq('user_id', uid);
 
-    debugPrint('✅ Design + image updated');
+    AppLogger.success('Design + image updated', tag: 'UserDesignService');
   } catch (e) {
-    debugPrint('❌ Update design error: $e');
+    AppLogger.error('Update design error', tag: 'UserDesignService', error: e);
     rethrow;
   }
 }
@@ -205,7 +206,7 @@ Future<void> updateDesign({
         return item;
       }
     } catch (e) {
-      print('❌ Fetch design by ID error: $e');
+      AppLogger.error('Fetch design by ID error', tag: 'UserDesignService', error: e);
     }
 
     return null;
@@ -224,15 +225,15 @@ Future<void> updateDesign({
           await supabase.storage.from('logos').remove([imagePath]);
         } catch (e) {
           // ignore storage removal errors but log
-          print('⚠️ Failed to remove image from storage: $e');
+          AppLogger.warning('Failed to remove image from storage', tag: 'UserDesignService');
         }
       }
 
       await supabase.from('designs').delete().eq('id', designId).eq('user_id', uid);
-      print('✅ Design deleted: $designId');
+      AppLogger.success('Design deleted: $designId', tag: 'UserDesignService');
       return true;
     } catch (e) {
-      print('❌ Delete design error: $e');
+      AppLogger.error('Delete design error', tag: 'UserDesignService', error: e);
       return false;
     }
   }

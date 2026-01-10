@@ -1,4 +1,4 @@
-package com.example.logo_app_flutter
+package com.devsinntechnologies.smartlogomaker
 
 import io.flutter.embedding.android.FlutterActivity
 

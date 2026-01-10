@@ -43,3 +43,19 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Production secrets and signing keys
+.env.production
+.env.*.local
+android/key.properties
+android/*.keystore
+android/*.jks
+ios/Runner/GoogleService-Info.plist
+ios/Runner/Config.xcconfig
+*.mobileprovision
+*.p12
+*.cer
+
+# Environment files with sensitive data
+*.env.production
+*.env.staging

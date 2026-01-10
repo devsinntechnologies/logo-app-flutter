@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:logo_app_flutter/utils/app_logger.dart';
 
 class AuthService {
   final _supabase = Supabase.instance.client;
@@ -11,7 +12,7 @@ class AuthService {
         redirectTo: 'io.supabase.flutter://callback',
       );
     } catch (e) {
-      print("Google Sign-In Error: $e");
+      AppLogger.error("Google Sign-In failed", tag: "AuthService", error: e);
     }
   }
 
@@ -22,12 +23,12 @@ class AuthService {
     required String firstName,
     required String lastName,
   }) async {
-    print("SIGNING UP USER WITH EMAIL: $email");
+    AppLogger.auth("Signing up user with email: $email");
     final response = await _supabase.auth.signUp(
       email: email,
       password: password,
     );
-    print("SIGNED UP USER: ${response.user}");
+    AppLogger.success("User signed up: ${response.user?.id}", tag: "AuthService");
 
     return response;
   }

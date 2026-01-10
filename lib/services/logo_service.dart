@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:logo_app_flutter/utils/app_logger.dart';
 
 class LogoService {
   
@@ -42,7 +43,7 @@ Future<List<String>> fetchLogoSVGs(String companyName, String slogan) async {
    if (response.statusCode == 200) {
     final decoded = jsonDecode(response.body);
     final List logos = decoded["data"];
-    print("Logos,$logos");
+    AppLogger.api('POST', 'getAllInfo', data: {'logoCount': logos.length});
     final List<String> svgList = [];
 
     for (var item in logos) {
@@ -50,7 +51,7 @@ Future<List<String>> fetchLogoSVGs(String companyName, String slogan) async {
         svgList.add(item["icon_normal"]["source_code"]);
       }
     }
-    print("svgList: ${svgList[0]}");
+    AppLogger.log('Fetched ${svgList.length} SVG logos', tag: 'LogoService');
     return svgList;
   } else {
     throw Exception('Failed to load logos');

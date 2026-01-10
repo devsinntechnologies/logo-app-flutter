@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:logo_app_flutter/config/environment.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
 import 'package:logo_app_flutter/screens/Splash_screen.dart';
 import 'package:logo_app_flutter/screens/home_screen.dart';
@@ -11,16 +12,26 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-    MobileAds.instance.initialize();
-     // ✅ Mark your device as test device
-  final requestConfig = RequestConfiguration(
-    testDeviceIds: ['DC255CC5EA7AC8D46B45CD0260ECECCC'], // from log
-  );
-  MobileAds.instance.updateRequestConfiguration(requestConfig);
+  
+  // Validate environment configuration
+  Environment.validate();
+  Environment.printConfig();
+  
+  // Initialize Mobile Ads
+  MobileAds.instance.initialize();
+  
+  // Configure test devices only in development mode
+  if (!Environment.isProduction && Environment.testDeviceIds.isNotEmpty) {
+    final requestConfig = RequestConfiguration(
+      testDeviceIds: Environment.testDeviceIds,
+    );
+    MobileAds.instance.updateRequestConfiguration(requestConfig);
+  }
+  
+  // Initialize Supabase with environment configuration
   await Supabase.initialize(
-    url: 'https://sobkonycxgkklpmxpphn.supabase.co',
-    anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNvYmtvbnljeGdra2xwbXhwcGhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5NjY2NDAsImV4cCI6MjA3OTU0MjY0MH0.oGf4XMlK73KrVVE1EULXMoZlwN4kf5gWUdz5sKZaGcw',
+    url: Environment.supabaseUrl,
+    anonKey: Environment.supabaseAnonKey,
   );
 
   runApp(const MyApp());

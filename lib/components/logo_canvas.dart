@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:logo_app_flutter/components/logoBottomNavbarItems/shape_selector_widget.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
+import 'package:logo_app_flutter/utils/app_logger.dart';
 import 'package:provider/provider.dart';
 
 import '../models/logo_state_data.dart';
@@ -125,7 +126,7 @@ class _LogoCanvasState extends State<LogoCanvas> {
     return ValueListenableBuilder<bool>(
       valueListenable: widget.isExportingNotifier,
       builder: (context, isExporting, child) {
-        print('🎨 LogoCanvas rebuilding with isExporting: $isExporting');
+        AppLogger.canvas('LogoCanvas rebuilding with isExporting: $isExporting');
         return LayoutBuilder(
           builder: (context, constraints) {
             final bgImage = providers.canvasImage ?? providers.backgroundImage;
@@ -925,8 +926,9 @@ class _LogoCanvasState extends State<LogoCanvas> {
     required bool isLocked,
     required bool isExporting,
   }) {
-    print(
-      '🔧 Building EditableElementWrapper for id: $id, isExporting: $isExporting',
+    AppLogger.log(
+      'Building EditableElementWrapper for id: $id, isExporting: $isExporting',
+      tag: 'LogoCanvas',
     );
     return EditableElementWrapper(
       id: id,

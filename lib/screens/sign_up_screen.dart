@@ -177,7 +177,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               InkWell(
                 onTap: () async {
                   final email = emailController.text;
-                  print("emailController: $emailController");
+                  // Debug logging removed for production
                   final password = passwordController.text;
                   final confirmPassword = confirmPasswordController.text;
                   final firstName = firstNameController.text;
@@ -192,7 +192,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                   try {
                     final auth = AuthService();
-                    print("email: $email");
+                    // Debug logging removed for production
                     final response = await auth.signUpWithEmail(
                       email: email,
                       password: password,

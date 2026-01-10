@@ -52,14 +52,14 @@ class AdMobService {
   // 🔹 Test Ad IDs (SAFE)
   // Banner
   static String get _bannerId => Platform.isAndroid
-      ? 'ca-app-pub-3940256099942544/6300978111' // test banner
+      ? 'ca-app-pub-8834178071297418/2453565991' // test banner
       : '';
 
 // Interstitial
   static String get _interstitialId =>
-      Platform.isAndroid ? 'ca-app-pub-3940256099942544/1033173712' : '';
+      Platform.isAndroid ? 'ca-app-pub-8834178071297418/1431294211' : '';
 
 // Rewarded
   static String get _rewardedId =>
-      Platform.isAndroid ? 'ca-app-pub-3940256099942544/5224354917' : '';
+      Platform.isAndroid ? 'ca-app-pub-8834178071297418/8579990644' : '';
 }

@@ -5,6 +5,7 @@ import '../services/canvas_upload_service.dart'; // import the upload service
 import 'package:logo_app_flutter/services/user_design_service.dart';
 import 'package:logo_app_flutter/models/logo_state_data.dart';
 import 'package:logo_app_flutter/screens/download_logo.dart';
+import 'package:logo_app_flutter/utils/app_logger.dart';
 
 class MyDesignScreen extends StatefulWidget {
   final GlobalKey canvasKey;
@@ -54,7 +55,7 @@ Future<void> fetchLogos() async {
       isLoading = false; // done loading
     });
   } catch (e) {
-    print('❌ Error fetching logos: $e');
+    AppLogger.error('Error fetching logos', tag: 'MyDesignScreen', error: e);
     setState(() {
       imageUrls = [];
       isLoading = false; // done loading
