@@ -312,7 +312,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
                     }
                   },
                   child: Text(
-                    widget.designId != null ? 'Update' : 'To My Design',
+                    widget.designId != null ? 'Update' : 'My Design',
                     style: const TextStyle(
                       fontSize: 16,
                       color: ThemeColors.purple,

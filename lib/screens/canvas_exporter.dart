@@ -39,30 +39,29 @@ enum ExportFormat { png, jpg, pdf, svg }
 Future<ExportFormat?> _pickFormat(BuildContext context) {
   return showDialog<ExportFormat>(
     context: context,
-    builder: (_) => SimpleDialog(
+    builder: (dialogContext) => SimpleDialog(
       title: const Text("Save As"),
       children: [
         SimpleDialogOption(
           child: const Text("PNG"),
-          onPressed: () => Navigator.pop(context, ExportFormat.png),
+          onPressed: () => Navigator.pop(dialogContext, ExportFormat.png),
         ),
         SimpleDialogOption(
           child: const Text("JPG"),
-          onPressed: () => Navigator.pop(context, ExportFormat.jpg),
+          onPressed: () => Navigator.pop(dialogContext, ExportFormat.jpg),
         ),
-      SimpleDialogOption(
-  child: const Text("PDF"),
-  onPressed: () {
-    Navigator.pop(context, ExportFormat.pdf); // pop first
-  },
-),
-SimpleDialogOption(
-  child: const Text("SVG"),
-  onPressed: () {
-    Navigator.pop(context, ExportFormat.svg); // pop first
-  },
-),
-
+        SimpleDialogOption(
+          child: const Text("PDF"),
+          onPressed: () {
+            Navigator.pop(dialogContext, ExportFormat.pdf);
+          },
+        ),
+        SimpleDialogOption(
+          child: const Text("SVG"),
+          onPressed: () {
+            Navigator.pop(dialogContext, ExportFormat.svg);
+          },
+        ),
       ],
     ),
   );
@@ -196,6 +195,7 @@ Future<void> _savePdf(Uint8List pngBytes, int timestamp, BuildContext context) a
       filename: filename,
       context: context,
       fileType: "PDF",
+      showDialog: false,
     );
   } catch (e) {
     _showErrorMessage(context, "Failed to save PDF: $e");
@@ -218,6 +218,7 @@ Future<void> _saveSvg(LogoStateData state, BuildContext context) async {
       filename: filename,
       context: context,
       fileType: "SVG",
+      showDialog: false,
     );
   } catch (e) {
     _showErrorMessage(context, "Failed to save SVG: $e");
@@ -230,32 +231,32 @@ Future<void> _saveSvg(LogoStateData state, BuildContext context) async {
 
 String _generateSimpleSvg(LogoStateData state) {
   final buffer = StringBuffer();
-  
-  buffer.writeln('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">');
+
+  // Standard XML header + SVG root with viewBox for better compatibility
+  buffer.writeln('<?xml version="1.0" encoding="UTF-8"?>');
+  buffer.writeln('<svg xmlns="http://www.w3.org/2000/svg" '
+      'xmlns:xlink="http://www.w3.org/1999/xlink" '
+      'version="1.1" width="800" height="600" viewBox="0 0 800 600">');
   
   // Background
   if (state.backgroundColor != null) {
     final c = state.backgroundColor ?? Colors.white;
-    final hexColor = '#${_colorToHex(c)}';
-    buffer.writeln(
-      '<rect width="800" height="600" fill="$hexColor" fill-opacity="${c.opacity}"/>'
-    );
+    final fill = _colorToSvgFill(c);
+    buffer.writeln('<rect width="800" height="600" fill="$fill"/>');
   }
   
   // Text elements
   for (final t in state.customTexts) {
     if (!t.isVisible) continue;
     final c = t.color;
-    final hexColor = '#${_colorToHex(c)}';
-    
-    buffer.writeln(
-      '<text x="${t.position.dx}" y="${t.position.dy}" '
-      'font-size="${t.size}" '
-      'fill="$hexColor" fill-opacity="${c.opacity}" '
-      'font-family="Arial, sans-serif">'
-      '${_escapeXml(t.text)}'
-      '</text>'
-    );
+    final fill = _colorToSvgFill(c);
+
+    // Use explicit units and basic text styling for wider viewer support
+    buffer.writeln('<text x="${t.position.dx}" y="${t.position.dy}" '
+        'font-size="${t.size}px" '
+        'fill="$fill" '
+        'font-family="Arial, sans-serif" '
+        'dominant-baseline="middle">${_escapeXml(t.text)}</text>');
   }
   
   // Simple placeholders for images
@@ -274,6 +275,18 @@ String _generateSimpleSvg(LogoStateData state) {
   return buffer.toString();
 }
 
+String _colorToSvgFill(Color color) {
+  // If fully opaque, use hex; otherwise use rgba() which some viewers handle better
+  final r = color.red;
+  final g = color.green;
+  final b = color.blue;
+  final a = (color.opacity).toStringAsFixed(3);
+  if (color.alpha == 255) {
+    return '#${_colorToHex(color)}';
+  }
+  return 'rgba($r,$g,$b,$a)';
+}
+
 /* ===============================
    SAVE NON-IMAGE FILES (PDF/SVG)
 ================================ */
@@ -283,6 +296,8 @@ Future<void> _saveNonImageFile({
   required String filename,
   required BuildContext context,
   required String fileType,
+  // When false, do not show any dialogs; caller will handle user feedback.
+  bool showDialog = true,
 }) async {
   try {
     // Try multiple locations for better compatibility
@@ -333,13 +348,15 @@ Future<void> _saveNonImageFile({
       print('Public directory error: $e');
     }
     
-    // Show all saved locations to user
-    _showMultiLocationMessage(
-      context,
-      filename,
-      fileType,
-      savedLocations,
-    );
+    // Show all saved locations to user (optional)
+    if (showDialog) {
+      _showMultiLocationMessage(
+        context,
+        filename,
+        fileType,
+        savedLocations,
+      );
+    }
     
   } catch (e) {
     // Last resort: temporary directory
@@ -347,7 +364,9 @@ Future<void> _saveNonImageFile({
     final tempPath = '${tempDir.path}/$filename';
     await File(tempPath).writeAsBytes(bytes);
     
-    _showFileLocationMessage(context, tempPath, fileType);
+    if (showDialog) {
+      _showFileLocationMessage(context, tempPath, fileType);
+    }
   }
 }
 
@@ -356,19 +375,8 @@ Future<void> _saveNonImageFile({
 ================================ */
 
 void _showGalleryMessage(BuildContext context, String fileType) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text('✅ $fileType saved to Gallery!'),
-      backgroundColor: Colors.green,
-      duration: Duration(seconds: 3),
-      action: SnackBarAction(
-        label: 'OPEN',
-        onPressed: () {
-          // You could open the gallery here
-        },
-      ),
-    ),
-  );
+  // Gallery save acknowledged by caller; no snackbar here to avoid duplicates.
+  // Optionally keep this function for future hooks (e.g., open gallery).
 }
 
 void _showFileLocationMessage(BuildContext context, String path, String fileType) {
@@ -414,9 +422,6 @@ void _showFileLocationMessage(BuildContext context, String path, String fileType
           label: Text('COPY PATH'),
           onPressed: () {
             Clipboard.setData(ClipboardData(text: path));
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Path copied to clipboard')),
-            );
             Navigator.pop(context);
           },
         ),
@@ -506,11 +511,15 @@ void _showMultiLocationMessage(
 }
 
 void _showErrorMessage(BuildContext context, String message) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
+  // Delegate error display to caller; show a simple dialog as fallback.
+  showDialog(
+    context: context,
+    builder: (c) => AlertDialog(
+      title: Text('Error'),
       content: Text(message),
-      backgroundColor: Colors.red,
-      duration: Duration(seconds: 4),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(c), child: Text('OK')),
+      ],
     ),
   );
 }
