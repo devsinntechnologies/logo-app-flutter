@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:logo_app_flutter/config/environment.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
-import 'package:logo_app_flutter/screens/Splash_screen.dart';
+import 'package:logo_app_flutter/screens/splash_screen.dart';
 import 'package:logo_app_flutter/screens/home_screen.dart';
 import 'package:logo_app_flutter/services/internet_checker.dart';
 import 'package:provider/provider.dart';
@@ -60,7 +60,7 @@ class _MyAppState extends State<MyApp> {
       final session = authState.session;
 
       setState(() {
-        _session = session;
+        // _session = session;
       });
     });
   }

@@ -8,6 +8,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:logo_app_flutter/components/google_alert.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
 import 'package:logo_app_flutter/screens/art_select_screen.dart';
+import 'package:logo_app_flutter/screens/canvas_exporter.dart';
 import 'package:logo_app_flutter/services/ad_mob_service.dart';
 import 'package:logo_app_flutter/services/canvas_upload_service.dart';
 import 'package:logo_app_flutter/screens/movement_panel.dart';
@@ -217,7 +218,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
             ),
           ),
           content: const Text(
-            'Do you want to save the logo to your gallery to My Design?',
+            'Do you want to save the logo to your storage or to My Design?',
             style: TextStyle(
               fontSize: 16,
               color: ThemeColors.purple,
@@ -330,7 +331,12 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
                     await WidgetsBinding.instance.endOfFrame;
 
-                    await saveCanvasToGallery(canvasKey, isExportingNotifier);
+                    // 👉 THIS LINE OPENS FORMAT SELECTION DIALOG
+                    await exportCanvas(
+                      context: context,
+                      repaintKey: canvasKey,
+                      logoState: _currentLogoState,
+                    );
 
                     if (previousSelection != null) {
                       provider.setSelectedElement(previousSelection);
@@ -366,13 +372,67 @@ class _DownloadLogoState extends State<DownloadLogo> {
                     );
                   },
                   child: const Text(
-                    'To Gallery',
+                    'Storage',
                     style: TextStyle(
                       fontSize: 16,
                       color: ThemeColors.purple,
                     ),
                   ),
                 ),
+
+                // TextButton(
+                //   onPressed: () async {
+                //     final provider = Provider.of<SelectedColorProvider>(context,
+                //         listen: false);
+
+                //     int? previousSelection = provider.selectedElementId;
+                //     provider.clearSelection();
+
+                //     await WidgetsBinding.instance.endOfFrame;
+
+                //     await saveCanvasToGallery(canvasKey, isExportingNotifier);
+
+                //     if (previousSelection != null) {
+                //       provider.setSelectedElement(previousSelection);
+                //     }
+
+                //     Navigator.of(context).pop();
+
+                //     ScaffoldMessenger.of(context).showSnackBar(
+                //       SnackBar(
+                //         duration: const Duration(seconds: 3),
+                //         backgroundColor: Colors.white,
+                //         behavior: SnackBarBehavior.floating,
+                //         shape: RoundedRectangleBorder(
+                //           borderRadius: BorderRadius.circular(12),
+                //         ),
+                //         margin: const EdgeInsets.all(16),
+                //         content: Row(
+                //           children: const [
+                //             Icon(Icons.check_circle, color: ThemeColors.purple),
+                //             SizedBox(width: 12),
+                //             Expanded(
+                //               child: Text(
+                //                 'Logo saved successfully!',
+                //                 style: TextStyle(
+                //                   color: ThemeColors.purple,
+                //                   fontSize: 16,
+                //                 ),
+                //               ),
+                //             ),
+                //           ],
+                //         ),
+                //       ),
+                //     );
+                //   },
+                //   child: const Text(
+                //     'To Gallery',
+                //     style: TextStyle(
+                //       fontSize: 16,
+                //       color: ThemeColors.purple,
+                //     ),
+                //   ),
+                // ),
               ],
             ),
           ],
@@ -533,33 +593,37 @@ class _DownloadLogoState extends State<DownloadLogo> {
             onPressed: () {
               final user = Supabase.instance.client.auth.currentUser;
               if (user != null) {
-                // ✅ Load rewarded ad first
-                AdMobService.loadRewarded(
-                  onLoaded: (RewardedAd ad) {
-                    ad.fullScreenContentCallback = FullScreenContentCallback(
-                      onAdDismissedFullScreenContent: (ad) {
-                        ad.dispose();
-                        // After ad is closed → show save confirmation
                         _showSaveConfirmationDialog(context, _canvasKey);
-                      },
-                      onAdFailedToShowFullScreenContent: (ad, error) {
-                        ad.dispose();
-                        // If ad fails → still show save confirmation
-                        _showSaveConfirmationDialog(context, _canvasKey);
-                      },
-                    );
 
-                    // Show the rewarded ad
-                    ad.show(
-                      onUserEarnedReward:
-                          (AdWithoutView ad, RewardItem reward) {
-                        // Optional: you can give extra rewards here if needed
-                        print(
-                            'User earned reward: ${reward.amount} ${reward.type}');
-                      },
-                    );
-                  },
-                );
+                // ✅ Load rewarded ad first
+                // AdMobService.loadRewarded(
+                //   onLoaded: (RewardedAd ad) {
+                //     ad.fullScreenContentCallback = FullScreenContentCallback(
+                //       onAdDismissedFullScreenContent: (ad) {
+                //         ad.dispose();
+                //         // After ad is closed → show save confirmation
+                //         _showSaveConfirmationDialog(context, _canvasKey);
+                //       },
+                //       onAdFailedToShowFullScreenContent: (ad, error) {
+                //         ad.dispose();
+                //         // If ad fails → still show save confirmation
+                //         _showSaveConfirmationDialog(context, _canvasKey);
+                //       },
+                //     );
+
+                //     // Show the rewarded ad
+                //     ad.show(
+                //       onUserEarnedReward:
+                //           (AdWithoutView ad, RewardItem reward) {
+                //         // Optional: you can give extra rewards here if needed
+                //         print(
+                //             'User earned reward: ${reward.amount} ${reward.type}');
+                //       },
+                //     );
+                //   },
+                // );
+             
+             
               } else {
                 // User not logged in → show login dialog
                 showCustomGoogleDialog(context);
