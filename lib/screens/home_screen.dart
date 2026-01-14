@@ -6,6 +6,8 @@ import 'package:logo_app_flutter/components/GridButtons/create_logo_button.dart'
 import 'package:logo_app_flutter/components/GridButtons/my_design_button.dart';
 import 'package:logo_app_flutter/components/GridButtons/my_logo_button.dart';
 import 'package:logo_app_flutter/components/drawer_items.dart';
+import 'package:logo_app_flutter/components/show_language_dialog.dart';
+import 'package:logo_app_flutter/generated/l10n.dart';
 import 'package:logo_app_flutter/screens/google_sign_in_button.dart';
 import 'package:logo_app_flutter/screens/my_account_screen.dart';
 import 'package:logo_app_flutter/services/ad_mob_service.dart';
@@ -93,11 +95,19 @@ class _HomeScreenState extends State<HomeScreen> {
                         color: Colors.white,
                       ),
                       const SizedBox(width: 10),
-                      Text(
-                        "Smart Logo Maker",
-                        style: Theme.of(
-                          context,
-                        ).textTheme.titleLarge?.copyWith(color: Colors.white),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Text(
+                            S.of(context).smartLogoMakerText,
+                            style: Theme.of(
+                              context,
+                            )
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(color: Colors.white),
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -110,16 +120,32 @@ class _HomeScreenState extends State<HomeScreen> {
                   // DrawerItem(icon: Icons.workspace_premium, text: "Get PRO"),
                   // DrawerItem(icon: Icons.image, text: "My Logo"),
 
-                  const DrawerItem(
-                      icon: Icons.design_services, text: "My Design"),
-                  const DrawerItem(icon: Icons.create, text: "Create Logo"),
-                  const DrawerItem(
-                      icon: Icons.auto_awesome, text: "Auto Design"),
-                  const DrawerItem(icon: Icons.language, text: "Language"),
+                  DrawerItem(
+                    icon: Icons.design_services,
+                    text: S.of(context).myDesign,
+                  ),
+                  DrawerItem(
+                    icon: Icons.create,
+                    text: S.of(context).createLogo,
+                  ),
+                  DrawerItem(
+                    icon: Icons.auto_awesome,
+                    text: S.of(context).autoDesign,
+                  ),
+                  DrawerItem(
+                    icon: Icons.language,
+                    text: S.of(context).language,
+                    onTap: () => showLanguageDialog(context),
+                  ),
                   // DrawerItem(icon: Icons.apps, text: "More Apps"),
-                  const DrawerItem(icon: Icons.share, text: "Share"),
-                  const DrawerItem(
-                      icon: Icons.privacy_tip, text: "Privacy Policy"),
+                  DrawerItem(
+                    icon: Icons.share,
+                    text: S.of(context).share,
+                  ),
+                  DrawerItem(
+                    icon: Icons.privacy_tip,
+                    text: S.of(context).privacyPolicy,
+                  ),
                 ],
               ),
             ),
@@ -148,26 +174,35 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                     ),
                   ),
-                  Center(
-                    child: Row(
-                      children: [
-                        Image.asset(
-                          'assets/icons/logo_app.png',
-                          // width: 30,
-                          height: 30,
-                        ),
-                        // const SizedBox(width:2),
-                        Text(
-                          'SmartLogoMaker',
-                          style: GoogleFonts.poppins(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black87,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                Center(
+  child: SingleChildScrollView(
+    scrollDirection: Axis.horizontal, // horizontal scroll
+    child: Row(
+      // mainAxisSize: MainAxisSize.min,
+      children: [
+        Image.asset(
+          'assets/icons/logo_app.png',
+          height: 30,
+        ),
+        const SizedBox(width: 5), // spacing between icon and text
+        ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width * 0.6, // max 60% of screen
+          ),
+          child: Text(
+            S.of(context).smartLogoMaker,
+            style: GoogleFonts.poppins(
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+              color: Colors.black87,
+            ),
+          ),
+        ),
+      ],
+    ),
+  ),
+),
+
                   GoogleSignInButton(),
                   // SizedBox(width: 1),
                 ],

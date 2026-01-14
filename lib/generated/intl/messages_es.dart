@@ -31,7 +31,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "share": MessageLookupByLibrary.simpleMessage("Compartir"),
     "smartLogoMaker": MessageLookupByLibrary.simpleMessage(
-      "Creador de Logo Inteligente",
+      "Creadorde Logo Inteligente",
     ),
     "smartLogoMakerText": MessageLookupByLibrary.simpleMessage(
       "Creador de Logo Inteligente",

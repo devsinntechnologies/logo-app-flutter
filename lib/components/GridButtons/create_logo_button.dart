@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:logo_app_flutter/generated/l10n.dart';
 import 'package:logo_app_flutter/screens/download_logo.dart';
 import 'package:logo_app_flutter/utils/theme_colors.dart';
 
@@ -10,7 +11,11 @@ class CreateLogoButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (_)=>DownloadLogo(svgLogo: "", companyName: "", sloganName: "")));
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (_) => DownloadLogo(
+                    svgLogo: "", companyName: "", sloganName: "")));
         // SnackBar snackBar = const SnackBar(
         //   content: Text('Create Logo button pressed!'),
         //   duration: Duration(milliseconds: 100),
@@ -22,8 +27,8 @@ class CreateLogoButton extends StatelessWidget {
         // width: 210,
         decoration: BoxDecoration(
           // color: const Color(0xFF5FD3F3),
-                    gradient: ThemeColors.greenBlue,
-      
+          gradient: ThemeColors.greenBlue,
+
           borderRadius: BorderRadius.circular(30),
           boxShadow: [
             BoxShadow(
@@ -35,8 +40,7 @@ class CreateLogoButton extends StatelessWidget {
           ],
         ),
         child: Padding(
-                 padding: const EdgeInsets.symmetric(vertical: 20,horizontal: 10),
-
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center, // optional
             children: [
@@ -49,12 +53,18 @@ class CreateLogoButton extends StatelessWidget {
                     // height: 40,
                   ),
                   SizedBox(height: 20),
-                  Text(
-                    'Create Logo',
-                    style: GoogleFonts.poppins(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 17,
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: MediaQuery.of(context).size.width *
+                          0.3, // limit text width
+                    ),
+                    child: Text(
+                      S.of(context).createLogo,
+                      style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 17,
+                      ),
                     ),
                   ),
                 ],
@@ -62,7 +72,11 @@ class CreateLogoButton extends StatelessWidget {
               const Spacer(),
               Column(
                 children: [
-                  const Icon(Icons.chevron_right, color: Colors.white,size: 35,),
+                  const Icon(
+                    Icons.chevron_right,
+                    color: Colors.white,
+                    size: 35,
+                  ),
                 ],
               ),
             ],
