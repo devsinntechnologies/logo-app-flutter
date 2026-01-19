@@ -54,10 +54,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
+                      color: Colors.black,
+
                 ),
               ),
               const SizedBox(height: 8),
               TextFormField(
+                style: const TextStyle(color: Colors.black),
                 controller: emailController,
                 cursorColor: Colors.black,
                 decoration: InputDecoration(
@@ -78,11 +81,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 'Password',
                 style: TextStyle(
                   fontSize: 14,
+                      color: Colors.black,
+
                   fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
               TextFormField(
+                style: const TextStyle(color: Colors.black),
+
                 controller: passwordController,
                 cursorColor: Colors.black,
                 decoration: InputDecoration(
@@ -175,7 +182,10 @@ class _LoginScreenState extends State<LoginScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('Don\'t have an account? '),
+                   Text('Don\'t have an account? ',
+                style:  TextStyle(color: Colors.black),
+                  
+                  ),
                   GestureDetector(
                     onTap: () {
                       Navigator.pushReplacement(

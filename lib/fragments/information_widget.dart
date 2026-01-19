@@ -7,7 +7,7 @@ class InformationWidget extends StatefulWidget {
   final String? initialCategory;
 
   const InformationWidget({
-    super.key, 
+    super.key,
     required this.onSave,
     this.initialName,
     this.initialSlogan,
@@ -72,7 +72,10 @@ class _InformationWidgetState extends State<InformationWidget> {
             const SizedBox(height: 16),
             const Text(
               "CHOOSE INDUSTRY",
-              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black),
             ),
             Container(
               height: 60,
@@ -98,28 +101,33 @@ class _InformationWidgetState extends State<InformationWidget> {
                       selectedCategory,
                     );
                   },
-                  items:
-                      categories.map((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(
-                            value,
-                            style: const TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                        );
-                      }).toList(),
+                  items: categories.map((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(
+                        value,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    );
+                  }).toList(),
                 ),
               ),
             ),
             const SizedBox(height: 20),
             const Text(
               "YOUR COMPANY NAME",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black),
             ),
             const SizedBox(height: 8),
             SizedBox(
               width: 330,
               child: TextField(
+                style: TextStyle(
+                  color: Colors.black, // This makes the text black
+                ),
                 controller: nameController,
                 textAlign: TextAlign.center,
                 maxLength: 10,
@@ -131,6 +139,7 @@ class _InformationWidgetState extends State<InformationWidget> {
                   ),
                   counterText: "",
                   hintText: 'Enter your company name',
+                  hintStyle: TextStyle(color: Colors.black),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),
@@ -139,18 +148,22 @@ class _InformationWidgetState extends State<InformationWidget> {
                   widget.onSave(text, sloganController.text, selectedCategory);
                 },
               ),
-           
-           
             ),
             const SizedBox(height: 20),
             const Text(
               "SLOGAN",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black),
             ),
             const SizedBox(height: 8),
             SizedBox(
               width: 330,
               child: TextField(
+                style: TextStyle(
+                  color: Colors.black, // This makes the text black
+                ),
                 controller: sloganController,
                 textAlign: TextAlign.center,
                 maxLength: 20,

@@ -174,34 +174,36 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                     ),
                   ),
-                Center(
-  child: SingleChildScrollView(
-    scrollDirection: Axis.horizontal, // horizontal scroll
-    child: Row(
-      // mainAxisSize: MainAxisSize.min,
-      children: [
-        Image.asset(
-          'assets/icons/logo_app.png',
-          height: 30,
-        ),
-        const SizedBox(width: 5), // spacing between icon and text
-        ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width * 0.6, // max 60% of screen
-          ),
-          child: Text(
-            S.of(context).smartLogoMaker,
-            style: GoogleFonts.poppins(
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
-              color: Colors.black87,
-            ),
-          ),
-        ),
-      ],
-    ),
-  ),
-),
+                  Center(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal, // horizontal scroll
+                      child: Row(
+                        // mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Image.asset(
+                            'assets/icons/logo_app.png',
+                            height: 30,
+                          ),
+                          const SizedBox(
+                              width: 5), // spacing between icon and text
+                          ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxWidth: MediaQuery.of(context).size.width *
+                                  0.6, // max 60% of screen
+                            ),
+                            child: Text(
+                              S.of(context).smartLogoMaker,
+                              style: GoogleFonts.poppins(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
 
                   GoogleSignInButton(),
                   // SizedBox(width: 1),

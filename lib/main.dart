@@ -53,10 +53,8 @@ class _MyAppState extends State<MyApp> {
   Session? _session;
 
   @override
-  @override
   void initState() {
     super.initState();
-
     _session = _supabase.auth.currentSession;
 
     _authSubscription = _supabase.auth.onAuthStateChange.listen((authState) {
@@ -67,6 +65,8 @@ class _MyAppState extends State<MyApp> {
       });
     });
   }
+
+
 
   @override
   void dispose() {
@@ -81,36 +81,34 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (_) => SelectedColorProvider()),
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
       ],
-      child: Builder(
-        builder: (context) {
-          return MaterialApp(
-            theme: ThemeData(
-              textTheme: GoogleFonts.poppinsTextTheme(),
+      child: Builder(builder: (context) {
+        return MaterialApp(
+          theme: ThemeData(
+            textTheme: GoogleFonts.poppinsTextTheme(),
+          ),
+          darkTheme: ThemeData(
+            textTheme: GoogleFonts.poppinsTextTheme(
+              ThemeData.dark().textTheme,
             ),
-            darkTheme: ThemeData(
-              textTheme: GoogleFonts.poppinsTextTheme(
-                ThemeData.dark().textTheme,
-              ),
-            ),
-            themeMode: ThemeMode.system,
-            debugShowCheckedModeBanner: false,
-            title: 'Auto Design Module',
-            locale: context.watch<LocaleProvider>().locale,
-            localizationsDelegates: const [
-              S.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: S.delegate.supportedLocales,
-            home: InternetChecker(
-              child: HomeScreen(),
-              // child: SignUpScreen(),
-            ),
-            // home: SplashScreen(),
-          );
-        }
-      ),
+          ),
+          themeMode: ThemeMode.system,
+          debugShowCheckedModeBanner: false,
+          title: 'Auto Design Module',
+          locale: context.watch<LocaleProvider>().locale,
+          localizationsDelegates: const [
+            S.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: S.delegate.supportedLocales,
+          home: InternetChecker(
+            child: HomeScreen(),
+            // child: SignUpScreen(),
+          ),
+          // home: SplashScreen(),
+        );
+      }),
     );
   }
 }

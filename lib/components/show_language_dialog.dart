@@ -6,7 +6,7 @@ void showLanguageDialog(BuildContext context) {
     context: context,
     builder: (context) {
       return AlertDialog(
-        title: const Text("Select Language"),
+        title: const Text("Select Language", style: TextStyle(color: Colors.black),),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

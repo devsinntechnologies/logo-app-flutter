@@ -28,7 +28,8 @@ class AuthService {
       email: email,
       password: password,
     );
-    AppLogger.success("User signed up: ${response.user?.id}", tag: "AuthService");
+    AppLogger.success("User signed up: ${response.user?.id}",
+        tag: "AuthService");
 
     return response;
   }

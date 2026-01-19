@@ -148,7 +148,7 @@ class _ChooseFontsWidgetState extends State<ChooseFontsWidget> {
         const SizedBox(height: 20),
         const Text(
           "CHOOSE FONTS",
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
         ),
         const SizedBox(height: 20),
     

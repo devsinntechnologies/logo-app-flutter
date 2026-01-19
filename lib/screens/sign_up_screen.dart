@@ -61,11 +61,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 'First Name',
                 style: TextStyle(
                   fontSize: 14,
+                  color: Colors.black,
                   fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
               TextFormField(
+                style:  TextStyle(color: Colors.black),
+
                 controller: firstNameController,
                 cursorColor: Colors.black,
                 decoration: InputDecoration(
@@ -84,11 +87,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 'Last Name',
                 style: TextStyle(
                   fontSize: 14,
+                  color: Colors.black,
                   fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
               TextFormField(
+                style:  TextStyle(color: Colors.black),
+
                 controller: lastNameController,
                 cursorColor: Colors.black,
                 decoration: InputDecoration(
@@ -108,10 +114,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
+                  color: Colors.black,
                 ),
               ),
               const SizedBox(height: 8),
               TextFormField(
+                style:  TextStyle(color: Colors.black),
+
                 controller: emailController,
                 cursorColor: Colors.black,
                 decoration: InputDecoration(
@@ -132,10 +141,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
+                  color: Colors.black
                 ),
               ),
               const SizedBox(height: 8),
               TextFormField(
+                style:  TextStyle(color: Colors.black),
+
                 controller: passwordController,
                 cursorColor: Colors.black,
                 decoration: InputDecoration(
@@ -155,11 +167,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 'Confirm Password',
                 style: TextStyle(
                   fontSize: 14,
+                  color: Colors.black,
                   fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
               TextFormField(
+                style:  TextStyle(color: Colors.black),
+
                 controller: confirmPasswordController,
                 cursorColor: Colors.black,
                 decoration: InputDecoration(
@@ -264,7 +279,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('Already have an account? '),
+                  const Text('Already have an account? ',
+                style:  TextStyle(color: Colors.black),
+                  
+                  ),
                   GestureDetector(
                     onTap: () {
                       Navigator.pushReplacement(
