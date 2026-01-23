@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:logo_app_flutter/generated/l10n.dart';
 import 'package:logo_app_flutter/screens/log_in_screen.dart';
 import 'package:logo_app_flutter/screens/verify_email_screen.dart';
 import 'package:logo_app_flutter/services/auth_service.dart';
@@ -46,8 +47,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Sign Up',
+              Text(
+                S.of(context).signup,
                 style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
@@ -57,8 +58,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
               const SizedBox(height: 32),
 
               // First Name
-              const Text(
-                'First Name',
+              Text(
+                S.of(context).name,
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.black,
@@ -67,12 +68,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
               const SizedBox(height: 8),
               TextFormField(
-                style:  TextStyle(color: Colors.black),
-
+                style: TextStyle(color: Colors.black),
                 controller: firstNameController,
                 cursorColor: Colors.black,
                 decoration: InputDecoration(
-                  hintText: 'Enter your first name',
+                  hintText: S.of(context).enterName,
                   filled: true,
                   fillColor: Colors.white,
                   focusedBorder: UnderlineInputBorder(
@@ -83,8 +83,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
               const SizedBox(height: 20),
 
               // Last Name
-              const Text(
-                'Last Name',
+              Text(
+                S.of(context).nameLast,
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.black,
@@ -93,12 +93,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
               const SizedBox(height: 8),
               TextFormField(
-                style:  TextStyle(color: Colors.black),
-
+                style: TextStyle(color: Colors.black),
                 controller: lastNameController,
                 cursorColor: Colors.black,
                 decoration: InputDecoration(
-                  hintText: 'Enter your last name',
+                  hintText: S.of(context).enterNameLast,
                   filled: true,
                   fillColor: Colors.white,
                   focusedBorder: UnderlineInputBorder(
@@ -109,8 +108,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
               const SizedBox(height: 20),
 
               // Email
-              const Text(
-                'Email',
+              Text(
+                S.of(context).email,
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
@@ -119,12 +118,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
               const SizedBox(height: 8),
               TextFormField(
-                style:  TextStyle(color: Colors.black),
-
+                style: TextStyle(color: Colors.black),
                 controller: emailController,
                 cursorColor: Colors.black,
                 decoration: InputDecoration(
-                  hintText: 'Enter your email',
+                  hintText: S.of(context).enterEmail,
                   filled: true,
                   fillColor: Colors.white,
                   focusedBorder: UnderlineInputBorder(
@@ -136,22 +134,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
               const SizedBox(height: 20),
 
               // Password
-              const Text(
-                'Password',
+              Text(
+                S.of(context).password,
                 style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black
-                ),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black),
               ),
               const SizedBox(height: 8),
               TextFormField(
-                style:  TextStyle(color: Colors.black),
-
+                style: TextStyle(color: Colors.black),
                 controller: passwordController,
                 cursorColor: Colors.black,
                 decoration: InputDecoration(
-                  hintText: 'Enter your password',
+                  hintText: S.of(context).enterPasswords,
                   focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.black, width: 2),
                   ),
@@ -163,8 +159,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
               const SizedBox(height: 20),
 
               // Confirm Password
-              const Text(
-                'Confirm Password',
+              Text(
+                S.of(context).passwordConfirm,
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.black,
@@ -173,12 +169,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
               const SizedBox(height: 8),
               TextFormField(
-                style:  TextStyle(color: Colors.black),
-
+                style: TextStyle(color: Colors.black),
                 controller: confirmPasswordController,
                 cursorColor: Colors.black,
                 decoration: InputDecoration(
-                  hintText: 'Confirm your password',
+                  hintText: S.of(context).confirmYourPassword,
                   focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.black, width: 2),
                   ),
@@ -262,7 +257,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   child: Center(
                     child: Text(
-                      "Sign Up",
+                      S.of(context).signup,
                       style: TextStyle(
                         fontSize: 20,
                         color: Colors.white,
@@ -279,9 +274,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('Already have an account? ',
-                style:  TextStyle(color: Colors.black),
-                  
+                  Text(
+                    'Already have an account? ',
+                    style: TextStyle(color: Colors.black),
                   ),
                   GestureDetector(
                     onTap: () {
@@ -291,8 +286,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             builder: (context) => const LoginScreen()),
                       );
                     },
-                    child: const Text(
-                      'Login',
+                    child: Text(
+                      S.of(context).login,
                       style: TextStyle(
                         color: Colors.purple,
                         fontSize: 15,

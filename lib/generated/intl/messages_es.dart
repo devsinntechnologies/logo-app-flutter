@@ -22,19 +22,113 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+    "ChooseIndustry": MessageLookupByLibrary.simpleMessage("ELIJA INDUSTRIA"),
+    "SignInWithGoogle": MessageLookupByLibrary.simpleMessage(
+      "Iniciar sesión con Google",
+    ),
+    "art": MessageLookupByLibrary.simpleMessage("Arte"),
     "autoDesign": MessageLookupByLibrary.simpleMessage("Diseño Automático"),
+    "automotiveTransportation": MessageLookupByLibrary.simpleMessage(
+      "Automoción y Transporte",
+    ),
+    "back": MessageLookupByLibrary.simpleMessage("Atrás"),
+    "background": MessageLookupByLibrary.simpleMessage("Fondo"),
+    "beautyMassage": MessageLookupByLibrary.simpleMessage("Belleza y Masaje"),
+    "businessConsulting": MessageLookupByLibrary.simpleMessage(
+      "Negocios y Consultoría",
+    ),
+    "calligraphy": MessageLookupByLibrary.simpleMessage("CALIGRAFÍA"),
+    "childrenEducation": MessageLookupByLibrary.simpleMessage(
+      "Niños y Educación",
+    ),
+    "chooseFonts": MessageLookupByLibrary.simpleMessage("ELIJA FUENTES"),
+    "chooseFontsSmall": MessageLookupByLibrary.simpleMessage("elige Fuentes"),
+    "classic": MessageLookupByLibrary.simpleMessage("CLÁSICO"),
+    "companyName": MessageLookupByLibrary.simpleMessage("NOMBRE DE SU EMPRESA"),
+    "confirmYourPassword": MessageLookupByLibrary.simpleMessage(
+      "Confirme su contraseña",
+    ),
+    "contemporary": MessageLookupByLibrary.simpleMessage("CONTEMPORÁNEO"),
     "createLogo": MessageLookupByLibrary.simpleMessage("Crear Logo"),
+    "display": MessageLookupByLibrary.simpleMessage("EXPOSICIÓN"),
+    "effects": MessageLookupByLibrary.simpleMessage("Efectos"),
+    "email": MessageLookupByLibrary.simpleMessage("Correo electrónico"),
+    "enterCompany": MessageLookupByLibrary.simpleMessage(
+      "Ingrese el nombre de su empresa",
+    ),
+    "enterEmail": MessageLookupByLibrary.simpleMessage(
+      "Ingrese su correo electrónico",
+    ),
+    "enterName": MessageLookupByLibrary.simpleMessage("Ingrese su nombre"),
+    "enterNameLast": MessageLookupByLibrary.simpleMessage(
+      "Ingrese su apellido",
+    ),
+    "enterPasswords": MessageLookupByLibrary.simpleMessage(
+      "Ingrese su contraseña",
+    ),
+    "enterSlogan": MessageLookupByLibrary.simpleMessage("Ingrese su eslogan"),
+    "entertainmentArtMusic": MessageLookupByLibrary.simpleMessage(
+      "Entretenimiento, Arte y Música",
+    ),
+    "familyServicesCounseling": MessageLookupByLibrary.simpleMessage(
+      "Servicios Familiares y Consejería",
+    ),
+    "fancy": MessageLookupByLibrary.simpleMessage("ELEGANTE"),
+    "financeInsurance": MessageLookupByLibrary.simpleMessage(
+      "Finanzas y Seguros",
+    ),
+    "foodBeverageRestaurant": MessageLookupByLibrary.simpleMessage(
+      "Comida, Bebida y Restaurante",
+    ),
+    "handwritten": MessageLookupByLibrary.simpleMessage("MANUSCRITO"),
+    "healthCarePublicSafety": MessageLookupByLibrary.simpleMessage(
+      "Salud Pública y Seguridad",
+    ),
+    "holidaySpecialOccasion": MessageLookupByLibrary.simpleMessage(
+      "Vacaciones y Ocasiones Especiales",
+    ),
+    "images": MessageLookupByLibrary.simpleMessage("Imágenes"),
+    "information": MessageLookupByLibrary.simpleMessage("Información"),
+    "itEngineeringScience": MessageLookupByLibrary.simpleMessage(
+      "TI, Ingeniería y Ciencia",
+    ),
     "language": MessageLookupByLibrary.simpleMessage("Idioma"),
+    "legalPolitics": MessageLookupByLibrary.simpleMessage("Legal y Política"),
+    "lockAll": MessageLookupByLibrary.simpleMessage("Bloquear Todo"),
+    "login": MessageLookupByLibrary.simpleMessage("Iniciar"),
+    "logoMaker": MessageLookupByLibrary.simpleMessage("Creador de Logos"),
+    "minimal": MessageLookupByLibrary.simpleMessage("MINIMALISTA"),
+    "modern": MessageLookupByLibrary.simpleMessage("MODERNO"),
     "myDesign": MessageLookupByLibrary.simpleMessage("Mi Diseño"),
+    "name": MessageLookupByLibrary.simpleMessage("Nombre"),
+    "nameLast": MessageLookupByLibrary.simpleMessage("Apellido"),
+    "next": MessageLookupByLibrary.simpleMessage("Siguiente"),
+    "noAccount": MessageLookupByLibrary.simpleMessage("¿No tienes una cuenta?"),
+    "or": MessageLookupByLibrary.simpleMessage("O"),
+    "palette": MessageLookupByLibrary.simpleMessage("Paleta"),
+    "password": MessageLookupByLibrary.simpleMessage("Contraseña"),
+    "passwordConfirm": MessageLookupByLibrary.simpleMessage(
+      "Confirmar contraseña",
+    ),
+    "petsAnimal": MessageLookupByLibrary.simpleMessage("Mascotas y Animales"),
+    "photography": MessageLookupByLibrary.simpleMessage("Fotografía"),
     "privacyPolicy": MessageLookupByLibrary.simpleMessage(
       "Política de Privacidad",
     ),
+    "retro": MessageLookupByLibrary.simpleMessage("RETRO"),
+    "saveLogo": MessageLookupByLibrary.simpleMessage("Guardar Logo"),
     "share": MessageLookupByLibrary.simpleMessage("Compartir"),
+    "signup": MessageLookupByLibrary.simpleMessage("Registrarse"),
+    "sloganName": MessageLookupByLibrary.simpleMessage("ESLOGAN"),
     "smartLogoMaker": MessageLookupByLibrary.simpleMessage(
-      "Creadorde Logo Inteligente",
+      "Creador de Logo Inteligente",
     ),
     "smartLogoMakerText": MessageLookupByLibrary.simpleMessage(
       "Creador de Logo Inteligente",
     ),
+    "sportsFitness": MessageLookupByLibrary.simpleMessage("Deportes y Fitness"),
+    "tech": MessageLookupByLibrary.simpleMessage("TECNOLOGÍA"),
+    "template": MessageLookupByLibrary.simpleMessage("Plantilla"),
+    "text": MessageLookupByLibrary.simpleMessage("Texto"),
   };
 }

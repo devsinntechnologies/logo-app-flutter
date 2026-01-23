@@ -6,12 +6,19 @@ import 'package:logo_app_flutter/components/GridButtons/create_logo_button.dart'
 import 'package:logo_app_flutter/components/GridButtons/my_design_button.dart';
 import 'package:logo_app_flutter/components/GridButtons/my_logo_button.dart';
 import 'package:logo_app_flutter/components/drawer_items.dart';
+import 'package:logo_app_flutter/components/google_alert.dart';
 import 'package:logo_app_flutter/components/show_language_dialog.dart';
 import 'package:logo_app_flutter/generated/l10n.dart';
+import 'package:logo_app_flutter/screens/design_input_screen.dart';
+import 'package:logo_app_flutter/screens/download_logo.dart';
 import 'package:logo_app_flutter/screens/google_sign_in_button.dart';
 import 'package:logo_app_flutter/screens/my_account_screen.dart';
+import 'package:logo_app_flutter/screens/my_design_screen.dart';
 import 'package:logo_app_flutter/services/ad_mob_service.dart';
 import 'package:logo_app_flutter/utils/theme_colors.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -123,14 +130,63 @@ class _HomeScreenState extends State<HomeScreen> {
                   DrawerItem(
                     icon: Icons.design_services,
                     text: S.of(context).myDesign,
+                    onTap: () {
+                      final user = Supabase.instance.client.auth.currentUser;
+                      final GlobalKey canvasKey = GlobalKey();
+
+                      if (user != null) {
+                        // User is logged in → navigate normally
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                MyDesignScreen(canvasKey: canvasKey),
+                          ),
+                        );
+
+                        // Show interstitial ad
+                        AdMobService.loadInterstitial(
+                          onLoaded: (InterstitialAd ad) {
+                            ad.fullScreenContentCallback =
+                                FullScreenContentCallback(
+                              onAdDismissedFullScreenContent: (ad) =>
+                                  ad.dispose(),
+                              onAdFailedToShowFullScreenContent: (ad, error) =>
+                                  ad.dispose(),
+                            );
+                            ad.show();
+                          },
+                        );
+                      } else {
+                        // User not logged in → show login/signup dialog
+                        showCustomGoogleDialog(context);
+                      }
+                    },
                   ),
+
                   DrawerItem(
                     icon: Icons.create,
                     text: S.of(context).createLogo,
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => DownloadLogo(
+                                  svgLogo: "",
+                                  companyName: "",
+                                  sloganName: "")));
+                    },
                   ),
                   DrawerItem(
                     icon: Icons.auto_awesome,
                     text: S.of(context).autoDesign,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const DesignInputScreen()),
+                      );
+                    },
                   ),
                   DrawerItem(
                     icon: Icons.language,
@@ -141,10 +197,27 @@ class _HomeScreenState extends State<HomeScreen> {
                   DrawerItem(
                     icon: Icons.share,
                     text: S.of(context).share,
+                    onTap: () {
+                      const appLink =
+                          'https://play.google.com/store/apps/details?id=com.devsinntechnologies.smartlogomaker&hl=en-US&ah=ZazxD_acLcZzxhvUTOIRv42CZBY';
+                      Share.share('Check out this app: $appLink');
+                    },
                   ),
+
                   DrawerItem(
                     icon: Icons.privacy_tip,
                     text: S.of(context).privacyPolicy,
+                    onTap: () async {
+                      final url = Uri.parse(
+                          'https://docs.google.com/document/d/1HEu-XJJL8pMcrqdekHDNO4w3CESBqzvWmHdrHWTcOT4/edit?usp=sharing');
+                      if (await canLaunchUrl(url)) {
+                        await launchUrl(url,
+                            mode: LaunchMode.externalApplication);
+                      } else {
+                        // optional: handle error
+                        print('Could not launch $url');
+                      }
+                    },
                   ),
                 ],
               ),
@@ -189,7 +262,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ConstrainedBox(
                             constraints: BoxConstraints(
                               maxWidth: MediaQuery.of(context).size.width *
-                                  0.6, // max 60% of screen
+                                  0.45, // max 60% of screen
                             ),
                             child: Text(
                               S.of(context).smartLogoMaker,
@@ -206,7 +279,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
 
                   GoogleSignInButton(),
-                  // SizedBox(width: 1),
                 ],
               ),
               const SizedBox(height: 23),

@@ -5,6 +5,7 @@ import 'package:logo_app_flutter/fragments/choose_fonts_widget.dart';
 import 'package:logo_app_flutter/fragments/information_widget.dart';
 import 'package:logo_app_flutter/fragments/template_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:logo_app_flutter/generated/l10n.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
 import 'package:logo_app_flutter/utils/theme_colors.dart';
 import 'package:provider/provider.dart';
@@ -22,11 +23,23 @@ class _DesignInputScreenState extends State<DesignInputScreen> {
   final PageController _pageController = PageController();
   final ScrollController _scrollController = ScrollController();
 
-  List<String> stepTitles = ["Information", "Choose Fonts", "Template"];
+  /// ✅ FIXED: stepTitles will be initialized later
+  late List<String> stepTitles;
 
   String companyName = '';
   String slogan = '';
   String category = 'Beauty & Massage';
+
+  /// ✅ FIXED: context is available here
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    stepTitles = [
+      S.of(context).information,
+      S.of(context).chooseFonts,
+      S.of(context).template,
+    ];
+  }
 
   @override
   void dispose() {
@@ -38,12 +51,6 @@ class _DesignInputScreenState extends State<DesignInputScreen> {
   void _nextStep() {
     if (_currentStep == 0) {
       if (companyName.isEmpty || slogan.isEmpty) {
-        // ScaffoldMessenger.of(context).showSnackBar(
-        //   const SnackBar(
-        //     content: Text('Please enter both Company Name and Slogan.'),
-        //     duration: Duration(seconds: 2),
-        //   ),
-        // );
         return;
       }
     }
@@ -87,21 +94,31 @@ class _DesignInputScreenState extends State<DesignInputScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Colors.white,
-          title: const Text('Are you sure?'),
+          title: const Text(
+            'Are you sure?',
+            style: TextStyle(color: Colors.black),
+          ),
           content: const Text(
             'Do you really want to go back to the Home Screen?',
+            style: TextStyle(color: Colors.black),
           ),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel',style: TextStyle(color: ThemeColors.purple),),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: ThemeColors.purple),
+              ),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
                 Navigator.pop(context);
               },
-              child: const Text('Yes',style: TextStyle(color: ThemeColors.purple),),
+              child: const Text(
+                'Yes',
+                style: TextStyle(color: ThemeColors.purple),
+              ),
             ),
           ],
         );
@@ -188,11 +205,10 @@ class _DesignInputScreenState extends State<DesignInputScreen> {
         companyName: companyName,
         slogan: slogan,
       ),
-
       appBar: AppBar(
         scrolledUnderElevation: 0,
         backgroundColor: Colors.white,
-        title: const Text('Auto Design'),
+        title: Text(S.of(context).autoDesign),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: _showExitConfirmationDialog,
@@ -200,7 +216,6 @@ class _DesignInputScreenState extends State<DesignInputScreen> {
       ),
       body: SingleChildScrollView(
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           children: [
             const Divider(height: 1),
             StepTrailWidget(
@@ -211,12 +226,13 @@ class _DesignInputScreenState extends State<DesignInputScreen> {
             const Divider(height: 1),
             const SizedBox(height: 10),
             SizedBox(
-              height: screenHeight* 0.72,
+              height: screenHeight * 0.72,
               child: PageView.builder(
                 controller: _pageController,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: stepTitles.length,
-                itemBuilder: (context, index) => _buildStepContent(index),
+                itemBuilder: (context, index) =>
+                    _buildStepContent(index),
               ),
             ),
           ],

@@ -5,16 +5,21 @@ void showLanguageDialog(BuildContext context) {
   showDialog(
     context: context,
     builder: (context) {
+      final currentLocale = LocaleProvider.of(context).locale;
       return AlertDialog(
-        title: const Text("Select Language", style: TextStyle(color: Colors.black),),
+        backgroundColor: Colors.white,
+        title: const Text(
+          "Select Language",
+          style: TextStyle(color: Colors.black),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _languageTile(context, 'English', const Locale('en')),
-            _languageTile(context, 'اردو', const Locale('ur')),
-            _languageTile(context, 'Français', const Locale('fr')),
-            _languageTile(context, 'Español', const Locale('es')),
-            _languageTile(context, 'العربية', const Locale('ar')),
+            _languageTile(context, 'English', const Locale('en'), currentLocale),
+            _languageTile(context, 'اردو', const Locale('ur'), currentLocale),
+            _languageTile(context, 'Français', const Locale('fr'), currentLocale),
+            _languageTile(context, 'Español', const Locale('es'), currentLocale),
+            _languageTile(context, 'العربية', const Locale('ar'), currentLocale),
           ],
         ),
       );
@@ -22,9 +27,12 @@ void showLanguageDialog(BuildContext context) {
   );
 }
 
-Widget _languageTile(BuildContext context, String title, Locale locale) {
+Widget _languageTile(BuildContext context, String title, Locale locale, Locale currentLocale) {
+  bool isSelected = locale.languageCode == currentLocale.languageCode;
+
   return ListTile(
     title: Text(title),
+    trailing: isSelected ? const Icon(Icons.check, color: Colors.black) : null,
     onTap: () {
       LocaleProvider.of(context).setLocale(locale);
       Navigator.pop(context);

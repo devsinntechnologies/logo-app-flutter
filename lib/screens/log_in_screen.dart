@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:logo_app_flutter/generated/l10n.dart';
 import 'package:logo_app_flutter/screens/sign_up_screen.dart';
 import 'package:logo_app_flutter/services/auth_service.dart';
 import 'package:logo_app_flutter/utils/theme_colors.dart';
@@ -39,23 +40,22 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Login',
+              Text(
+                S.of(context).login,
                 style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
                     color: ThemeColors.purple),
               ),
-              const SizedBox(height: 32),
+              SizedBox(height: 32),
 
               // Email
-              const Text(
-                'Email',
+              Text(
+                S.of(context).email,
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                      color: Colors.black,
-
+                  color: Colors.black,
                 ),
               ),
               const SizedBox(height: 8),
@@ -68,7 +68,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     borderSide: BorderSide(color: Colors.black, width: 2),
                   ),
                   counterText: "",
-                  hintText: 'Enter your email',
+                  hintText: S.of(context).enterEmail,
                   filled: true,
                   fillColor: Colors.white,
                 ),
@@ -77,19 +77,18 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 16),
 
               // Password
-              const Text(
-                'Password',
+               Text(
+                                                                    S.of(context).password,
+
                 style: TextStyle(
                   fontSize: 14,
-                      color: Colors.black,
-
+                  color: Colors.black,
                   fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 8),
               TextFormField(
                 style: const TextStyle(color: Colors.black),
-
                 controller: passwordController,
                 cursorColor: Colors.black,
                 decoration: InputDecoration(
@@ -97,7 +96,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   focusedBorder: UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.black, width: 2),
                   ),
-                  hintText: 'Enter your password',
+                  hintText:                                                     S.of(context).enterPasswords,
+
                   filled: true,
                   fillColor: Colors.white,
                 ),
@@ -123,7 +123,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             content: Text("Logged in successfully!")),
                       );
 
-                     Navigator.pop(context);
+                      Navigator.pop(context);
                     }
                   } catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -153,7 +153,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   child: Center(
                     child: Text(
-                      "Log In",
+                      S.of(context).login,
                       style: TextStyle(
                         fontSize: 20,
                         color: Colors.white,
@@ -182,9 +182,9 @@ class _LoginScreenState extends State<LoginScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                   Text('Don\'t have an account? ',
-                style:  TextStyle(color: Colors.black),
-                  
+                  Text(
+                    S.of(context).noAccount,
+                    style: TextStyle(color: Colors.black),
                   ),
                   GestureDetector(
                     onTap: () {
@@ -194,8 +194,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             builder: (context) => const SignUpScreen()),
                       );
                     },
-                    child: const Text(
-                      'Sign Up',
+                    child: Text(
+                      S.of(context).signup,
                       style: TextStyle(
                         fontSize: 15,
                         color: ThemeColors.purple,

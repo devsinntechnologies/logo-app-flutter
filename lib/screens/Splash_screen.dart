@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:logo_app_flutter/generated/l10n.dart';
 import 'package:logo_app_flutter/screens/home_screen.dart';
 import 'package:video_player/video_player.dart';
 
@@ -67,7 +68,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   child: Padding(
                     padding: const EdgeInsets.only(bottom: 35),
                     child: Text(
-                      "Smart Logo Maker",
+                      S.of(context).smartLogoMakerText,
                       style: GoogleFonts.poppins(
                         color: Colors.white,
                         fontWeight: FontWeight.w600,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:logo_app_flutter/generated/l10n.dart';
 import 'package:logo_app_flutter/screens/log_in_screen.dart';
 import 'package:logo_app_flutter/screens/sign_up_screen.dart';
 import 'package:logo_app_flutter/services/auth_service.dart';
@@ -46,7 +47,7 @@ void showCustomGoogleDialog(BuildContext context) {
                 ),
                 child: Center(
                   child: Text(
-                    "Login",
+                    S.of(context).login,
                     style: TextStyle(
                       fontSize: 20,
                       color: Colors.white,
@@ -87,7 +88,7 @@ void showCustomGoogleDialog(BuildContext context) {
                 ),
                 child: Center(
                   child: Text(
-                    "Sign Up",
+                    S.of(context).signup,
                     style: TextStyle(
                       fontSize: 20,
                       color: Colors.white,
@@ -111,7 +112,7 @@ void showCustomGoogleDialog(BuildContext context) {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: Text(
-                    "OR",
+                    S.of(context).or,
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.grey[600],
@@ -143,12 +144,14 @@ void showCustomGoogleDialog(BuildContext context) {
                     height: 20,
                   ),
                   SizedBox(width: 10),
-                  Text(
-                    "Sign In with Google",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black,
+                  Expanded(
+                    child: Text(
+                      S.of(context).SignInWithGoogle,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black,
+                      ),
                     ),
                   ),
                 ],

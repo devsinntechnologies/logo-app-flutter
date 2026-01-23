@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:logo_app_flutter/generated/l10n.dart';
 import 'package:logo_app_flutter/utils/theme_colors.dart';
 
 typedef BottomNavItemTapCallback = void Function(int index);
@@ -43,27 +44,27 @@ class _LogoBottomNavBarState extends State<LogoBottomNavBar> {
                 switch (index) {
                   case 0:
                     iconData = Icons.layers;
-                    label = 'Background';
+                    label =  S.of(context).background;
                     break;
                   case 1:
                     iconData = Icons.article_rounded;
-                    label = 'Art';
+                    label = S.of(context).art;
                     break;
                   case 2:
                     iconData = Icons.text_fields_outlined;
-                    label = 'Text';
+                    label = S.of(context).text;
                     break;
                   case 3:
                     iconData = Icons.edit;
-                    label = 'Effects';
+                    label = S.of(context).effects;
                     break;
                   case 4:
                     iconData = Icons.palette;
-                    label = 'Palette';
+                    label = S.of(context).palette;
                     break;
                   default:
                     iconData = Icons.image;
-                    label = 'Images';
+                    label = S.of(context).images;
                     break;
                 }
       

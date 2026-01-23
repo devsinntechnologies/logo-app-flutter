@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:logo_app_flutter/generated/l10n.dart';
 
 class InformationWidget extends StatefulWidget {
   final Function(String, String, String) onSave;
@@ -21,7 +22,7 @@ class InformationWidget extends StatefulWidget {
 class _InformationWidgetState extends State<InformationWidget> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController sloganController = TextEditingController();
-  String selectedCategory = 'Beauty & Massage';
+   String selectedCategory = ''; 
 
   @override
   void initState() {
@@ -38,23 +39,6 @@ class _InformationWidgetState extends State<InformationWidget> {
     }
   }
 
-  final List<String> categories = [
-    'Automotive & Transportation',
-    'Beauty & Massage',
-    'Business & Consulting',
-    'Children & Education',
-    'Entertainment, Art & Music',
-    'Family Services & Counseling',
-    'Finance & Insurance',
-    'Food, Beverage & Restaurant',
-    'Health Care & Public Safety',
-    'Holiday & Special Occasion',
-    'IT, Engineering & Science',
-    'Legal & Politics',
-    'Pets & Animal',
-    'Photography',
-    'Sports & Fitness',
-  ];
 
   @override
   void dispose() {
@@ -65,13 +49,34 @@ class _InformationWidgetState extends State<InformationWidget> {
 
   @override
   Widget build(BuildContext context) {
+      final List<String> categories = [
+  S.of(context).automotiveTransportation,
+  S.of(context).beautyMassage,
+  S.of(context).businessConsulting,
+  S.of(context).childrenEducation,
+  S.of(context).entertainmentArtMusic,
+  S.of(context).familyServicesCounseling,
+  S.of(context).financeInsurance,
+  S.of(context).foodBeverageRestaurant,
+  S.of(context).healthCarePublicSafety,
+  S.of(context).holidaySpecialOccasion,
+  S.of(context).itEngineeringScience,
+  S.of(context).legalPolitics,
+  S.of(context).petsAnimal,
+  S.of(context).photography,
+  S.of(context).sportsFitness,
+  ];
+  if (selectedCategory.isEmpty || !categories.contains(selectedCategory)) {
+    selectedCategory = categories.first;
+  }
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
             const SizedBox(height: 16),
-            const Text(
-              "CHOOSE INDUSTRY",
+             Text(
+                         S.of(context).ChooseIndustry,
+
               style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.bold,
@@ -114,8 +119,9 @@ class _InformationWidgetState extends State<InformationWidget> {
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
-              "YOUR COMPANY NAME",
+             Text(
+               S.of(context).companyName,
+
               style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -138,7 +144,8 @@ class _InformationWidgetState extends State<InformationWidget> {
                     borderSide: const BorderSide(color: Colors.black, width: 2),
                   ),
                   counterText: "",
-                  hintText: 'Enter your company name',
+                  hintText:   S.of(context).enterCompany,
+
                   hintStyle: TextStyle(color: Colors.black),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
@@ -150,8 +157,8 @@ class _InformationWidgetState extends State<InformationWidget> {
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
-              "SLOGAN",
+             Text(
+            S.of(context).sloganName,
               style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -174,8 +181,9 @@ class _InformationWidgetState extends State<InformationWidget> {
                     borderRadius: BorderRadius.circular(15),
                     borderSide: const BorderSide(color: Colors.black, width: 2),
                   ),
-                  counterText: "",
-                  hintText: 'Enter your slogan',
+                  counterText:"",
+
+                  hintText:  S.of(context).enterSlogan,
                   hintStyle: TextStyle(color: Colors.black),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),

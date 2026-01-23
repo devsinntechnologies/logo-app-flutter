@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:logo_app_flutter/components/google_alert.dart';
+import 'package:logo_app_flutter/generated/l10n.dart';
 import 'package:logo_app_flutter/services/auth_service.dart';
 import 'package:logo_app_flutter/utils/theme_colors.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -92,7 +93,7 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
                       "Sign In with Google",
                       style: TextStyle(
                         fontSize: 16,
-                      color: Colors.black,
+                        color: Colors.black,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -133,7 +134,9 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
     // When logged out: show Login button. When logged in: show account icon.
     if (_isLoggedIn) {
       final user = _supabase.auth.currentUser;
-      final avatarLabel = (user?.email != null && user!.email!.isNotEmpty) ? user.email![0].toUpperCase() : '';
+      final avatarLabel = (user?.email != null && user!.email!.isNotEmpty)
+          ? user.email![0].toUpperCase()
+          : '';
       return IconButton(
         tooltip: 'My Account',
         onPressed: () {
@@ -154,19 +157,27 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
       onTap: () => showCustomGoogleDialog(context),
       child: Padding(
         padding: const EdgeInsets.only(right: 6.0),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: ThemeColors.textGradient,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: const Padding(
-            padding: EdgeInsets.all(6.0),
-            child: Text(
-              "Login",
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+        child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width *
+                    0.3, // max 60% of screen
+              ),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: ThemeColors.textGradient,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Padding(
+              padding: EdgeInsets.all(6.0),
+              
+                child: Text(
+                  S.of(context).login,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  
+                ),
               ),
             ),
           ),

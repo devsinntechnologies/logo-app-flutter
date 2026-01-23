@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:logo_app_flutter/generated/l10n.dart';
 
 class BottomNavigationButtons extends StatelessWidget {
   final int currentStep;
@@ -38,14 +39,16 @@ class BottomNavigationButtons extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
                   foregroundColor: Colors.black,
                 ),
-                child: const Row(
+                child: Row(
                   children: [
                     Icon(Icons.arrow_back_ios_new_rounded, size: 16),
                     SizedBox(width: 8),
-                    Text('BACK', style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text(S.of(context).back,
+                        style: TextStyle(fontWeight: FontWeight.bold)),
                   ],
                 ),
               )
@@ -59,18 +62,18 @@ class BottomNavigationButtons extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 25),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 16, horizontal: 25),
                   foregroundColor: Colors.black,
                 ),
                 child: Row(
                   children: [
                     Text(
-                      'NEXT',
+                      S.of(context).next,
                       style: TextStyle(
-                        color:
-                            isDisabled && currentStep == 0
-                                ? Colors.grey
-                                : Colors.black,
+                        color: isDisabled && currentStep == 0
+                            ? Colors.grey
+                            : Colors.black,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

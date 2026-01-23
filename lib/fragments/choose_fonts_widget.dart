@@ -106,6 +106,7 @@
 // }
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:logo_app_flutter/generated/l10n.dart';
 import 'package:logo_app_flutter/utils/theme_colors.dart';
 
 class ChooseFontsWidget extends StatefulWidget {
@@ -125,20 +126,25 @@ class ChooseFontsWidget extends StatefulWidget {
 class _ChooseFontsWidgetState extends State<ChooseFontsWidget> {
   late int selectedIndex;
 
-  final List<String> fontNames = [
-    'MODERN',         // 0
-    'HANDWRITTEN',    // 1
-    'CONTEMPORARY',   // 2
-    'CALLIGRAPHY',    // 3
-    'FANCY',          // 4
-    'MINIMAL',        // 5
-    'TECH',           // 6
-    'CLASSIC',        // 7
-    'DISPLAY',        // 8
-    'RETRO',          // 9
-  ];
 
-
+  List<String> get fontNames => [
+        S.of(context).modern,
+        S.of(context).handwritten,
+        S.of(context).contemporary,
+        S.of(context).calligraphy,
+        S.of(context).fancy,
+        S.of(context).minimal,
+        S.of(context).tech,
+        S.of(context).classic,
+        S.of(context).display,
+        S.of(context).retro,
+      ];
+  @override
+  void initState() {
+    super.initState();
+    // Ensure selectedIndex is within bounds
+    selectedIndex = widget.initialSelectedIndex.clamp(0, 9);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -146,8 +152,8 @@ class _ChooseFontsWidgetState extends State<ChooseFontsWidget> {
     return Column(
       children: [
         const SizedBox(height: 20),
-        const Text(
-          "CHOOSE FONTS",
+         Text(
+           S.of(context).chooseFonts,
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
         ),
         const SizedBox(height: 20),
@@ -164,11 +170,7 @@ class _ChooseFontsWidgetState extends State<ChooseFontsWidget> {
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
-    selectedIndex = widget.initialSelectedIndex;
-  }
+  
 
   TextStyle _getFontStyle(int index) {
     switch (index) {
@@ -223,7 +225,7 @@ class _ChooseFontsWidgetState extends State<ChooseFontsWidget> {
             width: double.infinity,
             child: Center(
               child: Text(
-                fontNames[index],
+                index < fontNames.length ? fontNames[index] : "",
                 style: _getFontStyle(index).copyWith(
                   color: isSelected ? Colors.white : Colors.black87,
                   letterSpacing: 1.2,

@@ -6,6 +6,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/services.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:logo_app_flutter/components/google_alert.dart';
+import 'package:logo_app_flutter/generated/l10n.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
 import 'package:logo_app_flutter/screens/art_select_screen.dart';
 import 'package:logo_app_flutter/screens/canvas_exporter.dart';
@@ -573,8 +574,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
           onTap: () => _showBackSaveConfirmationDialog(context, _canvasKey),
           child: Icon(Icons.arrow_back),
         ),
-        title: const Text(
-          'Logo Maker',
+        title:  Text(
+          S.of(context).logoMaker,
           style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
         ),
         actions: [

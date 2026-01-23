@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:logo_app_flutter/generated/l10n.dart';
 import 'package:logo_app_flutter/models/logo_state_data.dart';
 import 'package:logo_app_flutter/utils/theme_colors.dart';
 
@@ -190,8 +191,8 @@ if (id >= 200 && id < 300) {
                         activeColor: Colors.white,
                         side: const BorderSide(color: Colors.black),
                       ),
-                      const Text(
-                        'Lock All',
+                       Text(
+                        S.of(context).lockAll,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 16,
