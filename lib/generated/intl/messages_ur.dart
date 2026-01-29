@@ -23,9 +23,17 @@ class MessageLookup extends MessageLookupByLibrary {
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "ChooseIndustry": MessageLookupByLibrary.simpleMessage("صنعت منتخب کریں"),
+    "DoUwantToExit": MessageLookupByLibrary.simpleMessage(
+      "کیا آپ لوگو میکر سے باہر نکلنا چاہتے ہیں؟",
+    ),
+    "DoUwantToGoHomeScreen": MessageLookupByLibrary.simpleMessage(
+      "کیا آپ واقعی ہوم اسکرین پر جانا چاہتے ہیں؟",
+    ),
     "SignInWithGoogle": MessageLookupByLibrary.simpleMessage(
       "گوگل کے ساتھ سائن ان کریں",
     ),
+    "apply": MessageLookupByLibrary.simpleMessage("لاگو کریں"),
+    "areyousure": MessageLookupByLibrary.simpleMessage("کیا آپ یقین ہیں؟"),
     "art": MessageLookupByLibrary.simpleMessage("فن"),
     "autoDesign": MessageLookupByLibrary.simpleMessage("خودکار ڈیزائن"),
     "automotiveTransportation": MessageLookupByLibrary.simpleMessage(
@@ -33,26 +41,40 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "back": MessageLookupByLibrary.simpleMessage("واپس"),
     "background": MessageLookupByLibrary.simpleMessage("پس منظر"),
+    "backward": MessageLookupByLibrary.simpleMessage("پیچھے"),
     "beautyMassage": MessageLookupByLibrary.simpleMessage("خوبصورتی اور مساج"),
     "businessConsulting": MessageLookupByLibrary.simpleMessage(
       "کاروبار اور مشاورت",
     ),
     "calligraphy": MessageLookupByLibrary.simpleMessage("خطاطی"),
+    "cancel": MessageLookupByLibrary.simpleMessage("منسوخ کریں"),
     "childrenEducation": MessageLookupByLibrary.simpleMessage("بچوں اور تعلیم"),
     "chooseFonts": MessageLookupByLibrary.simpleMessage("فونٹس منتخب کریں"),
     "chooseFontsSmall": MessageLookupByLibrary.simpleMessage(
       "فونٹس منتخب کریں",
     ),
     "classic": MessageLookupByLibrary.simpleMessage("کلاسیکی"),
+    "color": MessageLookupByLibrary.simpleMessage("رنگ"),
+    "colors": MessageLookupByLibrary.simpleMessage("رنگ"),
     "companyName": MessageLookupByLibrary.simpleMessage("اپنی کمپنی کا نام"),
     "confirmYourPassword": MessageLookupByLibrary.simpleMessage(
       "اپنا پاسورڈ دوبارہ درج کریں",
     ),
     "contemporary": MessageLookupByLibrary.simpleMessage("عصری"),
+    "controls": MessageLookupByLibrary.simpleMessage("کنٹرولز"),
     "createLogo": MessageLookupByLibrary.simpleMessage("لوگو بنائیں"),
+    "currentColor": MessageLookupByLibrary.simpleMessage("موجودہ رنگ"),
+    "custom": MessageLookupByLibrary.simpleMessage("حسب ضرورت"),
+    "customGradient": MessageLookupByLibrary.simpleMessage(
+      "حسب ضرورت گریڈیئنٹ",
+    ),
     "display": MessageLookupByLibrary.simpleMessage("ڈسپلے"),
+    "down": MessageLookupByLibrary.simpleMessage("نیچے"),
+    "duplicate": MessageLookupByLibrary.simpleMessage("نقل کریں"),
+    "edit": MessageLookupByLibrary.simpleMessage("ترمیم کریں"),
     "effects": MessageLookupByLibrary.simpleMessage("اثرات"),
     "email": MessageLookupByLibrary.simpleMessage("ای میل"),
+    "end": MessageLookupByLibrary.simpleMessage("اختتام"),
     "enterCompany": MessageLookupByLibrary.simpleMessage(
       "اپنی کمپنی کا نام درج کریں",
     ),
@@ -78,6 +100,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "foodBeverageRestaurant": MessageLookupByLibrary.simpleMessage(
       "خوراک، مشروبات اور ریستوراں",
     ),
+    "forward": MessageLookupByLibrary.simpleMessage("آگے"),
+    "gradient": MessageLookupByLibrary.simpleMessage("گریڈیئنٹ"),
+    "gradientAngle": MessageLookupByLibrary.simpleMessage("گریڈیئنٹ زاویہ"),
+    "gradientType": MessageLookupByLibrary.simpleMessage("گریڈیئنٹ کی قسم"),
     "handwritten": MessageLookupByLibrary.simpleMessage("ہاتھ سے لکھا ہوا"),
     "healthCarePublicSafety": MessageLookupByLibrary.simpleMessage(
       "صحت کی دیکھ بھال اور عوامی تحفظ",
@@ -85,6 +111,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "holidaySpecialOccasion": MessageLookupByLibrary.simpleMessage(
       "چھٹیاں اور خاص مواقع",
     ),
+    "image": MessageLookupByLibrary.simpleMessage("تصویر"),
     "images": MessageLookupByLibrary.simpleMessage("تصاویر"),
     "information": MessageLookupByLibrary.simpleMessage("معلومات"),
     "itEngineeringScience": MessageLookupByLibrary.simpleMessage(
@@ -103,6 +130,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "next": MessageLookupByLibrary.simpleMessage("اگلا"),
     "noAccount": MessageLookupByLibrary.simpleMessage("اکاؤنٹ نہیں ہے؟"),
     "or": MessageLookupByLibrary.simpleMessage("یا"),
+    "outlines": MessageLookupByLibrary.simpleMessage("آؤٹ لائنز"),
     "palette": MessageLookupByLibrary.simpleMessage("رنگ پیلیٹ"),
     "password": MessageLookupByLibrary.simpleMessage("پاسورڈ"),
     "passwordConfirm": MessageLookupByLibrary.simpleMessage(
@@ -112,9 +140,18 @@ class MessageLookup extends MessageLookupByLibrary {
       "پالتو جانور اور حیوانات",
     ),
     "photography": MessageLookupByLibrary.simpleMessage("تصویریں"),
+    "pickAnother": MessageLookupByLibrary.simpleMessage("دوسرا منتخب کریں"),
     "privacyPolicy": MessageLookupByLibrary.simpleMessage("رازداری کی پالیسی"),
     "retro": MessageLookupByLibrary.simpleMessage("ریٹرو"),
     "saveLogo": MessageLookupByLibrary.simpleMessage("لوگو محفوظ کریں"),
+    "select": MessageLookupByLibrary.simpleMessage("منتخب کریں"),
+    "selectBgImage": MessageLookupByLibrary.simpleMessage(
+      "پس منظر کی تصویر منتخب کریں",
+    ),
+    "selectColor": MessageLookupByLibrary.simpleMessage("رنگ منتخب کریں"),
+    "selectTextureImage": MessageLookupByLibrary.simpleMessage(
+      "ٹیکسچر کی تصویر منتخب کریں",
+    ),
     "share": MessageLookupByLibrary.simpleMessage("شیئر کریں"),
     "signup": MessageLookupByLibrary.simpleMessage("سائن اپ"),
     "sloganName": MessageLookupByLibrary.simpleMessage("نعرہ"),
@@ -123,8 +160,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "اسمارٹ لوگو میکر",
     ),
     "sportsFitness": MessageLookupByLibrary.simpleMessage("کھیل اور فٹنس"),
+    "start": MessageLookupByLibrary.simpleMessage("شروع"),
     "tech": MessageLookupByLibrary.simpleMessage("ٹیکنالوجی"),
     "template": MessageLookupByLibrary.simpleMessage("سانچہ"),
     "text": MessageLookupByLibrary.simpleMessage("متن"),
+    "texture": MessageLookupByLibrary.simpleMessage("ٹیکسچر"),
+    "up": MessageLookupByLibrary.simpleMessage("اوپر"),
+    "yes": MessageLookupByLibrary.simpleMessage("ہاں"),
   };
 }

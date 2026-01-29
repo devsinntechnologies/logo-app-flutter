@@ -247,6 +247,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:logo_app_flutter/components/logoBottomNavbarItems/shape_selector_widget.dart';
+import 'package:logo_app_flutter/generated/l10n.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
 import 'package:logo_app_flutter/screens/color_screen.dart';
 import 'package:logo_app_flutter/screens/gradiant_picker_screen.dart';
@@ -302,17 +303,17 @@ class _DropUpPanelState extends State<DropUpPanel> {
   int selectedIndex = 0;
   Color _baseColor = Colors.red; // Default palette color
 
-  final List<String> options = [
-    'Color',
-    'Gradient',
-    'Background',
-    'Texture',
-    'Image',
-  ];
   double _opacityValue = 1.0;
 
   @override
   Widget build(BuildContext context) {
+      final List<String> options = [
+    S.of(context).color,
+    S.of(context).gradient,
+    S.of(context).background,
+    S.of(context).texture,
+    S.of(context).image,
+  ];
     return Material(
       // elevation: 10,
       borderRadius: BorderRadius.circular(12),

@@ -94,19 +94,21 @@ class _DesignInputScreenState extends State<DesignInputScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Colors.white,
-          title: const Text(
-            'Are you sure?',
+          title:  Text(
+                    S.of(context).areyousure,
+
             style: TextStyle(color: Colors.black),
           ),
-          content: const Text(
-            'Do you really want to go back to the Home Screen?',
+          content:  Text(
+                   S.of(context).DoUwantToGoHomeScreen,
+
             style: TextStyle(color: Colors.black),
           ),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text(
-                'Cancel',
+              child:  Text(
+                       S.of(context).cancel,
                 style: TextStyle(color: ThemeColors.purple),
               ),
             ),
@@ -115,8 +117,8 @@ class _DesignInputScreenState extends State<DesignInputScreen> {
                 Navigator.of(context).pop();
                 Navigator.pop(context);
               },
-              child: const Text(
-                'Yes',
+              child:  Text(
+                        S.of(context).yes,
                 style: TextStyle(color: ThemeColors.purple),
               ),
             ),

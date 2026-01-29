@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:logo_app_flutter/generated/l10n.dart';
 import 'package:logo_app_flutter/models/logo_state_data.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
 import 'package:logo_app_flutter/utils/theme_colors.dart';
@@ -137,15 +138,21 @@ class _MovementPanelState extends State<MovementPanel>
                         padding: const EdgeInsets.symmetric(horizontal: 9.0),
                         child: SizedBox(
                           height: 40,
-                          child: const TabBar(
+                          child: TabBar(
                             indicatorColor: ThemeColors.purple,
                             labelColor: ThemeColors.purple,
                             unselectedLabelColor: Colors.grey,
                             labelPadding: EdgeInsets.symmetric(vertical: 0),
                             tabs: [
-                              Tab(text: 'Controls'),
-                              Tab(text: 'Colors'),
-                              Tab(text: 'Outlines'),
+                              Tab(
+                                text: S.of(context).controls,
+                              ),
+                              Tab(
+                                text: S.of(context).colors,
+                              ),
+                              Tab(
+                                text: S.of(context).outlines,
+                              ),
                               Padding(
                                 padding: EdgeInsets.only(right: 0),
                                 child: Tab(text: '3D'),
@@ -169,8 +176,6 @@ class _MovementPanelState extends State<MovementPanel>
                   ],
                 ),
               ),
-           
-           
             ),
           ),
         ),
@@ -245,7 +250,7 @@ class _MovementPanelState extends State<MovementPanel>
                           layerButton(
                             id: "up",
                             icon: Icons.keyboard_double_arrow_up,
-                            label: "Up",
+                            label: S.of(context).up,
                             enabled: canForward,
                             onTap: widget.onBringToFrontPressed,
                           ),
@@ -256,7 +261,7 @@ class _MovementPanelState extends State<MovementPanel>
                           layerButton(
                             id: "down",
                             icon: Icons.keyboard_double_arrow_down,
-                            label: "Down",
+                            label: S.of(context).down,
                             enabled: canBackward,
                             onTap: widget.onSendToBackPressed,
                           ),
@@ -271,7 +276,7 @@ class _MovementPanelState extends State<MovementPanel>
                           layerButton(
                             id: "forward",
                             icon: Icons.keyboard_arrow_up,
-                            label: "Forward",
+                            label: S.of(context).forward,
                             enabled: canForward,
                             onTap: widget.onBringForwardPressed,
                           ),
@@ -281,7 +286,7 @@ class _MovementPanelState extends State<MovementPanel>
                           layerButton(
                             id: "backward",
                             icon: Icons.keyboard_arrow_down,
-                            label: "Backward",
+                            label: S.of(context).backward,
                             enabled: canBackward,
                             onTap: widget.onSendBackwardPressed,
                           ),
@@ -402,8 +407,8 @@ class _MovementPanelState extends State<MovementPanel>
                               ),
                               minimumSize: const Size(70, 30),
                             ),
-                            child: const Text(
-                              "Duplicate",
+                            child: Text(
+                              S.of(context).duplicate,
                               style: TextStyle(color: Colors.white),
                             ),
                           ),
@@ -425,8 +430,8 @@ class _MovementPanelState extends State<MovementPanel>
                                 ),
                                 minimumSize: const Size(55, 30),
                               ),
-                              child: const Text(
-                                "Edit",
+                              child: Text(
+                                S.of(context).edit,
                                 style: TextStyle(color: Colors.white),
                               ),
                             ),

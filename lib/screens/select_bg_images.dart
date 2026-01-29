@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:logo_app_flutter/generated/l10n.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -32,11 +33,14 @@ class _SelectBgImagesState extends State<SelectBgImages> {
     'assets/bg_images/bg_9.jpg',
     'assets/bg_images/bg_10.jpg',
   ];
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Select Background Image')),
+      appBar: AppBar(
+          title: Text(
+        S.of(context).selectBgImage,
+      )),
       body: GridView.builder(
         padding: EdgeInsets.all(16),
         itemCount: images.length,
@@ -58,10 +62,9 @@ class _SelectBgImagesState extends State<SelectBgImages> {
                 uiImage,
                 null,
                 assetPath: images[index],
-              ); 
+              );
               Navigator.pop(context);
             },
-
             child: Container(
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.grey),

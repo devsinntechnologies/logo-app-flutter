@@ -23,9 +23,17 @@ class MessageLookup extends MessageLookupByLibrary {
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "ChooseIndustry": MessageLookupByLibrary.simpleMessage("اختر الصناعة"),
+    "DoUwantToExit": MessageLookupByLibrary.simpleMessage(
+      "هل تريد الخروج من صانع الشعار؟",
+    ),
+    "DoUwantToGoHomeScreen": MessageLookupByLibrary.simpleMessage(
+      "هل تريد العودة إلى الشاشة الرئيسية؟",
+    ),
     "SignInWithGoogle": MessageLookupByLibrary.simpleMessage(
       "تسجيل الدخول عبر جوجل",
     ),
+    "apply": MessageLookupByLibrary.simpleMessage("تطبيق"),
+    "areyousure": MessageLookupByLibrary.simpleMessage("هل أنت متأكد؟"),
     "art": MessageLookupByLibrary.simpleMessage("فن"),
     "autoDesign": MessageLookupByLibrary.simpleMessage("تصميم تلقائي"),
     "automotiveTransportation": MessageLookupByLibrary.simpleMessage(
@@ -33,26 +41,38 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "back": MessageLookupByLibrary.simpleMessage("رجوع"),
     "background": MessageLookupByLibrary.simpleMessage("خلفية"),
+    "backward": MessageLookupByLibrary.simpleMessage("إلى الخلف"),
     "beautyMassage": MessageLookupByLibrary.simpleMessage("الجمال والتدليك"),
     "businessConsulting": MessageLookupByLibrary.simpleMessage(
       "الأعمال والاستشارات",
     ),
     "calligraphy": MessageLookupByLibrary.simpleMessage("خط"),
+    "cancel": MessageLookupByLibrary.simpleMessage("إلغاء"),
     "childrenEducation": MessageLookupByLibrary.simpleMessage(
       "الأطفال والتعليم",
     ),
     "chooseFonts": MessageLookupByLibrary.simpleMessage("اختر الخطوط"),
     "chooseFontsSmall": MessageLookupByLibrary.simpleMessage("اختر الخطوط"),
     "classic": MessageLookupByLibrary.simpleMessage("كلاسيكي"),
+    "color": MessageLookupByLibrary.simpleMessage("لون"),
+    "colors": MessageLookupByLibrary.simpleMessage("الألوان"),
     "companyName": MessageLookupByLibrary.simpleMessage("اسم شركتك"),
     "confirmYourPassword": MessageLookupByLibrary.simpleMessage(
       "أكد كلمة المرور الخاصة بك",
     ),
     "contemporary": MessageLookupByLibrary.simpleMessage("معاصر"),
+    "controls": MessageLookupByLibrary.simpleMessage("التحكم"),
     "createLogo": MessageLookupByLibrary.simpleMessage("إنشاء شعار"),
+    "currentColor": MessageLookupByLibrary.simpleMessage("اللون الحالي"),
+    "custom": MessageLookupByLibrary.simpleMessage("مخصص"),
+    "customGradient": MessageLookupByLibrary.simpleMessage("تدرج مخصص"),
     "display": MessageLookupByLibrary.simpleMessage("عرض"),
+    "down": MessageLookupByLibrary.simpleMessage("أسفل"),
+    "duplicate": MessageLookupByLibrary.simpleMessage("تكرار"),
+    "edit": MessageLookupByLibrary.simpleMessage("تحرير"),
     "effects": MessageLookupByLibrary.simpleMessage("تأثيرات"),
     "email": MessageLookupByLibrary.simpleMessage("البريد الإلكتروني"),
+    "end": MessageLookupByLibrary.simpleMessage("نهاية"),
     "enterCompany": MessageLookupByLibrary.simpleMessage("أدخل اسم شركتك"),
     "enterEmail": MessageLookupByLibrary.simpleMessage("أدخل بريدك الإلكتروني"),
     "enterName": MessageLookupByLibrary.simpleMessage("أدخل اسمك الأول"),
@@ -72,6 +92,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "foodBeverageRestaurant": MessageLookupByLibrary.simpleMessage(
       "الطعام والشراب والمطاعم",
     ),
+    "forward": MessageLookupByLibrary.simpleMessage("إلى الأمام"),
+    "gradient": MessageLookupByLibrary.simpleMessage("تدرج"),
+    "gradientAngle": MessageLookupByLibrary.simpleMessage("زاوية التدرج"),
+    "gradientType": MessageLookupByLibrary.simpleMessage("نوع التدرج"),
     "handwritten": MessageLookupByLibrary.simpleMessage("مكتوب باليد"),
     "healthCarePublicSafety": MessageLookupByLibrary.simpleMessage(
       "الرعاية الصحية والسلامة العامة",
@@ -79,6 +103,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "holidaySpecialOccasion": MessageLookupByLibrary.simpleMessage(
       "العطلات والمناسبات الخاصة",
     ),
+    "image": MessageLookupByLibrary.simpleMessage("صورة"),
     "images": MessageLookupByLibrary.simpleMessage("صور"),
     "information": MessageLookupByLibrary.simpleMessage("معلومات"),
     "itEngineeringScience": MessageLookupByLibrary.simpleMessage(
@@ -97,6 +122,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "next": MessageLookupByLibrary.simpleMessage("التالي"),
     "noAccount": MessageLookupByLibrary.simpleMessage("ليس لديك حساب؟"),
     "or": MessageLookupByLibrary.simpleMessage("أو"),
+    "outlines": MessageLookupByLibrary.simpleMessage("الخطوط الخارجية"),
     "palette": MessageLookupByLibrary.simpleMessage("لوحة ألوان"),
     "password": MessageLookupByLibrary.simpleMessage("كلمة المرور"),
     "passwordConfirm": MessageLookupByLibrary.simpleMessage(
@@ -106,9 +132,16 @@ class MessageLookup extends MessageLookupByLibrary {
       "الحيوانات الأليفة والحيوانات",
     ),
     "photography": MessageLookupByLibrary.simpleMessage("التصوير"),
+    "pickAnother": MessageLookupByLibrary.simpleMessage("اختر آخر"),
     "privacyPolicy": MessageLookupByLibrary.simpleMessage("سياسة الخصوصية"),
     "retro": MessageLookupByLibrary.simpleMessage("رجعي"),
     "saveLogo": MessageLookupByLibrary.simpleMessage("حفظ الشعار"),
+    "select": MessageLookupByLibrary.simpleMessage("اختيار"),
+    "selectBgImage": MessageLookupByLibrary.simpleMessage("اختر صورة الخلفية"),
+    "selectColor": MessageLookupByLibrary.simpleMessage("اختر اللون"),
+    "selectTextureImage": MessageLookupByLibrary.simpleMessage(
+      "اختر صورة النسيج",
+    ),
     "share": MessageLookupByLibrary.simpleMessage("مشاركة"),
     "signup": MessageLookupByLibrary.simpleMessage("إنشاء حساب"),
     "sloganName": MessageLookupByLibrary.simpleMessage("الشعار"),
@@ -117,8 +150,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "صانع الشعار الذكي",
     ),
     "sportsFitness": MessageLookupByLibrary.simpleMessage("الرياضة واللياقة"),
+    "start": MessageLookupByLibrary.simpleMessage("ابدأ"),
     "tech": MessageLookupByLibrary.simpleMessage("تقنية"),
     "template": MessageLookupByLibrary.simpleMessage("القالب"),
     "text": MessageLookupByLibrary.simpleMessage("نص"),
+    "texture": MessageLookupByLibrary.simpleMessage("نسيج"),
+    "up": MessageLookupByLibrary.simpleMessage("أعلى"),
+    "yes": MessageLookupByLibrary.simpleMessage("نعم"),
   };
 }

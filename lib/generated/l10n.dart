@@ -549,9 +549,221 @@ class S {
     return Intl.message('Lock All', name: 'lockAll', desc: '', args: []);
   }
 
+  /// `Color`
+  String get color {
+    return Intl.message('Color', name: 'color', desc: '', args: []);
+  }
+
+  /// `Gradient`
+  String get gradient {
+    return Intl.message('Gradient', name: 'gradient', desc: '', args: []);
+  }
+
+  /// `Texture`
+  String get texture {
+    return Intl.message('Texture', name: 'texture', desc: '', args: []);
+  }
+
+  /// `Image`
+  String get image {
+    return Intl.message('Image', name: 'image', desc: '', args: []);
+  }
+
+  /// `Select Color`
+  String get selectColor {
+    return Intl.message(
+      'Select Color',
+      name: 'selectColor',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pick Another`
+  String get pickAnother {
+    return Intl.message(
+      'Pick Another',
+      name: 'pickAnother',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Current Color`
+  String get currentColor {
+    return Intl.message(
+      'Current Color',
+      name: 'currentColor',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Custom`
+  String get custom {
+    return Intl.message('Custom', name: 'custom', desc: '', args: []);
+  }
+
+  /// `Cancel`
+  String get cancel {
+    return Intl.message('Cancel', name: 'cancel', desc: '', args: []);
+  }
+
+  /// `Select`
+  String get select {
+    return Intl.message('Select', name: 'select', desc: '', args: []);
+  }
+
+  /// `Start`
+  String get start {
+    return Intl.message('Start', name: 'start', desc: '', args: []);
+  }
+
+  /// `End`
+  String get end {
+    return Intl.message('End', name: 'end', desc: '', args: []);
+  }
+
+  /// `Gradient Type`
+  String get gradientType {
+    return Intl.message(
+      'Gradient Type',
+      name: 'gradientType',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Gradient Angle`
+  String get gradientAngle {
+    return Intl.message(
+      'Gradient Angle',
+      name: 'gradientAngle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Custom Gradient`
+  String get customGradient {
+    return Intl.message(
+      'Custom Gradient',
+      name: 'customGradient',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `APPLY`
+  String get apply {
+    return Intl.message('APPLY', name: 'apply', desc: '', args: []);
+  }
+
+  /// `Select Background Image`
+  String get selectBgImage {
+    return Intl.message(
+      'Select Background Image',
+      name: 'selectBgImage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select Texture Image`
+  String get selectTextureImage {
+    return Intl.message(
+      'Select Texture Image',
+      name: 'selectTextureImage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Do you want to exit logo maker`
+  String get DoUwantToExit {
+    return Intl.message(
+      'Do you want to exit logo maker',
+      name: 'DoUwantToExit',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Save Logo`
   String get saveLogo {
     return Intl.message('Save Logo', name: 'saveLogo', desc: '', args: []);
+  }
+
+  /// `Save`
+  String get save {
+    return Intl.message('Save', name: 'save', desc: '', args: []);
+  }
+
+  /// `Controls`
+  String get controls {
+    return Intl.message('Controls', name: 'controls', desc: '', args: []);
+  }
+
+  /// `Colors`
+  String get colors {
+    return Intl.message('Colors', name: 'colors', desc: '', args: []);
+  }
+
+  /// `Outlines`
+  String get outlines {
+    return Intl.message('Outlines', name: 'outlines', desc: '', args: []);
+  }
+
+  // skipped getter for the '3d' key
+
+  /// `Duplicate`
+  String get duplicate {
+    return Intl.message('Duplicate', name: 'duplicate', desc: '', args: []);
+  }
+
+  /// `Edit`
+  String get edit {
+    return Intl.message('Edit', name: 'edit', desc: '', args: []);
+  }
+
+  /// `Forward`
+  String get forward {
+    return Intl.message('Forward', name: 'forward', desc: '', args: []);
+  }
+
+  /// `Backward`
+  String get backward {
+    return Intl.message('Backward', name: 'backward', desc: '', args: []);
+  }
+
+  /// `Up`
+  String get up {
+    return Intl.message('Up', name: 'up', desc: '', args: []);
+  }
+
+  /// `Down`
+  String get down {
+    return Intl.message('Down', name: 'down', desc: '', args: []);
+  }
+
+  /// `Are you sure`
+  String get areyousure {
+    return Intl.message('Are you sure', name: 'areyousure', desc: '', args: []);
+  }
+
+  /// ` Do you really want to go back to Home Screen`
+  String get DoUwantToGoHomeScreen {
+    return Intl.message(
+      ' Do you really want to go back to Home Screen',
+      name: 'DoUwantToGoHomeScreen',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Yes`
+  String get yes {
+    return Intl.message('Yes', name: 'yes', desc: '', args: []);
   }
 }
 

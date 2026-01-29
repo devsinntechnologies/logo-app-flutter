@@ -36,7 +36,6 @@ class BackgroundState {
       );
 }
 
-
 class CustomTextElement {
   final TextAlign textAlign;
   final String text;
@@ -137,7 +136,8 @@ class CustomImageElement {
   final Color? outlineColor;
   final double outlineWidth;
   final BoxFit fit;
-  final double? aspectRatio; // width / height, nullable to keep square by default
+  final double?
+      aspectRatio; // width / height, nullable to keep square by default
 
   const CustomImageElement({
     required this.path,
@@ -328,13 +328,11 @@ class LogoStateData {
 
   LogoStateData({
     this.elementColors = const {},
-
     this.outlineWidths = const {},
     this.outlineColors = const {},
     this.rotationXMap = const {},
     this.rotationYMap = const {},
     this.rotationZMap = const {},
-
     this.perspective = 0.001,
     List<CustomTextElement>? customTexts,
     List<CustomImageElement>? customImages,
@@ -349,7 +347,6 @@ class LogoStateData {
     this.companyNameOutlineWidth = 0.0,
     this.sloganOutlineColor = Colors.transparent,
     this.sloganOutlineWidth = 0.0,
-
     required this.logoPosition,
     required this.logoSize,
     required this.logoRotation,
@@ -385,11 +382,11 @@ class LogoStateData {
     this.backgroundColor,
     this.backgroundGradient,
     this.backgroundImagePath,
-  }) : customTexts = customTexts ?? [],
-       customImages = customImages ?? [],
-       customSVGs = customSVGs ?? [],
-       lockedElements = lockedElements ?? {},
-       elementOrder = elementOrder ?? [];
+  })  : customTexts = customTexts ?? [],
+        customImages = customImages ?? [],
+        customSVGs = customSVGs ?? [],
+        lockedElements = lockedElements ?? {},
+        elementOrder = elementOrder ?? [];
 
   Set<int> get visibleElementIds {
     final ids = <int>{};
@@ -424,11 +421,9 @@ class LogoStateData {
     Color? companyNameColor,
     Color? companyNameOutlineColor,
     double? companyNameOutlineWidth,
-
     Color? sloganColor,
     Color? sloganOutlineColor,
     double? sloganOutlineWidth,
-
     TextAlign? companyNameTextAlign,
     TextAlign? sloganTextAlign,
     Offset? logoPosition,
@@ -469,6 +464,9 @@ class LogoStateData {
     Color? backgroundColor,
     Gradient? backgroundGradient,
     String? backgroundImagePath,
+      bool clearBackgroundColor = false,
+  bool clearBackgroundGradient = false,
+  bool clearBackgroundImagePath = false,
   }) {
     return LogoStateData(
       elementColors: elementColors ?? this.elementColors,
@@ -477,21 +475,18 @@ class LogoStateData {
       rotationXMap: rotationXMap ?? this.rotationXMap,
       rotationYMap: rotationYMap ?? this.rotationYMap,
       rotationZMap: rotationZMap ?? this.rotationZMap,
-
       perspective: perspective ?? this.perspective,
-
       logoColor: logoColor ?? this.logoColor,
-      isLogoColorOverridden: isLogoColorOverridden ?? this.isLogoColorOverridden,
+      isLogoColorOverridden:
+          isLogoColorOverridden ?? this.isLogoColorOverridden,
       companyNameColor: companyNameColor ?? this.companyNameColor,
       companyNameOutlineColor:
           companyNameOutlineColor ?? this.companyNameOutlineColor,
       companyNameOutlineWidth:
           companyNameOutlineWidth ?? this.companyNameOutlineWidth,
-
       sloganColor: sloganColor ?? this.sloganColor,
       sloganOutlineColor: sloganOutlineColor ?? this.sloganOutlineColor,
       sloganOutlineWidth: sloganOutlineWidth ?? this.sloganOutlineWidth,
-
       logoPosition: logoPosition ?? this.logoPosition,
       logoSize: logoSize ?? this.logoSize,
       logoRotation: logoRotation ?? this.logoRotation,
@@ -527,20 +522,35 @@ class LogoStateData {
       customSVGs: customSVGs ?? this.customSVGs.map((e) => e.clone()).toList(),
       lockedElements: lockedElements ?? Set<int>.from(this.lockedElements),
       elementOrder: elementOrder ?? List<int>.from(this.elementOrder),
-
       companyNameTextAlign: companyNameTextAlign ?? this.companyNameTextAlign,
       sloganTextAlign: sloganTextAlign ?? this.sloganTextAlign,
       companyFontIndex: companyFontIndex ?? this.companyFontIndex,
       sloganFontIndex: sloganFontIndex ?? this.sloganFontIndex,
       selectedShapeName: selectedShapeName ?? this.selectedShapeName,
-      backgroundColor: backgroundColor ?? this.backgroundColor,
-      backgroundGradient: backgroundGradient ?? this.backgroundGradient,
-      backgroundImagePath: backgroundImagePath ?? this.backgroundImagePath,
+      // backgroundColor: backgroundColor ?? this.backgroundColor,
+      // backgroundGradient: backgroundGradient ?? this.backgroundGradient,
+      // backgroundImagePath: backgroundImagePath ?? this.backgroundImagePath,
+      backgroundColor: clearBackgroundColor 
+        ? null 
+        : (backgroundColor ?? this.backgroundColor),
+    backgroundGradient: clearBackgroundGradient 
+        ? null 
+        : (backgroundGradient ?? this.backgroundGradient),
+    backgroundImagePath: clearBackgroundImagePath 
+        ? null 
+        : (backgroundImagePath ?? this.backgroundImagePath),
     );
   }
 
   LogoStateData clone() {
     return LogoStateData(
+          
+    backgroundColor: backgroundColor != null ? Color(backgroundColor!.value) : null,
+    
+    // ✅ FIX: Deep clone the gradient
+    backgroundGradient: _cloneGradient(backgroundGradient),
+    
+    backgroundImagePath: backgroundImagePath,
       elementColors: Map<String, Color>.from(elementColors),
       outlineWidths: Map<String, double>.from(outlineWidths),
       outlineColors: Map<String, Color>.from(outlineColors),
@@ -581,43 +591,37 @@ class LogoStateData {
       isSloganVisible: isSloganVisible,
       sloganName: sloganName,
 
-      logo2Position:
-          logo2Position == null
-              ? null
-              : Offset(logo2Position!.dx, logo2Position!.dy),
+      logo2Position: logo2Position == null
+          ? null
+          : Offset(logo2Position!.dx, logo2Position!.dy),
       logo2Size: logo2Size,
       logo2Rotation: logo2Rotation,
       isLogo2Visible: isLogo2Visible,
 
-      companyName2Position:
-          companyName2Position == null
-              ? null
-              : Offset(companyName2Position!.dx, companyName2Position!.dy),
+      companyName2Position: companyName2Position == null
+          ? null
+          : Offset(companyName2Position!.dx, companyName2Position!.dy),
       companyName2Size: companyName2Size,
       companyName2Rotation: companyName2Rotation,
       isCompanyName2Visible: isCompanyName2Visible,
 
-      slogan2Position:
-          slogan2Position == null
-              ? null
-              : Offset(slogan2Position!.dx, slogan2Position!.dy),
+      slogan2Position: slogan2Position == null
+          ? null
+          : Offset(slogan2Position!.dx, slogan2Position!.dy),
       slogan2Size: slogan2Size,
       slogan2Rotation: slogan2Rotation,
       isSlogan2Visible: isSlogan2Visible,
 
       /// 🔥 Deep clone lists (VERY IMPORTANT)
-      customTexts:
-          customTexts
-              .map((e) => e.clone()) // requires clone() in CustomTextElement
-              .toList(),
-      customImages:
-          customImages
-              .map((e) => e.clone()) // requires clone() in CustomImageElement
-              .toList(),
-      customSVGs:
-          customSVGs
-              .map((e) => e.clone()) // requires clone() in CustomSvgElement
-              .toList(),
+      customTexts: customTexts
+          .map((e) => e.clone()) // requires clone() in CustomTextElement
+          .toList(),
+      customImages: customImages
+          .map((e) => e.clone()) // requires clone() in CustomImageElement
+          .toList(),
+      customSVGs: customSVGs
+          .map((e) => e.clone()) // requires clone() in CustomSvgElement
+          .toList(),
 
       /// 🔥 Deep clone sets and lists
       lockedElements: Set<int>.from(lockedElements),
@@ -628,15 +632,53 @@ class LogoStateData {
       companyFontIndex: companyFontIndex,
       sloganFontIndex: sloganFontIndex,
       selectedShapeName: selectedShapeName,
-      backgroundColor: backgroundColor != null ? Color(backgroundColor!.value) : null,
-      backgroundGradient: backgroundGradient,
-      backgroundImagePath: backgroundImagePath,
+      // backgroundColor:
+      //     backgroundColor != null ? Color(backgroundColor!.value) : null,
+      // backgroundGradient: backgroundGradient,
+      // backgroundImagePath: backgroundImagePath,
     );
   }
-
+Gradient? _cloneGradient(Gradient? gradient) {
+  if (gradient == null) return null;
+  
+  if (gradient is LinearGradient) {
+    return LinearGradient(
+      colors: List.from(gradient.colors),
+      stops: gradient.stops != null ? List.from(gradient.stops!) : null,
+      begin: gradient.begin,
+      end: gradient.end,
+      tileMode: gradient.tileMode,
+      transform: gradient.transform,
+    );
+  } else if (gradient is RadialGradient) {
+    return RadialGradient(
+      colors: List.from(gradient.colors),
+      stops: gradient.stops != null ? List.from(gradient.stops!) : null,
+      center: gradient.center,
+      radius: gradient.radius,
+      tileMode: gradient.tileMode,
+      focal: gradient.focal,
+      focalRadius: gradient.focalRadius,
+      transform: gradient.transform,
+    );
+  } else if (gradient is SweepGradient) {
+    return SweepGradient(
+      colors: List.from(gradient.colors),
+      stops: gradient.stops != null ? List.from(gradient.stops!) : null,
+      center: gradient.center,
+      startAngle: gradient.startAngle,
+      endAngle: gradient.endAngle,
+      tileMode: gradient.tileMode,
+      transform: gradient.transform,
+    );
+  }
+  
+  return gradient; // Fallback for unknown gradient types
+}
   /// Serialize to JSON-friendly map
   Map<String, dynamic> toJson() {
-    Map<String, dynamic> mapColor(Map<String, Color> m) => m.map((k, v) => MapEntry(k, v.value));
+    Map<String, dynamic> mapColor(Map<String, Color> m) =>
+        m.map((k, v) => MapEntry(k, v.value));
 
     return {
       'elementColors': mapColor(elementColors),
@@ -659,7 +701,10 @@ class LogoStateData {
       'logoRotation': logoRotation,
       'isLogoVisible': isLogoVisible,
       'svgLogo': svgLogo,
-      'companyNamePosition': {'dx': companyNamePosition.dx, 'dy': companyNamePosition.dy},
+      'companyNamePosition': {
+        'dx': companyNamePosition.dx,
+        'dy': companyNamePosition.dy
+      },
       'companyNameSize': companyNameSize,
       'companyNameRotation': companyNameRotation,
       'isCompanyNameVisible': isCompanyNameVisible,
@@ -669,41 +714,47 @@ class LogoStateData {
       'sloganRotation': sloganRotation,
       'isSloganVisible': isSloganVisible,
       'sloganName': sloganName,
-      'customTexts': customTexts.map((t) => {
-            'textAlign': t.textAlign.toString(),
-            'text': t.text,
-            'position': {'dx': t.position.dx, 'dy': t.position.dy},
-            'size': t.size,
-            'rotation': t.rotation,
-            'opacity': t.opacity,
-            'isVisible': t.isVisible,
-            'layerIndex': t.layerIndex,
-            'color': t.color.value,
-            'isOutlined': t.isOutlined,
-            'outlineColor': t.outlineColor.value,
-            'strokeWidth': t.strokeWidth,
-            'fontWeight': t.fontWeight.index,
-            'fontIndex': t.fontIndex,
-          }).toList(),
-      'customImages': customImages.map((i) => {
-            'path': i.path,
-            'position': {'dx': i.position.dx, 'dy': i.position.dy},
-            'rotation': i.rotation,
-            'size': i.size,
-            'opacity': i.opacity,
-            'isVisible': i.isVisible,
-            'layerIndex': i.layerIndex,
-          }).toList(),
-      'customSVGs': customSVGs.map((s) => {
-            'svgString': s.svgString,
-            'position': {'dx': s.position.dx, 'dy': s.position.dy},
-            'color': s.color?.value,
-            'size': s.size,
-            'rotation': s.rotation,
-            'opacity': s.opacity,
-            'isVisible': s.isVisible,
-            'layerIndex': s.layerIndex,
-          }).toList(),
+      'customTexts': customTexts
+          .map((t) => {
+                'textAlign': t.textAlign.toString(),
+                'text': t.text,
+                'position': {'dx': t.position.dx, 'dy': t.position.dy},
+                'size': t.size,
+                'rotation': t.rotation,
+                'opacity': t.opacity,
+                'isVisible': t.isVisible,
+                'layerIndex': t.layerIndex,
+                'color': t.color.value,
+                'isOutlined': t.isOutlined,
+                'outlineColor': t.outlineColor.value,
+                'strokeWidth': t.strokeWidth,
+                'fontWeight': t.fontWeight.index,
+                'fontIndex': t.fontIndex,
+              })
+          .toList(),
+      'customImages': customImages
+          .map((i) => {
+                'path': i.path,
+                'position': {'dx': i.position.dx, 'dy': i.position.dy},
+                'rotation': i.rotation,
+                'size': i.size,
+                'opacity': i.opacity,
+                'isVisible': i.isVisible,
+                'layerIndex': i.layerIndex,
+              })
+          .toList(),
+      'customSVGs': customSVGs
+          .map((s) => {
+                'svgString': s.svgString,
+                'position': {'dx': s.position.dx, 'dy': s.position.dy},
+                'color': s.color?.value,
+                'size': s.size,
+                'rotation': s.rotation,
+                'opacity': s.opacity,
+                'isVisible': s.isVisible,
+                'layerIndex': s.layerIndex,
+              })
+          .toList(),
       'lockedElements': lockedElements.toList(),
       'elementOrder': elementOrder,
       'companyNameTextAlign': companyNameTextAlign.toString(),
@@ -747,7 +798,8 @@ class LogoStateData {
       if (o is Map && o.containsKey('dx') && o.containsKey('dy')) {
         return Offset((o['dx'] as num).toDouble(), (o['dy'] as num).toDouble());
       }
-      if (o is List && o.length >= 2) return Offset((o[0] as num).toDouble(), (o[1] as num).toDouble());
+      if (o is List && o.length >= 2)
+        return Offset((o[0] as num).toDouble(), (o[1] as num).toDouble());
       return fallback;
     }
 
@@ -871,7 +923,9 @@ class LogoStateData {
           customSVGs.add(CustomSvgElement(
             svgString: s['svgString'] ?? '',
             position: parseOffset(s['position'], Offset.zero),
-            color: s['color'] == null ? null : parseColor(s['color'], Colors.black),
+            color: s['color'] == null
+                ? null
+                : parseColor(s['color'], Colors.black),
             size: (s['size'] as num?)?.toDouble() ?? 64.0,
             rotation: (s['rotation'] as num?)?.toDouble() ?? 0.0,
             opacity: (s['opacity'] as num?)?.toDouble() ?? 1.0,
@@ -914,18 +968,24 @@ class LogoStateData {
       isLogoColorOverridden: json['isLogoColorOverridden'] ?? false,
       companyNameColor: parseColor(json['companyNameColor'], Colors.black),
       sloganColor: parseColor(json['sloganColor'], Colors.black),
-      companyNameOutlineColor: parseColor(json['companyNameOutlineColor'], Colors.transparent),
-      companyNameOutlineWidth: (json['companyNameOutlineWidth'] as num?)?.toDouble() ?? 0.0,
-      sloganOutlineColor: parseColor(json['sloganOutlineColor'], Colors.transparent),
-      sloganOutlineWidth: (json['sloganOutlineWidth'] as num?)?.toDouble() ?? 0.0,
+      companyNameOutlineColor:
+          parseColor(json['companyNameOutlineColor'], Colors.transparent),
+      companyNameOutlineWidth:
+          (json['companyNameOutlineWidth'] as num?)?.toDouble() ?? 0.0,
+      sloganOutlineColor:
+          parseColor(json['sloganOutlineColor'], Colors.transparent),
+      sloganOutlineWidth:
+          (json['sloganOutlineWidth'] as num?)?.toDouble() ?? 0.0,
       logoPosition: parseOffset(json['logoPosition'], const Offset(150, 100)),
       logoSize: (json['logoSize'] as num?)?.toDouble() ?? 150.0,
       logoRotation: (json['logoRotation'] as num?)?.toDouble() ?? 0.0,
       isLogoVisible: json['isLogoVisible'] ?? true,
       svgLogo: json['svgLogo'] as String?,
-      companyNamePosition: parseOffset(json['companyNamePosition'], const Offset(0, 0)),
+      companyNamePosition:
+          parseOffset(json['companyNamePosition'], const Offset(0, 0)),
       companyNameSize: (json['companyNameSize'] as num?)?.toDouble() ?? 20.0,
-      companyNameRotation: (json['companyNameRotation'] as num?)?.toDouble() ?? 0.0,
+      companyNameRotation:
+          (json['companyNameRotation'] as num?)?.toDouble() ?? 0.0,
       isCompanyNameVisible: json['isCompanyNameVisible'] ?? true,
       companyName: json['companyName'] as String?,
       sloganPosition: parseOffset(json['sloganPosition'], const Offset(0, 0)),
@@ -936,27 +996,34 @@ class LogoStateData {
       sloganRotation: (json['sloganRotation'] as num?)?.toDouble() ?? 0.0,
       isSloganVisible: json['isSloganVisible'] ?? true,
       sloganName: json['sloganName'] as String?,
-      logo2Position: json['logo2Position'] == null ? null : parseOffset(json['logo2Position']),
+      logo2Position: json['logo2Position'] == null
+          ? null
+          : parseOffset(json['logo2Position']),
       logo2Size: (json['logo2Size'] as num?)?.toDouble(),
       logo2Rotation: (json['logo2Rotation'] as num?)?.toDouble(),
       isLogo2Visible: json['isLogo2Visible'] ?? false,
-      companyName2Position: json['companyName2Position'] == null ? null : parseOffset(json['companyName2Position']),
+      companyName2Position: json['companyName2Position'] == null
+          ? null
+          : parseOffset(json['companyName2Position']),
       companyName2Size: (json['companyName2Size'] as num?)?.toDouble(),
       companyName2Rotation: (json['companyName2Rotation'] as num?)?.toDouble(),
       isCompanyName2Visible: json['isCompanyName2Visible'] ?? false,
-      slogan2Position: json['slogan2Position'] == null ? null : parseOffset(json['slogan2Position']),
+      slogan2Position: json['slogan2Position'] == null
+          ? null
+          : parseOffset(json['slogan2Position']),
       slogan2Size: (json['slogan2Size'] as num?)?.toDouble(),
       slogan2Rotation: (json['slogan2Rotation'] as num?)?.toDouble(),
       isSlogan2Visible: json['isSlogan2Visible'] ?? false,
       companyNameTextAlign: TextAlign.center,
       sloganTextAlign: TextAlign.center,
       selectedShapeName: json['selectedShapeName'] as String?,
-      backgroundColor: json['backgroundColor'] == null ? null : parseColor(json['backgroundColor'], Colors.white),
+      backgroundColor: json['backgroundColor'] == null
+          ? null
+          : parseColor(json['backgroundColor'], Colors.white),
       backgroundImagePath: json['backgroundImagePath'] as String?,
     );
   }
 }
-
 
 // void _updateTextAlignment(TextAlign align) {
 //   final id = widget.selectedElementId;

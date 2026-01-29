@@ -574,7 +574,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
           onTap: () => _showBackSaveConfirmationDialog(context, _canvasKey),
           child: Icon(Icons.arrow_back),
         ),
-        title:  Text(
+        title: Text(
           S.of(context).logoMaker,
           style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
         ),
@@ -594,7 +594,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
             onPressed: () {
               final user = Supabase.instance.client.auth.currentUser;
               if (user != null) {
-                        _showSaveConfirmationDialog(context, _canvasKey);
+                _showSaveConfirmationDialog(context, _canvasKey);
 
                 // ✅ Load rewarded ad first
                 // AdMobService.loadRewarded(
@@ -623,8 +623,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
                 //     );
                 //   },
                 // );
-             
-             
               } else {
                 // User not logged in → show login dialog
                 showCustomGoogleDialog(context);
@@ -1268,7 +1266,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
             return AlertDialog(
               backgroundColor: Colors.white,
               title: Text(
-                'Do you want to exit logo Maker?',
+                S.of(context).DoUwantToExit,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 21,
@@ -1291,8 +1289,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
                       fillColor: MaterialStateProperty.all(ThemeColors.purple),
                     ),
                   ),
-                  const Text(
-                    'Save Logo',
+                  Text(
+                    S.of(context).saveLogo,
                     style: TextStyle(color: ThemeColors.purple, fontSize: 16),
                   ),
                 ],
@@ -1306,8 +1304,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
                         Navigator.of(dialogContext).pop();
                         Navigator.of(parentContext).pop();
                       },
-                      child: const Text(
-                        'Cancel',
+                      child: Text(
+                        S.of(context).cancel,
                         style: TextStyle(
                           fontSize: 16,
                           color: ThemeColors.purple,
@@ -1350,9 +1348,9 @@ class _DownloadLogoState extends State<DownloadLogo> {
                                           12,
                                         ),
                                       ),
-                                      margin: const EdgeInsets.all(16),
+                                      margin: EdgeInsets.all(16),
                                       content: Row(
-                                        children: const [
+                                        children: [
                                           Icon(
                                             Icons.check_circle,
                                             color: ThemeColors.purple,
@@ -1360,7 +1358,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
                                           SizedBox(width: 12),
                                           Expanded(
                                             child: Text(
-                                              'Logo saved to gallery!',
+                                              S.of(context).saveLogo,
                                               style: TextStyle(
                                                 color: ThemeColors.purple,
                                                 fontSize: 16,
@@ -1387,7 +1385,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
                           return ThemeColors.purple;
                         }),
                       ),
-                      child: const Text('Save', style: TextStyle(fontSize: 16)),
+                      child: Text(S.of(context).saveLogo,
+                          style: TextStyle(fontSize: 16)),
                     ),
                   ],
                 ),
@@ -1832,6 +1831,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
     }
   }
 
+/
   DateTime? _lastEmptyRedoTime;
   DateTime? _lastSuccessRedoTime;
 

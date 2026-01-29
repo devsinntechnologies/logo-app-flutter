@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:logo_app_flutter/generated/l10n.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
 import 'package:logo_app_flutter/screens/download_logo.dart';
 import 'package:logo_app_flutter/services/ad_mob_service.dart';
@@ -181,7 +182,7 @@ class _TemplateWidgetState extends State<TemplateWidget> {
               itemBuilder: (context, index) {
                 return InkWell(
                   onTap: () {
-                       AdMobService.loadInterstitial(
+                    AdMobService.loadInterstitial(
                       onLoaded: (InterstitialAd ad) {
                         ad.fullScreenContentCallback =
                             FullScreenContentCallback(
@@ -213,7 +214,6 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                         selectedIndex = index;
                       });
                     }
-                 
                   },
                   child: Stack(
                     alignment: Alignment.center,
@@ -315,7 +315,7 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                                 children: [
                                   Icon(Icons.edit, color: Colors.white),
                                   SizedBox(width: 5),
-                                  const Text("Edit"),
+                                  Text(S.of(context).edit),
                                 ],
                               ),
                             ),

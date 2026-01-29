@@ -23,9 +23,17 @@ class MessageLookup extends MessageLookupByLibrary {
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "ChooseIndustry": MessageLookupByLibrary.simpleMessage("ELIJA INDUSTRIA"),
+    "DoUwantToExit": MessageLookupByLibrary.simpleMessage(
+      "¿Desea salir del creador de logos?",
+    ),
+    "DoUwantToGoHomeScreen": MessageLookupByLibrary.simpleMessage(
+      "¿Desea volver a la pantalla principal?",
+    ),
     "SignInWithGoogle": MessageLookupByLibrary.simpleMessage(
       "Iniciar sesión con Google",
     ),
+    "apply": MessageLookupByLibrary.simpleMessage("Aplicar"),
+    "areyousure": MessageLookupByLibrary.simpleMessage("¿Estás seguro?"),
     "art": MessageLookupByLibrary.simpleMessage("Arte"),
     "autoDesign": MessageLookupByLibrary.simpleMessage("Diseño Automático"),
     "automotiveTransportation": MessageLookupByLibrary.simpleMessage(
@@ -33,26 +41,40 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "back": MessageLookupByLibrary.simpleMessage("Atrás"),
     "background": MessageLookupByLibrary.simpleMessage("Fondo"),
+    "backward": MessageLookupByLibrary.simpleMessage("Atrás"),
     "beautyMassage": MessageLookupByLibrary.simpleMessage("Belleza y Masaje"),
     "businessConsulting": MessageLookupByLibrary.simpleMessage(
       "Negocios y Consultoría",
     ),
     "calligraphy": MessageLookupByLibrary.simpleMessage("CALIGRAFÍA"),
+    "cancel": MessageLookupByLibrary.simpleMessage("Cancelar"),
     "childrenEducation": MessageLookupByLibrary.simpleMessage(
       "Niños y Educación",
     ),
     "chooseFonts": MessageLookupByLibrary.simpleMessage("ELIJA FUENTES"),
     "chooseFontsSmall": MessageLookupByLibrary.simpleMessage("elige Fuentes"),
     "classic": MessageLookupByLibrary.simpleMessage("CLÁSICO"),
+    "color": MessageLookupByLibrary.simpleMessage("Color"),
+    "colors": MessageLookupByLibrary.simpleMessage("Colores"),
     "companyName": MessageLookupByLibrary.simpleMessage("NOMBRE DE SU EMPRESA"),
     "confirmYourPassword": MessageLookupByLibrary.simpleMessage(
       "Confirme su contraseña",
     ),
     "contemporary": MessageLookupByLibrary.simpleMessage("CONTEMPORÁNEO"),
+    "controls": MessageLookupByLibrary.simpleMessage("Controles"),
     "createLogo": MessageLookupByLibrary.simpleMessage("Crear Logo"),
+    "currentColor": MessageLookupByLibrary.simpleMessage("Color Actual"),
+    "custom": MessageLookupByLibrary.simpleMessage("Personalizado"),
+    "customGradient": MessageLookupByLibrary.simpleMessage(
+      "Gradiente Personalizado",
+    ),
     "display": MessageLookupByLibrary.simpleMessage("EXPOSICIÓN"),
+    "down": MessageLookupByLibrary.simpleMessage("Abajo"),
+    "duplicate": MessageLookupByLibrary.simpleMessage("Duplicar"),
+    "edit": MessageLookupByLibrary.simpleMessage("Editar"),
     "effects": MessageLookupByLibrary.simpleMessage("Efectos"),
     "email": MessageLookupByLibrary.simpleMessage("Correo electrónico"),
+    "end": MessageLookupByLibrary.simpleMessage("Fin"),
     "enterCompany": MessageLookupByLibrary.simpleMessage(
       "Ingrese el nombre de su empresa",
     ),
@@ -80,6 +102,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "foodBeverageRestaurant": MessageLookupByLibrary.simpleMessage(
       "Comida, Bebida y Restaurante",
     ),
+    "forward": MessageLookupByLibrary.simpleMessage("Adelante"),
+    "gradient": MessageLookupByLibrary.simpleMessage("Gradiente"),
+    "gradientAngle": MessageLookupByLibrary.simpleMessage(
+      "Ángulo de Gradiente",
+    ),
+    "gradientType": MessageLookupByLibrary.simpleMessage("Tipo de Gradiente"),
     "handwritten": MessageLookupByLibrary.simpleMessage("MANUSCRITO"),
     "healthCarePublicSafety": MessageLookupByLibrary.simpleMessage(
       "Salud Pública y Seguridad",
@@ -87,6 +115,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "holidaySpecialOccasion": MessageLookupByLibrary.simpleMessage(
       "Vacaciones y Ocasiones Especiales",
     ),
+    "image": MessageLookupByLibrary.simpleMessage("Imagen"),
     "images": MessageLookupByLibrary.simpleMessage("Imágenes"),
     "information": MessageLookupByLibrary.simpleMessage("Información"),
     "itEngineeringScience": MessageLookupByLibrary.simpleMessage(
@@ -105,6 +134,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "next": MessageLookupByLibrary.simpleMessage("Siguiente"),
     "noAccount": MessageLookupByLibrary.simpleMessage("¿No tienes una cuenta?"),
     "or": MessageLookupByLibrary.simpleMessage("O"),
+    "outlines": MessageLookupByLibrary.simpleMessage("Contornos"),
     "palette": MessageLookupByLibrary.simpleMessage("Paleta"),
     "password": MessageLookupByLibrary.simpleMessage("Contraseña"),
     "passwordConfirm": MessageLookupByLibrary.simpleMessage(
@@ -112,11 +142,20 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "petsAnimal": MessageLookupByLibrary.simpleMessage("Mascotas y Animales"),
     "photography": MessageLookupByLibrary.simpleMessage("Fotografía"),
+    "pickAnother": MessageLookupByLibrary.simpleMessage("Elegir Otro"),
     "privacyPolicy": MessageLookupByLibrary.simpleMessage(
       "Política de Privacidad",
     ),
     "retro": MessageLookupByLibrary.simpleMessage("RETRO"),
     "saveLogo": MessageLookupByLibrary.simpleMessage("Guardar Logo"),
+    "select": MessageLookupByLibrary.simpleMessage("Seleccionar"),
+    "selectBgImage": MessageLookupByLibrary.simpleMessage(
+      "Seleccionar Imagen de Fondo",
+    ),
+    "selectColor": MessageLookupByLibrary.simpleMessage("Seleccionar Color"),
+    "selectTextureImage": MessageLookupByLibrary.simpleMessage(
+      "Seleccionar Imagen de Textura",
+    ),
     "share": MessageLookupByLibrary.simpleMessage("Compartir"),
     "signup": MessageLookupByLibrary.simpleMessage("Registrarse"),
     "sloganName": MessageLookupByLibrary.simpleMessage("ESLOGAN"),
@@ -127,8 +166,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Creador de Logo Inteligente",
     ),
     "sportsFitness": MessageLookupByLibrary.simpleMessage("Deportes y Fitness"),
+    "start": MessageLookupByLibrary.simpleMessage("Inicio"),
     "tech": MessageLookupByLibrary.simpleMessage("TECNOLOGÍA"),
     "template": MessageLookupByLibrary.simpleMessage("Plantilla"),
     "text": MessageLookupByLibrary.simpleMessage("Texto"),
+    "texture": MessageLookupByLibrary.simpleMessage("Textura"),
+    "up": MessageLookupByLibrary.simpleMessage("Arriba"),
+    "yes": MessageLookupByLibrary.simpleMessage("Sí"),
   };
 }

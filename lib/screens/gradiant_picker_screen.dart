@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:logo_app_flutter/generated/l10n.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:logo_app_flutter/utils/gradient_persistence.dart';
@@ -54,7 +55,7 @@ class _GradientPickerScreenState extends State<GradientPickerScreen> {
         return StatefulBuilder(builder: (context, setState) {
           final shades = generateShades(tempColor);
           return AlertDialog(
-            title: const Text("Select Color"),
+            title: Text(S.of(context).selectColor),
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -113,7 +114,10 @@ class _GradientPickerScreenState extends State<GradientPickerScreen> {
             ),
             actions: [
               TextButton(
-                child: const Text('CUSTOM'),
+                child:  Text(
+                            S.of(context).custom,
+
+                ),
                 onPressed: () async {
                   // Open full color picker with hex input
                   final Color? custom = await showDialog(
@@ -125,7 +129,8 @@ class _GradientPickerScreenState extends State<GradientPickerScreen> {
                               '#${current.value.toRadixString(16).padLeft(8, '0').toUpperCase()}');
                       return StatefulBuilder(builder: (c2, setState2) {
                         return AlertDialog(
-                          title: const Text('Custom Color'),
+                          title:  Text(                            S.of(context).custom,
+),
                           content: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -165,10 +170,16 @@ class _GradientPickerScreenState extends State<GradientPickerScreen> {
                           actions: [
                             TextButton(
                                 onPressed: () => Navigator.of(ctx).pop(),
-                                child: const Text('CANCEL')),
+                                child:  Text(
+                            S.of(context).cancel,
+
+                                )),
                             TextButton(
                                 onPressed: () => Navigator.of(ctx).pop(current),
-                                child: const Text('SELECT')),
+                                child:  Text(
+                            S.of(context).select,
+
+                                )),
                           ],
                         );
                       });
@@ -184,7 +195,8 @@ class _GradientPickerScreenState extends State<GradientPickerScreen> {
               //   onPressed: () => Navigator.of(context).pop(),
               // ),
               TextButton(
-                child: const Text('SELECT'),
+                child:  Text(                            S.of(context).select,
+),
                 onPressed: () => Navigator.of(context).pop(tempColor),
               ),
             ],
@@ -229,8 +241,8 @@ class _GradientPickerScreenState extends State<GradientPickerScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        title: const Text(
-          "Custom Gradient",
+        title: Text(
+          S.of(context).customGradient,
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -239,120 +251,36 @@ class _GradientPickerScreenState extends State<GradientPickerScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Preview box
-            Container(
-              height: 150,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                gradient: gradient,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Preview box
+              Container(
+                height: 150,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  gradient: gradient,
+                ),
               ),
-            ),
-            const SizedBox(height: 30),
+              const SizedBox(height: 30),
 
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _colorCircle("Start", startColor, () => pickColor(true)),
-                const Icon(Icons.swap_horiz, size: 28),
-                _colorCircle("End", endColor, () => pickColor(false)),
-              ],
-            ),
-
-            const SizedBox(height: 15),
-
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  const Text(
-                    "Gradient Type",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 10),
-                  Column(
-                    children: [
-                      GestureDetector(
-                        onTap: () => setState(() => isLinear = true),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 12,
-                            horizontal: 16,
-                          ),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                isLinear
-                                    ? Icons.radio_button_checked
-                                    : Icons.radio_button_off,
-                                color: isLinear ? Colors.orange : Colors.grey,
-                              ),
-                              const SizedBox(width: 8),
-                              const Text(
-                                "Linear",
-                                style: TextStyle(fontWeight: FontWeight.w500),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      GestureDetector(
-                        onTap: () => setState(() => isLinear = false),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 12,
-                            horizontal: 16,
-                          ),
-                          decoration: BoxDecoration(
-                            // color: !isLinear ? Colors.orange.shade50 : Colors.white,
-                            // border: Border.all(
-                            //   color: !isLinear ? Colors.orange : Colors.grey.shade300,
-                            //   width: 2,
-                            // ),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                !isLinear
-                                    ? Icons.radio_button_checked
-                                    : Icons.radio_button_off,
-                                color: !isLinear ? Colors.orange : Colors.grey,
-                              ),
-                              const SizedBox(width: 8),
-                              const Text(
-                                "Radial",
-                                style: TextStyle(fontWeight: FontWeight.w500),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  _colorCircle(
+                      S.of(context).start, startColor, () => pickColor(true)),
+                  const Icon(Icons.swap_horiz, size: 28),
+                  _colorCircle(
+                      S.of(context).end, endColor, () => pickColor(false)),
                 ],
               ),
-            ),
 
-            const SizedBox(height: 20),
+              const SizedBox(height: 15),
 
-            // ✅ Angle controls
-            if (isLinear)
-              // 👉 Linear → show angle buttons
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -362,54 +290,72 @@ class _GradientPickerScreenState extends State<GradientPickerScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      "Gradient Angle",
+                    Text(
+                      S.of(context).gradientType,
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 10),
-                    Padding(
-                      padding: const EdgeInsets.all(14.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          _angleButton(Icons.arrow_downward, 0),
-                          _angleButton(Icons.arrow_forward, 1.57),
-                          _angleButton(Icons.arrow_upward, 3.14),
-                          _angleButton(Icons.arrow_back, 4.71),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            else
-              // 👉 Radial → show slider (angle rotates gradient center)
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "Gradient Angle",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
+                    Column(
                       children: [
-                        const Icon(Icons.my_location, color: Colors.orange),
-                        Expanded(
-                          child: Slider(
-                            value: angle,
-                            min: 0,
-                            max: 6.28, // 2π radian full circle
-                            activeColor: Colors.orange,
-                            onChanged: (val) {
-                              setState(() => angle = val);
-                            },
+                        GestureDetector(
+                          onTap: () => setState(() => isLinear = true),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 12,
+                              horizontal: 16,
+                            ),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  isLinear
+                                      ? Icons.radio_button_checked
+                                      : Icons.radio_button_off,
+                                  color: isLinear ? Colors.orange : Colors.grey,
+                                ),
+                                const SizedBox(width: 8),
+                                const Text(
+                                  "Linear",
+                                  style: TextStyle(fontWeight: FontWeight.w500),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        GestureDetector(
+                          onTap: () => setState(() => isLinear = false),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 12,
+                              horizontal: 16,
+                            ),
+                            decoration: BoxDecoration(
+                              // color: !isLinear ? Colors.orange.shade50 : Colors.white,
+                              // border: Border.all(
+                              //   color: !isLinear ? Colors.orange : Colors.grey.shade300,
+                              //   width: 2,
+                              // ),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  !isLinear
+                                      ? Icons.radio_button_checked
+                                      : Icons.radio_button_off,
+                                  color:
+                                      !isLinear ? Colors.orange : Colors.grey,
+                                ),
+                                const SizedBox(width: 8),
+                                const Text(
+                                  "Radial",
+                                  style: TextStyle(fontWeight: FontWeight.w500),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ],
@@ -418,42 +364,113 @@ class _GradientPickerScreenState extends State<GradientPickerScreen> {
                 ),
               ),
 
-            const Spacer(),
+              const SizedBox(height: 20),
 
-            // Apply Button
-            GestureDetector(
-              onTap: () async {
-                await GradientPersistence.saveGradient(
-                  startColor: startColor,
-                  endColor: endColor,
-                  angle: angle,
-                  isLinear: isLinear,
-                );
-
-                Provider.of<SelectedColorProvider>(
-                  context,
-                  listen: false,
-                ).setGradient(gradient);
-                Navigator.pop(context);
-              },
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                decoration: BoxDecoration(
-                  color: Colors.blue,
-                  borderRadius: BorderRadius.circular(30),
+              // ✅ Angle controls
+              if (isLinear)
+                // 👉 Linear → show angle buttons
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        S.of(context).gradientAngle,
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 10),
+                      Padding(
+                        padding: const EdgeInsets.all(14.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            _angleButton(Icons.arrow_downward, 0),
+                            _angleButton(Icons.arrow_forward, 1.57),
+                            _angleButton(Icons.arrow_upward, 3.14),
+                            _angleButton(Icons.arrow_back, 4.71),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else
+                // 👉 Radial → show slider (angle rotates gradient center)
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        S.of(context).gradientAngle,
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          const Icon(Icons.my_location, color: Colors.orange),
+                          Expanded(
+                            child: Slider(
+                              value: angle,
+                              min: 0,
+                              max: 6.28, // 2π radian full circle
+                              activeColor: Colors.orange,
+                              onChanged: (val) {
+                                setState(() => angle = val);
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-                alignment: Alignment.center,
-                child: const Text(
-                  "APPLY",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+
+              
+
+              // Apply Button
+              GestureDetector(
+                onTap: () async {
+                  await GradientPersistence.saveGradient(
+                    startColor: startColor,
+                    endColor: endColor,
+                    angle: angle,
+                    isLinear: isLinear,
+                  );
+
+                  Provider.of<SelectedColorProvider>(
+                    context,
+                    listen: false,
+                  ).setGradient(gradient);
+                  Navigator.pop(context);
+                },
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    S.of(context).apply,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

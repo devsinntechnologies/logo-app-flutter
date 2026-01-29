@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:logo_app_flutter/generated/l10n.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -36,7 +37,10 @@ class SelectTextureImagesState extends State<SelectTextureImages> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Select Texture Image')),
+      appBar: AppBar(
+          title: Text(
+        S.of(context).selectTextureImage,
+      )),
       body: GridView.builder(
         padding: EdgeInsets.all(16),
         itemCount: images.length,
@@ -61,7 +65,6 @@ class SelectTextureImagesState extends State<SelectTextureImages> {
               ); // Pass asset path for undo/redo
               Navigator.pop(context);
             },
-
             child: Container(
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.grey),

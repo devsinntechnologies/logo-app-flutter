@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:logo_app_flutter/generated/l10n.dart';
+
 // adjust path as needed
 
 class ColorScreen extends StatefulWidget {
@@ -72,8 +74,8 @@ class _ColorScreenState extends State<ColorScreen> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
-              title: const Text(
-                'Select a Color',
+              title: Text(
+                S.of(context).selectColor,
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               content: SingleChildScrollView(
@@ -85,29 +87,29 @@ class _ColorScreenState extends State<ColorScreen> {
                       spacing: 12,
                       runSpacing: 12,
                       children: colorList.map((color) {
-                            final isSelected = tempColor == color;
-                            return Material(
-                              color: Colors.transparent,
-                              shape: const CircleBorder(),
-                              child: InkWell(
-                                customBorder: const CircleBorder(),
-                                onTap: () {
-                                  setState(() {
-                                    tempColor = color;
-                                  });
-                                },
-                                child: CircleAvatar(
-                                  radius: 20,
-                                  backgroundColor: color,
-                                  child: isSelected
-                                      ? const Icon(
-                                          Icons.done,
-                                          color: Colors.white,
-                                        )
-                                      : null,
-                                ),
-                              ),
-                            );
+                        final isSelected = tempColor == color;
+                        return Material(
+                          color: Colors.transparent,
+                          shape: const CircleBorder(),
+                          child: InkWell(
+                            customBorder: const CircleBorder(),
+                            onTap: () {
+                              setState(() {
+                                tempColor = color;
+                              });
+                            },
+                            child: CircleAvatar(
+                              radius: 20,
+                              backgroundColor: color,
+                              child: isSelected
+                                  ? const Icon(
+                                      Icons.done,
+                                      color: Colors.white,
+                                    )
+                                  : null,
+                            ),
+                          ),
+                        );
                       }).toList(),
                     ),
                     const SizedBox(height: 16),
@@ -132,13 +134,17 @@ class _ColorScreenState extends State<ColorScreen> {
                                     decoration: BoxDecoration(
                                       color: c,
                                       shape: BoxShape.circle,
-                                      border: Border.all(color: Colors.grey.shade300, width: 1.5),
+                                      border: Border.all(
+                                          color: Colors.grey.shade300,
+                                          width: 1.5),
                                     ),
                                   ),
                                   if (tempColor.value == c.value)
                                     Icon(
                                       Icons.check,
-                                      color: c.computeLuminance() > 0.6 ? Colors.black : Colors.white,
+                                      color: c.computeLuminance() > 0.6
+                                          ? Colors.black
+                                          : Colors.white,
                                       size: 18,
                                     ),
                                 ],
@@ -155,16 +161,22 @@ class _ColorScreenState extends State<ColorScreen> {
               ),
               actions: [
                 TextButton(
-                  child: const Text('CUSTOM'),
+                  child: Text(
+                    S.of(context).custom,
+                  ),
                   onPressed: () async {
                     final Color? custom = await showDialog(
                       context: context,
                       builder: (ctx2) {
                         Color current = tempColor;
-                        final controller = TextEditingController(text: '#${current.value.toRadixString(16).padLeft(8, '0').toUpperCase()}');
+                        final controller = TextEditingController(
+                            text:
+                                '#${current.value.toRadixString(16).padLeft(8, '0').toUpperCase()}');
                         return StatefulBuilder(builder: (c3, setState3) {
                           return AlertDialog(
-                            title: const Text('Custom Color'),
+                            title: Text(
+                              S.of(context).custom,
+                            ),
                             content: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
@@ -173,7 +185,8 @@ class _ColorScreenState extends State<ColorScreen> {
                                   onColorChanged: (col) {
                                     setState3(() {
                                       current = col;
-                                      controller.text = '#${current.value.toRadixString(16).padLeft(8, '0').toUpperCase()}';
+                                      controller.text =
+                                          '#${current.value.toRadixString(16).padLeft(8, '0').toUpperCase()}';
                                     });
                                   },
                                   showLabel: false,
@@ -182,14 +195,17 @@ class _ColorScreenState extends State<ColorScreen> {
                                 const SizedBox(height: 8),
                                 TextField(
                                   controller: controller,
-                                  decoration: const InputDecoration(labelText: 'Hex (eg. #FF00FF)'),
+                                  decoration: const InputDecoration(
+                                      labelText: 'Hex (eg. #FF00FF)'),
                                   onChanged: (val) {
                                     final v = val.replaceAll('#', '').trim();
                                     if (v.length == 6 || v.length == 8) {
                                       try {
                                         final parsed = int.parse(v, radix: 16);
                                         setState3(() {
-                                          current = Color(v.length == 6 ? 0xFF000000 | parsed : parsed);
+                                          current = Color(v.length == 6
+                                              ? 0xFF000000 | parsed
+                                              : parsed);
                                         });
                                       } catch (_) {}
                                     }
@@ -198,8 +214,17 @@ class _ColorScreenState extends State<ColorScreen> {
                               ],
                             ),
                             actions: [
-                              TextButton(onPressed: () => Navigator.of(ctx2).pop(), child: const Text('CANCEL')),
-                              TextButton(onPressed: () => Navigator.of(ctx2).pop(current), child: const Text('SELECT')),
+                              TextButton(
+                                  onPressed: () => Navigator.of(ctx2).pop(),
+                                  child: Text(
+                                    S.of(context).cancel,
+                                  )),
+                              TextButton(
+                                  onPressed: () =>
+                                      Navigator.of(ctx2).pop(current),
+                                  child: Text(
+                                    S.of(context).select,
+                                  )),
                             ],
                           );
                         });
@@ -209,14 +234,16 @@ class _ColorScreenState extends State<ColorScreen> {
                   },
                 ),
                 TextButton(
-                  child: const Text('CANCEL'),
+                  child: Text(
+                    S.of(context).cancel,
+                  ),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
                 ),
                 TextButton(
-                  child: const Text(
-                    'SELECT',
+                  child: Text(
+                    S.of(context).select,
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   onPressed: () {
@@ -243,7 +270,9 @@ class _ColorScreenState extends State<ColorScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Select Color"),
+        title: Text(
+          S.of(context).selectColor,
+        ),
         leading: const BackButton(),
         centerTitle: true,
       ),
@@ -253,8 +282,9 @@ class _ColorScreenState extends State<ColorScreen> {
             spacing: 8,
             runSpacing: 8,
             children: List.generate(colorGrid.length, (index) {
-                final c = colorGrid[index];
-                final isSelected = selectedProviderColor != null && c.value == selectedProviderColor.value;
+              final c = colorGrid[index];
+              final isSelected = selectedProviderColor != null &&
+                  c.value == selectedProviderColor.value;
               return GestureDetector(
                 onTap: () {
                   setState(() {
@@ -274,7 +304,9 @@ class _ColorScreenState extends State<ColorScreen> {
                     if (isSelected)
                       Icon(
                         Icons.check_circle,
-                        color: c.computeLuminance() > 0.6 ? Colors.black : Colors.white,
+                        color: c.computeLuminance() > 0.6
+                            ? Colors.black
+                            : Colors.white,
                         size: 26,
                       ),
                   ],
@@ -288,7 +320,7 @@ class _ColorScreenState extends State<ColorScreen> {
               _openColorPickerDialog(context);
             },
             icon: const Icon(Icons.palette),
-            label: const Text("PICK ANOTHER"),
+            label: Text(S.of(context).pickAnother),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.grey[200],
               foregroundColor: Colors.black,
@@ -300,8 +332,8 @@ class _ColorScreenState extends State<ColorScreen> {
             children: [
               Container(height: 80, width: 80, color: selectedProviderColor),
               const SizedBox(height: 18),
-              const Text(
-                "Current Color",
+              Text(
+                S.of(context).currentColor,
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 20),
