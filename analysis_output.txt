@@ -1,0 +1,33 @@
+Analyzing download_logo.dart...                                 
+
+   info - The import of 'dart:typed_data' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/services.dart' - lib\screens\download_logo.dart:4:8 - unnecessary_import
+warning - Unused import: 'package:google_mobile_ads/google_mobile_ads.dart' - lib\screens\download_logo.dart:7:8 - unused_import
+warning - Unused import: 'package:logo_app_flutter/services/ad_mob_service.dart' - lib\screens\download_logo.dart:13:8 - unused_import
+warning - Unused import: 'package:logo_app_flutter/services/canvas_upload_service.dart' - lib\screens\download_logo.dart:14:8 - unused_import
+warning - Unused import: '../utils/text_size_util.dart' - lib\screens\download_logo.dart:32:8 - unused_import
+warning - The value of the field '_selectedBackgroundShape' isn't used - lib\screens\download_logo.dart:78:10 - unused_field
+warning - The value of the field '_currentBackgroundState' isn't used - lib\screens\download_logo.dart:80:24 - unused_field
+warning - The declaration '_requestGalleryPermission' isn't referenced - lib\screens\download_logo.dart:197:16 - unused_element
+warning - The operand can't be 'null', so the condition is always 'true' - lib\screens\download_logo.dart:271:61 - unnecessary_null_comparison
+warning - The operand can't be 'null', so the condition is always 'true' - lib\screens\download_logo.dart:295:61 - unnecessary_null_comparison
+warning - The diagnostic 'avoid_print' doesn't need to be ignored here because it's already being ignored - lib\screens\download_logo.dart:481:18 - duplicate_ignore
+warning - The declaration '_clearSelection' isn't referenced - lib\screens\download_logo.dart:1242:8 - unused_element
+warning - The declaration '_setOutlineColor' isn't referenced - lib\screens\download_logo.dart:1401:8 - unused_element
+warning - The operand can't be 'null', so the condition is always 'true' - lib\screens\download_logo.dart:1692:14 - unnecessary_null_comparison
+warning - The diagnostic 'avoid_print' doesn't need to be ignored here because it's already being ignored - lib\screens\download_logo.dart:1732:16 - duplicate_ignore
+  error - Methods must have an explicit list of parameters - lib\screens\download_logo.dart:1839:1 - missing_method_parameters
+  error - Operator '/' should declare exactly 1 parameters, but 0 found - lib\screens\download_logo.dart:1839:1 - wrong_number_of_parameters_for_operator
+  error - Operator declarations must be preceded by the keyword 'operator' - lib\screens\download_logo.dart:1839:1 - missing_keyword_operator
+  error - A function body must be provided - lib\screens\download_logo.dart:1840:3 - missing_function_body
+warning - The diagnostic 'avoid_print' doesn't need to be ignored here because it's already being ignored - lib\screens\download_logo.dart:1852:18 - duplicate_ignore
+warning - The diagnostic 'avoid_print' doesn't need to be ignored here because it's already being ignored - lib\screens\download_logo.dart:1970:16 - duplicate_ignore
+warning - The left operand can't be null, so the right operand is never executed - lib\screens\download_logo.dart:2393:38 - dead_null_aware_expression
+warning - The value of the local variable 'message' isn't used - lib\screens\download_logo.dart:2770:14 - unused_local_variable
+warning - The declaration '_getElementPositionSafe' isn't referenced - lib\screens\download_logo.dart:3246:10 - unused_element
+warning - The declaration '_addCustomImage' isn't referenced - lib\screens\download_logo.dart:3396:8 - unused_element
+warning - The left operand can't be null, so the right operand is never executed - lib\screens\download_logo.dart:3778:62 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\screens\download_logo.dart:3782:69 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\screens\download_logo.dart:3786:64 - dead_null_aware_expression
+warning - The declaration '_handleResizePanUpdate' isn't referenced - lib\screens\download_logo.dart:3917:8 - unused_element
+warning - The value of the local variable 'newSize' isn't used - lib\screens\download_logo.dart:3944:14 - unused_local_variable
+

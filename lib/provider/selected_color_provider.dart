@@ -239,6 +239,7 @@ class SelectedColorProvider extends ChangeNotifier {
     _selectedGradient = null;
     _backgroundImage = null;
     _imageFile = null;
+    _assetImagePath = null; // Fix: Clear asset path to prevent phantom images
     _companyTextColor = Colors.black;
     _sloganColor = Colors.black;
     _logoColor = Colors.black;
@@ -267,7 +268,12 @@ class SelectedColorProvider extends ChangeNotifier {
   /// it starts an async load (asset or file). Otherwise applies gradient
   /// or color. This centralizes background restoration and keeps token
   /// invalidation in one place.
-  void setBackgroundFromValues({Color? color, Gradient? gradient, String? imagePath, bool checkerboardVisible = true}) {
+  void setBackgroundFromValues({
+    Color? color,
+    Gradient? gradient,
+    String? imagePath,
+    bool checkerboardVisible = true,
+  }) {
     if (imagePath != null && imagePath.isNotEmpty) {
       // Invalidate prior async loads
       _imageLoadToken++;
@@ -291,6 +297,18 @@ class SelectedColorProvider extends ChangeNotifier {
       setGradient(gradient);
     } else if (color != null) {
       setColor(color);
+    } else {
+      // All null -> Clear/Transparent background
+      // This is crucial for undo/redo states where background was cleared
+      _backgroundImage = null;
+      canvasImage = null;
+      _imageFile = null;
+      _assetImagePath = null;
+      _selectedGradient = null;
+      _selectedColor = null; // Or Colors.transparent? Usually null implies transparent/no fill
+      _isColorManuallySelected = false;
+      _imageLoadToken++; // Invalidate pending loads
+      notifyListeners();
     }
 
     setCheckerboardVisibility(checkerboardVisible);

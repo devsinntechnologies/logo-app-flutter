@@ -464,9 +464,9 @@ class LogoStateData {
     Color? backgroundColor,
     Gradient? backgroundGradient,
     String? backgroundImagePath,
-      bool clearBackgroundColor = false,
-  bool clearBackgroundGradient = false,
-  bool clearBackgroundImagePath = false,
+    bool clearBackgroundColor = false,
+    bool clearBackgroundGradient = false,
+    bool clearBackgroundImagePath = false,
   }) {
     return LogoStateData(
       elementColors: elementColors ?? this.elementColors,
@@ -527,18 +527,15 @@ class LogoStateData {
       companyFontIndex: companyFontIndex ?? this.companyFontIndex,
       sloganFontIndex: sloganFontIndex ?? this.sloganFontIndex,
       selectedShapeName: selectedShapeName ?? this.selectedShapeName,
-      // backgroundColor: backgroundColor ?? this.backgroundColor,
-      // backgroundGradient: backgroundGradient ?? this.backgroundGradient,
-      // backgroundImagePath: backgroundImagePath ?? this.backgroundImagePath,
       backgroundColor: clearBackgroundColor 
-        ? null 
-        : (backgroundColor ?? this.backgroundColor),
-    backgroundGradient: clearBackgroundGradient 
-        ? null 
-        : (backgroundGradient ?? this.backgroundGradient),
-    backgroundImagePath: clearBackgroundImagePath 
-        ? null 
-        : (backgroundImagePath ?? this.backgroundImagePath),
+          ? null 
+          : (backgroundColor ?? this.backgroundColor),
+      backgroundGradient: clearBackgroundGradient 
+          ? null 
+          : (backgroundGradient ?? this.backgroundGradient),
+      backgroundImagePath: clearBackgroundImagePath 
+          ? null 
+          : (backgroundImagePath ?? this.backgroundImagePath),
     );
   }
 
@@ -638,43 +635,10 @@ class LogoStateData {
       // backgroundImagePath: backgroundImagePath,
     );
   }
-Gradient? _cloneGradient(Gradient? gradient) {
-  if (gradient == null) return null;
-  
-  if (gradient is LinearGradient) {
-    return LinearGradient(
-      colors: List.from(gradient.colors),
-      stops: gradient.stops != null ? List.from(gradient.stops!) : null,
-      begin: gradient.begin,
-      end: gradient.end,
-      tileMode: gradient.tileMode,
-      transform: gradient.transform,
-    );
-  } else if (gradient is RadialGradient) {
-    return RadialGradient(
-      colors: List.from(gradient.colors),
-      stops: gradient.stops != null ? List.from(gradient.stops!) : null,
-      center: gradient.center,
-      radius: gradient.radius,
-      tileMode: gradient.tileMode,
-      focal: gradient.focal,
-      focalRadius: gradient.focalRadius,
-      transform: gradient.transform,
-    );
-  } else if (gradient is SweepGradient) {
-    return SweepGradient(
-      colors: List.from(gradient.colors),
-      stops: gradient.stops != null ? List.from(gradient.stops!) : null,
-      center: gradient.center,
-      startAngle: gradient.startAngle,
-      endAngle: gradient.endAngle,
-      tileMode: gradient.tileMode,
-      transform: gradient.transform,
-    );
+  Gradient? _cloneGradient(Gradient? gradient) {
+    // Gradients are immutable in Flutter, so returning the reference is safe.
+    return gradient;
   }
-  
-  return gradient; // Fallback for unknown gradient types
-}
   /// Serialize to JSON-friendly map
   Map<String, dynamic> toJson() {
     Map<String, dynamic> mapColor(Map<String, Color> m) =>

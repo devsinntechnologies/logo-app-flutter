@@ -1701,15 +1701,30 @@ class _DownloadLogoState extends State<DownloadLogo> {
     final currentRotationZ =
         Map<int, double>.from(_currentLogoState.rotationZMap);
 
+    // Explicitly determine background properties to ensure clean state capture
+    final Color? newBackgroundColor = provider.selectedColor;
+    final Gradient? newBackgroundGradient = provider.selectedGradient;
+    final String? newBackgroundImagePath = provider.assetImagePath ?? provider.imageFile?.path;
+
     final newState = _currentLogoState.copyWith(
       logoColor: provider.logoColor,
       isLogoColorOverridden: provider.isLogoColorOverridden,
       companyNameColor: provider.companyTextColor,
       sloganColor: provider.sloganColor,
       selectedShapeName: selectedShapeName,
-      backgroundColor: provider.selectedColor,
-      backgroundGradient: provider.selectedGradient,
-      backgroundImagePath: imagePath,
+      
+      // Explicitly pass the new values. 
+      // If the provider value is null, we pass null.
+      // We also set the clear flags to true if the value is null, 
+      // ensuring the copyWith method overwrites any existing value with null.
+      backgroundColor: newBackgroundColor,
+      backgroundGradient: newBackgroundGradient,
+      backgroundImagePath: newBackgroundImagePath,
+      
+      clearBackgroundColor: newBackgroundColor == null,
+      clearBackgroundGradient: newBackgroundGradient == null,
+      clearBackgroundImagePath: newBackgroundImagePath == null,
+
       customTexts: updatedCustomTexts,
       customSVGs: updatedCustomSVGs,
       customImages: updatedCustomImages,
@@ -1726,7 +1741,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
     // Debug log
     // ignore: avoid_print
     print(
-        '🔁 captureState -> bgColor:${newState.backgroundColor} bgGrad:${newState.backgroundGradient != null} bgImagePath:${newState.backgroundImagePath}');
+        '🔁 captureState -> bgColor:$newBackgroundColor bgGrad:${newBackgroundGradient != null} bgImagePath:$newBackgroundImagePath');
 
     return newState;
   }
@@ -1831,7 +1846,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
     }
   }
 
-/
+
   DateTime? _lastEmptyRedoTime;
   DateTime? _lastSuccessRedoTime;
 
