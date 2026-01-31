@@ -1747,13 +1747,20 @@ class _DownloadLogoState extends State<DownloadLogo> {
   }
 
   void _saveState() {
+    final newState = _captureStateFromProvider();
+
+    // Deduplicate: Only save if state actually changed
+    if (_undoStack.isNotEmpty && _undoStack.last == newState) {
+      return;
+    }
+
     _redoStack.clear();
 
     if (_undoStack.length >= _maxUndoHistory) {
       _undoStack.removeAt(0);
     }
 
-    _currentLogoState = _captureStateFromProvider();
+    _currentLogoState = newState;
     _undoStack.add(_currentLogoState.clone());
 
     // Force rebuild to update undo/redo button states
@@ -1764,7 +1771,14 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
   void _pushCurrentStateToUndoStack({bool clearRedo = false}) {
     if (clearRedo) _redoStack.clear();
-    _currentLogoState = _captureStateFromProvider();
+    final newState = _captureStateFromProvider();
+
+    // Deduplicate
+    if (_undoStack.isNotEmpty && _undoStack.last == newState) {
+      return;
+    }
+
+    _currentLogoState = newState;
     if (_undoStack.length >= _maxUndoHistory) _undoStack.removeAt(0);
     _undoStack.add(_currentLogoState.clone());
   }
@@ -1852,11 +1866,22 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
   void _redo() {
     if (_redoStack.isNotEmpty) {
-      // Save current state to undo stack before redo
-      _pushCurrentStateToUndoStack();
+      // The redo stack contains the NEXT state to restore.
+      final nextState = _redoStack.removeLast();
 
-      // Pop the redo state and set as current
-      _currentLogoState = _redoStack.removeLast();
+      // We must add this state to the undo stack, so we can undo back to it later.
+      // We do NOT use _pushCurrentStateToUndoStack() here, because that would
+      // capture the *current* state (which is the one we are leaving: the "previous" state).
+      // Since the undo stack already contains the "previous" state (as the last item),
+      // adding it again would create duplicates [A, A, B].
+      // Instead, we just add the new state [A, B].
+      if (_undoStack.length >= _maxUndoHistory) {
+        _undoStack.removeAt(0);
+      }
+      _undoStack.add(nextState.clone());
+
+      // Set as current and apply
+      _currentLogoState = nextState;
 
       // Debug: log redo target background
       // ignore: avoid_print

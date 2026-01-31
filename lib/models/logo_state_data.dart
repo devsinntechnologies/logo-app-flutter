@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 // class EditorState {
@@ -122,6 +123,44 @@ class CustomTextElement {
       strokeWidth: strokeWidth,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CustomTextElement &&
+          runtimeType == other.runtimeType &&
+          textAlign == other.textAlign &&
+          text == other.text &&
+          position == other.position &&
+          size == other.size &&
+          rotation == other.rotation &&
+          opacity == other.opacity &&
+          isVisible == other.isVisible &&
+          layerIndex == other.layerIndex &&
+          color == other.color &&
+          fontWeight == other.fontWeight &&
+          fontIndex == other.fontIndex &&
+          isOutlined == other.isOutlined &&
+          outlineColor == other.outlineColor &&
+          strokeWidth == other.strokeWidth;
+
+  @override
+  int get hashCode => Object.hash(
+        textAlign,
+        text,
+        position,
+        size,
+        rotation,
+        opacity,
+        isVisible,
+        layerIndex,
+        color,
+        fontWeight,
+        fontIndex,
+        isOutlined,
+        outlineColor,
+        strokeWidth,
+      );
 }
 
 class CustomImageElement {
@@ -200,6 +239,40 @@ class CustomImageElement {
       aspectRatio: aspectRatio,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CustomImageElement &&
+          runtimeType == other.runtimeType &&
+          path == other.path &&
+          position == other.position &&
+          rotation == other.rotation &&
+          size == other.size &&
+          opacity == other.opacity &&
+          isVisible == other.isVisible &&
+          layerIndex == other.layerIndex &&
+          color == other.color &&
+          outlineColor == other.outlineColor &&
+          outlineWidth == other.outlineWidth &&
+          fit == other.fit &&
+          aspectRatio == other.aspectRatio;
+
+  @override
+  int get hashCode => Object.hash(
+        path,
+        position,
+        rotation,
+        size,
+        opacity,
+        isVisible,
+        layerIndex,
+        color,
+        outlineColor,
+        outlineWidth,
+        fit,
+        aspectRatio,
+      );
 }
 
 class CustomSvgElement {
@@ -257,6 +330,32 @@ class CustomSvgElement {
       layerIndex: layerIndex,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CustomSvgElement &&
+          runtimeType == other.runtimeType &&
+          svgString == other.svgString &&
+          position == other.position &&
+          color == other.color &&
+          size == other.size &&
+          rotation == other.rotation &&
+          opacity == other.opacity &&
+          isVisible == other.isVisible &&
+          layerIndex == other.layerIndex;
+
+  @override
+  int get hashCode => Object.hash(
+        svgString,
+        position,
+        color,
+        size,
+        rotation,
+        opacity,
+        isVisible,
+        layerIndex,
+      );
 }
 
 class LogoStateData {
@@ -639,6 +738,95 @@ class LogoStateData {
     // Gradients are immutable in Flutter, so returning the reference is safe.
     return gradient;
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! LogoStateData) return false;
+
+    return companyNamePosition == other.companyNamePosition &&
+        companyNameSize == other.companyNameSize &&
+        companyNameRotation == other.companyNameRotation &&
+        isCompanyNameVisible == other.isCompanyNameVisible &&
+        companyName == other.companyName &&
+        sloganPosition == other.sloganPosition &&
+        sloganSize == other.sloganSize &&
+        sloganRotation == other.sloganRotation &&
+        isSloganVisible == other.isSloganVisible &&
+        sloganName == other.sloganName &&
+        logoPosition == other.logoPosition &&
+        logoSize == other.logoSize &&
+        logoRotation == other.logoRotation &&
+        isLogoVisible == other.isLogoVisible &&
+        svgLogo == other.svgLogo &&
+        logoColor == other.logoColor &&
+        isLogoColorOverridden == other.isLogoColorOverridden &&
+        companyNameColor == other.companyNameColor &&
+        sloganColor == other.sloganColor &&
+        backgroundColor == other.backgroundColor &&
+        backgroundGradient == other.backgroundGradient &&
+        backgroundImagePath == other.backgroundImagePath &&
+        selectedShapeName == other.selectedShapeName &&
+        companyFontIndex == other.companyFontIndex &&
+        sloganFontIndex == other.sloganFontIndex &&
+        companyNameTextAlign == other.companyNameTextAlign &&
+        sloganTextAlign == other.sloganTextAlign &&
+        perspective == other.perspective &&
+        companyNameOutlineColor == other.companyNameOutlineColor &&
+        companyNameOutlineWidth == other.companyNameOutlineWidth &&
+        sloganOutlineColor == other.sloganOutlineColor &&
+        sloganOutlineWidth == other.sloganOutlineWidth &&
+        isLogo2Visible == other.isLogo2Visible &&
+        logo2Position == other.logo2Position &&
+        logo2Size == other.logo2Size &&
+        logo2Rotation == other.logo2Rotation &&
+        isCompanyName2Visible == other.isCompanyName2Visible &&
+        companyName2Position == other.companyName2Position &&
+        companyName2Size == other.companyName2Size &&
+        companyName2Rotation == other.companyName2Rotation &&
+        isSlogan2Visible == other.isSlogan2Visible &&
+        slogan2Position == other.slogan2Position &&
+        slogan2Size == other.slogan2Size &&
+        slogan2Rotation == other.slogan2Rotation &&
+        listEquals(customTexts, other.customTexts) &&
+        listEquals(customImages, other.customImages) &&
+        listEquals(customSVGs, other.customSVGs) &&
+        setEquals(lockedElements, other.lockedElements) &&
+        listEquals(elementOrder, other.elementOrder) &&
+        mapEquals(elementColors, other.elementColors) &&
+        mapEquals(outlineWidths, other.outlineWidths) &&
+        mapEquals(outlineColors, other.outlineColors) &&
+        mapEquals(rotationXMap, other.rotationXMap) &&
+        mapEquals(rotationYMap, other.rotationYMap) &&
+        mapEquals(rotationZMap, other.rotationZMap);
+  }
+
+  @override
+  int get hashCode {
+    return Object.hashAll([
+      companyNamePosition,
+      companyNameSize,
+      companyNameRotation,
+      isCompanyNameVisible,
+      companyName,
+      sloganPosition,
+      sloganSize,
+      sloganRotation,
+      isSloganVisible,
+      sloganName,
+      logoPosition,
+      logoSize,
+      logoRotation,
+      isLogoVisible,
+      svgLogo,
+      logoColor,
+      isLogoColorOverridden,
+      companyNameColor,
+      sloganColor,
+      backgroundColor,
+    ]);
+  }
+
   /// Serialize to JSON-friendly map
   Map<String, dynamic> toJson() {
     Map<String, dynamic> mapColor(Map<String, Color> m) =>
