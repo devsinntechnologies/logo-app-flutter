@@ -28,14 +28,14 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late BannerAd _bannerAd;
+  BannerAd? _bannerAd;
   bool _isBannerLoaded = false;
 
   @override
   void initState() {
     super.initState();
 
-    // 🔹 Load banner from service
+    // 🔹 Load banner from service (only on supported platforms)
     _bannerAd = AdMobService.bannerAd(
       size: AdSize.banner,
       onLoaded: (_) {
@@ -48,7 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
-    _bannerAd.dispose();
+    _bannerAd?.dispose();
     super.dispose();
   }
 
@@ -277,7 +277,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ),
-
                   GoogleSignInButton(),
                 ],
               ),
@@ -387,11 +386,11 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: _isBannerLoaded
+      bottomNavigationBar: _isBannerLoaded && _bannerAd != null
           ? SizedBox(
-              height: _bannerAd.size.height.toDouble(),
-              width: _bannerAd.size.width.toDouble(),
-              child: AdWidget(ad: _bannerAd),
+              height: _bannerAd!.size.height.toDouble(),
+              width: _bannerAd!.size.width.toDouble(),
+              child: AdWidget(ad: _bannerAd!),
             )
           : null,
     );

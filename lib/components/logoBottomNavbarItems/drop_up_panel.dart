@@ -1,4 +1,3 @@
-
 // ignore_for_file: public_member_api_docs, sort_constructors_first, use_super_parameters, use_build_context_synchronously
 // import 'dart:io';
 // import 'dart:ui' as ui;
@@ -238,12 +237,11 @@
 //   }
 // }
 
-
-
 // // ignore_for_file: public_member_api_docs, sort_constructors_first, use_super_parameters, use_build_context_synchronously
 import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:logo_app_flutter/components/logoBottomNavbarItems/shape_selector_widget.dart';
@@ -278,6 +276,14 @@ class DropUpPanel extends StatefulWidget {
 
 class _DropUpPanelState extends State<DropUpPanel> {
   Future<void> pickImageFromDevice(BuildContext context) async {
+    if (kIsWeb) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content:
+                Text('Image selection from gallery is not supported on Web.')),
+      );
+      return;
+    }
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
@@ -293,7 +299,7 @@ class _DropUpPanelState extends State<DropUpPanel> {
         listen: false,
       );
       provider.setBackgroundImage(image, file);
-      
+
       // Save state for undo/redo
       widget.onSaveState?.call();
     }
@@ -307,13 +313,13 @@ class _DropUpPanelState extends State<DropUpPanel> {
 
   @override
   Widget build(BuildContext context) {
-      final List<String> options = [
-    S.of(context).color,
-    S.of(context).gradient,
-    S.of(context).background,
-    S.of(context).texture,
-    S.of(context).image,
-  ];
+    final List<String> options = [
+      S.of(context).color,
+      S.of(context).gradient,
+      S.of(context).background,
+      S.of(context).texture,
+      S.of(context).image,
+    ];
     return Material(
       // elevation: 10,
       borderRadius: BorderRadius.circular(12),
@@ -444,6 +450,9 @@ class _DropUpPanelState extends State<DropUpPanel> {
                           });
                           widget.onOpacityChanged(_opacityValue);
                         },
+                        onChangeEnd: (val) {
+                          widget.onSaveState?.call();
+                        },
                       ),
                     ),
                   ),
@@ -471,7 +480,7 @@ class _DropUpPanelState extends State<DropUpPanel> {
                       widget.onToggleCheckerboard(true);
                       widget.onShapeSelected(shapeName);
                     }
-                    
+
                     widget.onSaveState?.call(); // Save AFTER shape change
                   },
                 ),
@@ -505,4 +514,3 @@ class _TopOption extends StatelessWidget {
     );
   }
 }
-

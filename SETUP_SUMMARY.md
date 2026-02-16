@@ -215,7 +215,7 @@ flutter build apk --release \
 6. `lib/screens/log_in_screen.dart` - Removed debug logs
 7. `lib/screens/my_design_screen.dart` - AppLogger
 8. `lib/components/logo_canvas.dart` - AppLogger
-9. `android/app/build.gradle.kts` - Production config
+9. `` - Production config
 10. `.gitignore` - Security additions
 11. `README.md` - Complete rewrite
 12. `pubspec.yaml` - No changes needed

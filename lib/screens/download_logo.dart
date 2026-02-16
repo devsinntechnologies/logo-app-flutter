@@ -14,6 +14,7 @@ import 'package:logo_app_flutter/services/ad_mob_service.dart';
 import 'package:logo_app_flutter/services/canvas_upload_service.dart';
 import 'package:logo_app_flutter/screens/movement_panel.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/rendering.dart';
 import 'package:gallery_saver_plus/gallery_saver.dart';
 import 'package:image_picker/image_picker.dart';
@@ -1511,6 +1512,9 @@ class _DownloadLogoState extends State<DownloadLogo> {
                             });
                             updateOpacity(val);
                           },
+                          onChangeEnd: (val) {
+                            _saveState();
+                          },
                         ),
                       ),
                     ),
@@ -1704,7 +1708,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
     // Explicitly determine background properties to ensure clean state capture
     final Color? newBackgroundColor = provider.selectedColor;
     final Gradient? newBackgroundGradient = provider.selectedGradient;
-    final String? newBackgroundImagePath = provider.assetImagePath ?? provider.imageFile?.path;
+    final String? newBackgroundImagePath =
+        provider.assetImagePath ?? provider.imageFile?.path;
 
     final newState = _currentLogoState.copyWith(
       logoColor: provider.logoColor,
@@ -1712,15 +1717,15 @@ class _DownloadLogoState extends State<DownloadLogo> {
       companyNameColor: provider.companyTextColor,
       sloganColor: provider.sloganColor,
       selectedShapeName: selectedShapeName,
-      
-      // Explicitly pass the new values. 
+
+      // Explicitly pass the new values.
       // If the provider value is null, we pass null.
-      // We also set the clear flags to true if the value is null, 
+      // We also set the clear flags to true if the value is null,
       // ensuring the copyWith method overwrites any existing value with null.
       backgroundColor: newBackgroundColor,
       backgroundGradient: newBackgroundGradient,
       backgroundImagePath: newBackgroundImagePath,
-      
+
       clearBackgroundColor: newBackgroundColor == null,
       clearBackgroundGradient: newBackgroundGradient == null,
       clearBackgroundImagePath: newBackgroundImagePath == null,
@@ -1783,9 +1788,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
     _undoStack.add(_currentLogoState.clone());
   }
 
-  DateTime? _lastEmptyUndoTime;
-  DateTime? _lastSuccessUndoTime;
-
   void _undo() {
     if (_undoStack.length > 1) {
       // Need at least 2 items (current + previous)
@@ -1828,41 +1830,8 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
       // Always call setState to update button states
       setState(() {});
-
-      final now = DateTime.now();
-      // 👇 APPLY SAME LOGIC FOR SUCCESS MESSAGES
-      if (_lastSuccessUndoTime == null ||
-          now.difference(_lastSuccessUndoTime!) > const Duration(seconds: 2)) {
-        _lastSuccessUndoTime = now;
-
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(
-            const SnackBar(
-              content: Text('Undo successful!'),
-              duration: Duration(seconds: 2),
-            ),
-          );
-      }
-    } else {
-      final now = DateTime.now();
-      if (_lastEmptyUndoTime == null ||
-          now.difference(_lastEmptyUndoTime!) > const Duration(seconds: 2)) {
-        _lastEmptyUndoTime = now;
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Nothing to undo!'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
     }
   }
-
-
-  DateTime? _lastEmptyRedoTime;
-  DateTime? _lastSuccessRedoTime;
 
   void _redo() {
     if (_redoStack.isNotEmpty) {
@@ -1907,32 +1876,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
       selectedShapeName = _currentLogoState.selectedShapeName ?? "";
 
       setState(() {});
-
-      final now = DateTime.now();
-      if (_lastSuccessRedoTime == null ||
-          now.difference(_lastSuccessRedoTime!) > const Duration(seconds: 2)) {
-        _lastSuccessRedoTime = now;
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(
-            const SnackBar(
-              content: Text('Redo successful!'),
-              duration: Duration(seconds: 2),
-            ),
-          );
-      }
-    } else {
-      final now = DateTime.now();
-      if (_lastEmptyRedoTime == null ||
-          now.difference(_lastEmptyRedoTime!) > const Duration(seconds: 2)) {
-        _lastEmptyRedoTime = now;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Nothing to redo!'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
     }
   }
 
@@ -2111,6 +2054,17 @@ class _DownloadLogoState extends State<DownloadLogo> {
     }
 
     if (index == 5) {
+      if (kIsWeb) {
+        // Show a message that gallery picker is different on web or use web-friendly picker
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Gallery pick not supported on this web demo')),
+        );
+        setState(() {
+          selectedIndex = -1;
+        });
+        return;
+      }
       final picker = ImagePicker();
       final selectedSource = await showDialog<ImageSource>(
         context: context,

@@ -17,7 +17,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "com.devsinntechnologies.smartlogomaker"
-    compileSdk = 35 
+    compileSdk = 36 
     ndkVersion =  "27.0.12077973"
 
     compileOptions {
@@ -84,5 +84,5 @@ flutter {
     source = "../.."
 }
 dependencies {
-    implementation(kotlin("stdlib", "1.9.10"))
+    implementation(kotlin("stdlib", "2.1.0"))
 }
