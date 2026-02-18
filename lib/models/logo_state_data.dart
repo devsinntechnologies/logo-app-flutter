@@ -1,3 +1,188 @@
+// import 'dart:ui';
+
+// class LogoStateData {
+//   final List<LogoElement> textElements;
+//   final List<LogoElement> imageElements;
+//   final BackgroundState backgroundState;
+//   final double opacityValue;
+//   final int selectedFontIndex;
+//   final String selectedShapeName;
+//   final String selectedBackgroundShape;
+//   final bool isCheckerboardActive;
+//   final bool isCheckerboardVisible;
+//   final double checkerboardOpacity;
+//   final String? svgLogo;
+//   final String companyName;
+//   final String sloganName;
+//   final String? designId;
+//   final String? imagePath;
+
+//   LogoStateData({
+//     required this.textElements,
+//     required this.imageElements,
+//     required this.backgroundState,
+//     required this.opacityValue,
+//     required this.selectedFontIndex,
+//     required this.selectedShapeName,
+//     required this.selectedBackgroundShape,
+//     required this.isCheckerboardActive,
+//     required this.isCheckerboardVisible,
+//     required this.checkerboardOpacity,
+//     this.svgLogo,
+//     required this.companyName,
+//     required this.sloganName,
+//     this.designId,
+//     this.imagePath,
+//   });
+
+//   // Create a copy of the current state
+//   LogoStateData copyWith({
+//     List<LogoElement>? textElements,
+//     List<LogoElement>? imageElements,
+//     BackgroundState? backgroundState,
+//     double? opacityValue,
+//     int? selectedFontIndex,
+//     String? selectedShapeName,
+//     String? selectedBackgroundShape,
+//     bool? isCheckerboardActive,
+//     bool? isCheckerboardVisible,
+//     double? checkerboardOpacity,
+//     String? svgLogo,
+//     String? companyName,
+//     String? sloganName,
+//     String? designId,
+//     String? imagePath,
+//   }) {
+//     return LogoStateData(
+//       textElements: textElements ?? this.textElements,
+//       imageElements: imageElements ?? this.imageElements,
+//       backgroundState: backgroundState ?? this.backgroundState,
+//       opacityValue: opacityValue ?? this.opacityValue,
+//       selectedFontIndex: selectedFontIndex ?? this.selectedFontIndex,
+//       selectedShapeName: selectedShapeName ?? this.selectedShapeName,
+//       selectedBackgroundShape:
+//           selectedBackgroundShape ?? this.selectedBackgroundShape,
+//       isCheckerboardActive: isCheckerboardActive ?? this.isCheckerboardActive,
+//       isCheckerboardVisible:
+//           isCheckerboardVisible ?? this.isCheckerboardVisible,
+//       checkerboardOpacity: checkerboardOpacity ?? this.checkerboardOpacity,
+//       svgLogo: svgLogo ?? this.svgLogo,
+//       companyName: companyName ?? this.companyName,
+//       sloganName: sloganName ?? this.sloganName,
+//       designId: designId ?? this.designId,
+//       imagePath: imagePath ?? this.imagePath,
+//     );
+//   }
+// }
+
+// class LogoElement {
+//   final int id;
+//   final String text;
+//   final double fontSize;
+//   final Color color;
+//   final double x;
+//   final double y;
+//   final double width;
+//   final double height;
+//   final double rotation;
+//   final bool isBold;
+//   final bool isItalic;
+//   final String fontFamily;
+//   final String? imagePath;
+//   final double opacity;
+//   final bool isShadowEnabled;
+//   final Color shadowColor;
+//   final Offset shadowOffset;
+//   final double shadowBlurRadius;
+
+//   LogoElement({
+//     required this.id,
+//     required this.text,
+//     required this.fontSize,
+//     required this.color,
+//     required this.x,
+//     required this.y,
+//     required this.width,
+//     required this.height,
+//     required this.rotation,
+//     required this.isBold,
+//     required this.isItalic,
+//     required this.fontFamily,
+//     this.imagePath,
+//     required this.opacity,
+//     required this.isShadowEnabled,
+//     required this.shadowColor,
+//     required this.shadowOffset,
+//     required this.shadowBlurRadius,
+//   });
+
+//   LogoElement copyWith({
+//     int? id,
+//     String? text,
+//     double? fontSize,
+//     Color? color,
+//     double? x,
+//     double? y,
+//     double? width,
+//     double? height,
+//     double? rotation,
+//     bool? isBold,
+//     bool? isItalic,
+//     String? fontFamily,
+//     String? imagePath,
+//     double? opacity,
+//     bool? isShadowEnabled,
+//     Color? shadowColor,
+//     Offset? shadowOffset,
+//     double? shadowBlurRadius,
+//   }) {
+//     return LogoElement(
+//       id: id ?? this.id,
+//       text: text ?? this.text,
+//       fontSize: fontSize ?? this.fontSize,
+//       color: color ?? this.color,
+//       x: x ?? this.x,
+//       y: y ?? this.y,
+//       width: width ?? this.width,
+//       height: height ?? this.height,
+//       rotation: rotation ?? this.rotation,
+//       isBold: isBold ?? this.isBold,
+//       isItalic: isItalic ?? this.isItalic,
+//       fontFamily: fontFamily ?? this.fontFamily,
+//       imagePath: imagePath ?? this.imagePath,
+//       opacity: opacity ?? this.opacity,
+//       isShadowEnabled: isShadowEnabled ?? this.isShadowEnabled,
+//       shadowColor: shadowColor ?? this.shadowColor,
+//       shadowOffset: shadowOffset ?? this.shadowOffset,
+//       shadowBlurRadius: shadowBlurRadius ?? this.shadowBlurRadius,
+//     );
+//   }
+// }
+
+// class BackgroundState {
+//   final Color? backgroundColor;
+//   final Gradient? backgroundGradient;
+//   final String? backgroundImagePath;
+
+//   BackgroundState({
+//     this.backgroundColor,
+//     this.backgroundGradient,
+//     this.backgroundImagePath,
+//   });
+
+//   BackgroundState copyWith({
+//     Color? backgroundColor,
+//     Gradient? backgroundGradient,
+//     String? backgroundImagePath,
+//   }) {
+//     return BackgroundState(
+//       backgroundColor: backgroundColor ?? this.backgroundColor,
+//       backgroundGradient: backgroundGradient ?? this.backgroundGradient,
+//       backgroundImagePath: backgroundImagePath ?? this.backgroundImagePath,
+//     );
+//   }
+// }
+
 import 'dart:ui';
 import 'dart:ui' as ui;
 
@@ -626,27 +811,126 @@ class LogoStateData {
       companyFontIndex: companyFontIndex ?? this.companyFontIndex,
       sloganFontIndex: sloganFontIndex ?? this.sloganFontIndex,
       selectedShapeName: selectedShapeName ?? this.selectedShapeName,
-      backgroundColor: clearBackgroundColor 
-          ? null 
+      backgroundColor: clearBackgroundColor
+          ? null
           : (backgroundColor ?? this.backgroundColor),
-      backgroundGradient: clearBackgroundGradient 
-          ? null 
+      backgroundGradient: clearBackgroundGradient
+          ? null
           : (backgroundGradient ?? this.backgroundGradient),
-      backgroundImagePath: clearBackgroundImagePath 
-          ? null 
+      backgroundImagePath: clearBackgroundImagePath
+          ? null
           : (backgroundImagePath ?? this.backgroundImagePath),
     );
   }
 
+  // LogoStateData clone() {
+  //   return LogoStateData(
+  //     backgroundColor:
+  //         backgroundColor != null ? Color(backgroundColor!.value) : null,
+  //     // backgroundColor:
+  //     //     backgroundColor != null ? Color(backgroundColor!.value) : null,
+
+  //     // ✅ FIX: Deep clone the gradient
+  //     backgroundGradient: _cloneGradient(backgroundGradient),
+
+  //     backgroundImagePath: backgroundImagePath,
+  //     elementColors: Map<String, Color>.from(elementColors),
+  //     outlineWidths: Map<String, double>.from(outlineWidths),
+  //     outlineColors: Map<String, Color>.from(outlineColors),
+  //     rotationXMap: Map<int, double>.from(rotationXMap),
+  //     rotationYMap: Map<int, double>.from(rotationYMap),
+  //     rotationZMap: Map<int, double>.from(rotationZMap),
+
+  //     perspective: perspective ?? this.perspective,
+
+  //     logoColor: Color(logoColor.value),
+  //     isLogoColorOverridden: isLogoColorOverridden,
+  //     companyNameColor: Color(companyNameColor.value),
+  //     companyNameOutlineColor: Color(companyNameOutlineColor.value),
+  //     companyNameOutlineWidth: companyNameOutlineWidth,
+
+  //     sloganColor: Color(sloganColor.value),
+  //     sloganOutlineColor: Color(sloganOutlineColor.value),
+  //     sloganOutlineWidth: sloganOutlineWidth,
+
+  //     logoPosition: Offset(logoPosition.dx, logoPosition.dy),
+  //     logoSize: logoSize,
+  //     logoRotation: logoRotation,
+  //     isLogoVisible: isLogoVisible,
+  //     svgLogo: svgLogo,
+
+  //     companyNamePosition: Offset(
+  //       companyNamePosition.dx,
+  //       companyNamePosition.dy,
+  //     ),
+  //     companyNameSize: companyNameSize,
+  //     companyNameRotation: companyNameRotation,
+  //     isCompanyNameVisible: isCompanyNameVisible,
+  //     companyName: companyName,
+
+  //     sloganPosition: Offset(sloganPosition.dx, sloganPosition.dy),
+  //     sloganSize: sloganSize,
+  //     sloganRotation: sloganRotation,
+  //     isSloganVisible: isSloganVisible,
+  //     sloganName: sloganName,
+
+  //     logo2Position: logo2Position == null
+  //         ? null
+  //         : Offset(logo2Position!.dx, logo2Position!.dy),
+  //     logo2Size: logo2Size,
+  //     logo2Rotation: logo2Rotation,
+  //     isLogo2Visible: isLogo2Visible,
+
+  //     companyName2Position: companyName2Position == null
+  //         ? null
+  //         : Offset(companyName2Position!.dx, companyName2Position!.dy),
+  //     companyName2Size: companyName2Size,
+  //     companyName2Rotation: companyName2Rotation,
+  //     isCompanyName2Visible: isCompanyName2Visible,
+
+  //     slogan2Position: slogan2Position == null
+  //         ? null
+  //         : Offset(slogan2Position!.dx, slogan2Position!.dy),
+  //     slogan2Size: slogan2Size,
+  //     slogan2Rotation: slogan2Rotation,
+  //     isSlogan2Visible: isSlogan2Visible,
+
+  //     /// 🔥 Deep clone lists (VERY IMPORTANT)
+  //     customTexts: customTexts
+  //         .map((e) => e.clone()) // requires clone() in CustomTextElement
+  //         .toList(),
+  //     customImages: customImages
+  //         .map((e) => e.clone()) // requires clone() in CustomImageElement
+  //         .toList(),
+  //     customSVGs: customSVGs
+  //         .map((e) => e.clone()) // requires clone() in CustomSvgElement
+  //         .toList(),
+
+  //     /// 🔥 Deep clone sets and lists
+  //     lockedElements: Set<int>.from(lockedElements),
+  //     elementOrder: List<int>.from(elementOrder),
+
+  //     companyNameTextAlign: companyNameTextAlign,
+  //     sloganTextAlign: sloganTextAlign,
+  //     companyFontIndex: companyFontIndex,
+  //     sloganFontIndex: sloganFontIndex,
+  //     selectedShapeName: selectedShapeName,
+  //     // backgroundColor:
+  //     //     backgroundColor != null ? Color(backgroundColor!.value) : null,
+  //     // backgroundGradient: backgroundGradient,
+  //     // backgroundImagePath: backgroundImagePath,
+  //   );
+  // }
+
   LogoStateData clone() {
     return LogoStateData(
-          
-    backgroundColor: backgroundColor != null ? Color(backgroundColor!.value) : null,
-    
-    // ✅ FIX: Deep clone the gradient
-    backgroundGradient: _cloneGradient(backgroundGradient),
-    
-    backgroundImagePath: backgroundImagePath,
+      backgroundColor:
+          backgroundColor != null ? Color(backgroundColor!.value) : null,
+
+      // ✅ FIX: Deep clone the gradient
+      backgroundGradient: _cloneGradient(backgroundGradient),
+
+      backgroundImagePath: backgroundImagePath,
       elementColors: Map<String, Color>.from(elementColors),
       outlineWidths: Map<String, double>.from(outlineWidths),
       outlineColors: Map<String, Color>.from(outlineColors),
@@ -734,6 +1018,7 @@ class LogoStateData {
       // backgroundImagePath: backgroundImagePath,
     );
   }
+
   Gradient? _cloneGradient(Gradient? gradient) {
     // Gradients are immutable in Flutter, so returning the reference is safe.
     return gradient;

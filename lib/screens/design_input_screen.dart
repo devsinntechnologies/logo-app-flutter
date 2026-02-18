@@ -93,22 +93,22 @@ class _DesignInputScreenState extends State<DesignInputScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: Colors.white,
-          title:  Text(
-                    S.of(context).areyousure,
-
-            style: TextStyle(color: Colors.black),
+          // backgroundColor: Colors.white,
+          title: Text(
+            S.of(context).areyousure,
+            style:
+                TextStyle(color: Theme.of(context).textTheme.titleLarge?.color),
           ),
-          content:  Text(
-                   S.of(context).DoUwantToGoHomeScreen,
-
-            style: TextStyle(color: Colors.black),
+          content: Text(
+            S.of(context).DoUwantToGoHomeScreen,
+            style:
+                TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
           ),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child:  Text(
-                       S.of(context).cancel,
+              child: Text(
+                S.of(context).cancel,
                 style: TextStyle(color: ThemeColors.purple),
               ),
             ),
@@ -117,8 +117,8 @@ class _DesignInputScreenState extends State<DesignInputScreen> {
                 Navigator.of(context).pop();
                 Navigator.pop(context);
               },
-              child:  Text(
-                        S.of(context).yes,
+              child: Text(
+                S.of(context).yes,
                 style: TextStyle(color: ThemeColors.purple),
               ),
             ),
@@ -209,7 +209,6 @@ class _DesignInputScreenState extends State<DesignInputScreen> {
       ),
       appBar: AppBar(
         scrolledUnderElevation: 0,
-        backgroundColor: Colors.white,
         title: Text(S.of(context).autoDesign),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -233,8 +232,7 @@ class _DesignInputScreenState extends State<DesignInputScreen> {
                 controller: _pageController,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: stepTitles.length,
-                itemBuilder: (context, index) =>
-                    _buildStepContent(index),
+                itemBuilder: (context, index) => _buildStepContent(index),
               ),
             ),
           ],

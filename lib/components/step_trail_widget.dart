@@ -24,14 +24,14 @@ class StepTrailWidget extends StatelessWidget {
         child: Row(
           children: List.generate(
             stepTitles.length,
-            (index) => _buildStep(index),
+            (index) => _buildStep(context, index),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildStep(int index) {
+  Widget _buildStep(BuildContext context, int index) {
     bool isCompleted = index < currentStep;
     bool isActive = index == currentStep;
 
@@ -42,8 +42,9 @@ class StepTrailWidget extends StatelessWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color:
-                isCompleted || isActive ? ThemeColors.purple : Colors.grey[300],
+            color: isCompleted || isActive
+                ? ThemeColors.purple
+                : Theme.of(context).disabledColor.withOpacity(0.1),
             shape: BoxShape.circle,
           ),
           child: Center(
@@ -54,7 +55,7 @@ class StepTrailWidget extends StatelessWidget {
                     style: TextStyle(
                       color: (isCompleted || isActive)
                           ? Colors.white
-                          : Colors.black,
+                          : Theme.of(context).textTheme.bodyLarge?.color,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -65,7 +66,9 @@ class StepTrailWidget extends StatelessWidget {
           stepTitles[index],
           style: TextStyle(
             fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-            color: isActive ? Colors.black : Colors.grey,
+            color: isActive
+                ? Theme.of(context).textTheme.bodyLarge?.color
+                : Theme.of(context).hintColor,
           ),
         ),
         const SizedBox(width: 8),
@@ -73,7 +76,9 @@ class StepTrailWidget extends StatelessWidget {
           Container(
             width: 50,
             height: 2,
-            color: isCompleted ? ThemeColors.purple : Colors.grey[300],
+            color: isCompleted
+                ? ThemeColors.purple
+                : Theme.of(context).disabledColor.withOpacity(0.1),
           ),
         const SizedBox(width: 8),
       ],

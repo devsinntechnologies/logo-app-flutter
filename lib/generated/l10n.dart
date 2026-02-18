@@ -765,6 +765,8 @@ class S {
   String get yes {
     return Intl.message('Yes', name: 'yes', desc: '', args: []);
   }
+
+  get theme => null;
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

@@ -12,6 +12,13 @@ class SelectedColorProvider extends ChangeNotifier {
   // any previously-started image decode tasks so they don't overwrite newer
   // user actions (fixes redo/undo race conditions).
   int _imageLoadToken = 0;
+  // --- Undo/Redo Stacks ---
+  final List<LogoStateData> _undoStack = [];
+  final List<LogoStateData> _redoStack = [];
+  static const int _maxUndoHistory = 50;
+
+  bool get canUndo => _undoStack.length > 1;
+  bool get canRedo => _redoStack.isNotEmpty;
   double get intensity => _brightness;
   final Map<int, Color> _overrideColors = {};
   final Map<int, Color> _individualElementColors = {};
@@ -24,11 +31,11 @@ class SelectedColorProvider extends ChangeNotifier {
   Color? _shapeColor;
   Color _customTextColor = Colors.black;
   Color _logoColor = Colors.black;
-  
+
   // Font family properties
   int _companyFontIndex = 0;
   int _sloganFontIndex = 0;
-  
+
   int get companyFontIndex => _companyFontIndex;
   int get sloganFontIndex => _sloganFontIndex;
 
@@ -250,7 +257,6 @@ class SelectedColorProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-
   void setBackgroundImage(ui.Image image, File? file, {String? assetPath}) {
     canvasImage = image;
     _backgroundImage = image;
@@ -305,7 +311,8 @@ class SelectedColorProvider extends ChangeNotifier {
       _imageFile = null;
       _assetImagePath = null;
       _selectedGradient = null;
-      _selectedColor = null; // Or Colors.transparent? Usually null implies transparent/no fill
+      _selectedColor =
+          null; // Or Colors.transparent? Usually null implies transparent/no fill
       _isColorManuallySelected = false;
       _imageLoadToken++; // Invalidate pending loads
       notifyListeners();
@@ -665,7 +672,8 @@ class SelectedColorProvider extends ChangeNotifier {
     _sloganFontIndex = state.sloganFontIndex;
     // Debug: log restored font indices
     // ignore: avoid_print
-    print('🔁 applyLogoState restored fonts -> company:${_companyFontIndex} slogan:${_sloganFontIndex}');
+    print(
+        '🔁 applyLogoState restored fonts -> company:${_companyFontIndex} slogan:${_sloganFontIndex}');
 
     // 4) custom texts -> map to ids 100 + index (and mark override)
     for (int i = 0; i < state.customTexts.length; i++) {
@@ -736,5 +744,61 @@ class SelectedColorProvider extends ChangeNotifier {
     } catch (e) {
       print('Error loading image from asset: $e');
     }
+  }
+
+  // --- Undo/Redo Methods ---
+
+  void recordState(LogoStateData state) {
+    // Deduplicate: don't push if the state is identical to the last recorded state
+    if (_undoStack.isNotEmpty && _undoStack.last == state) return;
+
+    _redoStack.clear();
+    if (_undoStack.length >= _maxUndoHistory) {
+      _undoStack.removeAt(0);
+    }
+    _undoStack.add(state.clone());
+    notifyListeners();
+  }
+
+  LogoStateData? undo(LogoStateData currentState) {
+    if (!canUndo) return null;
+
+    // Push the current (before undo) state to redo stack
+    _redoStack.add(currentState.clone());
+
+    // Pop current state from undo stack
+    _undoStack.removeLast();
+
+    // The previous state is now at the top
+    final previousState = _undoStack.last.clone();
+
+    // Apply this state to provider fields
+    applyLogoState(previousState);
+
+    notifyListeners();
+    return previousState;
+  }
+
+  LogoStateData? redo() {
+    if (!canRedo) return null;
+
+    final nextState = _redoStack.removeLast();
+
+    // No need to remove from undoStack, redo pushes forward
+    if (_undoStack.length >= _maxUndoHistory) {
+      _undoStack.removeAt(0);
+    }
+    _undoStack.add(nextState.clone());
+
+    applyLogoState(nextState);
+
+    notifyListeners();
+    return nextState;
+  }
+
+  void clearHistory() {
+    _undoStack.clear();
+    _redoStack.clear();
+    notifyListeners();
   }
 }

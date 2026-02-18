@@ -6,6 +6,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:logo_app_flutter/config/environment.dart';
 import 'package:logo_app_flutter/provider/locale_provider.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
+import 'package:logo_app_flutter/provider/theme_provider.dart';
 import 'package:logo_app_flutter/screens/home_screen.dart';
 import 'package:logo_app_flutter/screens/splash_screen.dart';
 import 'package:logo_app_flutter/services/internet_checker.dart';
@@ -81,18 +82,31 @@ class _MyAppState extends State<MyApp> {
       providers: [
         ChangeNotifierProvider(create: (_) => SelectedColorProvider()),
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
       child: Builder(builder: (context) {
         return MaterialApp(
           theme: ThemeData(
+            useMaterial3: true,
+            brightness: Brightness.light,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.deepPurple,
+              brightness: Brightness.light,
+            ),
             textTheme: GoogleFonts.poppinsTextTheme(),
           ),
           darkTheme: ThemeData(
+            useMaterial3: true,
+            brightness: Brightness.dark,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.deepPurple,
+              brightness: Brightness.dark,
+            ),
             textTheme: GoogleFonts.poppinsTextTheme(
               ThemeData.dark().textTheme,
             ),
           ),
-          themeMode: ThemeMode.system,
+          themeMode: context.watch<ThemeProvider>().themeMode,
           debugShowCheckedModeBanner: false,
           title: 'Auto Design Module',
           locale: context.watch<LocaleProvider>().locale,

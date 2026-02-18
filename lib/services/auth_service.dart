@@ -13,6 +13,7 @@ class AuthService {
       );
     } catch (e) {
       AppLogger.error("Google Sign-In failed", tag: "AuthService", error: e);
+      rethrow;
     }
   }
 

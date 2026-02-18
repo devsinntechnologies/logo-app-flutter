@@ -105,7 +105,7 @@ class _MovementPanelState extends State<MovementPanel>
                 width: 27,
                 height: 27,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
+                  color: Theme.of(context).cardColor,
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(5),
                     topRight: Radius.circular(5),
@@ -126,14 +126,14 @@ class _MovementPanelState extends State<MovementPanel>
             padding: const EdgeInsets.only(bottom: 35),
             child: Container(
               width: MediaQuery.of(context).size.width,
-              decoration: BoxDecoration(color: Colors.white),
+              decoration: BoxDecoration(color: Theme.of(context).cardColor),
               child: DefaultTabController(
                 length: 4,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                      color: Colors.grey.shade100,
+                      color: Theme.of(context).colorScheme.surfaceVariant,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 9.0),
                         child: SizedBox(
@@ -141,7 +141,7 @@ class _MovementPanelState extends State<MovementPanel>
                           child: TabBar(
                             indicatorColor: ThemeColors.purple,
                             labelColor: ThemeColors.purple,
-                            unselectedLabelColor: Colors.grey,
+                            unselectedLabelColor: Theme.of(context).hintColor,
                             labelPadding: EdgeInsets.symmetric(vertical: 0),
                             tabs: [
                               Tab(
@@ -479,18 +479,22 @@ class _MovementPanelState extends State<MovementPanel>
             padding: const EdgeInsets.all(5),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.white,
+              color: Theme.of(context).cardColor,
               border: Border.all(
                 color: enabled
-                    ? (activeLayerButton == id ? Colors.black : Colors.grey)
-                    : Colors.grey.shade300,
+                    ? (activeLayerButton == id
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).dividerColor)
+                    : Theme.of(context).disabledColor,
                 width: 2,
               ),
             ),
             child: Icon(
               icon,
               size: 18,
-              color: enabled ? Colors.black : Colors.grey.shade400,
+              color: enabled
+                  ? Theme.of(context).iconTheme.color
+                  : Theme.of(context).disabledColor,
             ),
           ),
         ),
@@ -498,7 +502,9 @@ class _MovementPanelState extends State<MovementPanel>
           label,
           style: TextStyle(
             fontSize: 12,
-            color: enabled ? Colors.black : Colors.grey,
+            color: enabled
+                ? Theme.of(context).textTheme.bodyMedium?.color
+                : Theme.of(context).disabledColor,
           ),
         ),
       ],

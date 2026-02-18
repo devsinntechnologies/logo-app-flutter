@@ -11,17 +11,15 @@ class ArtSelectScreen extends StatelessWidget {
       length: 5, // adjust tabs count as needed
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.white,
           title: const Text(
             'Art Select',
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.black,
             ),
           ),
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.pop(context),
           ),
           elevation: 0,
@@ -46,7 +44,7 @@ class ArtSelectScreen extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: Theme.of(context).cardColor,
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: const [
                             BoxShadow(
@@ -58,18 +56,18 @@ class ArtSelectScreen extends StatelessWidget {
                         ),
                         child: GestureDetector(
                           onTap: () {
-                            Navigator.pop(context, images[index]); // ✅ Return selected image path
+                            Navigator.pop(context,
+                                images[index]); // ✅ Return selected image path
                           },
-                         child: images[index].endsWith('.svg')
-    ? SvgPicture.asset(
-        images[index],
-        fit: BoxFit.contain,
-      )
-    : Image.asset(
-        images[index],
-        fit: BoxFit.cover,
-      ),
-
+                          child: images[index].endsWith('.svg')
+                              ? SvgPicture.asset(
+                                  images[index],
+                                  fit: BoxFit.contain,
+                                )
+                              : Image.asset(
+                                  images[index],
+                                  fit: BoxFit.cover,
+                                ),
                         ),
                       ),
                       if (index.isEven) // crown icon for demo
@@ -89,14 +87,14 @@ class ArtSelectScreen extends StatelessWidget {
             );
           }),
         ),
-        bottomNavigationBar:  Container(
-            height: 100,
-          color: Colors.white,
+        bottomNavigationBar: Container(
+          height: 100,
+          color: Theme.of(context).cardColor,
           child: TabBar(
             isScrollable: true,
             indicatorColor: Colors.orange,
-            labelColor: Colors.black,
-            unselectedLabelColor: Colors.grey,
+            labelColor: Theme.of(context).textTheme.labelLarge?.color,
+            unselectedLabelColor: Theme.of(context).hintColor,
             tabs: [
               Tab(text: 'ANIMAL'),
               Tab(text: 'ARCHITECTURE'),
@@ -110,4 +108,3 @@ class ArtSelectScreen extends StatelessWidget {
     );
   }
 }
-

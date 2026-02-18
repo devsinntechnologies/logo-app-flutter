@@ -41,9 +41,7 @@ class _TextScreenState extends State<TextScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
         title: Text(widget.initialText.isEmpty ? 'Add New Text' : 'Edit Text'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -62,18 +60,23 @@ class _TextScreenState extends State<TextScreen> {
               controller: _controller,
               focusNode: _focusNode,
               autofocus: true,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: 'Your Text Here',
                 hintStyle: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w500,
-                  color: Colors.grey,
+                  color:
+                      Theme.of(context).hintColor, // Changed from Colors.grey
                 ),
                 border: InputBorder.none,
               ),
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w500),
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w500,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
+              ),
               textAlign: TextAlign.center,
-              cursorColor: Colors.black,
+              cursorColor: Theme.of(context).textSelectionTheme.cursorColor,
             ),
           ),
         ],

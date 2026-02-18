@@ -41,7 +41,7 @@ class BottomNavigationButtons extends StatelessWidget {
                   ),
                   padding:
                       const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
-                  foregroundColor: Colors.black,
+                  foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
                 child: Row(
                   children: [
@@ -64,7 +64,7 @@ class BottomNavigationButtons extends StatelessWidget {
                   ),
                   padding:
                       const EdgeInsets.symmetric(vertical: 16, horizontal: 25),
-                  foregroundColor: Colors.black,
+                  foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
                 child: Row(
                   children: [
@@ -72,8 +72,8 @@ class BottomNavigationButtons extends StatelessWidget {
                       S.of(context).next,
                       style: TextStyle(
                         color: isDisabled && currentStep == 0
-                            ? Colors.grey
-                            : Colors.black,
+                            ? Theme.of(context).disabledColor
+                            : Theme.of(context).textTheme.bodyLarge?.color,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

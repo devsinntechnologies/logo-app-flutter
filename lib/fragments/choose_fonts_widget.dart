@@ -126,7 +126,6 @@ class ChooseFontsWidget extends StatefulWidget {
 class _ChooseFontsWidgetState extends State<ChooseFontsWidget> {
   late int selectedIndex;
 
-
   List<String> get fontNames => [
         S.of(context).modern,
         S.of(context).handwritten,
@@ -152,14 +151,13 @@ class _ChooseFontsWidgetState extends State<ChooseFontsWidget> {
     return Column(
       children: [
         const SizedBox(height: 20),
-         Text(
-           S.of(context).chooseFonts,
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
+        Text(
+          S.of(context).chooseFonts,
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 20),
-    
         SizedBox(
-          height: screenHeight * 0.6, 
+          height: screenHeight * 0.6,
           child: ListView.builder(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: fontNames.length,
@@ -169,8 +167,6 @@ class _ChooseFontsWidgetState extends State<ChooseFontsWidget> {
       ],
     );
   }
-
-  
 
   TextStyle _getFontStyle(int index) {
     switch (index) {
@@ -205,10 +201,9 @@ class _ChooseFontsWidgetState extends State<ChooseFontsWidget> {
       margin: const EdgeInsets.symmetric(vertical: 6),
       decoration: BoxDecoration(
         // color: isSelected ? Colors.orange : Colors.transparent,
-        gradient: isSelected
-            ? ThemeColors.textGradient: null,
+        gradient: isSelected ? ThemeColors.textGradient : null,
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: Colors.black),
+        border: Border.all(color: Theme.of(context).dividerColor),
       ),
       child: Material(
         color: Colors.transparent,
@@ -227,7 +222,9 @@ class _ChooseFontsWidgetState extends State<ChooseFontsWidget> {
               child: Text(
                 index < fontNames.length ? fontNames[index] : "",
                 style: _getFontStyle(index).copyWith(
-                  color: isSelected ? Colors.white : Colors.black87,
+                  color: isSelected
+                      ? Colors.white
+                      : Theme.of(context).textTheme.bodyLarge?.color,
                   letterSpacing: 1.2,
                 ),
               ),

@@ -211,11 +211,9 @@ class _DownloadLogoState extends State<DownloadLogo> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: Colors.white,
           title: const Text(
             'Save Logo',
             style: TextStyle(
-              color: ThemeColors.purple,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -223,7 +221,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
             'Do you want to save the logo to your storage or to My Design?',
             style: TextStyle(
               fontSize: 16,
-              color: ThemeColors.purple,
             ),
           ),
           actions: [
@@ -243,6 +240,16 @@ class _DownloadLogoState extends State<DownloadLogo> {
                       await Future.delayed(const Duration(milliseconds: 50));
                       await WidgetsBinding.instance.endOfFrame;
                     }
+                    // Show loading dialog
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (context) => const Center(
+                        child: CircularProgressIndicator(
+                            color: ThemeColors.purple),
+                      ),
+                    );
+
                     try {
                       // Ensure current provider font selections are written into the state before saving
                       _currentLogoState = _currentLogoState.copyWith(
@@ -250,10 +257,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
                         sloganFontIndex: provider.sloganFontIndex,
                       );
                       final designJson = _currentLogoState.toJson();
-                      debugPrint(
-                          '💾 Saving design fonts -> provider.company:${provider.companyFontIndex} provider.slogan:${provider.sloganFontIndex}');
-                      debugPrint(
-                          '💾 designJson companyFontIndex: ${designJson["companyFontIndex"]} sloganFontIndex: ${designJson["sloganFontIndex"]}');
+
                       final svc = UserDesignService();
                       if (widget.designId != null) {
                         await svc.updateDesign(
@@ -268,23 +272,28 @@ class _DownloadLogoState extends State<DownloadLogo> {
                           designJson: designJson,
                         );
                       }
+
+                      // Close loading dialog
+                      Navigator.of(context).pop();
+
                       // Restore selection after save
                       if (hadSelection && previousSelection != null) {
                         provider.setSelectedElement(previousSelection);
                       }
+
+                      // Close confirmation dialog
                       Navigator.of(context).pop();
+
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          backgroundColor: Colors.white,
+                        const SnackBar(
                           behavior: SnackBarBehavior.floating,
                           content: Row(
-                            children: const [
-                              Icon(Icons.cloud_done, color: ThemeColors.purple),
+                            children: [
+                              Icon(Icons.cloud_done),
                               SizedBox(width: 12),
                               Text(
                                 'Logo saved successfully!',
                                 style: TextStyle(
-                                  color: ThemeColors.purple,
                                   fontSize: 16,
                                 ),
                               ),
@@ -293,10 +302,16 @@ class _DownloadLogoState extends State<DownloadLogo> {
                         ),
                       );
                     } catch (e) {
+                      // Close loading dialog
+                      Navigator.of(context).pop();
+
                       if (hadSelection && previousSelection != null) {
                         provider.setSelectedElement(previousSelection);
                       }
+
+                      // Close confirmation dialog
                       Navigator.of(context).pop();
+
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           backgroundColor: Colors.white,
@@ -306,7 +321,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
                               const Icon(Icons.error,
                                   color: ThemeColors.purple),
                               const SizedBox(width: 12),
-                              Expanded(child: Text('Error saving logo: $e')),
+                              Expanded(child: Text('Error: $e')),
                             ],
                           ),
                         ),
@@ -562,15 +577,9 @@ class _DownloadLogoState extends State<DownloadLogo> {
   }
 
   @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.grey.shade200,
         leading: InkWell(
           onTap: () => _showBackSaveConfirmationDialog(context, _canvasKey),
           child: Icon(Icons.arrow_back),
@@ -834,7 +843,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
                     Container(
                       height:
                           (MediaQuery.of(context).size.height > 500) ? 220 : 30,
-                      color: Colors.grey.shade200,
+                      color: Theme.of(context).colorScheme.surfaceVariant,
                       child: Padding(
                         padding: const EdgeInsets.all(5.0),
                         child: Align(
@@ -848,12 +857,13 @@ class _DownloadLogoState extends State<DownloadLogo> {
                                   onTap: _undo,
                                   child: CircleAvatar(
                                     radius: 18,
-                                    backgroundColor: Colors.white,
+                                    backgroundColor:
+                                        Theme.of(context).cardColor,
                                     child: Icon(
                                       Icons.replay,
                                       color: _undoStack.length > 1
-                                          ? Colors.black
-                                          : Colors.grey,
+                                          ? Theme.of(context).iconTheme.color
+                                          : Theme.of(context).disabledColor,
                                     ),
                                   ),
                                 ),
@@ -865,12 +875,13 @@ class _DownloadLogoState extends State<DownloadLogo> {
                                   onTap: _redo,
                                   child: CircleAvatar(
                                     radius: 18,
-                                    backgroundColor: Colors.white,
+                                    backgroundColor:
+                                        Theme.of(context).cardColor,
                                     child: Icon(
                                       Icons.refresh,
                                       color: _redoStack.isNotEmpty
-                                          ? Colors.black
-                                          : Colors.grey,
+                                          ? Theme.of(context).iconTheme.color
+                                          : Theme.of(context).disabledColor,
                                     ),
                                   ),
                                 ),
@@ -3930,8 +3941,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
     }
     // For text elements
     else if ((id >= 100 && id < 200) || id == 1 || id == 2) {
-      double newSize = currentSize.width + delta;
-
       // Text size needs to be in font size, not pixel width
       // Convert pixel delta to font size delta
       double fontSizeChange = delta * 0.3; // Adjust this factor as needed

@@ -22,7 +22,7 @@ class InformationWidget extends StatefulWidget {
 class _InformationWidgetState extends State<InformationWidget> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController sloganController = TextEditingController();
-   String selectedCategory = ''; 
+  String selectedCategory = '';
 
   @override
   void initState() {
@@ -39,7 +39,6 @@ class _InformationWidgetState extends State<InformationWidget> {
     }
   }
 
-
   @override
   void dispose() {
     nameController.dispose();
@@ -49,45 +48,42 @@ class _InformationWidgetState extends State<InformationWidget> {
 
   @override
   Widget build(BuildContext context) {
-      final List<String> categories = [
-  S.of(context).automotiveTransportation,
-  S.of(context).beautyMassage,
-  S.of(context).businessConsulting,
-  S.of(context).childrenEducation,
-  S.of(context).entertainmentArtMusic,
-  S.of(context).familyServicesCounseling,
-  S.of(context).financeInsurance,
-  S.of(context).foodBeverageRestaurant,
-  S.of(context).healthCarePublicSafety,
-  S.of(context).holidaySpecialOccasion,
-  S.of(context).itEngineeringScience,
-  S.of(context).legalPolitics,
-  S.of(context).petsAnimal,
-  S.of(context).photography,
-  S.of(context).sportsFitness,
-  ];
-  if (selectedCategory.isEmpty || !categories.contains(selectedCategory)) {
-    selectedCategory = categories.first;
-  }
+    final List<String> categories = [
+      S.of(context).automotiveTransportation,
+      S.of(context).beautyMassage,
+      S.of(context).businessConsulting,
+      S.of(context).childrenEducation,
+      S.of(context).entertainmentArtMusic,
+      S.of(context).familyServicesCounseling,
+      S.of(context).financeInsurance,
+      S.of(context).foodBeverageRestaurant,
+      S.of(context).healthCarePublicSafety,
+      S.of(context).holidaySpecialOccasion,
+      S.of(context).itEngineeringScience,
+      S.of(context).legalPolitics,
+      S.of(context).petsAnimal,
+      S.of(context).photography,
+      S.of(context).sportsFitness,
+    ];
+    if (selectedCategory.isEmpty || !categories.contains(selectedCategory)) {
+      selectedCategory = categories.first;
+    }
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
             const SizedBox(height: 16),
-             Text(
-                         S.of(context).ChooseIndustry,
-
-              style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black),
+            Text(
+              S.of(context).ChooseIndustry,
+              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
             ),
             Container(
               height: 60,
               margin: const EdgeInsets.all(16),
               padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.black, width: 2),
+                border:
+                    Border.all(color: Theme.of(context).primaryColor, width: 2),
                 borderRadius: BorderRadius.circular(15),
               ),
               child: DropdownButtonHideUnderline(
@@ -95,7 +91,10 @@ class _InformationWidgetState extends State<InformationWidget> {
                   value: selectedCategory,
                   isExpanded: true,
                   icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 35),
-                  style: const TextStyle(color: Colors.black, fontSize: 16),
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyLarge
+                      ?.copyWith(fontSize: 16),
                   onChanged: (String? newValue) {
                     setState(() {
                       selectedCategory = newValue!;
@@ -119,34 +118,26 @@ class _InformationWidgetState extends State<InformationWidget> {
               ),
             ),
             const SizedBox(height: 20),
-             Text(
-               S.of(context).companyName,
-
-              style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black),
+            Text(
+              S.of(context).companyName,
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             SizedBox(
               width: 330,
               child: TextField(
-                style: TextStyle(
-                  color: Colors.black, // This makes the text black
-                ),
                 controller: nameController,
                 textAlign: TextAlign.center,
                 maxLength: 10,
-                cursorColor: Colors.black,
                 decoration: InputDecoration(
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
-                    borderSide: const BorderSide(color: Colors.black, width: 2),
+                    borderSide: BorderSide(
+                        color: Theme.of(context).primaryColor, width: 2),
                   ),
                   counterText: "",
-                  hintText:   S.of(context).enterCompany,
-
-                  hintStyle: TextStyle(color: Colors.black),
+                  hintText: S.of(context).enterCompany,
+                  hintStyle: TextStyle(color: Theme.of(context).hintColor),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),
@@ -157,34 +148,27 @@ class _InformationWidgetState extends State<InformationWidget> {
               ),
             ),
             const SizedBox(height: 20),
-             Text(
-            S.of(context).sloganName,
-              style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black),
+            Text(
+              S.of(context).sloganName,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             SizedBox(
               width: 330,
               child: TextField(
-                style: TextStyle(
-                  color: Colors.black, // This makes the text black
-                ),
                 controller: sloganController,
                 textAlign: TextAlign.center,
                 maxLength: 20,
-                cursorColor: Colors.black,
                 decoration: InputDecoration(
                   focusedBorder: OutlineInputBorder(
                     // focused outline color
                     borderRadius: BorderRadius.circular(15),
-                    borderSide: const BorderSide(color: Colors.black, width: 2),
+                    borderSide: BorderSide(
+                        color: Theme.of(context).primaryColor, width: 2),
                   ),
-                  counterText:"",
-
-                  hintText:  S.of(context).enterSlogan,
-                  hintStyle: TextStyle(color: Colors.black),
+                  counterText: "",
+                  hintText: S.of(context).enterSlogan,
+                  hintStyle: TextStyle(color: Theme.of(context).hintColor),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),

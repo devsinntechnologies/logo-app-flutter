@@ -45,74 +45,76 @@ class _TemplateWidgetState extends State<TemplateWidget> {
     );
   }
 
-  TextStyle _getFontStyle(int index, {double fontSize = 14}) {
+  TextStyle _getFontStyle(BuildContext context, int index,
+      {double fontSize = 14}) {
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color;
     switch (index) {
       case 0:
         return GoogleFonts.roboto(
           fontSize: fontSize,
-          color: Colors.black87,
+          color: textColor,
           fontWeight: FontWeight.bold,
           letterSpacing: 1.2,
         );
       case 1:
         return GoogleFonts.pacifico(
           fontSize: fontSize,
-          color: Colors.black87,
+          color: textColor,
           letterSpacing: 1.2,
         );
       case 2:
         return GoogleFonts.poppins(
           fontSize: fontSize,
-          color: Colors.black87,
+          color: textColor,
           fontWeight: FontWeight.normal,
           letterSpacing: 1.2,
         );
       case 3:
         return GoogleFonts.dancingScript(
           fontSize: fontSize,
-          color: Colors.black87,
+          color: textColor,
           letterSpacing: 1.2,
         );
       case 4:
         return GoogleFonts.satisfy(
           fontSize: fontSize,
-          color: Colors.black87,
+          color: textColor,
           letterSpacing: 1.2,
         );
       case 5:
         return GoogleFonts.lato(
           fontSize: fontSize,
-          color: Colors.black87,
+          color: textColor,
           letterSpacing: 1.2,
         );
       case 6:
         return GoogleFonts.orbitron(
           fontSize: fontSize,
-          color: Colors.black87,
+          color: textColor,
           letterSpacing: 1.2,
         );
       case 7:
         return GoogleFonts.openSans(
           fontSize: fontSize,
-          color: Colors.black87,
+          color: textColor,
           letterSpacing: 1.2,
         );
       case 8:
         return GoogleFonts.bebasNeue(
           fontSize: fontSize,
-          color: Colors.black87,
+          color: textColor,
           letterSpacing: 1.2,
         );
       case 9:
         return GoogleFonts.pressStart2p(
-          fontSize: fontSize - 2, // this font is blocky, reduce size a bit
-          color: Colors.black87,
+          fontSize: fontSize - 2,
+          color: textColor,
           letterSpacing: 1.2,
         );
       default:
         return TextStyle(
           fontSize: fontSize,
-          color: Colors.black87,
+          color: textColor,
         );
     }
   }
@@ -248,6 +250,7 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: _getFontStyle(
+                                  context,
                                   widget.selectedFontIndex,
                                   fontSize: 14,
                                 ),
@@ -261,6 +264,7 @@ class _TemplateWidgetState extends State<TemplateWidget> {
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                                 style: _getFontStyle(
+                                  context,
                                   widget.selectedFontIndex,
                                   fontSize: 10,
                                 ),

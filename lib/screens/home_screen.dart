@@ -8,6 +8,7 @@ import 'package:logo_app_flutter/components/GridButtons/my_logo_button.dart';
 import 'package:logo_app_flutter/components/drawer_items.dart';
 import 'package:logo_app_flutter/components/google_alert.dart';
 import 'package:logo_app_flutter/components/show_language_dialog.dart';
+import 'package:logo_app_flutter/components/show_theme_dialog.dart';
 import 'package:logo_app_flutter/generated/l10n.dart';
 import 'package:logo_app_flutter/screens/design_input_screen.dart';
 import 'package:logo_app_flutter/screens/download_logo.dart';
@@ -55,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       drawer: Drawer(
         child: Column(
           children: [
@@ -219,6 +220,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       }
                     },
                   ),
+                  DrawerItem(
+                    icon: Icons.palette,
+                    text: S.of(context).theme ?? "Theme",
+                    onTap: () => showThemeDialog(context),
+                  ),
+                  const Divider(),
                 ],
               ),
             ),
@@ -241,6 +248,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         "assets/icons/menu.png",
                         width: 30,
                         height: 30,
+                        color: Theme.of(context).iconTheme.color,
                       ),
                       onPressed: () {
                         Scaffold.of(context).openDrawer();
@@ -269,7 +277,12 @@ class _HomeScreenState extends State<HomeScreen> {
                               style: GoogleFonts.poppins(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w500,
-                                color: Colors.black87,
+                                color: Theme.of(context)
+                                        .textTheme
+                                        .bodyLarge
+                                        ?.color
+                                        ?.withOpacity(0.87) ??
+                                    Colors.black87,
                               ),
                             ),
                           ),

@@ -8,15 +8,15 @@ class CanvasUploadService {
   /// Upload canvas image to Supabase under the current user's folder
   static Future<String?> uploadCanvas({required GlobalKey canvasKey}) async {
     try {
-        // Allow any pending UI updates (like clearing selection) to complete
-        await Future.delayed(const Duration(milliseconds: 50));
-        await WidgetsBinding.instance.endOfFrame;
-        await Future.delayed(const Duration(milliseconds: 50));
-        await WidgetsBinding.instance.endOfFrame;
+      // Allow any pending UI updates (like clearing selection) to complete
+      await Future.delayed(const Duration(milliseconds: 50));
+      await WidgetsBinding.instance.endOfFrame;
+      await Future.delayed(const Duration(milliseconds: 50));
+      await WidgetsBinding.instance.endOfFrame;
 
-        final boundary =
+      final boundary =
           canvasKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
-        final ui.Image image = await boundary.toImage(pixelRatio: 3);
+      final ui.Image image = await boundary.toImage(pixelRatio: 3);
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       final Uint8List pngBytes = byteData!.buffer.asUint8List();
 
@@ -36,7 +36,7 @@ class CanvasUploadService {
       return url;
     } catch (e) {
       print('❌ Canvas upload error: $e');
-      return null;
+      rethrow;
     }
   }
 }

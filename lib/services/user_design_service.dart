@@ -13,7 +13,8 @@ class UserDesignService {
   Future<List<Map<String, dynamic>>> fetchUserDesigns() async {
     final uid = supabase.auth.currentUser!.id;
     try {
-      final response = await supabase.from('designs').select().eq('user_id', uid);
+      final response =
+          await supabase.from('designs').select().eq('user_id', uid);
 
       if (response is! List) return [];
 
@@ -42,14 +43,16 @@ class UserDesignService {
 
       return normalized;
     } catch (e) {
-      AppLogger.error('Fetch designs error', tag: 'UserDesignService', error: e);
-      return [];
+      AppLogger.error('Fetch designs error',
+          tag: 'UserDesignService', error: e);
+      rethrow;
     }
   }
 
   /// Upload a canvas image to Supabase storage
   /// Returns a map with 'filePath' and 'url'
-  Future<Map<String, String>?> uploadCanvasImage({required GlobalKey canvasKey, String? targetPath}) async {
+  Future<Map<String, String>?> uploadCanvasImage(
+      {required GlobalKey canvasKey, String? targetPath}) async {
     try {
       // Ensure UI has finished any pending rebuilds (selection box cleared)
       // Wait a couple of frames and small delays to let provider.clearSelection() propagate.
@@ -62,10 +65,14 @@ class UserDesignService {
           canvasKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
       final ui.Image image = await boundary.toImage(pixelRatio: 3);
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-      final Uint8List pngBytes = byteData!.buffer.asUint8List();
+      if (byteData == null) {
+        throw Exception('Could not capture canvas image data');
+      }
+      final Uint8List pngBytes = byteData.buffer.asUint8List();
 
       final uid = supabase.auth.currentUser!.id;
-      final filePath = targetPath ?? 'logos/$uid/logo_${DateTime.now().millisecondsSinceEpoch}.png';
+      final filePath = targetPath ??
+          'logos/$uid/logo_${DateTime.now().millisecondsSinceEpoch}.png';
 
       // If replacing an existing file, attempt to remove it first so upload is a clean replace
       if (targetPath != null) {
@@ -87,8 +94,9 @@ class UserDesignService {
 
       return {'filePath': filePath, 'url': url};
     } catch (e) {
-      AppLogger.error('Canvas upload error', tag: 'UserDesignService', error: e);
-      return null;
+      AppLogger.error('Canvas upload error',
+          tag: 'UserDesignService', error: e);
+      rethrow;
     }
   }
 
@@ -111,66 +119,69 @@ class UserDesignService {
 
       AppLogger.success('Design saved successfully', tag: 'UserDesignService');
     } catch (e) {
-      AppLogger.error('Save new design error', tag: 'UserDesignService', error: e);
+      AppLogger.error('Save new design error',
+          tag: 'UserDesignService', error: e);
+      rethrow;
     }
   }
 
   /// Update an existing design
-Future<void> updateDesign({
-  required String designId,
-  required GlobalKey canvasKey,
-  required Map<String, dynamic> updatedJson,
-  String? imagePath,           // 👈 SAME path pass karne ke liye
-  bool updateImage = false,
-}) async {
-  final uid = supabase.auth.currentUser!.id;
+  Future<void> updateDesign({
+    required String designId,
+    required GlobalKey canvasKey,
+    required Map<String, dynamic> updatedJson,
+    String? imagePath, // 👈 SAME path pass karne ke liye
+    bool updateImage = false,
+  }) async {
+    final uid = supabase.auth.currentUser!.id;
 
-  try {
-    String? finalPath = imagePath;
+    try {
+      String? finalPath = imagePath;
 
-    if (updateImage) {
-      // Agar imagePath UI se nahi aayi, DB se le lo
-      if (finalPath == null) {
-        try {
-          final existing = await fetchDesignById(designId);
-          finalPath = existing?['image_path'] as String?;
-        } catch (_) {
-          finalPath = null;
+      if (updateImage) {
+        // Agar imagePath UI se nahi aayi, DB se le lo
+        if (finalPath == null) {
+          try {
+            final existing = await fetchDesignById(designId);
+            finalPath = existing?['image_path'] as String?;
+          } catch (_) {
+            finalPath = null;
+          }
+        }
+
+        // 🔥 SAME PATH par overwrite
+        final uploadResult = await uploadCanvasImage(
+          canvasKey: canvasKey,
+          targetPath: finalPath,
+        );
+
+        if (uploadResult != null) {
+          finalPath = uploadResult['filePath'];
         }
       }
 
-      // 🔥 SAME PATH par overwrite
-      final uploadResult = await uploadCanvasImage(
-        canvasKey: canvasKey,
-        targetPath: finalPath,
-      );
+      final updateData = {
+        'design_json': jsonEncode(updatedJson),
+        'updated_at': DateTime.now().toIso8601String(),
+      };
 
-      if (uploadResult != null) {
-        finalPath = uploadResult['filePath'];
+      if (finalPath != null) {
+        updateData['image_path'] = finalPath;
       }
+
+      await supabase
+          .from('designs')
+          .update(updateData)
+          .eq('id', designId)
+          .eq('user_id', uid);
+
+      AppLogger.success('Design + image updated', tag: 'UserDesignService');
+    } catch (e) {
+      AppLogger.error('Update design error',
+          tag: 'UserDesignService', error: e);
+      rethrow;
     }
-
-    final updateData = {
-      'design_json': jsonEncode(updatedJson),
-      'updated_at': DateTime.now().toIso8601String(),
-    };
-
-    if (finalPath != null) {
-      updateData['image_path'] = finalPath;
-    }
-
-    await supabase
-        .from('designs')
-        .update(updateData)
-        .eq('id', designId)
-        .eq('user_id', uid);
-
-    AppLogger.success('Design + image updated', tag: 'UserDesignService');
-  } catch (e) {
-    AppLogger.error('Update design error', tag: 'UserDesignService', error: e);
-    rethrow;
   }
-}
 
   /// Fetch a single design by ID
   Future<Map<String, dynamic>?> fetchDesignById(String designId) async {
@@ -206,7 +217,9 @@ Future<void> updateDesign({
         return item;
       }
     } catch (e) {
-      AppLogger.error('Fetch design by ID error', tag: 'UserDesignService', error: e);
+      AppLogger.error('Fetch design by ID error',
+          tag: 'UserDesignService', error: e);
+      rethrow;
     }
 
     return null;
@@ -225,16 +238,22 @@ Future<void> updateDesign({
           await supabase.storage.from('logos').remove([imagePath]);
         } catch (e) {
           // ignore storage removal errors but log
-          AppLogger.warning('Failed to remove image from storage', tag: 'UserDesignService');
+          AppLogger.warning('Failed to remove image from storage',
+              tag: 'UserDesignService');
         }
       }
 
-      await supabase.from('designs').delete().eq('id', designId).eq('user_id', uid);
+      await supabase
+          .from('designs')
+          .delete()
+          .eq('id', designId)
+          .eq('user_id', uid);
       AppLogger.success('Design deleted: $designId', tag: 'UserDesignService');
       return true;
     } catch (e) {
-      AppLogger.error('Delete design error', tag: 'UserDesignService', error: e);
-      return false;
+      AppLogger.error('Delete design error',
+          tag: 'UserDesignService', error: e);
+      rethrow;
     }
   }
 }

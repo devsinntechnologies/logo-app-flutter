@@ -57,7 +57,7 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
       context: context,
       builder: (context) {
         return AlertDialog(
-            backgroundColor: Colors.grey[100],
+            backgroundColor: Theme.of(context).dialogBackgroundColor,
             title: GestureDetector(
               onTap: () {
                 _signInWithGoogle();
@@ -66,16 +66,16 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(5),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.shade400,
+                      color: Theme.of(context).shadowColor.withOpacity(0.2),
                       offset: const Offset(4, 4),
                       blurRadius: 6,
                     ),
                     BoxShadow(
-                      color: Colors.white,
+                      color: Theme.of(context).canvasColor.withOpacity(0.2),
                       offset: const Offset(-4, -4),
                       blurRadius: 6,
                     ),
@@ -93,7 +93,7 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
                       "Sign In with Google",
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors.black,
+                        color: Colors.black87,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -158,10 +158,10 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
       child: Padding(
         padding: const EdgeInsets.only(right: 6.0),
         child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width *
-                    0.3, // max 60% of screen
-              ),
+          constraints: BoxConstraints(
+            maxWidth:
+                MediaQuery.of(context).size.width * 0.3, // max 60% of screen
+          ),
           child: Container(
             decoration: BoxDecoration(
               gradient: ThemeColors.textGradient,
@@ -169,14 +169,12 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
             ),
             child: Padding(
               padding: EdgeInsets.all(6.0),
-              
-                child: Text(
-                  S.of(context).login,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  
+              child: Text(
+                S.of(context).login,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
