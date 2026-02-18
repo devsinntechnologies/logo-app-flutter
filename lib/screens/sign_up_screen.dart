@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:logo_app_flutter/generated/l10n.dart';
+import 'package:logo_app_flutter/screens/home_screen.dart';
 import 'package:logo_app_flutter/screens/log_in_screen.dart';
-import 'package:logo_app_flutter/screens/verify_email_screen.dart';
 import 'package:logo_app_flutter/services/auth_service.dart';
 import 'package:logo_app_flutter/utils/theme_colors.dart';
 
@@ -222,11 +222,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     //   );
                     // }
                     if (response.user != null) {
-                      Navigator.pushReplacement(
+                      Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => VerifyEmailScreen(email: email),
+                          builder: (_) => const HomeScreen(),
                         ),
+                        (route) => false,
                       );
                     }
                   } catch (e) {

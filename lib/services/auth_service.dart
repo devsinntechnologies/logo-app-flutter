@@ -28,6 +28,10 @@ class AuthService {
     final response = await _supabase.auth.signUp(
       email: email,
       password: password,
+      data: {
+        'first_name': firstName,
+        'last_name': lastName,
+      },
     );
     AppLogger.success("User signed up: ${response.user?.id}",
         tag: "AuthService");

@@ -36,18 +36,18 @@ class MyDesignButton extends StatelessWidget {
         // );
         // ScaffoldMessenger.of(context).showSnackBar(snackBar);
         AdMobService.loadInterstitial(
-    onLoaded: (InterstitialAd ad) {
-      ad.fullScreenContentCallback = FullScreenContentCallback(
-        onAdDismissedFullScreenContent: (ad) {
-          ad.dispose();
-        },
-        onAdFailedToShowFullScreenContent: (ad, error) {
-          ad.dispose();
-        },
-      );
-      ad.show();
-    },
-  );
+          onLoaded: (InterstitialAd ad) {
+            ad.fullScreenContentCallback = FullScreenContentCallback(
+              onAdDismissedFullScreenContent: (ad) {
+                ad.dispose();
+              },
+              onAdFailedToShowFullScreenContent: (ad, error) {
+                ad.dispose();
+              },
+            );
+            ad.show();
+          },
+        );
       },
       child: Container(
         height: 160,
@@ -76,7 +76,7 @@ class MyDesignButton extends StatelessWidget {
                   SizedBox(height: 20),
                   Expanded(
                     child: Text(
-                    S.of(context).myDesign,
+                      S.of(context).myDesign,
                       style: GoogleFonts.poppins(
                         color: Colors.white,
                         fontWeight: FontWeight.w600,

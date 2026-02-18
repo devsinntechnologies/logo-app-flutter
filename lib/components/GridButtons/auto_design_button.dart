@@ -36,62 +36,62 @@ class AutoDesignButton extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Container(
-            height: 220,
-            // width: 150,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: ThemeColors.orangePinkPurple,
-              borderRadius: BorderRadius.circular(35),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.25),
-                  blurRadius: 10,
-                  spreadRadius: 3,
-                  offset: const Offset(2, 4),
-                ),
-              ],
-            ),
-            child: Padding(
-  padding: const EdgeInsets.all(8.0),
-  child: Row(
-    crossAxisAlignment: CrossAxisAlignment.center,
-    children: [
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Image.asset(
-            'assets/icons/wandd.png',
-            width: 60,
-          ),
-          const SizedBox(height: 25),
-          ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width * 0.6, // limit text width
-            ),
-            child: Text(
-              S.of(context).autoDesign,
-              style: const TextStyle(
-                fontSize: 24,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+              height: 220,
+              // width: 150,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: ThemeColors.orangePinkPurple,
+                borderRadius: BorderRadius.circular(35),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.25),
+                    blurRadius: 10,
+                    spreadRadius: 3,
+                    offset: const Offset(2, 4),
+                  ),
+                ],
               ),
-              softWrap: true, // allow wrapping
-              overflow: TextOverflow.ellipsis, // optional: show ... if still too long
-            ),
-          ),
-        ],
-      ),
-      const Spacer(),
-      const Icon(
-        Icons.chevron_right,
-        color: Colors.white,
-        size: 42,
-      ),
-    ],
-  ),
-)
-
-          ),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Image.asset(
+                          'assets/icons/wandd.png',
+                          width: 60,
+                        ),
+                        const SizedBox(height: 25),
+                        ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: MediaQuery.of(context).size.width *
+                                0.6, // limit text width
+                          ),
+                          child: Text(
+                            S.of(context).autoDesign,
+                            style: const TextStyle(
+                              fontSize: 24,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            softWrap: true, // allow wrapping
+                            overflow: TextOverflow
+                                .ellipsis, // optional: show ... if still too long
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
+                    const Icon(
+                      Icons.chevron_right,
+                      color: Colors.white,
+                      size: 42,
+                    ),
+                  ],
+                ),
+              )),
         ),
       ),
     );
