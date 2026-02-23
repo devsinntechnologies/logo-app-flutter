@@ -15,9 +15,10 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
+
 android {
     namespace = "com.devsinntechnologies.smartlogomaker"
-    compileSdk = 36 
+    compileSdk = 36
     ndkVersion =  "27.0.12077973"
 
     compileOptions {
@@ -41,11 +42,11 @@ android {
 
     signingConfigs {
         create("release") {
-            if (keystoreProperties.containsKey("keyAlias")) {
-                keyAlias = keystoreProperties.getProperty("keyAlias")
-                keyPassword = keystoreProperties.getProperty("keyPassword")
-                storeFile = file(keystoreProperties.getProperty("storeFile"))
-                storePassword = keystoreProperties.getProperty("storePassword")
+            if (keystorePropertiesFile.exists()) {
+                keyAlias = keystoreProperties["keyAlias"] as String
+                keyPassword = keystoreProperties["keyPassword"] as String
+                storeFile = file(keystoreProperties["storeFile"] as String)
+                storePassword = keystoreProperties["storePassword"] as String
             }
         }
     }
@@ -56,11 +57,8 @@ android {
             signingConfig = if (keystorePropertiesFile.exists()) {
                 signingConfigs.getByName("release")
             } else {
-                println("⚠️  WARNING: key.properties not found. Using debug signing.")
-                println("   For production builds, create key.properties with your signing configuration.")
                 signingConfigs.getByName("debug")
             }
-            
             // Enable code shrinking and obfuscation for production
             isMinifyEnabled = true
             isShrinkResources = true
@@ -84,5 +82,5 @@ flutter {
     source = "../.."
 }
 dependencies {
-    implementation(kotlin("stdlib", "2.1.0"))
+    implementation(kotlin("stdlib", "2.1.10"))
 }
