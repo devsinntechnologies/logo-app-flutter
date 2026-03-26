@@ -1,0 +1,123 @@
+Analyzing logo-app-flutter...                                   
+
+warning - The include file 'package:flutter_lints/flutter.yaml' in 'c:\users\admin\desktop\smart_logo_maker\logo-app-flutter\analysis_options.yaml' can't be found when analyzing 'c:\users\admin\desktop\smart_logo_maker\logo-app-flutter' - analysis_options.yaml:10:10 - include_file_not_found
+warning - Unused import: 'package:google_mobile_ads/google_mobile_ads.dart' - lib\components\GridButtons\auto_design_button.dart:2:8 - unused_import
+warning - Unused import: 'package:logo_app_flutter/services/ad_mob_service.dart' - lib\components\GridButtons\auto_design_button.dart:5:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\components\GridButtons\auto_design_button.dart:47:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\components\GridButtons\create_logo_button.dart:35:35 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\components\GridButtons\my_design_button.dart:60:35 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\components\GridButtons\my_logo_button.dart:35:37 - deprecated_member_use
+warning - The value of the local variable 'clampedX' isn't used - lib\components\editable_element_wrapper.dart:72:18 - unused_local_variable
+warning - The value of the local variable 'clampedY' isn't used - lib\components\editable_element_wrapper.dart:77:18 - unused_local_variable
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\components\editable_element_wrapper.dart:140:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\components\grid_buttons.dart:26:37 - deprecated_member_use
+warning - The value of the field '_baseColor' isn't used - lib\components\logoBottomNavbarItems\drop_up_panel.dart:304:9 - unused_field
+warning - The value of the local variable 'isScrollEnabled' isn't used - lib\components\logo_bottom_nav_bar.dart:72:23 - unused_local_variable
+warning - The value of the local variable 'logoColor' isn't used - lib\components\logo_canvas.dart:120:11 - unused_local_variable
+warning - The value of the local variable 'isSelected' isn't used - lib\components\logo_canvas.dart:433:16 - unused_local_variable
+warning - The value of the local variable 'shapeColor' isn't used - lib\components\logo_canvas.dart:437:18 - unused_local_variable
+warning - The value of the local variable 'customTextColor' isn't used - lib\components\logo_canvas.dart:440:17 - unused_local_variable
+warning - The left operand can't be null, so the right operand is never executed - lib\components\logo_canvas.dart:610:70 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\components\logo_canvas.dart:611:71 - dead_null_aware_expression
+warning - The receiver can't be null, so the null-aware operator '?.' is unnecessary - lib\components\logo_canvas.dart:616:35 - invalid_null_aware_operator
+warning - The operand can't be 'null', so the condition is always 'false' - lib\components\logo_canvas.dart:716:47 - unnecessary_null_comparison
+warning - The left operand can't be null, so the right operand is never executed - lib\components\logo_canvas.dart:792:128 - dead_null_aware_expression
+warning - The operand can't be 'null', so the condition is always 'false' - lib\components\logo_canvas.dart:830:58 - unnecessary_null_comparison
+warning - The left operand can't be null, so the right operand is never executed - lib\components\logo_canvas.dart:857:131 - dead_null_aware_expression
+warning - The operand can't be 'null', so the condition is always 'false' - lib\components\logo_canvas.dart:895:53 - unnecessary_null_comparison
+warning - Unused import: 'package:logo_app_flutter/provider/selected_color_provider.dart' - lib\fragments\template_widget.dart:5:8 - unused_import
+warning - Unused import: 'package:provider/provider.dart' - lib\fragments\template_widget.dart:11:8 - unused_import
+warning - The value of the local variable 'screenHeight' isn't used - lib\fragments\template_widget.dart:123:11 - unused_local_variable
+warning - Unused import: 'package:logo_app_flutter/screens/splash_screen.dart' - lib\main.dart:9:8 - unused_import
+warning - The value of the field '_session' isn't used - lib\main.dart:53:12 - unused_field
+warning - The value of the local variable 'session' isn't used - lib\main.dart:61:13 - unused_local_variable
+   info - The import of 'dart:ui' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart' - lib\models\logo_state_data.dart:1:8 - unnecessary_import
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\models\logo_state_data.dart:117:26 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\models\logo_state_data.dart:121:40 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\models\logo_state_data.dart:252:50 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\models\logo_state_data.dart:548:71 - deprecated_member_use
+warning - The left operand can't be null, so the right operand is never executed - lib\models\logo_state_data.dart:561:35 - dead_null_aware_expression
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\models\logo_state_data.dart:563:34 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\models\logo_state_data.dart:565:48 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\models\logo_state_data.dart:566:62 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\models\logo_state_data.dart:569:38 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\models\logo_state_data.dart:570:52 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\models\logo_state_data.dart:681:39 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\models\logo_state_data.dart:686:66 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\models\logo_state_data.dart:691:30 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\models\logo_state_data.dart:693:44 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\models\logo_state_data.dart:694:34 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\models\logo_state_data.dart:695:58 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\models\logo_state_data.dart:697:48 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\models\logo_state_data.dart:727:34 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\models\logo_state_data.dart:729:48 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\models\logo_state_data.dart:750:35 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\models\logo_state_data.dart:765:43 - deprecated_member_use
+   info - The import of 'dart:typed_data' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/services.dart' - lib\screens\canvas_exporter.dart:3:8 - unnecessary_import
+   info - 'red' is deprecated and shouldn't be used. Use (*.r * 255.0).round() & 0xff - lib\screens\canvas_exporter.dart:280:19 - deprecated_member_use
+   info - 'green' is deprecated and shouldn't be used. Use (*.g * 255.0).round() & 0xff - lib\screens\canvas_exporter.dart:281:19 - deprecated_member_use
+   info - 'blue' is deprecated and shouldn't be used. Use (*.b * 255.0).round() & 0xff - lib\screens\canvas_exporter.dart:282:19 - deprecated_member_use
+   info - 'opacity' is deprecated and shouldn't be used. Use .a - lib\screens\canvas_exporter.dart:283:20 - deprecated_member_use
+   info - 'alpha' is deprecated and shouldn't be used. Use (*.a * 255.0).round() & 0xff - lib\screens\canvas_exporter.dart:284:13 - deprecated_member_use
+   info - 'red' is deprecated and shouldn't be used. Use (*.r * 255.0).round() & 0xff - lib\screens\canvas_exporter.dart:532:16 - deprecated_member_use
+   info - 'green' is deprecated and shouldn't be used. Use (*.g * 255.0).round() & 0xff - lib\screens\canvas_exporter.dart:533:16 - deprecated_member_use
+   info - 'blue' is deprecated and shouldn't be used. Use (*.b * 255.0).round() & 0xff - lib\screens\canvas_exporter.dart:534:16 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\screens\color_screen.dart:142:49 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\screens\color_screen.dart:142:60 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\screens\color_screen.dart:174:45 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\screens\color_screen.dart:189:55 - deprecated_member_use
+   info - 'showLabel' is deprecated and shouldn't be used. Use empty list in [labelTypes] to disable label - lib\screens\color_screen.dart:192:35 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\screens\color_screen.dart:287:21 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\screens\color_screen.dart:287:52 - deprecated_member_use
+warning - Unused import: 'package:logo_app_flutter/provider/selected_color_provider.dart' - lib\screens\design_input_screen.dart:9:8 - unused_import
+warning - Unused import: 'package:provider/provider.dart' - lib\screens\design_input_screen.dart:11:8 - unused_import
+   info - The import of 'dart:typed_data' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/services.dart' - lib\screens\download_logo.dart:4:8 - unnecessary_import
+warning - Unused import: 'package:google_mobile_ads/google_mobile_ads.dart' - lib\screens\download_logo.dart:7:8 - unused_import
+warning - Unused import: 'package:logo_app_flutter/services/ad_mob_service.dart' - lib\screens\download_logo.dart:13:8 - unused_import
+warning - Unused import: 'package:logo_app_flutter/services/canvas_upload_service.dart' - lib\screens\download_logo.dart:14:8 - unused_import
+warning - Unused import: '../utils/text_size_util.dart' - lib\screens\download_logo.dart:32:8 - unused_import
+warning - The value of the field '_selectedBackgroundShape' isn't used - lib\screens\download_logo.dart:78:10 - unused_field
+warning - The value of the field '_currentBackgroundState' isn't used - lib\screens\download_logo.dart:80:24 - unused_field
+warning - The declaration '_requestGalleryPermission' isn't referenced - lib\screens\download_logo.dart:197:16 - unused_element
+warning - The operand can't be 'null', so the condition is always 'true' - lib\screens\download_logo.dart:271:61 - unnecessary_null_comparison
+warning - The operand can't be 'null', so the condition is always 'true' - lib\screens\download_logo.dart:295:61 - unnecessary_null_comparison
+warning - The diagnostic 'avoid_print' doesn't need to be ignored here because it's already being ignored - lib\screens\download_logo.dart:481:18 - duplicate_ignore
+warning - The declaration '_clearSelection' isn't referenced - lib\screens\download_logo.dart:1242:8 - unused_element
+warning - The declaration '_setOutlineColor' isn't referenced - lib\screens\download_logo.dart:1401:8 - unused_element
+warning - The operand can't be 'null', so the condition is always 'true' - lib\screens\download_logo.dart:1692:14 - unnecessary_null_comparison
+warning - The diagnostic 'avoid_print' doesn't need to be ignored here because it's already being ignored - lib\screens\download_logo.dart:1732:16 - duplicate_ignore
+warning - The diagnostic 'avoid_print' doesn't need to be ignored here because it's already being ignored - lib\screens\download_logo.dart:1852:18 - duplicate_ignore
+warning - The diagnostic 'avoid_print' doesn't need to be ignored here because it's already being ignored - lib\screens\download_logo.dart:1970:16 - duplicate_ignore
+warning - The left operand can't be null, so the right operand is never executed - lib\screens\download_logo.dart:2393:38 - dead_null_aware_expression
+warning - The value of the local variable 'message' isn't used - lib\screens\download_logo.dart:2770:14 - unused_local_variable
+warning - The declaration '_getElementPositionSafe' isn't referenced - lib\screens\download_logo.dart:3246:10 - unused_element
+warning - The declaration '_addCustomImage' isn't referenced - lib\screens\download_logo.dart:3396:8 - unused_element
+warning - The left operand can't be null, so the right operand is never executed - lib\screens\download_logo.dart:3778:62 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\screens\download_logo.dart:3782:69 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\screens\download_logo.dart:3786:64 - dead_null_aware_expression
+warning - The declaration '_handleResizePanUpdate' isn't referenced - lib\screens\download_logo.dart:3917:8 - unused_element
+warning - The value of the local variable 'newSize' isn't used - lib\screens\download_logo.dart:3944:14 - unused_local_variable
+warning - The declaration '_showConfirmDialog' isn't referenced - lib\screens\google_sign_in_button.dart:55:8 - unused_element
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\screens\gradiant_picker_screen.dart:96:45 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\screens\gradiant_picker_screen.dart:96:56 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\screens\gradiant_picker_screen.dart:129:43 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\screens\gradiant_picker_screen.dart:143:53 - deprecated_member_use
+   info - 'showLabel' is deprecated and shouldn't be used. Use empty list in [labelTypes] to disable label - lib\screens\gradiant_picker_screen.dart:146:33 - deprecated_member_use
+warning - The declaration '_choiceChip' isn't referenced - lib\screens\gradiant_picker_screen.dart:500:10 - unused_element
+warning - Unused import: 'package:logo_app_flutter/components/GridButtons/my_logo_button.dart' - lib\screens\home_screen.dart:7:8 - unused_import
+warning - Unused import: 'package:logo_app_flutter/screens/my_account_screen.dart' - lib\screens\home_screen.dart:15:8 - unused_import
+warning - The value of the local variable 'text' isn't used - lib\screens\layer_panel.dart:34:10 - unused_local_variable
+warning - The value of the local variable 'image' isn't used - lib\screens\layer_panel.dart:40:13 - unused_local_variable
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\layer_panel.dart:174:41 - deprecated_member_use
+warning - The value of the field '_selectedTextAlign' isn't used - lib\screens\movement_panel.dart:60:13 - unused_field
+warning - The declaration '_saveStateAndUpdate' isn't referenced - lib\screens\movement_panel.dart:84:8 - unused_element
+warning - The declaration '_buildColorBox' isn't referenced - lib\screens\movement_panel.dart:941:10 - unused_element
+warning - The receiver can't be null, so the null-aware operator '?[' is unnecessary - lib\screens\my_design_screen.dart:187:85 - invalid_null_aware_operator
+warning - The receiver can't be null, so the null-aware operator '?[' is unnecessary - lib\screens\my_design_screen.dart:253:93 - invalid_null_aware_operator
+   info - The import of 'dart:typed_data' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/services.dart' - lib\screens\select_texture_images.dart:1:8 - unnecessary_import
+warning - The value of the local variable 'size' isn't used - lib\screens\splash_screen.dart:49:10 - unused_local_variable
+warning - Unnecessary type check; the result is always 'false' - lib\services\user_design_service.dart:18:11 - unnecessary_type_check
+warning - Unnecessary type check; the result is always 'true' - lib\services\user_design_service.dart:187:11 - unnecessary_type_check
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\utils\gradient_persistence.dart:18:51 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use component accessors like .r or .g, or toARGB32 for an explicit conversion - lib\utils\gradient_persistence.dart:19:47 - deprecated_member_use
+
