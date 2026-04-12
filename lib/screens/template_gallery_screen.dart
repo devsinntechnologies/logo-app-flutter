@@ -4,6 +4,8 @@ import '../components/gallery/gallery_chip.dart';
 import '../components/gallery/template_row.dart';
 import '../components/gallery/template_row_item.dart';
 
+import 'category_selection_screen.dart';
+
 class TemplateGalleryScreen extends StatefulWidget {
   const TemplateGalleryScreen({super.key});
 
@@ -297,7 +299,13 @@ class _TemplateGalleryScreenState extends State<TemplateGalleryScreen> {
                 icon: Icon(item['icon'] as IconData,
                     color: item['color'] as Color),
                 isAd: item['isAd'] as bool,
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const CategorySelectionScreen()),
+                  );
+                },
               );
             }).toList(),
           );
@@ -408,7 +416,14 @@ class _TemplateGalleryScreenState extends State<TemplateGalleryScreen> {
                     icon: Icon(item['icon'] as IconData,
                         color: item['color'] as Color),
                     isAd: item['isAd'] as bool,
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                const CategorySelectionScreen()),
+                      );
+                    },
                   );
                 },
               ),

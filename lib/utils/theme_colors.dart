@@ -99,4 +99,66 @@ class ThemeColors {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
+
+  // Category Gradients
+  static const LinearGradient retailGradient = LinearGradient(
+    colors: [Color(0xFFFF8E53), Color(0xFFFF5252)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  static const LinearGradient foodGradient = LinearGradient(
+    colors: [Color(0xFFFFB347), Color(0xFFFF8E53)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  static const LinearGradient healthGradient = LinearGradient(
+    colors: [Color(0xFFFF5ACD), Color(0xFFFB3EBD)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  static const LinearGradient creativeGradient = LinearGradient(
+    colors: [Color(0xFFB33EC9), Color(0xFFD431BD)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  static const LinearGradient technologyGradient = LinearGradient(
+    colors: [Color(0xFF6A11CB), Color(0xFF2575FC)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  static const LinearGradient professionalGradient = LinearGradient(
+    colors: [Color(0xFF2193B0), Color(0xFF6DD5ED)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  static const LinearGradient fitnessGradient = LinearGradient(
+    colors: [Color(0xFF11998E), Color(0xFF38EF7D)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  static const LinearGradient musicGradient = LinearGradient(
+    colors: [Color(0xFF8E2DE2), Color(0xFF4A00E0)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  static const LinearGradient photographyGradient = LinearGradient(
+    colors: [Color(0xFF00C9FF), Color(0xFF92FE9D)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  static const LinearGradient travelGradient = LinearGradient(
+    colors: [Color(0xFF2196F3), Color(0xFF00BCD4)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  static const LinearGradient fashionGradient = LinearGradient(
+    colors: [Color(0xFFF06292), Color(0xFFE91E63)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  static const LinearGradient cafeGradient = LinearGradient(
+    colors: [Color(0xFFFDC830), Color(0xFFF37335)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
 }

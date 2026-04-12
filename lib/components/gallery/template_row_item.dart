@@ -29,12 +29,12 @@ class _TemplateRowItemState extends State<TemplateRowItem> {
         onTapUp: (_) => setState(() => _isHovered = false),
         onTapCancel: () => setState(() => _isHovered = false),
         onTap: widget.onTap,
-        child: AnimatedScale(
-          scale: _isHovered ? 0.96 : 1.0,
-          duration: const Duration(milliseconds: 150),
-          curve: Curves.easeOutBack,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          transform: Matrix4.identity()
+            ..translate(0.0, _isHovered ? -10.0 : 0.0)
+            ..scale(_isHovered ? 1.05 : 1.0),
+          child: Container(
             width: 150,
             height: 150,
             margin: const EdgeInsets.only(right: 16),
@@ -49,7 +49,7 @@ class _TemplateRowItemState extends State<TemplateRowItem> {
                 BoxShadow(
                   color: Colors.black.withOpacity(_isHovered ? 0.08 : 0.04),
                   blurRadius: _isHovered ? 20 : 15,
-                  offset: Offset(0, _isHovered ? 8 : 10),
+                  offset: Offset(0, _isHovered ? 12 : 10),
                 ),
               ],
             ),
