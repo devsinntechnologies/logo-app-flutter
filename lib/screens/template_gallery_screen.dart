@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
-import '../components/gallery/gallery_chip.dart';
-import '../components/gallery/template_row.dart';
-import '../components/gallery/template_row_item.dart';
-
-import 'category_selection_screen.dart';
+import 'package:logo_app_flutter/screens/business_info_screen.dart';
+import 'package:logo_app_flutter/components/gallery/gallery_chip.dart';
+import 'package:logo_app_flutter/components/gallery/template_row.dart';
+import 'package:logo_app_flutter/components/gallery/template_row_item.dart';
+import 'package:logo_app_flutter/screens/category_selection_screen.dart';
 
 class TemplateGalleryScreen extends StatefulWidget {
   const TemplateGalleryScreen({super.key});
@@ -33,34 +33,124 @@ class _TemplateGalleryScreenState extends State<TemplateGalleryScreen> {
   // Template Data Map with Names for Search
   final Map<String, List<Map<String, dynamic>>> _templateData = {
     'Free': [
-      {'name': 'Color Palette', 'icon': Iconsax.color_swatch, 'color': Colors.orange, 'isAd': false},
-      {'name': 'Briefcase Logo', 'icon': Iconsax.briefcase, 'color': Colors.brown, 'isAd': false},
-      {'name': 'ID Card Design', 'icon': Iconsax.personalcard, 'color': Colors.blue, 'isAd': false},
+      {
+        'name': 'Color Palette',
+        'icon': Iconsax.color_swatch,
+        'color': Colors.orange,
+        'isAd': false
+      },
+      {
+        'name': 'Briefcase Logo',
+        'icon': Iconsax.briefcase,
+        'color': Colors.brown,
+        'isAd': false
+      },
+      {
+        'name': 'ID Card Design',
+        'icon': Iconsax.personalcard,
+        'color': Colors.blue,
+        'isAd': false
+      },
     ],
     'Thanks Giving': [
-      {'name': 'Dinner Logo', 'icon': Icons.restaurant, 'color': Colors.orange, 'isAd': false},
-      {'name': 'Autumn Leaf', 'icon': Icons.grass, 'color': Colors.orangeAccent, 'isAd': false},
-      {'name': 'Grill Master', 'icon': Icons.outdoor_grill, 'color': Colors.deepOrange, 'isAd': false},
+      {
+        'name': 'Dinner Logo',
+        'icon': Icons.restaurant,
+        'color': Colors.orange,
+        'isAd': false
+      },
+      {
+        'name': 'Autumn Leaf',
+        'icon': Icons.grass,
+        'color': Colors.orangeAccent,
+        'isAd': false
+      },
+      {
+        'name': 'Grill Master',
+        'icon': Icons.outdoor_grill,
+        'color': Colors.deepOrange,
+        'isAd': false
+      },
     ],
     'Christmas': [
-      {'name': 'Xmas Tree', 'icon': Icons.park, 'color': Colors.green, 'isAd': true},
-      {'name': 'Santa Claus', 'icon': Icons.face, 'color': Colors.red, 'isAd': false},
-      {'name': 'Gift Box', 'icon': Icons.card_giftcard, 'color': Colors.redAccent, 'isAd': false},
+      {
+        'name': 'Xmas Tree',
+        'icon': Icons.park,
+        'color': Colors.green,
+        'isAd': true
+      },
+      {
+        'name': 'Santa Claus',
+        'icon': Icons.face,
+        'color': Colors.red,
+        'isAd': false
+      },
+      {
+        'name': 'Gift Box',
+        'icon': Icons.card_giftcard,
+        'color': Colors.redAccent,
+        'isAd': false
+      },
     ],
     'Business': [
-      {'name': 'Growth Chart', 'icon': Iconsax.graph, 'color': Colors.blue, 'isAd': false},
-      {'name': 'Achievement Award', 'icon': Iconsax.award, 'color': Colors.amber, 'isAd': false},
-      {'name': 'Market Status', 'icon': Iconsax.status_up, 'color': Colors.indigo, 'isAd': false},
+      {
+        'name': 'Growth Chart',
+        'icon': Iconsax.graph,
+        'color': Colors.blue,
+        'isAd': false
+      },
+      {
+        'name': 'Achievement Award',
+        'icon': Iconsax.award,
+        'color': Colors.amber,
+        'isAd': false
+      },
+      {
+        'name': 'Market Status',
+        'icon': Iconsax.status_up,
+        'color': Colors.indigo,
+        'isAd': false
+      },
     ],
     'Food': [
-      {'name': 'Pizza Paradise', 'icon': Icons.local_pizza, 'color': Colors.orange, 'isAd': false},
-      {'name': 'Burger King', 'icon': Icons.lunch_dining, 'color': Colors.brown, 'isAd': false},
-      {'name': 'Pastry Chef', 'icon': Icons.bakery_dining, 'color': Colors.amber, 'isAd': false},
+      {
+        'name': 'Pizza Paradise',
+        'icon': Icons.local_pizza,
+        'color': Colors.orange,
+        'isAd': false
+      },
+      {
+        'name': 'Burger King',
+        'icon': Icons.lunch_dining,
+        'color': Colors.brown,
+        'isAd': false
+      },
+      {
+        'name': 'Pastry Chef',
+        'icon': Icons.bakery_dining,
+        'color': Colors.amber,
+        'isAd': false
+      },
     ],
     'Nature': [
-      {'name': 'Eco Green', 'icon': Icons.eco, 'color': Colors.green, 'isAd': false},
-      {'name': 'Pink Flower', 'icon': Icons.filter_vintage, 'color': Colors.pink, 'isAd': false},
-      {'name': 'Morning Sun', 'icon': Icons.wb_sunny, 'color': Colors.orange, 'isAd': false},
+      {
+        'name': 'Eco Green',
+        'icon': Icons.eco,
+        'color': Colors.green,
+        'isAd': false
+      },
+      {
+        'name': 'Pink Flower',
+        'icon': Icons.filter_vintage,
+        'color': Colors.pink,
+        'isAd': false
+      },
+      {
+        'name': 'Morning Sun',
+        'icon': Icons.wb_sunny,
+        'color': Colors.orange,
+        'isAd': false
+      },
     ],
   };
 
@@ -303,7 +393,10 @@ class _TemplateGalleryScreenState extends State<TemplateGalleryScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const CategorySelectionScreen()),
+                      builder: (context) => BusinessInfoScreen(
+                        categoryName: item['name'] ?? 'Custom',
+                      ),
+                    ),
                   );
                 },
               );
@@ -420,8 +513,10 @@ class _TemplateGalleryScreenState extends State<TemplateGalleryScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) =>
-                                const CategorySelectionScreen()),
+                          builder: (context) => BusinessInfoScreen(
+                            categoryName: item['name'] ?? 'Custom',
+                          ),
+                        ),
                       );
                     },
                   );

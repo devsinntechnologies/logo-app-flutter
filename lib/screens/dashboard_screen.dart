@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
-import '../../components/dashboard/dashboard_card.dart';
-import '../../components/dashboard/feature_list_item.dart';
-import '../../utils/theme_colors.dart';
-import 'category_selection_screen.dart';
-import 'design_input_screen.dart';
-import 'my_design_screen.dart';
-import 'template_gallery_screen.dart';
+import 'package:logo_app_flutter/components/dashboard/dashboard_card.dart';
+import 'package:logo_app_flutter/components/dashboard/feature_list_item.dart';
+import 'package:logo_app_flutter/utils/theme_colors.dart';
+import 'package:logo_app_flutter/screens/category_selection_screen.dart';
+import 'package:logo_app_flutter/screens/my_design_screen.dart';
+import 'package:logo_app_flutter/screens/template_gallery_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});

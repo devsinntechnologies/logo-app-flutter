@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:logo_app_flutter/config/environment.dart';
+import 'package:logo_app_flutter/provider/business_info_provider.dart';
 import 'package:logo_app_flutter/provider/locale_provider.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
 import 'package:logo_app_flutter/provider/theme_provider.dart';
@@ -84,6 +85,7 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (_) => SelectedColorProvider()),
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => BusinessInfoProvider()),
       ],
       child: Builder(builder: (context) {
         return MaterialApp(

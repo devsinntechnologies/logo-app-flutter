@@ -1,0 +1,136 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../provider/business_info_provider.dart';
+import '../components/business_info/business_input_card.dart';
+import '../components/business_info/business_preview_card.dart';
+import '../components/business_info/business_continue_button.dart';
+
+class BusinessInfoScreen extends StatefulWidget {
+  final String categoryName;
+
+  const BusinessInfoScreen({super.key, required this.categoryName});
+
+  @override
+  State<BusinessInfoScreen> createState() => _BusinessInfoScreenState();
+}
+
+class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _sloganController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _sloganController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF9F9FF),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        leading: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.grey.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.arrow_back, color: Colors.black, size: 20),
+            ),
+          ),
+        ),
+        title: const Text(
+          'Business Info',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(2),
+          child: Container(
+            height: 2,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFFFF5722), Color(0xFFE91E63), Color(0xFF9C27B0)],
+              ),
+            ),
+          ),
+        ),
+      ),
+      body: Consumer<BusinessInfoProvider>(
+        builder: (context, provider, child) {
+          return SingleChildScrollView(
+            child: Column(
+              children: [
+                const SizedBox(height: 30),
+                const Text(
+                  'Tell us about your business',
+                  style: TextStyle(
+                    color: Color(0xFF4A4A6A),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 30),
+
+                // Business Name Card
+                BusinessInputCard(
+                  title: 'Business Name *',
+                  hint: 'Enter your business name',
+                  icon: Icons.business,
+                  iconBgColor: const Color(0xFFFF5252).withOpacity(0.8),
+                  controller: _nameController,
+                  maxLength: 30,
+                  onChanged: (val) => provider.updateBusinessName(val),
+                ),
+
+                const SizedBox(height: 20),
+
+                // Slogan Card
+                BusinessInputCard(
+                  title: 'Slogan (Optional)',
+                  hint: 'Your business tagline',
+                  icon: Icons.chat_bubble_outline_rounded,
+                  iconBgColor: const Color(0xFF9C27B0).withOpacity(0.8),
+                  controller: _sloganController,
+                  maxLength: 50,
+                  onChanged: (val) => provider.updateSlogan(val),
+                ),
+
+                const SizedBox(height: 30),
+
+                // Preview Card
+                BusinessPreviewCard(
+                  showPreview: provider.showPreview,
+                  businessName: provider.businessName,
+                  slogan: provider.slogan,
+                ),
+
+                const SizedBox(height: 30),
+
+                // Continue Button
+                BusinessContinueButton(
+                  isEnabled: provider.canContinue,
+                  onTap: () {
+                    // Logic to next screen
+                  },
+                ),
+                
+                const SizedBox(height: 40),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
-import '../components/category_card.dart';
-import '../utils/theme_colors.dart';
+import 'package:logo_app_flutter/components/category_card.dart';
+import 'package:logo_app_flutter/utils/theme_colors.dart';
+import 'package:logo_app_flutter/screens/business_info_screen.dart';
 
 class CategorySelectionScreen extends StatelessWidget {
   const CategorySelectionScreen({super.key});
@@ -161,7 +162,14 @@ class CategorySelectionScreen extends StatelessWidget {
                   icon: category['icon'],
                   gradient: category['gradient'],
                   onTap: () {
-                    // Logic when category selected
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => BusinessInfoScreen(
+                          categoryName: category['title'],
+                        ),
+                      ),
+                    );
                   },
                 );
               },

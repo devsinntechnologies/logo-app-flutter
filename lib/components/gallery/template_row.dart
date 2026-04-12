@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'template_row_item.dart';
+import 'package:logo_app_flutter/components/gallery/template_row_item.dart';
 
 class TemplateRow extends StatelessWidget {
   final String title;
