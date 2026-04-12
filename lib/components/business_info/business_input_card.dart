@@ -98,7 +98,7 @@ class BusinessInputCard extends StatelessWidget {
               ),
               // Custom counter on left side
               Padding(
-                padding: const EdgeInsets.only(left: 5, top: 10 ),
+                padding: const EdgeInsets.only(left: 5, top: 10),
                 child: Text(
                   '${controller.text.length}/$maxLength characters',
                   style: const TextStyle(color: Colors.grey, fontSize: 12),

@@ -12,7 +12,7 @@ class DesignStyleScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F9FF),
+      backgroundColor: const Color(0xFFFDF2F5),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -42,7 +42,7 @@ class DesignStyleScreen extends StatelessWidget {
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(2),
           child: Container(
-            height: 2,
+            height: 4,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 colors: [
@@ -88,7 +88,7 @@ class DesignStyleScreen extends StatelessWidget {
                           crossAxisCount: 2,
                           crossAxisSpacing: 16,
                           mainAxisSpacing: 16,
-                          childAspectRatio: 1.2,
+                          // childAspectRatio: 1.0,
                         ),
                         itemCount: provider.fontStyles.length,
                         itemBuilder: (context, index) {

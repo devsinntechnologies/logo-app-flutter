@@ -12,6 +12,8 @@ import 'package:logo_app_flutter/provider/logo_results_provider.dart';
 import 'package:logo_app_flutter/provider/locale_provider.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
 import 'package:logo_app_flutter/provider/theme_provider.dart';
+import 'package:logo_app_flutter/provider/intro_provider.dart';
+import 'package:logo_app_flutter/screens/intro_animation_screen.dart';
 import 'package:logo_app_flutter/screens/dashboard_screen.dart';
 import 'package:logo_app_flutter/screens/home_screen.dart';
 import 'package:logo_app_flutter/screens/splash_screen.dart';
@@ -84,6 +86,10 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    // Pre-cache intro images to prevent white flash
+    precacheImage(const AssetImage('assets/images/Home1.png'), context);
+    precacheImage(const AssetImage('assets/logo_images/bulb.png'), context);
+
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => SelectedColorProvider()),
@@ -94,12 +100,14 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (_) => LogoDesignProvider()),
         ChangeNotifierProvider(create: (_) => LogoGenerationProvider()),
         ChangeNotifierProvider(create: (_) => LogoResultsProvider()),
+        ChangeNotifierProvider(create: (_) => IntroProvider()),
       ],
       child: Builder(builder: (context) {
         return MaterialApp(
           theme: ThemeData(
             useMaterial3: true,
             brightness: Brightness.light,
+            scaffoldBackgroundColor: const Color(0xFF9C27B0), // Set base purple
             colorScheme: ColorScheme.fromSeed(
               seedColor: Colors.deepPurple,
               brightness: Brightness.light,
@@ -109,6 +117,7 @@ class _MyAppState extends State<MyApp> {
           darkTheme: ThemeData(
             useMaterial3: true,
             brightness: Brightness.dark,
+            scaffoldBackgroundColor: const Color(0xFF9C27B0), // Set base purple
             colorScheme: ColorScheme.fromSeed(
               seedColor: Colors.deepPurple,
               brightness: Brightness.dark,
@@ -131,7 +140,7 @@ class _MyAppState extends State<MyApp> {
           home: InternetChecker(
             // child: HomeScreen(),
             // child: HomeScreen(),
-            child: DashboardScreen(),
+            child: const IntroAnimationScreen(),
             // child: SignUpScreen(),
           ),
           // home: SplashScreen(),
