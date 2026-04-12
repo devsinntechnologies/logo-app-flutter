@@ -1,0 +1,125 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../provider/logo_results_provider.dart';
+import '../components/logo_results/logo_result_card.dart';
+
+class LogoResultsScreen extends StatelessWidget {
+  const LogoResultsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFFDF2F8),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        leading: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFFF4F5F9),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.arrow_back,
+                  color: Color(0xFF1F1F39), size: 18),
+            ),
+          ),
+        ),
+        title: const Text(
+          'Your Logos',
+          style: TextStyle(
+            color: Color(0xFF1F1F39),
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: GestureDetector(
+              onTap: () =>
+                  context.read<LogoResultsProvider>().regenerateVariations(),
+              child: Container(
+                width: 40,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF4F5F9),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.refresh,
+                    color: Color(0xFF1F1F39), size: 18),
+              ),
+            ),
+          ),
+        ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(2),
+          child: Container(
+            height: 2,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFFFF8A65),
+                  Color(0xFFE91E63),
+                  Color(0xFF9C27B0)
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+      body: Consumer<LogoResultsProvider>(
+        builder: (context, provider, child) {
+          return SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 25),
+            child: Column(
+              children: [
+                const SizedBox(height: 5),
+                const Text(
+                  'We generated 6 unique logos for you',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Color(0xFF4A4A6A),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 35),
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 20,
+                    mainAxisSpacing: 25,
+                    childAspectRatio: 0.85,
+                  ),
+                  itemCount: provider.generatedLogos.length,
+                  itemBuilder: (context, index) {
+                    final logo = provider.generatedLogos[index];
+                    return LogoResultCard(
+                      name: logo.name,
+                      icon: logo.icon,
+                      colors: logo.colors,
+                      isFavorite: logo.isFavorite,
+                      onFavoriteTap: () => provider.toggleFavorite(index),
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content: Text('Opening ${logo.name} in Editor')),
+                        );
+                      },
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}

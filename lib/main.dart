@@ -8,6 +8,7 @@ import 'package:logo_app_flutter/provider/business_info_provider.dart';
 import 'package:logo_app_flutter/provider/gallery_provider.dart';
 import 'package:logo_app_flutter/provider/logo_design_provider.dart';
 import 'package:logo_app_flutter/provider/logo_generation_provider.dart';
+import 'package:logo_app_flutter/provider/logo_results_provider.dart';
 import 'package:logo_app_flutter/provider/locale_provider.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
 import 'package:logo_app_flutter/provider/theme_provider.dart';
@@ -92,6 +93,7 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (_) => GalleryProvider()),
         ChangeNotifierProvider(create: (_) => LogoDesignProvider()),
         ChangeNotifierProvider(create: (_) => LogoGenerationProvider()),
+        ChangeNotifierProvider(create: (_) => LogoResultsProvider()),
       ],
       child: Builder(builder: (context) {
         return MaterialApp(

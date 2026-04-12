@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:logo_app_flutter/screens/logo_results_screen.dart';
 import '../provider/logo_generation_provider.dart';
 
 class LogoGenerationScreen extends StatefulWidget {
@@ -22,13 +23,16 @@ class _LogoGenerationScreenState extends State<LogoGenerationScreen>
       duration: const Duration(seconds: 4),
     )..repeat();
 
-    // Start the simulation
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<LogoGenerationProvider>().startSimulation(
             onComplete: () {
-              // Navigation to final editor/results would go here
               if (mounted) {
-                Navigator.pop(context); // Currently just goes back
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const LogoResultsScreen(),
+                  ),
+                );
               }
             },
           );
