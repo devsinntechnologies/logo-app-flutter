@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
-import '../../provider/business_info_provider.dart';
+import 'package:logo_app_flutter/provider/business_info_provider.dart';
+import 'package:logo_app_flutter/screens/download_logo.dart';
 
 class LogoDetailDialog extends StatelessWidget {
   final String name;
@@ -147,8 +148,18 @@ class LogoDetailDialog extends StatelessWidget {
                     textcolor: Colors.white,
                     color: const Color(0xFFFFFFFF),
                     onTap: () {
-                      Navigator.pop(context);
-                      // Future: Navigate to Mockups
+                      Navigator.pop(context); // Close dialog
+                      final info = context.read<BusinessInfoProvider>();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DownloadLogo(
+                            svgLogo: image, // Passing path as requested
+                            companyName: info.businessName,
+                            sloganName: info.slogan,
+                          ),
+                        ),
+                      );
                     },
                   ),
                 ),
