@@ -26,7 +26,8 @@ class DesignStyleScreen extends StatelessWidget {
                 color: Colors.grey.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.arrow_back, color: Colors.black, size: 20),
+              child:
+                  const Icon(Icons.arrow_back, color: Colors.black, size: 20),
             ),
           ),
         ),
@@ -44,7 +45,11 @@ class DesignStyleScreen extends StatelessWidget {
             height: 2,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFFFF5722), Color(0xFFE91E63), Color(0xFF9C27B0)],
+                colors: [
+                  Color(0xFFFF5722),
+                  Color(0xFFE91E63),
+                  Color(0xFF9C27B0)
+                ],
               ),
             ),
           ),
@@ -52,76 +57,89 @@ class DesignStyleScreen extends StatelessWidget {
       ),
       body: Consumer<LogoDesignProvider>(
         builder: (context, provider, child) {
-          return SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(height: 30),
-                const Text(
-                  'Customize your logo style',
-                  style: TextStyle(
-                    color: Color(0xFF4A4A6A),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
+          return Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const SizedBox(height: 30),
+                      const Text(
+                        'Customize your logo style',
+                        style: TextStyle(
+                          color: Color(0xFF4A4A6A),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 30),
+
+                      // Font Style Section
+                      _buildSectionTitle('Font Style',
+                          Icons.text_fields_rounded, const Color(0xFFFF5252)),
+                      const SizedBox(height: 20),
+                      GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                          childAspectRatio: 1.2,
+                        ),
+                        itemCount: provider.fontStyles.length,
+                        itemBuilder: (context, index) {
+                          final item = provider.fontStyles[index];
+                          return FontStyleCard(
+                            name: item['name'],
+                            textStyle: item['style'],
+                            isSelected: provider.selectedFontIndex == index,
+                            onTap: () => provider.setFont(index),
+                          );
+                        },
+                      ),
+
+                      const SizedBox(height: 40),
+
+                      // Color Scheme Section
+                      _buildSectionTitle('Color Scheme',
+                          Icons.color_lens_rounded, const Color(0xFF7C4DFF)),
+                      const SizedBox(height: 20),
+                      GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                          childAspectRatio: 1.2,
+                        ),
+                        itemCount: provider.colorPalettes.length,
+                        itemBuilder: (context, index) {
+                          final item = provider.colorPalettes[index];
+                          return ColorSchemeCard(
+                            name: item['name'],
+                            colors: item['colors'],
+                            isSelected: provider.selectedPaletteIndex == index,
+                            onTap: () => provider.setPalette(index),
+                          );
+                        },
+                      ),
+
+                      const SizedBox(height: 50),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 30),
+              ),
 
-                // Font Style Section
-                _buildSectionTitle('Font Style', Icons.text_fields_rounded, const Color(0xFFFF5252)),
-                const SizedBox(height: 20),
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    childAspectRatio: 1.2,
-                  ),
-                  itemCount: provider.fontStyles.length,
-                  itemBuilder: (context, index) {
-                    final item = provider.fontStyles[index];
-                    return FontStyleCard(
-                      name: item['name'],
-                      textStyle: item['style'],
-                      isSelected: provider.selectedFontIndex == index,
-                      onTap: () => provider.setFont(index),
-                    );
-                  },
-                ),
-
-                const SizedBox(height: 40),
-
-                // Color Scheme Section
-                _buildSectionTitle('Color Scheme', Icons.color_lens_rounded, const Color(0xFF7C4DFF)),
-                const SizedBox(height: 20),
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    childAspectRatio: 1.2,
-                  ),
-                  itemCount: provider.colorPalettes.length,
-                  itemBuilder: (context, index) {
-                    final item = provider.colorPalettes[index];
-                    return ColorSchemeCard(
-                      name: item['name'],
-                      colors: item['colors'],
-                      isSelected: provider.selectedPaletteIndex == index,
-                      onTap: () => provider.setPalette(index),
-                    );
-                  },
-                ),
-
-                const SizedBox(height: 50),
-
-                // Final Action Button
-                GestureDetector(
+              // Final Action Button - Pinned at bottom
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 10, 24, 24),
+                child: GestureDetector(
                   onTap: () {
                     Navigator.push(
                       context,
@@ -144,22 +162,50 @@ class DesignStyleScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: const Center(
-                      child: Text(
-                        'Generate Logos',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                    child: Stack(
+                      children: [
+                        // Glossy Bubble Top-Right
+                        Positioned(
+                          right: -10,
+                          top: -10,
+                          child: Container(
+                            width: 50,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white.withOpacity(0.1),
+                            ),
+                          ),
                         ),
-                      ),
+                        // Glossy Bubble Bottom-Left
+                        Positioned(
+                          left: -15,
+                          bottom: -15,
+                          child: Container(
+                            width: 60,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white.withOpacity(0.1),
+                            ),
+                          ),
+                        ),
+                        const Center(
+                          child: Text(
+                            'Generate Logos',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-
-                const SizedBox(height: 40),
-              ],
-            ),
+              ),
+            ],
           );
         },
       ),

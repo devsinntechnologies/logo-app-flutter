@@ -35,15 +35,45 @@ class BusinessContinueButton extends StatelessWidget {
                   ]
                 : [],
           ),
-          child: Center(
-            child: Text(
-              'Continue',
-              style: TextStyle(
-                color: isEnabled ? Colors.white : const Color(0xFF9CA3AF),
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+          child: Stack(
+            children: [
+              // Glossy Bubble Top-Right
+              Positioned(
+                right: -10,
+                top: -10,
+                child: Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withOpacity(0.1),
+                  ),
+                ),
               ),
-            ),
+              // Glossy Bubble Bottom-Left
+              Positioned(
+                left: -15,
+                bottom: -15,
+                child: Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withOpacity(0.1),
+                  ),
+                ),
+              ),
+              Center(
+                child: Text(
+                  'Continue',
+                  style: TextStyle(
+                    color: isEnabled ? Colors.white : const Color(0xFF9CA3AF),
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

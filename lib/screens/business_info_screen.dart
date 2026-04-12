@@ -20,6 +20,15 @@ class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
   final TextEditingController _sloganController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    // Load existing values from Provider
+    final provider = context.read<BusinessInfoProvider>();
+    _nameController.text = provider.businessName;
+    _sloganController.text = provider.slogan;
+  }
+
+  @override
   void dispose() {
     _nameController.dispose();
     _sloganController.dispose();
@@ -29,7 +38,7 @@ class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F9FF),
+      backgroundColor: const Color(0xFFFDF2F8),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -43,7 +52,8 @@ class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
                 color: Colors.grey.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.arrow_back, color: Colors.black, size: 20),
+              child:
+                  const Icon(Icons.arrow_back, color: Colors.black, size: 20),
             ),
           ),
         ),
@@ -58,10 +68,14 @@ class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(2),
           child: Container(
-            height: 2,
+            height: 4,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFFFF5722), Color(0xFFE91E63), Color(0xFF9C27B0)],
+                colors: [
+                  Color(0xFFFF5722),
+                  Color(0xFFE91E63),
+                  Color(0xFF9C27B0)
+                ],
               ),
             ),
           ),
@@ -116,7 +130,7 @@ class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
                   slogan: provider.slogan,
                 ),
 
-                const SizedBox(height: 30),
+                // const SizedBox(height: 30),
 
                 // Continue Button
                 BusinessContinueButton(
@@ -130,7 +144,7 @@ class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
                     );
                   },
                 ),
-                
+
                 const SizedBox(height: 40),
               ],
             ),

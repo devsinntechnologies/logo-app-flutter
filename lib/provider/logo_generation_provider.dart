@@ -12,18 +12,18 @@ class LogoGenerationProvider extends ChangeNotifier {
   final List<Map<String, dynamic>> steps = [
     {
       'title': 'Analyzing your preferences...',
-      'icon': Icons.auto_awesome,
-      'colors': [const Color(0xFFFF8A65), const Color(0xFFE91E63)],
+      'icon': Icons.auto_fix_high_outlined,
+      'colors': [const Color(0xFFFB6859), const Color(0xFFC834C6)],
     },
     {
       'title': 'Selecting color palettes...',
       'icon': Icons.palette_outlined,
-      'colors': [const Color(0xFFF06292), const Color(0xFFD81B60)],
+      'colors': [const Color(0xFFFC2E75), const Color(0xFFEA35CE)],
     },
     {
       'title': 'Generating logo concepts...',
-      'icon': Icons.auto_fix_high,
-      'colors': [const Color(0xFF26A69A), const Color(0xFF00BFA5)],
+      'icon': Icons.auto_awesome_outlined,
+      'colors': [const Color(0xFF01C774), const Color(0xFF01CDCD)],
     },
   ];
 

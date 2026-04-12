@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:logo_app_flutter/components/dashboard/dashboard_card.dart';
+import 'package:logo_app_flutter/screens/dashboard_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:logo_app_flutter/components/logo_results/logo_detail_dialog.dart';
 import '../provider/business_info_provider.dart';
@@ -50,8 +52,17 @@ class LogoResultsScreen extends StatelessWidget {
                   color: const Color(0xFFF4F5F9),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.refresh,
-                    color: Color(0xFF1F1F39), size: 18),
+                child: InkWell(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const DashboardScreen()));
+                  },
+                  // context.read<LogoResultsProvider>().regenerateVariations(),
+                  child: const Icon(Icons.refresh_outlined,
+                      color: Color(0xFF1F1F39), size: 18),
+                ),
               ),
             ),
           ),

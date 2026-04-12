@@ -70,42 +70,30 @@ class BusinessPreviewCard extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: const [
-                          Icon(Icons.auto_awesome, color: Colors.white, size: 20),
-                          SizedBox(width: 8),
+                          Icon(Icons.auto_awesome, color: Colors.white, size: 24),
+                          SizedBox(width: 12),
                           Text(
                             'Preview',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              letterSpacing: 0.5,
                             ),
                           ),
-                          SizedBox(width: 8),
-                          Icon(Icons.auto_awesome, color: Colors.white, size: 20),
+                          SizedBox(width: 12),
+                          Icon(Icons.auto_awesome, color: Colors.white, size: 24),
                         ],
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 12),
                       Text(
-                        businessName.toUpperCase(),
+                        businessName.isNotEmpty ? businessName : 'Your Logo Name',
                         textAlign: TextAlign.center,
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w300,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      if (slogan.isNotEmpty)
-                        Text(
-                          slogan,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.8),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w200,
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
                     ],
                   ),
                 ),
