@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../provider/business_info_provider.dart';
+import 'package:logo_app_flutter/screens/design_style_screen.dart';
 import '../components/business_info/business_input_card.dart';
 import '../components/business_info/business_preview_card.dart';
 import '../components/business_info/business_continue_button.dart';
@@ -121,7 +122,12 @@ class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
                 BusinessContinueButton(
                   isEnabled: provider.canContinue,
                   onTap: () {
-                    // Logic to next screen
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const DesignStyleScreen(),
+                      ),
+                    );
                   },
                 ),
                 
