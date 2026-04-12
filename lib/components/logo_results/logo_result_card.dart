@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../provider/business_info_provider.dart';
 
 class LogoResultCard extends StatelessWidget {
   final String name;
-  final IconData icon;
+  final String image;
   final List<Color> colors;
   final bool isFavorite;
   final VoidCallback onFavoriteTap;
@@ -11,7 +13,7 @@ class LogoResultCard extends StatelessWidget {
   const LogoResultCard({
     super.key,
     required this.name,
-    required this.icon,
+    required this.image,
     required this.colors,
     required this.isFavorite,
     required this.onFavoriteTap,
@@ -80,12 +82,36 @@ class LogoResultCard extends StatelessWidget {
                           ),
                           borderRadius: BorderRadius.circular(28),
                         ),
-                        child: Center(
-                          child: Icon(
-                            icon,
-                            color: Colors.white,
-                            size: 45,
-                          ),
+                        child: Consumer<BusinessInfoProvider>(
+                          builder: (context, info, child) {
+                            return Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                // Icon(
+                                //   image,
+                                //   color: Colors.white,
+                                //   size: 35, // Slightly smaller to fit text in grid
+                                // ),
+                                Image.asset(
+                                  image,
+                                  height: 35,
+                                  width: 35,
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  info.businessName,
+                                  textAlign: TextAlign.center,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
                         ),
                       ),
                       // Favorite Button

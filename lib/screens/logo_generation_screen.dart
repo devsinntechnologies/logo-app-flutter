@@ -25,17 +25,17 @@ class _LogoGenerationScreenState extends State<LogoGenerationScreen>
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<LogoGenerationProvider>().startSimulation(
-            onComplete: () {
-              if (mounted) {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const LogoResultsScreen(),
-                  ),
-                );
-              }
-            },
-          );
+        onComplete: () {
+          if (mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const LogoResultsScreen(),
+              ),
+            );
+          }
+        },
+      );
     });
   }
 
@@ -88,8 +88,8 @@ class _LogoGenerationScreenState extends State<LogoGenerationScreen>
                         child: Center(
                           // Use a counter-rotation to keep the icon upright
                           child: Transform.rotate(
-                             angle: -_rotationController.value * 2 * math.pi,
-                             child: Icon(
+                            angle: -_rotationController.value * 2 * math.pi,
+                            child: Icon(
                               step['icon'],
                               color: Colors.white,
                               size: 70,

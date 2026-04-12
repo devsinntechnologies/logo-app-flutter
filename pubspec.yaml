@@ -102,6 +102,21 @@ flutter:
     - assets/bg_images/
     - assets/effects_images/
     - assets/videos/
+    - assets/images/image.png
+    - assets/images/restaurant.png
+    - assets/images/favorite.png
+    - assets/images/palette.png
+    - assets/images/code.png
+    - assets/images/briefcase.png
+    - assets/images/fitness.png
+    - assets/images/music.png
+    - assets/images/camera.png
+    - assets/images/explore.png
+    - assets/images/coffee.png
+    - assets/images/house.png
+    - assets/images/gamepad.png
+    - assets/images/school.png
+    - assets/images/Home1.png
 
   #   - images/a_dot_ham.jpeg
 

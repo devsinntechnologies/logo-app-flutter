@@ -12,82 +12,82 @@ class CategorySelectionScreen extends StatelessWidget {
     final List<Map<String, dynamic>> categories = [
       {
         'title': 'Retail',
-        'icon': Iconsax.shop,
+        'image': 'assets/images/image.png',
         'gradient': ThemeColors.retailGradient,
       },
       {
         'title': 'Food & Beverage',
-        'icon': Icons.restaurant,
+        'image': 'assets/images/restaurant.png',
         'gradient': ThemeColors.foodGradient,
       },
       {
         'title': 'Health & Wellness',
-        'icon': Icons.favorite_border,
+        'image': 'assets/images/favorite.png',
         'gradient': ThemeColors.healthGradient,
       },
       {
         'title': 'Creative & Design',
-        'icon': Icons.palette_outlined,
+        'image': 'assets/images/palette.png',
         'gradient': ThemeColors.creativeGradient,
       },
       {
         'title': 'Technology',
-        'icon': Icons.code,
+        'image': 'assets/images/code.png',
         'gradient': ThemeColors.technologyGradient,
       },
       {
         'title': 'Professional Services',
-        'icon': Iconsax.briefcase,
+        'image': 'assets/images/briefcase.png',
         'gradient': ThemeColors.professionalGradient,
       },
       {
         'title': 'Fitness & Sports',
-        'icon': Icons.fitness_center,
+        'image': 'assets/images/fitness.png',
         'gradient': ThemeColors.fitnessGradient,
       },
       {
         'title': 'Music & Entertainment',
-        'icon': Icons.music_note_outlined,
+        'image': 'assets/images/music.png',
         'gradient': ThemeColors.musicGradient,
       },
       {
         'title': 'Photography',
-        'icon': Icons.camera_alt_outlined,
+        'image': 'assets/images/camera.png',
         'gradient': ThemeColors.photographyGradient,
       },
       {
         'title': 'Travel & Tourism',
-        'icon': Icons.explore_outlined,
+        'image': 'assets/images/explore.png',
         'gradient': ThemeColors.travelGradient,
       },
       {
         'title': 'Fashion & Beauty',
-        'icon': Iconsax.bag,
+        'image': 'assets/icons/bag.png',
         'gradient': ThemeColors.fashionGradient,
       },
       {
         'title': 'Cafe & Bakery',
-        'icon': Icons.coffee_outlined,
+        'image': 'assets/images/coffee.png',
         'gradient': ThemeColors.cafeGradient,
       },
       {
         'title': 'Real Estate',
-        'icon': Iconsax.house,
+        'image': 'assets/images/house.png',
         'gradient': ThemeColors.templatesGradient,
       },
       {
         'title': 'Gaming',
-        'icon': Icons.gamepad_outlined,
+        'image': 'assets/images/gamepad.png',
         'gradient': ThemeColors.myLogosGradient,
       },
       {
         'title': 'Education',
-        'icon': Icons.school_outlined,
+        'image': 'assets/images/school.png',
         'gradient': ThemeColors.technologyGradient,
       },
       {
         'title': 'Eco & Nature',
-        'icon': Icons.eco_outlined,
+        'image': 'assets/icons/eco.png',
         'gradient': ThemeColors.fitnessGradient,
       },
     ];
@@ -106,7 +106,8 @@ class CategorySelectionScreen extends StatelessWidget {
                 color: Colors.grey.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.arrow_back, color: Colors.black, size: 20),
+              child:
+                  const Icon(Icons.arrow_back, color: Colors.black, size: 20),
             ),
           ),
         ),
@@ -159,7 +160,7 @@ class CategorySelectionScreen extends StatelessWidget {
                 final category = categories[index];
                 return CategoryCard(
                   title: category['title'],
-                  icon: category['icon'],
+                  image: category['image'],
                   gradient: category['gradient'],
                   onTap: () {
                     Navigator.push(

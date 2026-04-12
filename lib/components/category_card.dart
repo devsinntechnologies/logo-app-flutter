@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 
 class CategoryCard extends StatelessWidget {
   final String title;
-  final IconData icon;
+  final String image;
+  // IconData icon;
+
   final Gradient gradient;
   final VoidCallback onTap;
 
   const CategoryCard({
     super.key,
     required this.title,
-    required this.icon,
+    required this.image,
     required this.gradient,
     required this.onTap,
   });
@@ -36,7 +38,7 @@ class CategoryCard extends StatelessWidget {
                 ..scale(hovered ? 1.05 : 1.0),
               decoration: BoxDecoration(
                 gradient: gradient,
-                borderRadius: BorderRadius.circular(30),
+                borderRadius: BorderRadius.circular(20),
                 border: Border.all(
                   color: Colors.white.withOpacity(hovered ? 0.4 : 0.2),
                   width: 2,
@@ -97,11 +99,13 @@ class CategoryCard extends StatelessWidget {
                       children: [
                         Hero(
                           tag: 'cat_icon_$title',
-                          child: Icon(
-                            icon,
-                            size: 45,
-                            color: Colors.white,
-                          ),
+                          child:
+                          Image.asset(image,height: 45,width: 45,)
+                          //  Icon(
+                          //   icon,
+                          //   size: 45,
+                          //   color: Colors.white,
+                          // ),
                         ),
                         const SizedBox(height: 12),
                         Padding(

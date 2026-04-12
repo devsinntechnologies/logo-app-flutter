@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:logo_app_flutter/components/logo_results/logo_detail_dialog.dart';
+import '../provider/business_info_provider.dart';
 import '../provider/logo_results_provider.dart';
 import '../components/logo_results/logo_result_card.dart';
 
@@ -77,14 +79,18 @@ class LogoResultsScreen extends StatelessWidget {
             child: Column(
               children: [
                 const SizedBox(height: 5),
-                const Text(
-                  'We generated 6 unique logos for you',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Color(0xFF4A4A6A),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
+                Consumer<BusinessInfoProvider>(
+                  builder: (context, info, child) {
+                    return Text(
+                      'We generated 6 unique logos for ${info.businessName}',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Color(0xFF4A4A6A),
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 35),
                 GridView.builder(
@@ -101,14 +107,18 @@ class LogoResultsScreen extends StatelessWidget {
                     final logo = provider.generatedLogos[index];
                     return LogoResultCard(
                       name: logo.name,
-                      icon: logo.icon,
+                      image: logo.image,
                       colors: logo.colors,
                       isFavorite: logo.isFavorite,
                       onFavoriteTap: () => provider.toggleFavorite(index),
                       onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text('Opening ${logo.name} in Editor')),
+                        showDialog(
+                          context: context,
+                          builder: (context) => LogoDetailDialog(
+                            name: logo.name,
+                            image: logo.image,
+                            colors: logo.colors,
+                          ),
                         );
                       },
                     );

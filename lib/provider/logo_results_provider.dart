@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 
 class LogoResult {
   final String name;
-  final IconData icon;
+  final String image;
+  //  IconData icon;
   final List<Color> colors;
   bool isFavorite;
 
   LogoResult({
     required this.name,
-    required this.icon,
+    required this.image,
     required this.colors,
     this.isFavorite = false,
   });
@@ -18,32 +19,43 @@ class LogoResultsProvider extends ChangeNotifier {
   final List<LogoResult> _generatedLogos = [
     LogoResult(
       name: 'Minimal Logo',
-      icon: Icons.shopping_bag_rounded,
+      image: 'assets/icons/bag.png',
+      // icon: Icons.shopping_bag_rounded,
       colors: [const Color(0xFF7C4DFF), const Color(0xFF651FFF)],
     ),
     LogoResult(
       name: 'Modern Logo',
-      icon: Icons.store_rounded,
+      image: 'assets/icons/house.png',
+
+      // icon: Icons.store_rounded,
       colors: [const Color(0xFFFF4081), const Color(0xFFF50057)],
     ),
     LogoResult(
       name: 'Classic Logo',
-      icon: Icons.card_giftcard_rounded,
+      // icon: Icons.card_giftcard_rounded,
+      image: 'assets/icons/gift.png',
+
       colors: [const Color(0xFF00B0FF), const Color(0xFF0091EA)],
     ),
     LogoResult(
       name: 'Bold Logo',
-      icon: Icons.shopping_cart_rounded,
+      // icon: Icons.shopping_cart_rounded,
+      image: 'assets/icons/basket.png',
+
       colors: [const Color(0xFFFF6D00), const Color(0xFFFF3D00)],
     ),
     LogoResult(
       name: 'Elegant Logo',
-      icon: Icons.diamond_rounded,
+      // icon: Icons.diamond_rounded,
+      image: 'assets/icons/dimand.png',
+
       colors: [const Color(0xFF00BFA5), const Color(0xFF1DE9B6)],
     ),
     LogoResult(
       name: 'Dynamic Logo',
-      icon: Icons.auto_awesome,
+      // icon: Icons.auto_awesome,
+      image: 'assets/icons/star.png',
+
       colors: [const Color(0xFFFFAB00), const Color(0xFFFFD600)],
     ),
   ];
