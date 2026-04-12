@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:logo_app_flutter/provider/gallery_provider.dart';
+import 'package:logo_app_flutter/provider/business_info_provider.dart';
+import 'package:logo_app_flutter/screens/category_selection_screen.dart';
 import 'package:logo_app_flutter/screens/business_info_screen.dart';
 import 'package:logo_app_flutter/components/gallery/gallery_chip.dart';
 import 'package:logo_app_flutter/components/gallery/template_row.dart';
@@ -185,9 +187,7 @@ class TemplateGalleryScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => BusinessInfoScreen(
-                        categoryName: item['name'] ?? 'Custom',
-                      ),
+                      builder: (context) => const CategorySelectionScreen(),
                     ),
                   );
                 },
@@ -249,9 +249,7 @@ class TemplateGalleryScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => BusinessInfoScreen(
-                            categoryName: item['name'] ?? 'Custom',
-                          ),
+                          builder: (context) => const CategorySelectionScreen(),
                         ),
                       );
                     },

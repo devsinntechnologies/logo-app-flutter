@@ -58,6 +58,7 @@ class DownloadLogo extends StatefulWidget {
 }
 
 class _DownloadLogoState extends State<DownloadLogo> {
+  double _zoomLevel = 1.0;
   String selectedShapeName = ""; // 👈 Add this
   // --- State Management ---
   late LogoStateData _currentLogoState;
@@ -465,12 +466,18 @@ class _DownloadLogoState extends State<DownloadLogo> {
     super.initState();
 
     // 1️⃣ Initialize logo state first
+    final String logoPath = widget.svgLogo;
+    final bool isImagePath = logoPath.toLowerCase().endsWith('.png') ||
+        logoPath.toLowerCase().endsWith('.jpg') ||
+        logoPath.toLowerCase().endsWith('.jpeg') ||
+        logoPath.startsWith('assets/');
+
     _currentLogoState = LogoStateData(
       logoPosition: const Offset(150, 100),
       logoSize: 100,
       logoRotation: 0,
-      isLogoVisible: true,
-      svgLogo: "${widget.svgLogo}",
+      isLogoVisible: !isImagePath,
+      svgLogo: isImagePath ? "" : "${widget.svgLogo}",
       companyNamePosition: const Offset(160, 200),
       companyNameSize: 20,
       companyNameRotation: 0,
@@ -485,9 +492,18 @@ class _DownloadLogoState extends State<DownloadLogo> {
       isCompanyName2Visible: false,
       isSlogan2Visible: false,
       customTexts: [],
-      customImages: [],
+      customImages: isImagePath
+          ? [
+              CustomImageElement(
+                path: logoPath,
+                position: const Offset(150, 100),
+                rotation: 0,
+                size: 100,
+              )
+            ]
+          : [],
       lockedElements: {},
-      elementOrder: [0, 1, 2],
+      elementOrder: isImagePath ? [200, 1, 2] : [0, 1, 2],
     );
 
     // If an initial state is provided (editing an existing design), use it
@@ -579,67 +595,100 @@ class _DownloadLogoState extends State<DownloadLogo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        leading: InkWell(
-          onTap: () => _showBackSaveConfirmationDialog(context, _canvasKey),
-          child: Icon(Icons.arrow_back),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => _showBackSaveConfirmationDialog(context, _canvasKey),
         ),
-        title: Text(
-          S.of(context).logoMaker,
-          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Expanded(
+              child: const Text(
+                'Logo Maker',
+                style: TextStyle(
+                  color: Color(0xFF1F1F39),
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const SizedBox(width: 15),
+            // IconButton(
+            //   icon: const Icon(Icons.undo, color: Colors.black, size: 20),
+            //   onPressed: _undo,
+            //   tooltip: 'Undo',
+            // ),
+            // IconButton(
+            //   icon: const Icon(Icons.redo, color: Colors.black, size: 20),
+            //   onPressed: _redo,
+            //   tooltip: 'Redo',
+            // ),
+          ],
         ),
         actions: [
-          // IconButton(
-          //   icon: const Icon(Icons.redo, size: 30),
-          //   onPressed: _redo,
-          //   tooltip: 'redo last change',
-          // ),
-          // IconButton(
-          //   icon: const Icon(Icons.undo, size: 30),
-          //   onPressed: _undo,
-          //   tooltip: 'Undo last change',
-          // ),
           IconButton(
-            icon: const Icon(Icons.save, size: 35),
-            onPressed: () {
-              final user = Supabase.instance.client.auth.currentUser;
-              if (user != null) {
-                _showSaveConfirmationDialog(context, _canvasKey);
-
-                // ✅ Load rewarded ad first
-                // AdMobService.loadRewarded(
-                //   onLoaded: (RewardedAd ad) {
-                //     ad.fullScreenContentCallback = FullScreenContentCallback(
-                //       onAdDismissedFullScreenContent: (ad) {
-                //         ad.dispose();
-                //         // After ad is closed → show save confirmation
-                //         _showSaveConfirmationDialog(context, _canvasKey);
-                //       },
-                //       onAdFailedToShowFullScreenContent: (ad, error) {
-                //         ad.dispose();
-                //         // If ad fails → still show save confirmation
-                //         _showSaveConfirmationDialog(context, _canvasKey);
-                //       },
-                //     );
-
-                //     // Show the rewarded ad
-                //     ad.show(
-                //       onUserEarnedReward:
-                //           (AdWithoutView ad, RewardItem reward) {
-                //         // Optional: you can give extra rewards here if needed
-                //         print(
-                //             'User earned reward: ${reward.amount} ${reward.type}');
-                //       },
-                //     );
-                //   },
-                // );
-              } else {
-                // User not logged in → show login dialog
-                showCustomGoogleDialog(context);
-              }
-            },
-            tooltip: 'Save Logo',
-          )
+            icon: const Icon(Icons.zoom_in, color: Colors.black, size: 22),
+            onPressed: () =>
+                setState(() => _zoomLevel = (_zoomLevel + 0.1).clamp(0.5, 3.0)),
+          ),
+          IconButton(
+            icon: const Icon(Icons.zoom_out, color: Colors.black, size: 22),
+            onPressed: () =>
+                setState(() => _zoomLevel = (_zoomLevel - 0.1).clamp(0.5, 3.0)),
+          ),
+          const SizedBox(width: 8),
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: Center(
+              child: GestureDetector(
+                onTap: () {
+                  final user = Supabase.instance.client.auth.currentUser;
+                  if (user != null) {
+                    _showSaveConfirmationDialog(context, _canvasKey);
+                  } else {
+                    showCustomGoogleDialog(context);
+                  }
+                },
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFFF8A65), Color(0xFFE91E63)],
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFE91E63).withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Icon(Icons.save, color: Colors.white, size: 18),
+                      SizedBox(width: 4),
+                      Text(
+                        'Save',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
       body: Stack(
@@ -658,55 +707,58 @@ class _DownloadLogoState extends State<DownloadLogo> {
                         child: ClipRect(
                           child: RepaintBoundary(
                             key: _canvasKey,
-                            child: SizedBox(
-                              width: MediaQuery.of(context).size.width,
-                              child: LogoCanvas(
-                                selectedShapeName: selectedShapeName,
-                                isExportingNotifier: isExportingNotifier,
-                                logoState: _currentLogoState,
-                                svgLogo: widget.svgLogo,
-                                companyName: widget.companyName,
-                                sloganName: widget.sloganName,
-                                // Show grid when toggled ON or while moving elements
-                                showGrid: (_showGrid || _isMoving),
-                                isEditingMode: true,
-                                selectedElementId: selectedElement,
-                                highlightedHorizontalGridLineIndex:
-                                    _highlightedHorizontalGridLineIndex,
-                                highlightedVerticalGridLineIndex:
-                                    _highlightedVerticalGridLineIndex,
-                                isLayersRibbonExtended: _isLayersPanelVisible,
-                                onToggleGrid: () =>
-                                    setState(() => _showGrid = !_showGrid),
-                                onToggleLayersRibbon: () => setState(
-                                  () => _isLayersPanelVisible =
-                                      !_isLayersPanelVisible,
+                            child: Transform.scale(
+                              scale: _zoomLevel,
+                              child: SizedBox(
+                                width: MediaQuery.of(context).size.width,
+                                child: LogoCanvas(
+                                  selectedShapeName: selectedShapeName,
+                                  isExportingNotifier: isExportingNotifier,
+                                  logoState: _currentLogoState,
+                                  svgLogo: widget.svgLogo,
+                                  companyName: widget.companyName,
+                                  sloganName: widget.sloganName,
+                                  // Show grid when toggled ON or while moving elements
+                                  showGrid: (_showGrid || _isMoving),
+                                  isEditingMode: true,
+                                  selectedElementId: selectedElement,
+                                  highlightedHorizontalGridLineIndex:
+                                      _highlightedHorizontalGridLineIndex,
+                                  highlightedVerticalGridLineIndex:
+                                      _highlightedVerticalGridLineIndex,
+                                  isLayersRibbonExtended: _isLayersPanelVisible,
+                                  onToggleGrid: () =>
+                                      setState(() => _showGrid = !_showGrid),
+                                  onToggleLayersRibbon: () => setState(
+                                    () => _isLayersPanelVisible =
+                                        !_isLayersPanelVisible,
+                                  ),
+                                  onCanvasTap: () {
+                                    setState(() {
+                                      selectedElement = null;
+                                    });
+                                  },
+                                  onElementPanStart: _onPanStart,
+                                  onElementPanUpdate: _updateElementPosition,
+                                  onElementPanEnd: _onPanEnd,
+                                  onElementTap: _elementSelect,
+                                  onElementDelete: _deleteElement,
+                                  onElementSplit: _splitElement,
+                                  onElementRotateTap: _rotateElementByTap,
+                                  onElementRotatePanStart: _onRotatePanStart,
+                                  onElementRotatePanUpdate: _onRotatePanUpdate,
+                                  onElementRotatePanEnd: _onPanEnd,
+                                  onElementResizeTap: _resizeElementByTap,
+                                  onElementResizePanStart: _onResizePanStart,
+                                  onElementResizePanUpdate: _onResizePanUpdate,
+                                  onElementResizePanEnd: _onPanEnd,
+                                  isCheckerboardActive: true,
+                                  checkerboardOpacity: checkerboardOpacity,
+                                  isCheckerboardVisible: isCheckerboardVisible,
+                                  lockedElements:
+                                      _currentLogoState.lockedElements,
+                                  elementOrder: _currentLogoState.elementOrder,
                                 ),
-                                onCanvasTap: () {
-                                  setState(() {
-                                    selectedElement = null;
-                                  });
-                                },
-                                onElementPanStart: _onPanStart,
-                                onElementPanUpdate: _updateElementPosition,
-                                onElementPanEnd: _onPanEnd,
-                                onElementTap: _elementSelect,
-                                onElementDelete: _deleteElement,
-                                onElementSplit: _splitElement,
-                                onElementRotateTap: _rotateElementByTap,
-                                onElementRotatePanStart: _onRotatePanStart,
-                                onElementRotatePanUpdate: _onRotatePanUpdate,
-                                onElementRotatePanEnd: _onPanEnd,
-                                onElementResizeTap: _resizeElementByTap,
-                                onElementResizePanStart: _onResizePanStart,
-                                onElementResizePanUpdate: _onResizePanUpdate,
-                                onElementResizePanEnd: _onPanEnd,
-                                isCheckerboardActive: true,
-                                checkerboardOpacity: checkerboardOpacity,
-                                isCheckerboardVisible: isCheckerboardVisible,
-                                lockedElements:
-                                    _currentLogoState.lockedElements,
-                                elementOrder: _currentLogoState.elementOrder,
                               ),
                             ),
                           ),
