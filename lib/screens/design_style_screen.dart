@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../provider/logo_design_provider.dart';
+import 'package:logo_app_flutter/screens/logo_generation_screen.dart';
 import '../components/design_style/font_style_card.dart';
 import '../components/design_style/color_scheme_card.dart';
 import '../utils/theme_colors.dart';
@@ -122,9 +123,11 @@ class DesignStyleScreen extends StatelessWidget {
                 // Final Action Button
                 GestureDetector(
                   onTap: () {
-                    // Final Generation Step
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Generating your master logo...')),
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LogoGenerationScreen(),
+                      ),
                     );
                   },
                   child: Container(
