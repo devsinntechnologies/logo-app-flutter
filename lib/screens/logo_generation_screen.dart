@@ -2,6 +2,8 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:logo_app_flutter/screens/logo_results_screen.dart';
+import 'package:logo_app_flutter/provider/business_info_provider.dart';
+import 'package:logo_app_flutter/provider/logo_results_provider.dart';
 import '../provider/logo_generation_provider.dart';
 
 class LogoGenerationScreen extends StatefulWidget {
@@ -24,6 +26,12 @@ class _LogoGenerationScreenState extends State<LogoGenerationScreen>
     )..repeat();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      final businessInfo = context.read<BusinessInfoProvider>();
+      context.read<LogoResultsProvider>().fetchLogos(
+            businessInfo.businessName,
+            businessInfo.slogan,
+          );
+
       context.read<LogoGenerationProvider>().startSimulation(
         onComplete: () {
           if (mounted) {

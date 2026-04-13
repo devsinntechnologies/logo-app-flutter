@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:logo_app_flutter/components/category_card.dart';
 import 'package:logo_app_flutter/components/divider_container.dart';
+import 'package:logo_app_flutter/provider/business_info_provider.dart';
 import 'package:logo_app_flutter/utils/theme_colors.dart';
 import 'package:logo_app_flutter/screens/business_info_screen.dart';
+import 'package:provider/provider.dart';
 
 class CategorySelectionScreen extends StatelessWidget {
   const CategorySelectionScreen({super.key});
@@ -164,6 +167,9 @@ class CategorySelectionScreen extends StatelessWidget {
                   image: category['image'],
                   gradient: category['gradient'],
                   onTap: () {
+                    context
+                        .read<BusinessInfoProvider>()
+                        .updateCategory(category['title']);
                     Navigator.push(
                       context,
                       MaterialPageRoute(

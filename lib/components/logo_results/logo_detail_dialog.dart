@@ -1,20 +1,52 @@
 import 'package:flutter/material.dart';
-import 'package:iconsax/iconsax.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:logo_app_flutter/provider/business_info_provider.dart';
+import 'package:logo_app_flutter/provider/logo_design_provider.dart';
 import 'package:logo_app_flutter/screens/download_logo.dart';
 
 class LogoDetailDialog extends StatelessWidget {
   final String name;
-  final String image;
+  final String svg;
   final List<Color> colors;
 
   const LogoDetailDialog({
     super.key,
     required this.name,
-    required this.image,
+    required this.svg,
     required this.colors,
   });
+
+  TextStyle _getFontStyle(BuildContext context, int index, Color color,
+      {double fontSize = 14}) {
+    switch (index) {
+      case 0:
+        return GoogleFonts.roboto(
+            fontSize: fontSize, color: color, fontWeight: FontWeight.bold);
+      case 1:
+        return GoogleFonts.playfairDisplay(
+            fontSize: fontSize, color: color, fontWeight: FontWeight.bold);
+      case 2:
+        return GoogleFonts.bebasNeue(fontSize: fontSize, color: color);
+      case 3:
+        return GoogleFonts.dancingScript(
+            fontSize: fontSize, color: color, fontWeight: FontWeight.bold);
+      case 4:
+        return GoogleFonts.poppins(
+            fontSize: fontSize, color: color, fontWeight: FontWeight.w600);
+      case 5:
+        return GoogleFonts.lato(
+            fontSize: fontSize, color: color, fontWeight: FontWeight.bold);
+      case 6:
+        return GoogleFonts.orbitron(
+            fontSize: fontSize, color: color, fontWeight: FontWeight.bold);
+      case 7:
+        return GoogleFonts.pacifico(fontSize: fontSize, color: color);
+      default:
+        return TextStyle(fontSize: fontSize, color: color);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,30 +116,25 @@ class LogoDetailDialog extends StatelessWidget {
                   ),
                 ],
               ),
-              child: Consumer<BusinessInfoProvider>(
-                builder: (context, info, child) {
+              child: Consumer2<BusinessInfoProvider, LogoDesignProvider>(
+                builder: (context, info, design, child) {
                   return Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Icon(
-                      //   icon,
-                      //   color: Colors.white,
-                      //   size: 70,
-                      // ),
-                      Image.asset(
-                        image,
-                        height: 70,
-                        width: 70,
+                      SvgPicture.string(
+                        svg,
+                        height: 80,
+                        width: 80,
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 15),
                       Text(
                         info.businessName,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.2,
+                        style: _getFontStyle(
+                          context,
+                          design.selectedFontIndex,
+                          Colors.white,
+                          fontSize: 20,
                         ),
                       ),
                     ],
@@ -154,7 +181,7 @@ class LogoDetailDialog extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (context) => DownloadLogo(
-                            svgLogo: image, // Passing path as requested
+                            svgLogo: svg, // Passing path as requested
                             companyName: info.businessName,
                             sloganName: info.slogan,
                           ),

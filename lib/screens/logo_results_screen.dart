@@ -44,27 +44,24 @@ class LogoResultsScreen extends StatelessWidget {
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: GestureDetector(
-              onTap: () =>
-                  context.read<LogoResultsProvider>().regenerateVariations(),
-              child: Container(
-                width: 40,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF4F5F9),
-                  shape: BoxShape.circle,
-                ),
-                child: InkWell(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const DashboardScreen()));
-                  },
-                  // context.read<LogoResultsProvider>().regenerateVariations(),
-                  child: const Icon(Icons.refresh_outlined,
-                      color: Color(0xFF1F1F39), size: 20),
-                ),
-              ),
+            child: Consumer<BusinessInfoProvider>(
+              builder: (context, info, child) {
+                return GestureDetector(
+                  onTap: () => context.read<LogoResultsProvider>().fetchLogos(
+                        info.businessName,
+                        info.slogan,
+                      ),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF4F5F9),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.refresh_outlined,
+                        color: Color(0xFF1F1F39), size: 20),
+                  ),
+                );
+              },
             ),
           ),
         ],
@@ -87,6 +84,35 @@ class LogoResultsScreen extends StatelessWidget {
       ),
       body: Consumer<LogoResultsProvider>(
         builder: (context, provider, child) {
+          if (provider.isLoading) {
+            return const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(color: Color(0xFFE91E63)),
+                  SizedBox(height: 20),
+                  Text(
+                    'Generating more logos...',
+                    style: TextStyle(
+                      color: Color(0xFF4A4A6A),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          if (provider.generatedLogos.isEmpty) {
+            return const Center(
+              child: Text(
+                'No logos generated yet.',
+                style: TextStyle(color: Color(0xFF4A4A6A)),
+              ),
+            );
+          }
+
           return SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 25),
             child: Column(
@@ -95,7 +121,7 @@ class LogoResultsScreen extends StatelessWidget {
                 Consumer<BusinessInfoProvider>(
                   builder: (context, info, child) {
                     return Text(
-                      'We generated 6 unique logos for ${info.businessName}',
+                      'We generated ${provider.generatedLogos.length} unique logos for ${info.businessName}',
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         color: Color(0xFF4A4A6A),
@@ -106,40 +132,36 @@ class LogoResultsScreen extends StatelessWidget {
                   },
                 ),
                 const SizedBox(height: 35),
-                Container(
-                  color: Colors.amber,
-                  child: GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 20,
-                      mainAxisSpacing: 25,
-                      childAspectRatio: 0.85,
-                    ),
-                    itemCount: provider.generatedLogos.length,
-                    itemBuilder: (context, index) {
-                      final logo = provider.generatedLogos[index];
-                      return LogoResultCard(
-                        name: logo.name,
-                        image: logo.image,
-                        colors: logo.colors,
-                        isFavorite: logo.isFavorite,
-                        onFavoriteTap: () => provider.toggleFavorite(index),
-                        onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => LogoDetailDialog(
-                              name: logo.name,
-                              image: logo.image,
-                              colors: logo.colors,
-                            ),
-                          );
-                        },
-                      );
-                    },
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 20,
+                    mainAxisSpacing: 25,
+                    childAspectRatio: 0.75,
                   ),
+                  itemCount: provider.generatedLogos.length,
+                  itemBuilder: (context, index) {
+                    final logo = provider.generatedLogos[index];
+                    return LogoResultCard(
+                      name: logo.name,
+                      svg: logo.svg,
+                      colors: logo.colors,
+                      isFavorite: logo.isFavorite,
+                      onFavoriteTap: () => provider.toggleFavorite(index),
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => LogoDetailDialog(
+                            name: logo.name,
+                            svg: logo.svg,
+                            colors: logo.colors,
+                          ),
+                        );
+                      },
+                    );
+                  },
                 ),
                 const SizedBox(height: 20),
               ],

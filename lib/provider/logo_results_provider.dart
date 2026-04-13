@@ -1,66 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:logo_app_flutter/services/logo_service.dart';
 
 class LogoResult {
   final String name;
-  final String image;
-  //  IconData icon;
+  final String svg;
   final List<Color> colors;
   bool isFavorite;
 
   LogoResult({
     required this.name,
-    required this.image,
+    required this.svg,
     required this.colors,
     this.isFavorite = false,
   });
 }
 
 class LogoResultsProvider extends ChangeNotifier {
-  final List<LogoResult> _generatedLogos = [
-    LogoResult(
-      name: 'Minimal Logo',
-      image: 'assets/icons/bag.png',
-      // icon: Icons.shopping_bag_rounded,
-      colors: [const Color(0xFF7C4DFF), const Color(0xFF651FFF)],
-    ),
-    LogoResult(
-      name: 'Modern Logo',
-      image: 'assets/icons/house.png',
-
-      // icon: Icons.store_rounded,
-      colors: [const Color(0xFFFF4081), const Color(0xFFF50057)],
-    ),
-    LogoResult(
-      name: 'Classic Logo',
-      // icon: Icons.card_giftcard_rounded,
-      image: 'assets/icons/gift.png',
-
-      colors: [const Color(0xFF00B0FF), const Color(0xFF0091EA)],
-    ),
-    LogoResult(
-      name: 'Bold Logo',
-      // icon: Icons.shopping_cart_rounded,
-      image: 'assets/icons/basket.png',
-
-      colors: [const Color(0xFFFF6D00), const Color(0xFFFF3D00)],
-    ),
-    LogoResult(
-      name: 'Elegant Logo',
-      // icon: Icons.diamond_rounded,
-      image: 'assets/icons/dimand.png',
-
-      colors: [const Color(0xFF00BFA5), const Color(0xFF1DE9B6)],
-    ),
-    LogoResult(
-      name: 'Dynamic Logo',
-      // icon: Icons.auto_awesome,
-      image: 'assets/icons/star.png',
-
-      colors: [const Color(0xFFFFAB00), const Color(0xFFFFD600)],
-    ),
-  ];
+  List<LogoResult> _generatedLogos = [];
+  bool _isLoading = false;
 
   List<LogoResult> get generatedLogos => _generatedLogos;
+  bool get isLoading => _isLoading;
 
   void toggleFavorite(int index) {
     if (index >= 0 && index < _generatedLogos.length) {
@@ -69,8 +29,54 @@ class LogoResultsProvider extends ChangeNotifier {
     }
   }
 
-  void regenerateVariations() {
-    // In a real app, this would trigger new variations
-    notifyListeners();
+  Future<void> fetchLogos(String name, String slogan) async {
+    _isLoading = true;
+    // Defer notification to avoid 'setState() called during build' errors
+    Future.microtask(() => notifyListeners());
+
+    try {
+      final svgs = await LogoService().fetchLogoSVGs(name, slogan);
+      _generatedLogos = svgs.asMap().entries.map((entry) {
+        int idx = entry.key;
+        String svg = entry.value;
+
+        // Assign some default varied colors for the cards
+        List<Color> colors;
+        switch (idx % 6) {
+          case 0:
+            colors = [const Color(0xFF7C4DFF), const Color(0xFF651FFF)];
+            break;
+          case 1:
+            colors = [const Color(0xFFFF4081), const Color(0xFFF50057)];
+            break;
+          case 2:
+            colors = [const Color(0xFF00B0FF), const Color(0xFF0091EA)];
+            break;
+          case 3:
+            colors = [const Color(0xFFFF6D00), const Color(0xFFFF3D00)];
+            break;
+          case 4:
+            colors = [const Color(0xFF00BFA5), const Color(0xFF1DE9B6)];
+            break;
+          default:
+            colors = [const Color(0xFFFFAB00), const Color(0xFFFFD600)];
+        }
+
+        return LogoResult(
+          name: 'Design ${idx + 1}',
+          svg: svg,
+          colors: colors,
+        );
+      }).toList();
+    } catch (e) {
+      debugPrint('Error fetching logos: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  void regenerateVariations(String name, String slogan) {
+    fetchLogos(name, slogan);
   }
 }
