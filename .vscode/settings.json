@@ -1,3 +1,4 @@
 {
-    "cmake.sourceDirectory": "C:/Users/Admin/Desktop/smart_logo_maker/logo-app-flutter/linux"
+    "cmake.sourceDirectory": "C:/Users/Admin/Desktop/smart_logo_maker/logo-app-flutter/linux",
+    "dart.flutterSdkPath": "~/Downloads/flutter 5"
 }
