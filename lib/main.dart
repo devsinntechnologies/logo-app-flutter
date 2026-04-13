@@ -7,7 +7,6 @@ import 'package:logo_app_flutter/config/environment.dart';
 import 'package:logo_app_flutter/provider/locale_provider.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
 import 'package:logo_app_flutter/provider/theme_provider.dart';
-import 'package:logo_app_flutter/screens/dashboard_screen.dart';
 import 'package:logo_app_flutter/screens/home_screen.dart';
 import 'package:logo_app_flutter/screens/splash_screen.dart';
 import 'package:logo_app_flutter/services/internet_checker.dart';
@@ -119,9 +118,7 @@ class _MyAppState extends State<MyApp> {
           ],
           supportedLocales: S.delegate.supportedLocales,
           home: InternetChecker(
-            // child: HomeScreen(),
-            // child: HomeScreen(),
-            child: DashboardScreen(),
+            child: HomeScreen(),
             // child: SignUpScreen(),
           ),
           // home: SplashScreen(),
