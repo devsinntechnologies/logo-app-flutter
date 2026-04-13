@@ -79,7 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   gradient: ThemeColors.customGradient),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                spacing: 20,
+                // spacing: 20,
                 children: [
                   SizedBox(height: 30),
                   CircleAvatar(

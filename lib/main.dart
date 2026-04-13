@@ -31,17 +31,17 @@ void main() async {
   Environment.printConfig();
 
   // Initialize Mobile Ads (only on supported platforms)
-  if (!kIsWeb) {
-    MobileAds.instance.initialize();
+  // if (!kIsWeb) {
+  //   MobileAds.instance.initialize();
 
-    // Configure test devices only in development mode
-    if (!Environment.isProduction && Environment.testDeviceIds.isNotEmpty) {
-      final requestConfig = RequestConfiguration(
-        testDeviceIds: Environment.testDeviceIds,
-      );
-      MobileAds.instance.updateRequestConfiguration(requestConfig);
-    }
-  }
+  //   // Configure test devices only in development mode
+  //   if (!Environment.isProduction && Environment.testDeviceIds.isNotEmpty) {
+  //     final requestConfig = RequestConfiguration(
+  //       testDeviceIds: Environment.testDeviceIds,
+  //     );
+  //     MobileAds.instance.updateRequestConfiguration(requestConfig);
+  //   }
+  // }
 
   // Initialize Supabase with environment configuration
   await Supabase.initialize(
