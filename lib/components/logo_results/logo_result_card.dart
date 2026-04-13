@@ -47,7 +47,7 @@ class LogoResultCard extends StatelessWidget {
                   height: 152, // Reduced from 165 to fix overflow
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(35),
+                    borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color:
                           //  interacting
@@ -80,7 +80,7 @@ class LogoResultCard extends StatelessWidget {
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
-                          borderRadius: BorderRadius.circular(28),
+                          borderRadius: BorderRadius.circular(15),
                         ),
                         child: Consumer<BusinessInfoProvider>(
                           builder: (context, info, child) {
@@ -149,13 +149,13 @@ class LogoResultCard extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 5),
+              const SizedBox(height: 10),
               Text(
                 name,
                 style: TextStyle(
                   color: const Color(0xFF1F1F39),
-                  fontSize: 12,
-                  fontWeight: interacting ? FontWeight.bold : FontWeight.w500,
+                  fontSize: 16,
+                  fontWeight: interacting ? FontWeight.bold : FontWeight.w400,
                 ),
               ),
             ],

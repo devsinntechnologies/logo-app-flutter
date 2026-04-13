@@ -22,9 +22,9 @@ class BusinessContinueButton extends StatelessWidget {
           width: double.infinity,
           height: 65,
           decoration: BoxDecoration(
-            gradient: isEnabled ? ThemeColors.mainCardGradient : null,
+            gradient: isEnabled ? ThemeColors.continueGradient : null,
             color: isEnabled ? null : const Color(0xFFD1D5DB),
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: BorderRadius.circular(20),
             boxShadow: isEnabled
                 ? [
                     BoxShadow(

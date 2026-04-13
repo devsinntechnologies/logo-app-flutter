@@ -26,7 +26,8 @@ class LogoResultsScreen extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 color: const Color(0xFFF4F5F9),
-                shape: BoxShape.circle,
+                // shape: BoxShape.circle,
+                borderRadius: BorderRadius.circular(10),
               ),
               child: const Icon(Icons.arrow_back,
                   color: Color(0xFF1F1F39), size: 20),
@@ -38,7 +39,7 @@ class LogoResultsScreen extends StatelessWidget {
           style: TextStyle(
             color: Color(0xFF1F1F39),
             fontSize: 16,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w400,
           ),
         ),
         actions: [
@@ -94,52 +95,62 @@ class LogoResultsScreen extends StatelessWidget {
                 const SizedBox(height: 5),
                 Consumer<BusinessInfoProvider>(
                   builder: (context, info, child) {
-                    return Text(
-                      'We generated 6 unique logos for ${info.businessName}',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Color(0xFF4A4A6A),
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'We generated 6 unique logos for ',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Color(0xFF4A4A6A),
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          ' ${info.businessName}',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Color(0xffFF6F0A),
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     );
                   },
                 ),
                 const SizedBox(height: 35),
-                Container(
-                  color: Colors.amber,
-                  child: GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 20,
-                      mainAxisSpacing: 25,
-                      childAspectRatio: 0.85,
-                    ),
-                    itemCount: provider.generatedLogos.length,
-                    itemBuilder: (context, index) {
-                      final logo = provider.generatedLogos[index];
-                      return LogoResultCard(
-                        name: logo.name,
-                        image: logo.image,
-                        colors: logo.colors,
-                        isFavorite: logo.isFavorite,
-                        onFavoriteTap: () => provider.toggleFavorite(index),
-                        onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => LogoDetailDialog(
-                              name: logo.name,
-                              image: logo.image,
-                              colors: logo.colors,
-                            ),
-                          );
-                        },
-                      );
-                    },
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 20,
+                    mainAxisSpacing: 25,
+                    childAspectRatio: 0.75,
                   ),
+                  itemCount: provider.generatedLogos.length,
+                  itemBuilder: (context, index) {
+                    final logo = provider.generatedLogos[index];
+                    return LogoResultCard(
+                      name: logo.name,
+                      image: logo.image,
+                      colors: logo.colors,
+                      isFavorite: logo.isFavorite,
+                      onFavoriteTap: () => provider.toggleFavorite(index),
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => LogoDetailDialog(
+                            name: logo.name,
+                            image: logo.image,
+                            colors: logo.colors,
+                          ),
+                        );
+                      },
+                    );
+                  },
                 ),
                 const SizedBox(height: 20),
               ],

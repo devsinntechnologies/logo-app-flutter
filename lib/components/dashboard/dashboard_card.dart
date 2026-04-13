@@ -43,7 +43,7 @@ class DashboardCard extends StatelessWidget {
                 clipBehavior: Clip.antiAlias,
                 decoration: BoxDecoration(
                   gradient: gradient,
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(15),
                   boxShadow: [
                     BoxShadow(
                       color: (gradient as LinearGradient)
@@ -126,16 +126,18 @@ class DashboardCard extends StatelessWidget {
                 title,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
+              SizedBox(height: 4),
               Text(
                 subtitle,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: Colors.white.withOpacity(0.8),
-                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
                 ),
               ),
             ],
@@ -150,45 +152,31 @@ class DashboardCard extends StatelessWidget {
   Widget _buildSecondaryLayout() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
-            shape: BoxShape.circle,
+        IconTheme(
+          data: const IconThemeData(color: Colors.white, size: 36),
+          child: icon,
+        ),
+        const Spacer(),
+        Text(
+          title,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
           ),
-          child: IconTheme(
-            data: const IconThemeData(color: Colors.white, size: 28),
-            child: icon,
+        ),
+        SizedBox(height: 4),
+        Text(
+          subtitle,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
           ),
         ),
-        const SizedBox(height: 15),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              subtitle,
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.8),
-                fontSize: 12,
-              ),
-            ),
-          ],
-        ),
-        const Align(
-          alignment: Alignment.bottomRight,
-          child: Icon(Icons.arrow_forward_ios_rounded,
-              color: Colors.white, size: 18),
-        ),
+        const SizedBox(height: 7),
+        Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 16),
       ],
     );
   }

@@ -63,7 +63,7 @@ class CategorySelectionScreen extends StatelessWidget {
       },
       {
         'title': 'Fashion & Beauty',
-        'image': 'assets/icons/bag.png',
+        'image': 'assets/icons/bags.png',
         'gradient': ThemeColors.fashionGradient,
       },
       {
@@ -74,22 +74,22 @@ class CategorySelectionScreen extends StatelessWidget {
       {
         'title': 'Real Estate',
         'image': 'assets/images/house.png',
-        'gradient': ThemeColors.templatesGradient,
+        'gradient': ThemeColors.realGradient,
       },
       {
         'title': 'Gaming',
         'image': 'assets/images/gamepad.png',
-        'gradient': ThemeColors.myLogosGradient,
+        'gradient': ThemeColors.gameGradient,
       },
       {
         'title': 'Education',
         'image': 'assets/images/school.png',
-        'gradient': ThemeColors.technologyGradient,
+        'gradient': ThemeColors.educationGradient,
       },
       {
         'title': 'Eco & Nature',
         'image': 'assets/icons/eco.png',
-        'gradient': ThemeColors.fitnessGradient,
+        'gradient': ThemeColors.ecoGradient,
       },
     ];
 
@@ -104,8 +104,8 @@ class CategorySelectionScreen extends StatelessWidget {
             onTap: () => Navigator.pop(context),
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.1),
-                shape: BoxShape.circle,
+                color: Colors.grey.withOpacity(0.2),
+                // shape: BoxShape.circle,
               ),
               child:
                   const Icon(Icons.arrow_back, color: Colors.black, size: 20),
@@ -117,7 +117,7 @@ class CategorySelectionScreen extends StatelessWidget {
           style: TextStyle(
             color: Colors.black,
             fontSize: 16,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
           ),
         ),
         centerTitle: true,
@@ -142,8 +142,9 @@ class CategorySelectionScreen extends StatelessWidget {
               'Choose the category that best fits your business',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.grey,
+                color: Colors.black,
                 fontSize: 14,
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 24),
@@ -154,7 +155,7 @@ class CategorySelectionScreen extends StatelessWidget {
                 crossAxisCount: 2,
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 16,
-                childAspectRatio: 0.9,
+                childAspectRatio: 0.99,
               ),
               itemCount: categories.length,
               itemBuilder: (context, index) {
