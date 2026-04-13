@@ -44,7 +44,7 @@ class LogoResultCard extends StatelessWidget {
                     ..translate(0.0, interacting ? -12.0 : 0.0)
                     ..scale(interacting ? 1.02 : 1.0),
                   width: double.infinity,
-                  height: 155, // Reduced from 165 to fix overflow
+                  height: 152, // Reduced from 165 to fix overflow
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(35),

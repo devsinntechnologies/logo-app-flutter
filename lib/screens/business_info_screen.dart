@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:logo_app_flutter/components/divider_container.dart';
 import 'package:provider/provider.dart';
 import '../provider/business_info_provider.dart';
 import 'package:logo_app_flutter/screens/design_style_screen.dart';
@@ -66,20 +67,21 @@ class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
           ),
         ),
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(2),
-          child: Container(
-            height: 4,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xFFFF5722),
-                  Color(0xFFE91E63),
-                  Color(0xFF9C27B0)
-                ],
-              ),
+            preferredSize: const Size.fromHeight(2), child: DividerContainer()
+
+            //  Container(
+            //   height: 4,
+            //   decoration: const BoxDecoration(
+            //     gradient: LinearGradient(
+            //       colors: [
+            //         Color(0xFFFF5722),
+            //         Color(0xFFE91E63),
+            //         Color(0xFF9C27B0)
+            //       ],
+            //     ),
+            //   ),
+            // ),
             ),
-          ),
-        ),
       ),
       body: Consumer<BusinessInfoProvider>(
         builder: (context, provider, child) {

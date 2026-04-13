@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:logo_app_flutter/components/dashboard/dashboard_card.dart';
 import 'package:logo_app_flutter/components/dashboard/feature_list_item.dart';
+import 'package:logo_app_flutter/components/divider_container.dart';
 import 'package:logo_app_flutter/utils/theme_colors.dart';
 import 'package:logo_app_flutter/screens/category_selection_screen.dart';
 import 'package:logo_app_flutter/screens/my_design_screen.dart';
 import 'package:logo_app_flutter/screens/template_gallery_screen.dart';
+import 'package:logo_app_flutter/screens/download_logo.dart';
+import 'package:logo_app_flutter/screens/home_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -37,19 +40,7 @@ class DashboardScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 18),
                     // Gradient Separator Line
-                    Container(
-                      height: 2.5,
-                      width: double.infinity,
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Color(0xFFFF6B21),
-                            Color(0xFFE91E63),
-                            Color(0xFF9C27B0),
-                          ],
-                        ),
-                      ),
-                    ),
+                    DividerContainer(),
                   ],
                 ),
               ),
@@ -84,15 +75,14 @@ class DashboardScreen extends StatelessWidget {
                           crossAxisCount: 2,
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
-                          crossAxisSpacing: 20,
-                          mainAxisSpacing: 20,
+                          crossAxisSpacing: 15,
+                          mainAxisSpacing: 15,
                           childAspectRatio: 0.85,
                           children: [
                             DashboardCard(
                               title: 'Templates',
                               subtitle: 'Browse designs',
-                              icon: const Icon(
-                                  Iconsax.status_up), // Exact star/spark icon
+                              icon: Icon(Icons.auto_awesome), // Exact star/spark icon
                               gradient: ThemeColors.templatesGradient,
                               onTap: () {
                                 Navigator.push(
@@ -106,23 +96,24 @@ class DashboardScreen extends StatelessWidget {
                             DashboardCard(
                               title: 'Customize',
                               subtitle: 'Make it yours',
-                              icon: const Icon(Iconsax
-                                  .brush_2), // Correct palette/brush icon
+                              icon: Icon(Icons
+                                  .palette_outlined), // Correct palette/brush icon
                               gradient: ThemeColors.customizeGradient,
                               onTap: () {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => MyDesignScreen(
-                                          canvasKey: GlobalKey())),
+                                      builder: (context) => DownloadLogo(
+                                          svgLogo: "",
+                                          companyName: "",
+                                          sloganName: "")),
                                 );
                               },
                             ),
                             DashboardCard(
                               title: 'My Logos',
                               subtitle: 'Your collection',
-                              icon: const Icon(
-                                  Iconsax.image), // Correct gallery icon
+                              icon: Icon(Icons.image), // Correct gallery icon
                               gradient: ThemeColors.myLogosGradient,
                               onTap: () {
                                 Navigator.push(
@@ -136,7 +127,7 @@ class DashboardScreen extends StatelessWidget {
                             DashboardCard(
                               title: 'History',
                               subtitle: 'Recent designs',
-                              icon: const Icon(Iconsax.clock),
+                              icon: Icon(Icons.history),
                               gradient: ThemeColors.historyGradient,
                               onTap: () {
                                 Navigator.push(
@@ -179,10 +170,12 @@ class DashboardScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 25),
-                          const FeatureListItem(
+                          FeatureListItem(
                             icon: Icon(Iconsax.magicpen),
                             text: 'Instant logo generation with AI',
-                            iconBgColor: Color(0xFFE91E63),
+                            iconBgColor: LinearGradient(
+                                colors: [Color(0xFFFE7359), Color(0xffF84490)]),
+                            // Color(0xFFFE7359),
                           ),
                           const Padding(
                             padding: EdgeInsets.symmetric(horizontal: 25),
@@ -192,10 +185,13 @@ class DashboardScreen extends StatelessWidget {
                                 color: Color(0xFFF3F3F3)),
                           ),
                           const FeatureListItem(
-                            icon: Icon(Iconsax.brush_2),
-                            text: 'Customizable colors and styles',
-                            iconBgColor: Color(0xFF00BFA5),
-                          ),
+                              icon: Icon(Icons.palette_outlined),
+                              text: 'Customizable colors and styles',
+                              // iconBgColor: Color(0xFF00BFA5),
+                              iconBgColor: LinearGradient(colors: [
+                                Color(0xFF00D3D6),
+                                Color(0xff00CD84)
+                              ])),
                           const Padding(
                             padding: EdgeInsets.symmetric(horizontal: 25),
                             child: Divider(
@@ -204,10 +200,13 @@ class DashboardScreen extends StatelessWidget {
                                 color: Color(0xFFF3F3F3)),
                           ),
                           const FeatureListItem(
-                            icon: Icon(Iconsax.status_up),
-                            text: 'Professional quality designs',
-                            iconBgColor: Color(0xFF9C27B0),
-                          ),
+                              icon: Icon(Icons.auto_awesome),
+                              text: 'Professional quality designs',
+                              // iconBgColor: Color(0xFF9C27B0),\
+                              iconBgColor: LinearGradient(colors: [
+                                Color(0xFFCD28FB),
+                                Color(0xffAD1EFB)
+                              ])),
                         ],
                       ),
                     ),

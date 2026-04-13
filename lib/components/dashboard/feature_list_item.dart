@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class FeatureListItem extends StatelessWidget {
   final Widget icon;
   final String text;
-  final Color iconBgColor;
+  final Gradient iconBgColor;
 
   const FeatureListItem({
     super.key,
@@ -21,11 +21,13 @@ class FeatureListItem extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: iconBgColor.withOpacity(0.15),
-              shape: BoxShape.circle,
-            ),
+                gradient: iconBgColor,
+                // color: iconBgColor,
+                borderRadius: BorderRadius.circular(10)
+                // shape: BoxShape.circle,
+                ),
             child: IconTheme(
-              data: IconThemeData(color: iconBgColor, size: 22),
+              data: IconThemeData(color: Colors.white, size: 22),
               child: icon,
             ),
           ),

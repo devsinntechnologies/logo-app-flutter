@@ -43,7 +43,7 @@ class DashboardCard extends StatelessWidget {
                 clipBehavior: Clip.antiAlias,
                 decoration: BoxDecoration(
                   gradient: gradient,
-                  borderRadius: BorderRadius.circular(35),
+                  borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
                       color: (gradient as LinearGradient)
@@ -87,8 +87,10 @@ class DashboardCard extends StatelessWidget {
 
                     // Content Layer
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 26),
-                      child: isMain ? _buildMainLayout() : _buildSecondaryLayout(),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 22, vertical: 26),
+                      child:
+                          isMain ? _buildMainLayout() : _buildSecondaryLayout(),
                     ),
                   ],
                 ),
@@ -130,6 +132,7 @@ class DashboardCard extends StatelessWidget {
               ),
               Text(
                 subtitle,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: Colors.white.withOpacity(0.8),
                   fontSize: 14,
@@ -138,7 +141,8 @@ class DashboardCard extends StatelessWidget {
             ],
           ),
         ),
-        const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 24),
+        const Icon(Icons.arrow_forward_ios_rounded,
+            color: Colors.white, size: 24),
       ],
     );
   }
@@ -182,7 +186,8 @@ class DashboardCard extends StatelessWidget {
         ),
         const Align(
           alignment: Alignment.bottomRight,
-          child: Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 18),
+          child: Icon(Icons.arrow_forward_ios_rounded,
+              color: Colors.white, size: 18),
         ),
       ],
     );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:logo_app_flutter/components/category_card.dart';
+import 'package:logo_app_flutter/components/divider_container.dart';
 import 'package:logo_app_flutter/utils/theme_colors.dart';
 import 'package:logo_app_flutter/screens/business_info_screen.dart';
 
@@ -121,16 +122,16 @@ class CategorySelectionScreen extends StatelessWidget {
         ),
         centerTitle: true,
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(
-            height: 1,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFFFF2E94), Color(0xFFC32BAC)],
-              ),
+            preferredSize: const Size.fromHeight(1), child: DividerContainer()
+            //  Container(
+            //   height: 1,
+            //   decoration: const BoxDecoration(
+            //     gradient: LinearGradient(
+            //       colors: [Color(0xFFFF2E94), Color(0xFFC32BAC)],
+            //     ),
+            //   ),
+            // ),
             ),
-          ),
-        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),

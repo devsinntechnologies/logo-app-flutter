@@ -65,6 +65,7 @@ class BusinessInputCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TextField(
+                style: TextStyle(color: Colors.black),
                 cursorColor: Colors.black,
                 cursorHeight: 20,
                 cursorWidth: 1,
