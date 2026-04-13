@@ -3,7 +3,6 @@ import 'package:iconsax/iconsax.dart';
 import '../../components/dashboard/dashboard_card.dart';
 import '../../components/dashboard/feature_list_item.dart';
 import '../../utils/theme_colors.dart';
-import 'category_selection_screen.dart';
 import 'design_input_screen.dart';
 import 'my_design_screen.dart';
 import 'template_gallery_screen.dart';
@@ -71,8 +70,7 @@ class DashboardScreen extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) =>
-                                  const CategorySelectionScreen()),
+                              builder: (context) => const DesignInputScreen()),
                         );
                       },
                     ),
@@ -139,14 +137,7 @@ class DashboardScreen extends StatelessWidget {
                               subtitle: 'Recent designs',
                               icon: const Icon(Iconsax.clock),
                               gradient: ThemeColors.historyGradient,
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const CategorySelectionScreen()),
-                                );
-                              },
+                              onTap: () {},
                             ),
                           ],
                         );

@@ -35,51 +35,47 @@ class _DashboardCardState extends State<DashboardCard> {
         onTapUp: (_) => setState(() => _isHovered = false),
         onTapCancel: () => setState(() => _isHovered = false),
         onTap: widget.onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          transform: Matrix4.identity()
-            ..translate(0.0, _isHovered ? -10.0 : 0.0)
-            ..scale(_isHovered ? 1.04 : 1.0),
+        child: AnimatedScale(
+          scale: _isHovered ? 0.97 : 1.0,
+          duration: const Duration(milliseconds: 150),
+          curve: Curves.easeInOut,
           child: Container(
-            width: double.infinity,
-            clipBehavior: Clip.antiAlias,
+            height: widget.isMain ? 175 : null,
             decoration: BoxDecoration(
               gradient: widget.gradient,
-              borderRadius: BorderRadius.circular(35),
+              borderRadius: BorderRadius.circular(30),
               boxShadow: [
                 BoxShadow(
-                  color: (widget.gradient as LinearGradient)
-                      .colors
-                      .first
-                      .withOpacity(_isHovered ? 0.4 : 0.25),
-                  blurRadius: _isHovered ? 25 : 18,
-                  offset: Offset(0, _isHovered ? 12 : 8),
+                  color: (widget.gradient as LinearGradient).colors.last.withOpacity(0.35),
+                  blurRadius: 20,
+                  offset: Offset(0, _isHovered ? 5 : 10),
                 ),
               ],
             ),
+            clipBehavior: Clip.antiAlias,
             child: Stack(
               children: [
-                // Glossy Arc Highlight (Top Left)
+                // Top-Left Glossy Highlight Arc
                 Positioned(
-                  left: -20,
-                  top: -20,
+                  left: -50,
+                  top: -50,
                   child: Container(
-                    width: 120,
-                    height: 120,
+                    width: 180,
+                    height: 180,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: Colors.white.withOpacity(0.12),
                     ),
                   ),
                 ),
-
-                // Decorative Bubble (Bottom Right)
+                
+                // Bottom-Right Decorative Bubble
                 Positioned(
                   right: -10,
                   bottom: -10,
                   child: Container(
-                    width: 80,
-                    height: 80,
+                    width: 90,
+                    height: 90,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: Colors.white.withOpacity(0.08),
@@ -87,22 +83,24 @@ class _DashboardCardState extends State<DashboardCard> {
                   ),
                 ),
 
-                // Content Layer
+                // Content
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 22, vertical: 26),
-                  child: widget.isMain
-                      ? Row(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 26),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: widget.isMain ? MainAxisAlignment.center : MainAxisAlignment.start,
+                    children: [
+                      if (widget.isMain)
+                        Row(
                           children: [
                             Container(
                               padding: const EdgeInsets.all(15),
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(20),
+                                color: Colors.white.withOpacity(0.25),
+                                borderRadius: BorderRadius.circular(22),
                               ),
                               child: IconTheme(
-                                data: const IconThemeData(
-                                    color: Colors.white, size: 36),
+                                data: const IconThemeData(color: Colors.white, size: 38),
                                 child: widget.icon,
                               ),
                             ),
@@ -110,7 +108,6 @@ class _DashboardCardState extends State<DashboardCard> {
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
                                     widget.title,
@@ -118,66 +115,62 @@ class _DashboardCardState extends State<DashboardCard> {
                                       color: Colors.white,
                                       fontSize: 22,
                                       fontWeight: FontWeight.bold,
+                                      letterSpacing: 0.2,
                                     ),
                                   ),
+                                  const SizedBox(height: 4),
                                   Text(
                                     widget.subtitle,
                                     style: TextStyle(
-                                      color: Colors.white.withOpacity(0.8),
+                                      color: Colors.white.withOpacity(0.95),
                                       fontSize: 14,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                            const Icon(Icons.arrow_forward_ios_rounded,
-                                color: Colors.white, size: 24),
+                            const Icon(
+                              Icons.arrow_forward_ios_rounded,
+                              color: Colors.white,
+                              size: 26,
+                            ),
                           ],
                         )
-                      : Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
-                                shape: BoxShape.circle,
-                              ),
-                              child: IconTheme(
-                                data: const IconThemeData(
-                                    color: Colors.white, size: 28),
-                                child: widget.icon,
-                              ),
-                            ),
-                            const SizedBox(height: 15),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  widget.title,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  widget.subtitle,
-                                  style: TextStyle(
-                                    color: Colors.white.withOpacity(0.8),
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const Align(
-                              alignment: Alignment.bottomRight,
-                              child: Icon(Icons.arrow_forward_ios_rounded,
-                                  color: Colors.white, size: 18),
-                            ),
-                          ],
+                      else ...[
+                        const SizedBox(height: 5),
+                        IconTheme(
+                          data: const IconThemeData(color: Colors.white, size: 34),
+                          child: widget.icon,
                         ),
+                        const SizedBox(height: 22),
+                        Text(
+                          widget.title,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          widget.subtitle,
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.85),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const Spacer(),
+                        const Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
               ],
             ),
