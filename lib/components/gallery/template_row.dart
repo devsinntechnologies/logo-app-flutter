@@ -25,9 +25,17 @@ class TemplateRow extends StatelessWidget {
               // Colored vertical indicator
               Container(
                 width: 4,
-                height: 24,
+                height: 18,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFC32BAC),
+                  gradient: const LinearGradient(
+                    colors: [
+                      Color(0xFFFF6516),
+                      Color(0xFFD73ABA),
+                      Color(0xFFA628EB)
+                    ],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -35,7 +43,7 @@ class TemplateRow extends StatelessWidget {
               Text(
                 title,
                 style: const TextStyle(
-                  fontSize: 22,
+                  fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF1A1A1A),
                 ),
@@ -50,7 +58,7 @@ class TemplateRow extends StatelessWidget {
                       style: TextStyle(
                         color: Color(0xFFFF4081),
                         fontSize: 14,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w400,
                       ),
                     ),
                     Icon(
@@ -76,36 +84,6 @@ class TemplateRow extends StatelessWidget {
           ),
         ),
 
-        // Custom scroll indicator (as seen in image)
-        const SizedBox(height: 8),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Row(
-            children: [
-              const Icon(Icons.arrow_left, size: 24, color: Colors.grey),
-              Expanded(
-                child: Container(
-                  height: 10,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE0E0E0),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: FractionallySizedBox(
-                    alignment: Alignment.centerLeft,
-                    widthFactor: 0.4,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF757575),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const Icon(Icons.arrow_right, size: 24, color: Colors.grey),
-            ],
-          ),
-        ),
         const SizedBox(height: 16),
       ],
     );

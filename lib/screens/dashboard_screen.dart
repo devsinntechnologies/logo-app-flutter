@@ -132,12 +132,12 @@ class DashboardScreen extends StatelessWidget {
                               icon: Icon(Icons.image), // Correct gallery icon
                               gradient: ThemeColors.myLogosGradient,
                               onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => MyDesignScreen(
-                                          canvasKey: GlobalKey())),
-                                );
+                                // Navigator.push(
+                                //   context,
+                                //   MaterialPageRoute(
+                                //       builder: (context) => MyDesignScreen(
+                                //           canvasKey: GlobalKey())),
+                                // );
                               },
                             ),
                             DashboardCard(
@@ -146,12 +146,12 @@ class DashboardScreen extends StatelessWidget {
                               icon: Icon(Icons.history),
                               gradient: ThemeColors.historyGradient,
                               onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const CategorySelectionScreen()),
-                                );
+                                // Navigator.push(
+                                //   context,
+                                //   MaterialPageRoute(
+                                //       builder: (context) =>
+                                //           const CategorySelectionScreen()),
+                                // );
                               },
                             ),
                           ],

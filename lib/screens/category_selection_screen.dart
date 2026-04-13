@@ -105,6 +105,7 @@ class CategorySelectionScreen extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.grey.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(10),
                 // shape: BoxShape.circle,
               ),
               child:
