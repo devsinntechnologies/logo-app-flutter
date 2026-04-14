@@ -547,19 +547,17 @@ class _DownloadLogoState extends State<DownloadLogo> {
       context,
       listen: false,
     );
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      colorProvider.resetAllOutlines();
-      colorProvider.resetAllColors(defaultColors: {});
-      colorProvider.clearOverrides();
+    colorProvider.resetAllOutlines();
+    colorProvider.resetAllColors(defaultColors: {});
+    colorProvider.clearOverrides();
 
-      // Set the selected font index for company name and slogan (prefer initial state)
-      final startCompanyFont =
-          widget.initialLogoState?.companyFontIndex ?? widget.selectedFontIndex;
-      final startSloganFont =
-          widget.initialLogoState?.sloganFontIndex ?? widget.selectedFontIndex;
-      colorProvider.setCompanyFontIndex(startCompanyFont);
-      colorProvider.setSloganFontIndex(startSloganFont);
-    });
+    // Set the selected font index for company name and slogan (prefer initial state)
+    final startCompanyFont =
+        widget.initialLogoState?.companyFontIndex ?? widget.selectedFontIndex;
+    final startSloganFont =
+        widget.initialLogoState?.sloganFontIndex ?? widget.selectedFontIndex;
+    colorProvider.setCompanyFontIndex(startCompanyFont);
+    colorProvider.setSloganFontIndex(startSloganFont);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Clear undo/redo stacks and initialize with clean state
@@ -598,90 +596,109 @@ class _DownloadLogoState extends State<DownloadLogo> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF3F4F6),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: false,
-        titleSpacing: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => _showBackSaveConfirmationDialog(context, _canvasKey),
-        ),
-        title: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              // IconButton(icon: const Icon(Icons.arrow_back, color: Colors.black87), onPressed: () => _showBackSaveConfirmationDialog(context, _canvasKey)),
-              IconButton(
-                  icon: const Icon(Icons.undo, color: Colors.black87),
-                  onPressed: _undoStack.length > 1 ? _undo : null),
-              IconButton(
-                  icon: const Icon(Icons.redo, color: Colors.black87),
-                  onPressed: _redoStack.isNotEmpty ? _redo : null),
-              IconButton(
-                  icon: const Icon(Icons.zoom_in, color: Colors.black87),
-                  onPressed: () => setState(
-                      () => _zoomLevel = (_zoomLevel + 0.1).clamp(0.5, 3.0))),
-              IconButton(
-                  icon: const Icon(Icons.zoom_out, color: Colors.black87),
-                  onPressed: () => setState(
-                      () => _zoomLevel = (_zoomLevel - 0.1).clamp(0.5, 3.0))),
-              IconButton(
-                  icon: const Icon(Icons.search, color: Colors.black87),
-                  onPressed: () {}),
-            ],
-          ),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: Center(
-              child: GestureDetector(
-                onTap: () {
-                  final user = Supabase.instance.client.auth.currentUser;
-                  if (user != null) {
-                    _showSaveConfirmationDialog(context, _canvasKey);
-                  } else {
-                    showCustomGoogleDialog(context);
-                  }
-                },
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                        colors: [Color(0xFFFF8A65), Color(0xFFE91E63)]),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Icon(Icons.save_alt, color: Colors.white, size: 16),
-                      SizedBox(width: 4),
-                      Text('Save',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          )
-        ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1.0),
-          child: Container(color: Colors.grey.shade300, height: 1.0),
-        ),
-      ),
-      body: Stack(
-        alignment: Alignment.center,
-        children: [
+      body: SafeArea(
+        child: Stack(alignment: Alignment.center, children: [
           Center(
             child: Column(
               // crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
+                // Floating Toolbar
+                Padding(
+                  padding: const EdgeInsets.only(top: 10, bottom: 20),
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 10,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.arrow_back,
+                                color: Colors.black54),
+                            onPressed: () => _showBackSaveConfirmationDialog(
+                                context, _canvasKey),
+                          ),
+                          IconButton(
+                            icon:
+                                const Icon(Icons.replay, color: Colors.black54),
+                            onPressed: _undoStack.length > 1 ? _undo : null,
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.refresh,
+                                color: Colors.black54),
+                            onPressed: _redoStack.isNotEmpty ? _redo : null,
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.zoom_in,
+                                color: Colors.black54),
+                            onPressed: () => setState(() => _zoomLevel =
+                                (_zoomLevel + 0.1).clamp(0.5, 3.0)),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.zoom_out,
+                                color: Colors.black54),
+                            onPressed: () => setState(() => _zoomLevel =
+                                (_zoomLevel - 0.1).clamp(0.5, 3.0)),
+                          ),
+                          IconButton(
+                            icon:
+                                const Icon(Icons.search, color: Colors.black54),
+                            onPressed: () {},
+                          ),
+                          const SizedBox(width: 10),
+                          GestureDetector(
+                            onTap: () {
+                              final user =
+                                  Supabase.instance.client.auth.currentUser;
+                              if (user != null) {
+                                _showSaveConfirmationDialog(
+                                    context, _canvasKey);
+                              } else {
+                                showCustomGoogleDialog(context);
+                              }
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(
+                                gradient: ThemeColors.mainCardGradient,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: const [
+                                  Icon(Icons.save_alt,
+                                      color: Colors.white, size: 18),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    'Save',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
                 Expanded(
                   child: Stack(
                     alignment: Alignment.center,
@@ -1244,7 +1261,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
               ),
             ),
           ),
-        ],
+        ]),
       ),
       bottomNavigationBar: LogoBottomNavBar(
         selectedIndex: selectedIndex,

@@ -20,7 +20,7 @@ class LogoResultsScreen extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         leading: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
           child: GestureDetector(
             onTap: () => Navigator.pop(context),
             child: Container(
@@ -30,7 +30,7 @@ class LogoResultsScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10),
               ),
               child: const Icon(Icons.arrow_back,
-                  color: Color(0xFF1F1F39), size: 20),
+                  color: Color(0xFF1F1F39), size: 25),
             ),
           ),
         ),
@@ -44,15 +44,17 @@ class LogoResultsScreen extends StatelessWidget {
         ),
         actions: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
             child: GestureDetector(
               onTap: () =>
                   context.read<LogoResultsProvider>().regenerateVariations(),
               child: Container(
-                width: 40,
+                // width: 40,
                 decoration: BoxDecoration(
                   color: const Color(0xFFF4F5F9),
-                  shape: BoxShape.circle,
+                  borderRadius: BorderRadius.circular(10),
+
+                  // shape: BoxShape.circle,
                 ),
                 child: InkWell(
                   onTap: () {
@@ -63,7 +65,7 @@ class LogoResultsScreen extends StatelessWidget {
                   },
                   // context.read<LogoResultsProvider>().regenerateVariations(),
                   child: const Icon(Icons.refresh_outlined,
-                      color: Color(0xFF1F1F39), size: 20),
+                      color: Color(0xFF1F1F39), size: 25),
                 ),
               ),
             ),
@@ -96,6 +98,7 @@ class LogoResultsScreen extends StatelessWidget {
                 Consumer<BusinessInfoProvider>(
                   builder: (context, info, child) {
                     return Wrap(
+                      alignment: WrapAlignment.center,
                       // mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
@@ -127,7 +130,7 @@ class LogoResultsScreen extends StatelessWidget {
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     crossAxisSpacing: 20,
-                    mainAxisSpacing: 25,
+                    mainAxisSpacing: 0,
                     childAspectRatio: 0.75,
                   ),
                   itemCount: provider.generatedLogos.length,
