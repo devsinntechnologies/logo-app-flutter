@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:logo_app_flutter/components/google_alert.dart';
+import 'package:logo_app_flutter/screens/dashboard_screen.dart';
 import 'package:logo_app_flutter/utils/theme_colors.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -24,6 +25,15 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
         setState(() {
           _user = data.session?.user;
         });
+
+        // 🔥 IMPORTANT: logout par redirect
+        if (data.session == null) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => DashboardScreen()),
+            (route) => false,
+          );
+        }
       }
     });
   }
@@ -181,7 +191,11 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                   const SizedBox(height: 15),
                   _buildInfoRow("Name", name),
                   const SizedBox(height: 15),
-                  _buildInfoRow("User ID", userId.substring(0, 8) + '...'),
+                  _buildInfoRow(
+                      "User ID",
+                      userId.length > 8
+                          ? userId.substring(0, 8) + '...'
+                          : userId),
                 ],
               ),
             ),
@@ -191,17 +205,15 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
               onTap: () async {
                 if (!mounted) return;
 
-                // Pop and show Snackbar immediately
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Signed out successfully')),
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (_) => DashboardScreen()),
+                  (route) => false,
                 );
 
-                // Wait a tiny moment so UI updates instantly
-                await Future.delayed(const Duration(milliseconds: 100));
-
-                // Perform sign out
-                await _supabase.auth.signOut();
+                Future.microtask(() async {
+                  await _supabase.auth.signOut();
+                });
               },
               child: Container(
                 width: double.infinity,

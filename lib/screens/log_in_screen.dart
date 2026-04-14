@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:logo_app_flutter/generated/l10n.dart';
+import 'package:logo_app_flutter/screens/dashboard_screen.dart';
 import 'package:logo_app_flutter/screens/sign_up_screen.dart';
+import 'package:logo_app_flutter/screens/verify_email_screen.dart';
 import 'package:logo_app_flutter/provider/auth_provider.dart';
 import 'package:logo_app_flutter/utils/theme_colors.dart';
 import 'package:provider/provider.dart';
@@ -82,7 +84,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your email';
                       }
-                      // if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                      // if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                      //     .hasMatch(value)) {
                       //   return 'Please enter a valid email';
                       // }
                       return null;
@@ -148,15 +151,33 @@ class _LoginScreenState extends State<LoginScreen> {
                                         content:
                                             Text("Logged in successfully!")),
                                   );
-                                  Navigator.pop(context);
+                              Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            DashboardScreen(),
+                                      ),
+                                    );
                                 }
                               } else if (authProvider.errorMessage != null) {
                                 if (mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                        content:
-                                            Text(authProvider.errorMessage!)),
-                                  );
+                                  if (authProvider.errorMessage!
+                                      .toLowerCase()
+                                      .contains("confirm your email")) {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            VerifyEmailScreen(email: email),
+                                      ),
+                                    );
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                          content:
+                                              Text(authProvider.errorMessage!)),
+                                    );
+                                  }
                                 }
                               }
                             }

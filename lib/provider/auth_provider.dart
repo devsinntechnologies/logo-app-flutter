@@ -90,6 +90,18 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> resendVerification(String email) async {
+    _setLoading(true);
+    _setError(null);
+    try {
+      await _authService.resendVerification(email);
+      _setLoading(false);
+    } catch (e) {
+      _setError("Failed to resend confirmation email.");
+      _setLoading(false);
+    }
+  }
+
   String _mapAuthException(AuthException e) {
     final message = e.message.toLowerCase();
     if (message.contains('invalid login credentials')) {

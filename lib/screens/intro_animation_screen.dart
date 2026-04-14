@@ -5,7 +5,8 @@ import 'package:logo_app_flutter/provider/intro_provider.dart';
 import 'package:logo_app_flutter/screens/dashboard_screen.dart';
 
 class IntroAnimationScreen extends StatefulWidget {
-  const IntroAnimationScreen({super.key});
+  final VoidCallback onComplete;
+  const IntroAnimationScreen({super.key, required this.onComplete});
 
   @override
   State<IntroAnimationScreen> createState() => _IntroAnimationScreenState();
@@ -58,18 +59,7 @@ class _IntroAnimationScreenState extends State<IntroAnimationScreen>
         onStageTwo: () => _controller.forward(),
         onComplete: () {
           if (mounted) {
-            Navigator.pushReplacement(
-              context,
-              PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) =>
-                    const DashboardScreen(),
-                transitionsBuilder:
-                    (context, animation, secondaryAnimation, child) {
-                  return FadeTransition(opacity: animation, child: child);
-                },
-                transitionDuration: const Duration(milliseconds: 1000),
-              ),
-            );
+            widget.onComplete();
           }
         },
       );

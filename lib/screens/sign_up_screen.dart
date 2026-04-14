@@ -3,6 +3,7 @@ import 'package:logo_app_flutter/generated/l10n.dart';
 import 'package:logo_app_flutter/screens/dashboard_screen.dart';
 import 'package:logo_app_flutter/screens/home_screen.dart';
 import 'package:logo_app_flutter/screens/log_in_screen.dart';
+import 'package:logo_app_flutter/screens/verify_email_screen.dart';
 import 'package:logo_app_flutter/provider/auth_provider.dart';
 import 'package:logo_app_flutter/utils/theme_colors.dart';
 import 'package:provider/provider.dart';
@@ -143,10 +144,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     keyboardType: TextInputType.emailAddress,
                     validator: (value) {
-                      if (value == null || value.isEmpty)
+                      if (value == null || value.isEmpty) {
                         return 'Please enter email';
+                      }
                       // if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                      //     .hasMatch(value)) return 'Please enter valid email';
+                      //     .hasMatch(value)) {
+                      //   return 'Please enter a valid email';
+                      // }
                       return null;
                     },
                   ),
@@ -237,18 +241,30 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                               if (response != null && response.user != null) {
                                 if (mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                        content: Text(
-                                            "Account created successfully!")),
-                                  );
-                                  Navigator.pushAndRemoveUntil(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (_) =>
-                                            const DashboardScreen()),
-                                    (route) => false,
-                                  );
+                                  if (response.session == null) {
+                                    // Verification required
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => VerifyEmailScreen(email: email),
+                                      ),
+                                    );
+                                  } else {
+                                    // Session active (verified)
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text(
+                                              "Account created successfully!")),
+                                    );
+                                    // AuthWrapper will handle the transition, 
+                                    // but we can also pop or navigate to Dashboard
+                                    Navigator.pushAndRemoveUntil(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (_) => const DashboardScreen()),
+                                      (route) => false,
+                                    );
+                                  }
                                 }
                               } else if (authProvider.errorMessage != null) {
                                 if (mounted) {

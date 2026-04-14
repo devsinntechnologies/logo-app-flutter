@@ -18,6 +18,7 @@ import 'package:logo_app_flutter/screens/intro_animation_screen.dart';
 import 'package:logo_app_flutter/screens/dashboard_screen.dart';
 import 'package:logo_app_flutter/screens/home_screen.dart';
 import 'package:logo_app_flutter/screens/splash_screen.dart';
+import 'package:logo_app_flutter/screens/verify_email_screen.dart';
 import 'package:logo_app_flutter/services/internet_checker.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -64,6 +65,7 @@ class _MyAppState extends State<MyApp> {
   final _supabase = Supabase.instance.client;
   late final StreamSubscription<AuthState> _authSubscription;
   Session? _session;
+  bool _introDone = false;
 
   @override
   void initState() {
@@ -71,11 +73,11 @@ class _MyAppState extends State<MyApp> {
     _session = _supabase.auth.currentSession;
 
     _authSubscription = _supabase.auth.onAuthStateChange.listen((authState) {
-      final session = authState.session;
-
-      setState(() {
-        // _session = session;
-      });
+      if (mounted) {
+        setState(() {
+          _session = authState.session;
+        });
+      }
     });
   }
 
@@ -87,7 +89,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    // Pre-cache intro images to prevent white flash
+ 
     precacheImage(const AssetImage('assets/images/Home1.png'), context);
     precacheImage(const AssetImage('assets/logo_images/bulb.png'), context);
 
@@ -109,7 +111,7 @@ class _MyAppState extends State<MyApp> {
           theme: ThemeData(
             useMaterial3: true,
             brightness: Brightness.light,
-            scaffoldBackgroundColor: const Color(0xFF9C27B0), // Set base purple
+            scaffoldBackgroundColor: const Color(0xFF9C27B0), 
             colorScheme: ColorScheme.fromSeed(
               seedColor: Colors.deepPurple,
               brightness: Brightness.light,
@@ -119,7 +121,7 @@ class _MyAppState extends State<MyApp> {
           darkTheme: ThemeData(
             useMaterial3: true,
             brightness: Brightness.dark,
-            scaffoldBackgroundColor: const Color(0xFF9C27B0), // Set base purple
+            scaffoldBackgroundColor: const Color(0xFF9C27B0),
             colorScheme: ColorScheme.fromSeed(
               seedColor: Colors.deepPurple,
               brightness: Brightness.dark,
@@ -140,14 +142,52 @@ class _MyAppState extends State<MyApp> {
           ],
           supportedLocales: S.delegate.supportedLocales,
           home: InternetChecker(
-            // child: HomeScreen(),
-            // child: HomeScreen(),
-            child: const IntroAnimationScreen(),
-            // child: SignUpScreen(),
+            child: _MainWrapper(
+              session: _session,
+              introDone: _introDone,
+              onIntroComplete: () {
+                setState(() {
+                  _introDone = true;
+                });
+              },
+            ),
           ),
-          // home: SplashScreen(),
         );
       }),
     );
+  }
+}
+
+class _MainWrapper extends StatelessWidget {
+  final Session? session;
+  final bool introDone;
+  final VoidCallback onIntroComplete;
+
+  const _MainWrapper({
+    required this.session,
+    required this.introDone,
+    required this.onIntroComplete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+
+    if (!introDone) {
+      return IntroAnimationScreen(onComplete: onIntroComplete);
+    }
+
+
+    if (session == null) {
+      return const DashboardScreen();
+    }
+
+
+    final user = session!.user;
+    if (user.emailConfirmedAt == null) {
+      return VerifyEmailScreen(email: user.email ?? "");
+    }
+
+ 
+    return const DashboardScreen();
   }
 }
