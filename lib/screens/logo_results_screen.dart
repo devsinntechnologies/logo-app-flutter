@@ -95,8 +95,8 @@ class LogoResultsScreen extends StatelessWidget {
                 const SizedBox(height: 5),
                 Consumer<BusinessInfoProvider>(
                   builder: (context, info, child) {
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    return Wrap(
+                      // mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
                           'We generated 6 unique logos for ',

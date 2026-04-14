@@ -121,7 +121,7 @@ class DashboardCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
-            children: [
+            children: [ 
               Text(
                 title,
                 style: const TextStyle(
