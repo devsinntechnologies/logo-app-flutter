@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:logo_app_flutter/config/environment.dart';
 import 'package:logo_app_flutter/utils/app_logger.dart';
 
 class AuthService {
@@ -10,36 +11,30 @@ class AuthService {
   // ---------------- GOOGLE SIGN IN ----------------
   Future<void> signInWithGoogle() async {
     try {
-      // 1. Configure Native Google Sign-In
-      // Note: On Android, this usually works without IDs if correctly configured in Gradle/Google Cloud.
-      // On iOS, you MUST add the Reversed Client ID to Info.plist.
-      final GoogleSignIn googleSignIn = GoogleSignIn();
+      // AppLogger.info("Starting Google Sign-In (Browser flow)", tag: "AuthService");
 
-      // 2. Trigger the native sign-in dialog
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-      if (googleUser == null) {
-        // User canceled the sign-in
-        return;
-      }
-
-      // 3. Obtain auth details
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-      final idToken = googleAuth.idToken;
-      final accessToken = googleAuth.accessToken;
-
-      if (idToken == null) {
-        throw 'No ID Token found from Google.';
-      }
-
-      // 4. Authenticate with Supabase
-      await _supabase.auth.signInWithIdToken(
-        provider: OAuthProvider.google,
-        idToken: idToken,
-        accessToken: accessToken,
+      // We use the browser-based flow as primary to ensure success across all devices
+      // and avoid "Error 10" alerts caused by native configuration issues.
+      await _supabase.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: 'io.supabase.flutter://callback',
       );
 
-      AppLogger.success("Google Sign-In successful", tag: "AuthService");
+      /* 
+      // NATIVE FALLBACK (Currently disabled to avoid double-alerts)
+      final GoogleSignIn googleSignIn = GoogleSignIn(serverClientId: Environment.googleWebClientId);
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      if (googleUser != null) {
+        final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+        await _supabase.auth.signInWithIdToken(
+          provider: OAuthProvider.google,
+          idToken: googleAuth.idToken!,
+          accessToken: googleAuth.accessToken,
+        );
+      }
+      */
+
+      AppLogger.success("Google Sign-In initiated", tag: "AuthService");
     } catch (e) {
       AppLogger.error("Google Sign-In failed", tag: "AuthService", error: e);
       rethrow;

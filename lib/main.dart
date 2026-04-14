@@ -89,7 +89,6 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
- 
     precacheImage(const AssetImage('assets/images/Home1.png'), context);
     precacheImage(const AssetImage('assets/logo_images/bulb.png'), context);
 
@@ -111,7 +110,7 @@ class _MyAppState extends State<MyApp> {
           theme: ThemeData(
             useMaterial3: true,
             brightness: Brightness.light,
-            scaffoldBackgroundColor: const Color(0xFF9C27B0), 
+            scaffoldBackgroundColor: const Color(0xFF9C27B0),
             colorScheme: ColorScheme.fromSeed(
               seedColor: Colors.deepPurple,
               brightness: Brightness.light,
@@ -171,23 +170,19 @@ class _MainWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     if (!introDone) {
       return IntroAnimationScreen(onComplete: onIntroComplete);
     }
 
-
     if (session == null) {
       return const DashboardScreen();
     }
-
 
     final user = session!.user;
     if (user.emailConfirmedAt == null) {
       return VerifyEmailScreen(email: user.email ?? "");
     }
 
- 
     return const DashboardScreen();
   }
 }

@@ -20,7 +20,7 @@ class _MyDesignScreenState extends State<MyDesignScreen> {
   final supabase = Supabase.instance.client;
   List<String> imageUrls = [];
   List<Map<String, dynamic>> userDesigns = [];
-bool isLoading = true; 
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -30,42 +30,46 @@ bool isLoading = true;
   }
 
   /// Fetch all logos for the current user
-Future<void> fetchLogos() async {
-  setState(() => isLoading = true); // start loading
-  try {
-    final uid = supabase.auth.currentUser!.id;
-    final response = await supabase.storage.from('logos').list(path: 'logos/$uid');
+  Future<void> fetchLogos() async {
+    setState(() => isLoading = true); // start loading
+    try {
+      final uid = supabase.auth.currentUser!.id;
+      final response =
+          await supabase.storage.from('logos').list(path: 'logos/$uid');
 
-    if (response.isEmpty) {
+      if (response.isEmpty) {
+        setState(() {
+          imageUrls = [];
+          isLoading = false; // done loading
+        });
+        return;
+      }
+
+      final now = DateTime.now().millisecondsSinceEpoch;
+      final urls = response.map((file) {
+        final base = supabase.storage
+            .from('logos')
+            .getPublicUrl('logos/$uid/${file.name}');
+        return '$base?t=$now'; // cache-busting
+      }).toList();
+
+      setState(() {
+        imageUrls = urls;
+        isLoading = false; // done loading
+      });
+    } catch (e) {
+      AppLogger.error('Error fetching logos', tag: 'MyDesignScreen', error: e);
       setState(() {
         imageUrls = [];
         isLoading = false; // done loading
       });
-      return;
     }
-
-    final now = DateTime.now().millisecondsSinceEpoch;
-    final urls = response.map((file) {
-      final base = supabase.storage.from('logos').getPublicUrl('logos/$uid/${file.name}');
-      return '$base?t=$now'; // cache-busting
-    }).toList();
-
-    setState(() {
-      imageUrls = urls;
-      isLoading = false; // done loading
-    });
-  } catch (e) {
-    AppLogger.error('Error fetching logos', tag: 'MyDesignScreen', error: e);
-    setState(() {
-      imageUrls = [];
-      isLoading = false; // done loading
-    });
   }
-}
 
   /// Upload canvas and refresh logos
   Future<void> uploadCanvas() async {
-    final url = await CanvasUploadService.uploadCanvas(canvasKey: widget.canvasKey);
+    final url =
+        await CanvasUploadService.uploadCanvas(canvasKey: widget.canvasKey);
     if (url != null) {
       fetchLogos(); // refresh GridView
     }
@@ -106,7 +110,8 @@ Future<void> fetchLogos() async {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: const [
-                      Icon(Icons.image_not_supported, size: 60, color: Colors.grey),
+                      Icon(Icons.image_not_supported,
+                          size: 60, color: Colors.grey),
                       SizedBox(height: 12),
                       Text(
                         'No logos yet.\nUpload your first logo!',
@@ -128,7 +133,8 @@ Future<void> fetchLogos() async {
                   itemBuilder: (context, index) {
                     final url = imageUrls[index];
                     final fileName = url.split('/').last;
-                    final fileBase = fileName.split('?').first; // remove cache-bust query
+                    final fileBase =
+                        fileName.split('?').first; // remove cache-bust query
 
                     // helper to strip query params from a URL
                     String stripQuery(String? u) => (u ?? '').split('?').first;
@@ -143,7 +149,8 @@ Future<void> fetchLogos() async {
                         final iuStripped = stripQuery(iu);
                         final urlStripped = stripQuery(url);
 
-                        if (iuStripped.isNotEmpty && iuStripped == urlStripped) return true;
+                        if (iuStripped.isNotEmpty && iuStripped == urlStripped)
+                          return true;
 
                         if (ip.isNotEmpty) {
                           final ipBase = ip.split('/').last;
@@ -175,26 +182,35 @@ Future<void> fetchLogos() async {
                                       var dj = d['design_json'];
                                       if (dj is String) {
                                         try {
-                                          dj = dj.isNotEmpty ? jsonDecode(dj) as Map<String, dynamic> : {};
+                                          dj = dj.isNotEmpty
+                                              ? jsonDecode(dj)
+                                                  as Map<String, dynamic>
+                                              : {};
                                         } catch (_) {
                                           dj = {};
                                         }
                                       }
                                       if (dj is Map<String, dynamic>) {
-                                        final state = LogoStateData.fromJson(dj);
+                                        final state =
+                                            LogoStateData.fromJson(dj);
                                         // Debug: log design id and parsed font index before navigating
                                         // ignore: avoid_print
-                                        print('NAVIGATE -> design id:${matchedDesign?["id"]} companyFont:${state.companyFontIndex} sloganFont:${state.sloganFontIndex}');
+                                        print(
+                                            'NAVIGATE -> design id:${matchedDesign?["id"]} companyFont:${state.companyFontIndex} sloganFont:${state.sloganFontIndex}');
                                         await Navigator.push(
                                           context,
                                           MaterialPageRoute(
                                             builder: (_) => DownloadLogo(
                                               svgLogo: state.svgLogo ?? '',
-                                              companyName: state.companyName ?? '',
-                                              sloganName: state.sloganName ?? '',
-                                              selectedFontIndex: state.companyFontIndex,
+                                              companyName:
+                                                  state.companyName ?? '',
+                                              sloganName:
+                                                  state.sloganName ?? '',
+                                              selectedFontIndex:
+                                                  state.companyFontIndex,
                                               initialLogoState: state,
-                                              designId: matchedDesign?['id']?.toString(),
+                                              designId: matchedDesign?['id']
+                                                  ?.toString(),
                                             ),
                                           ),
                                         );
@@ -209,7 +225,8 @@ Future<void> fetchLogos() async {
                                     fit: BoxFit.cover,
                                     width: double.infinity,
                                     errorBuilder: (context, error, stackTrace) {
-                                      return const Center(child: Icon(Icons.error));
+                                      return const Center(
+                                          child: Icon(Icons.error));
                                     },
                                   ),
                                 ),
@@ -218,13 +235,17 @@ Future<void> fetchLogos() async {
                           ),
                           // const SizedBox(height: 4),
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8.0),
                             child: Row(
                               children: [
                                 Expanded(
                                   child: Text(
                                     fileName,
-                                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black),
+                                    style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.black),
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
@@ -234,33 +255,43 @@ Future<void> fetchLogos() async {
                                     // mainAxisSize: MainAxisSize.min,
                                     children: [
                                       IconButton(
-                                        icon: const Icon(Icons.edit, color: Colors.black),
+                                        icon: const Icon(Icons.edit,
+                                            color: Colors.black),
                                         tooltip: 'Edit design',
                                         onPressed: () async {
                                           final d = matchedDesign!;
                                           var dj = d['design_json'];
                                           if (dj is String) {
                                             try {
-                                              dj = dj.isNotEmpty ? jsonDecode(dj) as Map<String, dynamic> : {};
+                                              dj = dj.isNotEmpty
+                                                  ? jsonDecode(dj)
+                                                      as Map<String, dynamic>
+                                                  : {};
                                             } catch (_) {
                                               dj = {};
                                             }
                                           }
                                           if (dj is Map<String, dynamic>) {
-                                            final state = LogoStateData.fromJson(dj);
-                                          // Debug: log design id and parsed font index before navigating (edit button)
-                                          // ignore: avoid_print
-                                          print('NAVIGATE(edit) -> design id:${matchedDesign?["id"]} companyFont:${state.companyFontIndex} sloganFont:${state.sloganFontIndex}');
-                                              await Navigator.push(
+                                            final state =
+                                                LogoStateData.fromJson(dj);
+                                            // Debug: log design id and parsed font index before navigating (edit button)
+                                            // ignore: avoid_print
+                                            print(
+                                                'NAVIGATE(edit) -> design id:${matchedDesign?["id"]} companyFont:${state.companyFontIndex} sloganFont:${state.sloganFontIndex}');
+                                            await Navigator.push(
                                               context,
                                               MaterialPageRoute(
                                                 builder: (_) => DownloadLogo(
                                                   svgLogo: state.svgLogo ?? '',
-                                                  companyName: state.companyName ?? '',
-                                                  sloganName: state.sloganName ?? '',
-                                                  selectedFontIndex: state.companyFontIndex,
+                                                  companyName:
+                                                      state.companyName ?? '',
+                                                  sloganName:
+                                                      state.sloganName ?? '',
+                                                  selectedFontIndex:
+                                                      state.companyFontIndex,
                                                   initialLogoState: state,
-                                                  designId: matchedDesign?['id']?.toString(),
+                                                  designId: matchedDesign?['id']
+                                                      ?.toString(),
                                                 ),
                                               ),
                                             );
@@ -270,40 +301,64 @@ Future<void> fetchLogos() async {
                                         },
                                       ),
                                       IconButton(
-                                        icon: const Icon(Icons.delete, color: Colors.red),
+                                        icon: const Icon(Icons.delete,
+                                            color: Colors.red),
                                         onPressed: () async {
-                                          final confirmed = await showDialog<bool>(
+                                          final confirmed =
+                                              await showDialog<bool>(
                                             context: context,
                                             builder: (c) => AlertDialog(
-                                              title: const Text('Delete design?'),
-                                              content: const Text('This will permanently delete the design and its image.'),
+                                              title:
+                                                  const Text('Delete design?'),
+                                              content: const Text(
+                                                  'This will permanently delete the design and its image.'),
                                               actions: [
-                                                TextButton(onPressed: () => Navigator.of(c).pop(false), child: const Text('Cancel')),
-                                                TextButton(onPressed: () => Navigator.of(c).pop(true), child: const Text('Delete')),
+                                                TextButton(
+                                                    onPressed: () =>
+                                                        Navigator.of(c)
+                                                            .pop(false),
+                                                    child:
+                                                        const Text('Cancel')),
+                                                TextButton(
+                                                    onPressed: () =>
+                                                        Navigator.of(c)
+                                                            .pop(true),
+                                                    child:
+                                                        const Text('Delete')),
                                               ],
                                             ),
                                           );
 
                                           if (confirmed == true) {
-                                            final idStr = matchedDesign?['id']?.toString();
-                                            if (idStr == null || idStr.isEmpty) {
-                                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invalid design id')));
+                                            final idStr = matchedDesign?['id']
+                                                ?.toString();
+                                            if (idStr == null ||
+                                                idStr.isEmpty) {
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(const SnackBar(
+                                                      content: Text(
+                                                          'Invalid design id')));
                                             } else {
                                               final svc = UserDesignService();
-                                              final ok = await svc.deleteDesign(idStr);
+                                              final ok =
+                                                  await svc.deleteDesign(idStr);
                                               if (ok) {
-                                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Design deleted')));
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(const SnackBar(
+                                                        content: Text(
+                                                            'Design deleted')));
                                                 await fetchLogos();
                                                 await fetchDesigns();
                                               } else {
-                                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to delete design')));
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(const SnackBar(
+                                                        content: Text(
+                                                            'Failed to delete design')));
                                               }
                                             }
                                           }
                                         },
                                       ),
-                                   
-                                   
                                     ],
                                   ),
                               ],

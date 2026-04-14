@@ -133,7 +133,18 @@ void showCustomGoogleDialog(BuildContext context) {
             GestureDetector(
               onTap: () async {
                 Navigator.pop(context);
-                await context.read<AuthProvider>().signInWithGoogle();
+                try {
+                  await context.read<AuthProvider>().signInWithGoogle();
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("Google Sign-In failed: $e"),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
               },
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
