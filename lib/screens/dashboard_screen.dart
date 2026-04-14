@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:logo_app_flutter/components/dashboard/dashboard_card.dart';
 import 'package:logo_app_flutter/components/dashboard/feature_list_item.dart';
 import 'package:logo_app_flutter/components/divider_container.dart';
+import 'package:logo_app_flutter/screens/google_sign_in_button.dart';
 import 'package:logo_app_flutter/utils/theme_colors.dart';
 import 'package:logo_app_flutter/screens/category_selection_screen.dart';
 import 'package:logo_app_flutter/screens/my_design_screen.dart';
 import 'package:logo_app_flutter/screens/template_gallery_screen.dart';
 import 'package:logo_app_flutter/screens/download_logo.dart';
-import 'package:logo_app_flutter/screens/home_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -16,7 +17,7 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F7FF), // Subtle lavender tint
+      backgroundColor: const Color(0xFFFCF6ED), // Match figma background
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -25,22 +26,36 @@ class DashboardScreen extends StatelessWidget {
               // Custom Header
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.only(top: 24, bottom: 0),
-                color: Colors.white,
+                padding: const EdgeInsets.only(
+                    top: 15, left: 20, right: 20, bottom: 0),
+                color: Colors.transparent,
                 child: Column(
                   children: [
-                    const Text(
-                      'Smart Logo Maker',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                        letterSpacing: 0.2,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const SizedBox(
+                            width:
+                                48), // To balance the center text if login button is roughly 48-60w
+                        Expanded(
+                          child: Center(
+                            child: Text(
+                              'SMART LOGO MAKER',
+                              style: GoogleFonts.poppins(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black87,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const GoogleSignInButton(),
+                      ],
                     ),
                     const SizedBox(height: 18),
                     // Gradient Separator Line
-                    DividerContainer(),
+                    const DividerContainer(),
                   ],
                 ),
               ),
@@ -77,12 +92,13 @@ class DashboardScreen extends StatelessWidget {
                           physics: const NeverScrollableScrollPhysics(),
                           crossAxisSpacing: 15,
                           mainAxisSpacing: 15,
-                          childAspectRatio: 0.85,
+                          childAspectRatio: 0.99,
                           children: [
                             DashboardCard(
                               title: 'Templates',
                               subtitle: 'Browse designs',
-                              icon: Icon(Icons.auto_awesome), // Exact star/spark icon
+                              icon: Icon(
+                                  Icons.auto_awesome), // Exact star/spark icon
                               gradient: ThemeColors.templatesGradient,
                               onTap: () {
                                 Navigator.push(
@@ -116,12 +132,12 @@ class DashboardScreen extends StatelessWidget {
                               icon: Icon(Icons.image), // Correct gallery icon
                               gradient: ThemeColors.myLogosGradient,
                               onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => MyDesignScreen(
-                                          canvasKey: GlobalKey())),
-                                );
+                                // Navigator.push(
+                                //   context,
+                                //   MaterialPageRoute(
+                                //       builder: (context) => MyDesignScreen(
+                                //           canvasKey: GlobalKey())),
+                                // );
                               },
                             ),
                             DashboardCard(
@@ -130,12 +146,12 @@ class DashboardScreen extends StatelessWidget {
                               icon: Icon(Icons.history),
                               gradient: ThemeColors.historyGradient,
                               onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const CategorySelectionScreen()),
-                                );
+                                // Navigator.push(
+                                //   context,
+                                //   MaterialPageRoute(
+                                //       builder: (context) =>
+                                //           const CategorySelectionScreen()),
+                                // );
                               },
                             ),
                           ],
@@ -147,10 +163,10 @@ class DashboardScreen extends StatelessWidget {
                     // Bottom Section: AI-Powered Features
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 28),
+                      padding: const EdgeInsets.symmetric(vertical: 20),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(35),
+                        borderRadius: BorderRadius.circular(15),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.04),
@@ -169,44 +185,25 @@ class DashboardScreen extends StatelessWidget {
                               color: Colors.black87,
                             ),
                           ),
-                          const SizedBox(height: 25),
-                          FeatureListItem(
+                          const SizedBox(height: 20),
+                          const FeatureListItem(
                             icon: Icon(Iconsax.magicpen),
-                            text: 'Instant logo generation with AI',
+                            text: 'Instant Generation with AI',
                             iconBgColor: LinearGradient(
                                 colors: [Color(0xFFFE7359), Color(0xffF84490)]),
-                            // Color(0xFFFE7359),
-                          ),
-                          const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 25),
-                            child: Divider(
-                                height: 1,
-                                thickness: 0.8,
-                                color: Color(0xFFF3F3F3)),
                           ),
                           const FeatureListItem(
-                              icon: Icon(Icons.palette_outlined),
-                              text: 'Customizable colors and styles',
-                              // iconBgColor: Color(0xFF00BFA5),
-                              iconBgColor: LinearGradient(colors: [
-                                Color(0xFF00D3D6),
-                                Color(0xff00CD84)
-                              ])),
-                          const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 25),
-                            child: Divider(
-                                height: 1,
-                                thickness: 0.8,
-                                color: Color(0xFFF3F3F3)),
+                            icon: Icon(Icons.palette_outlined),
+                            text: 'Customizable colors and styles',
+                            iconBgColor: LinearGradient(
+                                colors: [Color(0xFF00D3D6), Color(0xff00CD84)]),
                           ),
                           const FeatureListItem(
-                              icon: Icon(Icons.auto_awesome),
-                              text: 'Professional quality designs',
-                              // iconBgColor: Color(0xFF9C27B0),\
-                              iconBgColor: LinearGradient(colors: [
-                                Color(0xFFCD28FB),
-                                Color(0xffAD1EFB)
-                              ])),
+                            icon: Icon(Icons.auto_awesome),
+                            text: 'Professional quality designs',
+                            iconBgColor: LinearGradient(
+                                colors: [Color(0xFFCD28FB), Color(0xffAD1EFB)]),
+                          ),
                         ],
                       ),
                     ),

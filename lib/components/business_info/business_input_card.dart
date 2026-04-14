@@ -45,7 +45,7 @@ class BusinessInputCard extends StatelessWidget {
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: iconBgColor,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(icon, color: Colors.white, size: 22),
               ),
@@ -53,10 +53,9 @@ class BusinessInputCard extends StatelessWidget {
               Text(
                 title,
                 style: const TextStyle(
-                  color: Color(0xFF4A4A6A),
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                    color: Color(0xFF4A4A6A),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500),
               ),
             ],
           ),
@@ -102,7 +101,10 @@ class BusinessInputCard extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 5, top: 10),
                 child: Text(
                   '${controller.text.length}/$maxLength characters',
-                  style: const TextStyle(color: Colors.grey, fontSize: 12),
+                  style: const TextStyle(
+                      color: Colors.grey,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500),
                 ),
               ),
             ],

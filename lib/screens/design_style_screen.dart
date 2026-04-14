@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:logo_app_flutter/components/divider_container.dart';
 import 'package:provider/provider.dart';
 import '../provider/logo_design_provider.dart';
 import 'package:logo_app_flutter/screens/logo_generation_screen.dart';
@@ -24,7 +25,8 @@ class DesignStyleScreen extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.grey.withOpacity(0.1),
-                shape: BoxShape.circle,
+                // shape: BoxShape.circle,
+                borderRadius: BorderRadius.circular(10),
               ),
               child:
                   const Icon(Icons.arrow_back, color: Colors.black, size: 20),
@@ -35,24 +37,13 @@ class DesignStyleScreen extends StatelessWidget {
           'Design Style',
           style: TextStyle(
             color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
+            fontSize: 16,
+            fontWeight: FontWeight.w400,
           ),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(2),
-          child: Container(
-            height: 4,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xFFFF5722),
-                  Color(0xFFE91E63),
-                  Color(0xFF9C27B0)
-                ],
-              ),
-            ),
-          ),
+          child: DividerContainer(),
         ),
       ),
       body: Consumer<LogoDesignProvider>(
@@ -71,7 +62,7 @@ class DesignStyleScreen extends StatelessWidget {
                         style: TextStyle(
                           color: Color(0xFF4A4A6A),
                           fontSize: 16,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w400,
                         ),
                       ),
                       const SizedBox(height: 30),
@@ -86,9 +77,9 @@ class DesignStyleScreen extends StatelessWidget {
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
-                          crossAxisSpacing: 16,
-                          mainAxisSpacing: 16,
-                          // childAspectRatio: 1.0,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio: 0.99,
                         ),
                         itemCount: provider.fontStyles.length,
                         itemBuilder: (context, index) {
@@ -152,8 +143,8 @@ class DesignStyleScreen extends StatelessWidget {
                     width: double.infinity,
                     height: 65,
                     decoration: BoxDecoration(
-                      gradient: ThemeColors.mainCardGradient,
-                      borderRadius: BorderRadius.circular(30),
+                      gradient: ThemeColors.continueGradient,
+                      borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
                           color: const Color(0xFFE91E63).withOpacity(0.3),
@@ -219,7 +210,7 @@ class DesignStyleScreen extends StatelessWidget {
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: color.withOpacity(0.8),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(15),
           ),
           child: Icon(icon, color: Colors.white, size: 22),
         ),
@@ -229,7 +220,7 @@ class DesignStyleScreen extends StatelessWidget {
           style: const TextStyle(
             color: Color(0xFF4A4A6A),
             fontSize: 16,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w400,
           ),
         ),
       ],

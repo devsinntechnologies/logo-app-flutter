@@ -33,23 +33,12 @@ class TemplateRowItem extends StatelessWidget {
                 ..translate(0.0, hovered ? -10.0 : 0.0)
                 ..scale(hovered ? 1.05 : 1.0),
               child: Container(
-                width: 150,
-                height: 150,
+                width: 140, // Adjusted as mockup cards are roughly square but slightly smaller
+                height: 140, 
                 margin: const EdgeInsets.only(right: 16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF9F7FF),
-                  borderRadius: BorderRadius.circular(35),
-                  border: Border.all(
-                    color: Colors.white,
-                    width: 2.5,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(hovered ? 0.08 : 0.04),
-                      blurRadius: hovered ? 20 : 15,
-                      offset: Offset(0, hovered ? 12 : 10),
-                    ),
-                  ],
+                  color: const Color(0xFFFAF2FF), // Pale pinkish/purple background
+                  borderRadius: BorderRadius.circular(25),
                 ),
                 child: Stack(
                   children: [
@@ -58,25 +47,11 @@ class TemplateRowItem extends StatelessWidget {
                       right: -10,
                       top: -10,
                       child: Container(
-                        width: 80,
-                        height: 80,
+                        width: 70,
+                        height: 70,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: Colors.white.withOpacity(0.6),
-                        ),
-                      ),
-                    ),
-
-                    // Bottom-left decoration
-                    Positioned(
-                      left: -5,
-                      bottom: -5,
-                      child: Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: const Color(0xFFEDE7F6).withOpacity(0.4),
                         ),
                       ),
                     ),
@@ -86,14 +61,14 @@ class TemplateRowItem extends StatelessWidget {
                       child: Hero(
                         tag: 'template_${hashCode == 0 ? icon.hashCode : hashCode}',
                         child: IconTheme(
-                          data: const IconThemeData(size: 85, color: Colors.black),
+                          data: const IconThemeData(size: 60), // inherit color
                           child: icon,
                         ),
                       ),
                     ),
 
                     // Ad Badge
-                    if (isAd)
+                    if (false) // Ignoring ads for this redesign
                       Positioned(
                         left: 12,
                         top: 12,

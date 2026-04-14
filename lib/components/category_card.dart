@@ -38,7 +38,7 @@ class CategoryCard extends StatelessWidget {
                 ..scale(hovered ? 1.05 : 1.0),
               decoration: BoxDecoration(
                 gradient: gradient,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(19),
                 border: Border.all(
                   color: Colors.white.withOpacity(hovered ? 0.4 : 0.2),
                   width: 2,
@@ -98,15 +98,19 @@ class CategoryCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Hero(
-                          tag: 'cat_icon_$title',
-                          child:
-                          Image.asset(image,height: 45,width: 45,)
-                          //  Icon(
-                          //   icon,
-                          //   size: 45,
-                          //   color: Colors.white,
-                          // ),
-                        ),
+                            tag: 'cat_icon_$title',
+                            child: Image.asset(
+                              image,
+                              height: 50,
+                              // cacheWidth: 100,
+                              width: 60,
+                            )
+                            //  Icon(
+                            //   icon,
+                            //   size: 45,
+                            //   color: Colors.white,
+                            // ),
+                            ),
                         const SizedBox(height: 12),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -116,7 +120,7 @@ class CategoryCard extends StatelessWidget {
                             style: TextStyle(
                               color: Colors.white.withOpacity(0.95),
                               fontSize: 14,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w600,
                               letterSpacing: 0.5,
                             ),
                           ),

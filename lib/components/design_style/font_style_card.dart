@@ -22,7 +22,7 @@ class FontStyleCard extends StatelessWidget {
       valueListenable: isHovered,
       builder: (context, hovered, child) {
         final active = hovered || isSelected;
-        
+
         return MouseRegion(
           onEnter: (_) => isHovered.value = true,
           onExit: (_) => isHovered.value = false,
@@ -34,15 +34,17 @@ class FontStyleCard extends StatelessWidget {
                 ..translate(0.0, active ? -8.0 : 0.0),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(25),
+                borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: isSelected ? const Color(0xFFFF4081) : Colors.grey.withOpacity(0.15),
+                  color: isSelected
+                      ? const Color(0xFFFF4081)
+                      : Colors.grey.withOpacity(0.15),
                   width: isSelected ? 2.5 : 1,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: isSelected 
-                        ? const Color(0xFFFF4081).withOpacity(0.2) 
+                    color: isSelected
+                        ? const Color(0xFFFF4081).withOpacity(0.2)
                         : Colors.black.withOpacity(hovered ? 0.08 : 0.03),
                     blurRadius: active ? 15 : 8,
                     offset: Offset(0, active ? 8 : 4),
@@ -87,7 +89,8 @@ class FontStyleCard extends StatelessWidget {
                           color: Color(0xFFFF4081),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.check, color: Colors.white, size: 12),
+                        child: const Icon(Icons.check,
+                            color: Colors.white, size: 12),
                       ),
                     ),
                 ],

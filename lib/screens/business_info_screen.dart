@@ -50,8 +50,9 @@ class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
             onTap: () => Navigator.pop(context),
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.1),
-                shape: BoxShape.circle,
+                color: Colors.grey.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(10),
+                // shape: BoxShape.circle,
               ),
               child:
                   const Icon(Icons.arrow_back, color: Colors.black, size: 20),
@@ -62,8 +63,8 @@ class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
           'Business Info',
           style: TextStyle(
             color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
           ),
         ),
         bottom: PreferredSize(
@@ -92,8 +93,8 @@ class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
                 const Text(
                   'Tell us about your business',
                   style: TextStyle(
-                    color: Color(0xFF4A4A6A),
-                    fontSize: 16,
+                    color: Color(0xFF171717),
+                    fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
                 ),

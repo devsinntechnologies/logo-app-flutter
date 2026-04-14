@@ -9,8 +9,23 @@ import 'package:logo_app_flutter/components/gallery/template_row.dart';
 import 'package:logo_app_flutter/components/gallery/template_row_item.dart';
 import 'package:provider/provider.dart';
 
-class TemplateGalleryScreen extends StatelessWidget {
+class TemplateGalleryScreen extends StatefulWidget {
   const TemplateGalleryScreen({super.key});
+
+  @override
+  State<TemplateGalleryScreen> createState() => _TemplateGalleryScreenState();
+}
+
+class _TemplateGalleryScreenState extends State<TemplateGalleryScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<GalleryProvider>().selectCategory('All');
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,12 +70,17 @@ class TemplateGalleryScreen extends StatelessWidget {
             onTap: () => Navigator.pop(context),
             child: Container(
               padding: const EdgeInsets.all(10),
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                    colors: [Color(0xFFFF2E94), Color(0xFFC32BAC)]),
-                shape: BoxShape.circle,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(colors: [
+                  Color(0xFFFF6516),
+                  Color(0xFFD73ABA),
+                  Color(0xFFA628EB)
+                ]),
+                // color: Colors.grey.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
+              child:
+                  const Icon(Icons.arrow_back, color: Colors.white, size: 20),
             ),
           ),
           const SizedBox(width: 16),
@@ -70,11 +90,17 @@ class TemplateGalleryScreen extends StatelessWidget {
               children: const [
                 Text(
                   'Template Gallery',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.black87),
                 ),
                 Text(
-                  'Choose your design style',
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                  '2,500+ premium templates',
+                  style: TextStyle(fontSize: 12, color: Colors.grey,
+                      fontWeight: FontWeight.w400,
+                  
+                  ),
                 ),
               ],
             ),
@@ -84,7 +110,8 @@ class TemplateGalleryScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSearchAndFilters(BuildContext context, GalleryProvider provider) {
+  Widget _buildSearchAndFilters(
+      BuildContext context, GalleryProvider provider) {
     return Container(
       padding: const EdgeInsets.only(left: 16, bottom: 12, right: 16),
       child: Column(
@@ -98,7 +125,11 @@ class TemplateGalleryScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     gradient: provider.isSearchExpanded
-                        ? const LinearGradient(colors: [Color(0xFFFF2E94), Color(0xFFC32BAC)])
+                        ? const LinearGradient(colors: [
+                            Color(0xFFFF6516),
+                            Color(0xFFD73ABA),
+                            Color(0xFFA628EB)
+                          ])
                         : null,
                     color: provider.isSearchExpanded ? null : Colors.white,
                     shape: BoxShape.circle,
@@ -106,13 +137,21 @@ class TemplateGalleryScreen extends StatelessWidget {
                         ? null
                         : Border.all(color: Colors.black.withOpacity(0.08)),
                     boxShadow: provider.isSearchExpanded
-                        ? [BoxShadow(color: const Color(0xFFFF2E94).withOpacity(0.4), blurRadius: 10, offset: const Offset(0, 4))]
+                        ? [
+                            BoxShadow(
+                                color: const Color(0xFFD73ABA).withOpacity(0.4),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4))
+                          ]
                         : null,
                   ),
                   child: Icon(
-                    provider.isSearchExpanded ? Icons.search : Iconsax.search_normal,
+                    provider.isSearchExpanded
+                        ? Icons.search
+                        : Iconsax.search_normal,
                     size: 22,
-                    color: provider.isSearchExpanded ? Colors.white : const Color(0xFFC32BAC),
+                    color:
+                        provider.isSearchExpanded ? Colors.white : Colors.grey,
                   ),
                 ),
               ),
@@ -136,7 +175,6 @@ class TemplateGalleryScreen extends StatelessWidget {
               ),
             ],
           ),
-
           AnimatedContainer(
             duration: const Duration(milliseconds: 300),
             height: provider.isSearchExpanded ? 60 : 0,
@@ -148,18 +186,21 @@ class TemplateGalleryScreen extends StatelessWidget {
                     autofocus: true,
                     decoration: InputDecoration(
                       hintText: 'Search templates...',
-                      suffixIcon: const Icon(Iconsax.search_status, color: Colors.grey),
+                      suffixIcon:
+                          const Icon(Iconsax.search_status, color: Colors.grey),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(15),
-                        borderSide: const BorderSide(color: Color(0xFFFF2E94)),
+                        borderSide: const BorderSide(color: Color(0xFFD73ABA)),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(15),
-                        borderSide: BorderSide(color: const Color(0xFFFF2E94).withOpacity(0.3)),
+                        borderSide: BorderSide(
+                            color: const Color(0xFFD73ABA).withOpacity(0.3)),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(15),
-                        borderSide: const BorderSide(color: Color(0xFFC32BAC), width: 1.5),
+                        borderSide: const BorderSide(
+                            color: Color(0xFFD73ABA), width: 1.5),
                       ),
                     ),
                     onChanged: (val) => provider.updateSearchQuery(val),
@@ -175,31 +216,104 @@ class TemplateGalleryScreen extends StatelessWidget {
     return SingleChildScrollView(
       controller: provider.scrollController,
       child: Column(
-        children: provider.templateData.entries.map((entry) {
-          return TemplateRow(
-            title: entry.key,
-            onSeeAll: () => provider.selectCategory(entry.key),
-            items: entry.value.map((item) {
-              return TemplateRowItem(
-                icon: Icon(item['icon'] as IconData, color: item['color'] as Color),
-                isAd: item['isAd'] as bool,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const CategorySelectionScreen(),
-                    ),
-                  );
-                },
-              );
-            }).toList(),
-          );
-        }).toList(),
+        children: [
+          ...provider.templateData.entries.map((entry) {
+            return TemplateRow(
+              title: entry.key,
+              onSeeAll: () => provider.selectCategory(entry.key),
+              items: entry.value.map((item) {
+                return TemplateRowItem(
+                  icon: Icon(item['icon'] as IconData,
+                      color: item['color'] as Color),
+                  isAd: item['isAd'] as bool,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const CategorySelectionScreen(),
+                      ),
+                    );
+                  },
+                );
+              }).toList(),
+            );
+          }),
+          const SizedBox(height: 10),
+          _buildPremiumBanner(),
+          const SizedBox(height: 30),
+        ],
       ),
     );
   }
 
-  Widget _buildGridView(BuildContext context, GalleryProvider provider, List<Map<String, dynamic>> items) {
+  Widget _buildPremiumBanner() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFF6516), Color(0xFFD73ABA), Color(0xFFA628EB)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+              color: const Color(0xFFD73ABA).withOpacity(0.4),
+              blurRadius: 15,
+              offset: const Offset(0, 8)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12)),
+                child: const Icon(Icons.workspace_premium,
+                    color: Colors.yellow, size: 24),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    Text('Premium Template',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold)),
+                    Text('Unlock full access today!',
+                        style: TextStyle(color: Colors.white, fontSize: 12)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Container(
+            width: double.infinity,
+            alignment: Alignment.center,
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            decoration: BoxDecoration(
+                color: Colors.white, borderRadius: BorderRadius.circular(12)),
+            child: const Text('UPGRADE NOW',
+                style: TextStyle(
+                    color: Color(0xFFD73ABA),
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGridView(BuildContext context, GalleryProvider provider,
+      List<Map<String, dynamic>> items) {
     return SingleChildScrollView(
       controller: provider.scrollController,
       child: Column(
@@ -213,14 +327,18 @@ class TemplateGalleryScreen extends StatelessWidget {
                   width: 6,
                   height: 22,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(colors: [Color(0xFFFF2E94), Color(0xFFC32BAC)]),
+                    gradient: const LinearGradient(
+                        colors: [Color(0xFFFF2E94), Color(0xFFC32BAC)]),
                     borderRadius: BorderRadius.circular(3),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Text(
                   '${items.length} templates found',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.black87),
+                  style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black87),
                 ),
               ],
             ),
@@ -243,7 +361,8 @@ class TemplateGalleryScreen extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final item = items[index];
                   return TemplateRowItem(
-                    icon: Icon(item['icon'] as IconData, color: item['color'] as Color),
+                    icon: Icon(item['icon'] as IconData,
+                        color: item['color'] as Color),
                     isAd: item['isAd'] as bool,
                     onTap: () {
                       Navigator.push(
@@ -276,20 +395,30 @@ class TemplateGalleryScreen extends StatelessWidget {
                 color: const Color(0xFFF9F7FF),
                 shape: BoxShape.circle,
                 border: Border.all(color: Colors.white, width: 4),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, 10))],
+                boxShadow: [
+                  BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10))
+                ],
               ),
-              child: const Icon(Iconsax.search_status, size: 80, color: Color(0xFF1A1C1E)),
+              child: const Icon(Iconsax.search_status,
+                  size: 80, color: Color(0xFF1A1C1E)),
             ),
             const SizedBox(height: 24),
             const Text(
               'No templates found',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1A1C1E)),
+              style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1A1C1E)),
             ),
             const SizedBox(height: 8),
             Text(
               'Try adjusting your search or filters',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: Colors.grey.shade600, height: 1.5),
+              style: TextStyle(
+                  fontSize: 14, color: Colors.grey.shade600, height: 1.5),
             ),
           ],
         ),

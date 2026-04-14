@@ -76,88 +76,119 @@ class ThemeColors {
     end: Alignment.bottomRight,
   );
 
-  static const LinearGradient templatesGradient = LinearGradient(
-    colors: [Color(0xFF00E5FF), Color(0xff00C37C)],
+  static const LinearGradient continueGradient = LinearGradient(
+    colors: [
+      Color(0xFFFF6516), // Orange
+      Color(0xFFD73ABA), // Pink
+      Color(0xFFA628EB), // Purple
+    ],
     begin: Alignment.topLeft,
-    end: Alignment.bottomCenter,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient templatesGradient = LinearGradient(
+    colors: [Color(0xFF00C3BF), Color(0xff00C478)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
   );
 
   static const LinearGradient customizeGradient = LinearGradient(
-    colors: [Color(0xFFF06292), Color(0xFFE91E63)],
+    colors: [Color(0xFFF335AA), Color(0xFFFC2A74)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient myLogosGradient = LinearGradient(
-    colors: [Color(0xFF7B1FA2), Color(0xFF8227F9)],
+    colors: [Color(0xFFA02CFF), Color(0xFF7C2AF8)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient historyGradient = LinearGradient(
-    colors: [Color(0xFFFFA000), Color(0xFFFF5722)],
+    colors: [Color(0xFFFFAC00), Color(0xFFFF4A1F)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   // Category Gradients
   static const LinearGradient retailGradient = LinearGradient(
-    colors: [Color(0xFFFF8E53), Color(0xFFFF5252)],
+    colors: [Color(0xFFFFF7B00), Color(0xFFFF6200), Color(0xFFFD402A)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
   static const LinearGradient foodGradient = LinearGradient(
-    colors: [Color(0xFFFFB347), Color(0xFFFF8E53)],
+    colors: [Color(0xFFFFA000), Color(0xFFFF6800), Color(0xFFFD3E2C)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
   static const LinearGradient healthGradient = LinearGradient(
-    colors: [Color(0xFFFF5ACD), Color(0xFFFB3EBD)],
+    colors: [Color(0xFFFFA55AC), Color(0xFFF73298), Color(0xFFFD296E)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
   static const LinearGradient creativeGradient = LinearGradient(
-    colors: [Color(0xFFB33EC9), Color(0xFFD431BD)],
+    colors: [Color(0xFFEB36D1), Color(0xffF5339D), Color(0xFFC137D1)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
   static const LinearGradient technologyGradient = LinearGradient(
-    colors: [Color(0xFF6A11CB), Color(0xFF2575FC)],
+    colors: [Color(0xFFA333FF), Color(0xFF9317FA), Color(0xFF7130F8)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
   static const LinearGradient professionalGradient = LinearGradient(
-    colors: [Color(0xFF2193B0), Color(0xFF6DD5ED)],
+    colors: [Color(0xFF3E68FF), Color(0xFF5637F6), Color(0xFF7E2AF9)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
   static const LinearGradient fitnessGradient = LinearGradient(
-    colors: [Color(0xFF11998E), Color(0xFF38EF7D)],
+    colors: [Color(0xFF00D376), Color(0xFF00BA7D), Color(0xFF00A086)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
   static const LinearGradient musicGradient = LinearGradient(
-    colors: [Color(0xFF8E2DE2), Color(0xFF4A00E0)],
+    colors: [Color(0xFFCE66FF), Color(0xFFE441FA), Color(0xFFF036B6)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
   static const LinearGradient photographyGradient = LinearGradient(
-    colors: [Color(0xFF00C9FF), Color(0xFF92FE9D)],
+    colors: [Color(0xFF00CDDE), Color(0xFF00BE9E), Color(0xFF00C669)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
   static const LinearGradient travelGradient = LinearGradient(
-    colors: [Color(0xFF2196F3), Color(0xFF00BCD4)],
+    colors: [Color(0xFF08A2FF), Color(0xFF377BFF), Color(0xFF516CFF)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
   static const LinearGradient fashionGradient = LinearGradient(
-    colors: [Color(0xFFF06292), Color(0xFFE91E63)],
+    colors: [Color(0xFFFE528B), Color(0xFFF534A1), Color(0xFFE633E2)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
   static const LinearGradient cafeGradient = LinearGradient(
-    colors: [Color(0xFFFDC830), Color(0xFFF37335)],
+    colors: [Color(0xFFED9300), Color(0xffD48400), Color(0xFFE96400)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient realGradient = LinearGradient(
+    colors: [Color(0xFF00CACA), Color(0xff00BAD9), Color(0xFF158FFB)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  static const LinearGradient gameGradient = LinearGradient(
+    colors: [Color(0xFF9341FF), Color(0xff9A0FF9), Color(0xFFB500EA)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  static const LinearGradient educationGradient = LinearGradient(
+    colors: [Color(0xFF2DACF2), Color(0xff00B9D4), Color(0xFF00BAC1)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+  static const LinearGradient ecoGradient = LinearGradient(
+    colors: [Color(0xFF00B45C), Color(0xff009866), Color(0xFF00977E)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );

@@ -91,7 +91,15 @@ class _LogoResultCardState extends State<LogoResultCard> {
                   height: 152,
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(35),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color:
+                          //  interacting
+                          //     ? const Color(0xFFFF4081).withOpacity(0.5)
+                          //     :
+                          Colors.transparent,
+                      width: 2,
+                    ),
                     boxShadow: [
                       BoxShadow(
                         color: interacting
@@ -115,7 +123,7 @@ class _LogoResultCardState extends State<LogoResultCard> {
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
-                          borderRadius: BorderRadius.circular(28),
+                          borderRadius: BorderRadius.circular(15),
                         ),
                         child: Consumer2<BusinessInfoProvider, LogoDesignProvider>(
                           builder: (context, info, design, child) {
@@ -180,7 +188,7 @@ class _LogoResultCardState extends State<LogoResultCard> {
                   ),
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 10),
               Text(
                 widget.name,
                 textAlign: TextAlign.center,
@@ -188,8 +196,8 @@ class _LogoResultCardState extends State<LogoResultCard> {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: const Color(0xFF1F1F39),
-                  fontSize: 12,
-                  fontWeight: interacting ? FontWeight.bold : FontWeight.w500,
+                  fontSize: 16,
+                  fontWeight: interacting ? FontWeight.bold : FontWeight.w400,
                 ),
               ),
             ],

@@ -27,7 +27,7 @@ class BusinessPreviewCard extends StatelessWidget {
             width: double.infinity,
             height: 140,
             decoration: BoxDecoration(
-              gradient: ThemeColors.mainCardGradient,
+              gradient: ThemeColors.continueGradient,
               borderRadius: BorderRadius.circular(25),
               boxShadow: [
                 BoxShadow(
@@ -70,7 +70,8 @@ class BusinessPreviewCard extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: const [
-                          Icon(Icons.auto_awesome, color: Colors.white, size: 24),
+                          Icon(Icons.auto_awesome,
+                              color: Colors.white, size: 24),
                           SizedBox(width: 12),
                           Text(
                             'Preview',
@@ -81,12 +82,15 @@ class BusinessPreviewCard extends StatelessWidget {
                             ),
                           ),
                           SizedBox(width: 12),
-                          Icon(Icons.auto_awesome, color: Colors.white, size: 24),
+                          Icon(Icons.auto_awesome,
+                              color: Colors.white, size: 24),
                         ],
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        businessName.isNotEmpty ? businessName : 'Your Logo Name',
+                        businessName.isNotEmpty
+                            ? businessName
+                            : 'Your Logo Name',
                         textAlign: TextAlign.center,
                         style: const TextStyle(
                           color: Colors.white,

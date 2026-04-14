@@ -24,7 +24,7 @@ class GalleryChip extends StatelessWidget {
           decoration: BoxDecoration(
             gradient: isSelected
                 ? const LinearGradient(
-                    colors: [Color(0xFFFF2E94), Color(0xFFC32BAC)],
+                    colors: [Color(0xFFFF6928), Color(0xFFD73ABA), Color(0xFFA628EB)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   )
