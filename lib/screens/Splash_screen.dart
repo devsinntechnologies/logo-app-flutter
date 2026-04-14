@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:logo_app_flutter/generated/l10n.dart';
+import 'package:logo_app_flutter/screens/dashboard_screen.dart';
 import 'package:logo_app_flutter/screens/home_screen.dart';
 import 'package:video_player/video_player.dart';
 
@@ -40,7 +41,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void navigateToHome() {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
+      MaterialPageRoute(builder: (_) => const DashboardScreen()),
     );
   }
 

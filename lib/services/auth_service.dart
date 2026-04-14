@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:logo_app_flutter/utils/app_logger.dart';
 
@@ -33,6 +35,7 @@ class AuthService {
         'last_name': lastName,
       },
     );
+
     AppLogger.success("User signed up: ${response.user?.id}",
         tag: "AuthService");
 

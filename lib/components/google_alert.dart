@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:logo_app_flutter/generated/l10n.dart';
 import 'package:logo_app_flutter/screens/log_in_screen.dart';
 import 'package:logo_app_flutter/screens/sign_up_screen.dart';
-import 'package:logo_app_flutter/services/auth_service.dart';
-import 'package:logo_app_flutter/utils/theme_colors.dart'; // import your service
-
-final AuthService _auth = AuthService(); // create service object
+import 'package:logo_app_flutter/provider/auth_provider.dart';
+import 'package:logo_app_flutter/utils/theme_colors.dart';
+import 'package:provider/provider.dart';
 
 void showCustomGoogleDialog(BuildContext context) {
   showDialog(
@@ -134,7 +133,7 @@ void showCustomGoogleDialog(BuildContext context) {
             GestureDetector(
               onTap: () async {
                 Navigator.pop(context);
-                await _auth.signInWithGoogle();
+                await context.read<AuthProvider>().signInWithGoogle();
               },
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,

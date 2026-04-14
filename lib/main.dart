@@ -13,6 +13,7 @@ import 'package:logo_app_flutter/provider/locale_provider.dart';
 import 'package:logo_app_flutter/provider/selected_color_provider.dart';
 import 'package:logo_app_flutter/provider/theme_provider.dart';
 import 'package:logo_app_flutter/provider/intro_provider.dart';
+import 'package:logo_app_flutter/provider/auth_provider.dart';
 import 'package:logo_app_flutter/screens/intro_animation_screen.dart';
 import 'package:logo_app_flutter/screens/dashboard_screen.dart';
 import 'package:logo_app_flutter/screens/home_screen.dart';
@@ -101,6 +102,7 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (_) => LogoGenerationProvider()),
         ChangeNotifierProvider(create: (_) => LogoResultsProvider()),
         ChangeNotifierProvider(create: (_) => IntroProvider()),
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
       ],
       child: Builder(builder: (context) {
         return MaterialApp(

@@ -1,10 +1,13 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:logo_app_flutter/components/google_alert.dart';
 import 'package:logo_app_flutter/generated/l10n.dart';
-import 'package:logo_app_flutter/services/auth_service.dart';
+import 'package:logo_app_flutter/provider/auth_provider.dart';
 import 'package:logo_app_flutter/utils/theme_colors.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:logo_app_flutter/screens/my_account_screen.dart';
+import 'package:provider/provider.dart';
 
 class GoogleSignInButton extends StatefulWidget {
   const GoogleSignInButton({super.key});
@@ -14,7 +17,6 @@ class GoogleSignInButton extends StatefulWidget {
 }
 
 class _GoogleSignInButtonState extends State<GoogleSignInButton> {
-  final AuthService authService = AuthService();
   final _supabase = Supabase.instance.client;
   bool _isLoading = false;
   bool _isLoggedIn = false;
@@ -25,9 +27,9 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
 
     // Check initial auth state
     _isLoggedIn = _supabase.auth.currentSession != null;
-
     _supabase.auth.onAuthStateChange.listen((data) {
       final session = data.session;
+
       if (mounted) {
         setState(() {
           _isLoggedIn = session != null;
@@ -40,7 +42,7 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
     setState(() => _isLoading = true);
 
     try {
-      await authService.signInWithGoogle();
+      await context.read<AuthProvider>().signInWithGoogle();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
