@@ -65,54 +65,61 @@ class BusinessPreviewCard extends StatelessWidget {
                   ),
                 ),
                 Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Icon(Icons.auto_awesome,
-                              color: Colors.white, size: 24),
-                          SizedBox(width: 12),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const [
+                            Icon(Icons.auto_awesome,
+                                color: Colors.white, size: 24),
+                            SizedBox(width: 12),
+                            Text(
+                              'Preview',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(width: 12),
+                            Icon(Icons.auto_awesome,
+                                color: Colors.white, size: 24),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          businessName.isNotEmpty
+                              ? businessName
+                              : 'Your Logo Name',
+                          textAlign: TextAlign.center,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        if (slogan.isNotEmpty) ...[
+                          const SizedBox(height: 8),
                           Text(
-                            'Preview',
+                            slogan,
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 2,
                             style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                              color: Colors.white.withOpacity(0.9),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              fontStyle: FontStyle.italic,
                             ),
                           ),
-                          SizedBox(width: 12),
-                          Icon(Icons.auto_awesome,
-                              color: Colors.white, size: 24),
                         ],
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        businessName.isNotEmpty
-                            ? businessName
-                            : 'Your Logo Name',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      if (slogan.isNotEmpty) ...[
-                        const SizedBox(height: 8),
-                        Text(
-                          slogan,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.9),
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
                       ],
-                    ],
+                    ),
                   ),
                 ),
               ],

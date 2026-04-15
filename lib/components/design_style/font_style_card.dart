@@ -37,7 +37,7 @@ class FontStyleCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
                   color: isSelected
-                      ? const Color(0xFFFF4081)
+                      ? const Color(0xFFFB64B6)
                       : Colors.grey.withOpacity(0.15),
                   width: isSelected ? 2.5 : 1,
                 ),
@@ -71,8 +71,8 @@ class FontStyleCard extends StatelessWidget {
                           name,
                           textAlign: TextAlign.center,
                           style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
                             color: Color(0xFF4A4A6A),
                           ),
                         ),
@@ -86,7 +86,10 @@ class FontStyleCard extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.all(4),
                         decoration: const BoxDecoration(
-                          color: Color(0xFFFF4081),
+                          gradient: LinearGradient(colors: [
+                           Color(0xFFFF6900),Color(0xFFF6339A) 
+                          ]),
+                          // color: Color(0xFFFF4081),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(Icons.check,

@@ -102,6 +102,7 @@ class CategoryCard extends StatelessWidget {
                             child: Image.asset(
                               image,
                               height: 50,
+                              // filterQuality: FilterQuality.medium,
                               // cacheWidth: 100,
                               width: 60,
                             )
@@ -119,8 +120,8 @@ class CategoryCard extends StatelessWidget {
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: Colors.white.withOpacity(0.95),
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
                               letterSpacing: 0.5,
                             ),
                           ),

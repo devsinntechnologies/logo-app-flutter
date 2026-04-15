@@ -36,13 +36,15 @@ class ColorSchemeCard extends StatelessWidget {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(25),
                 border: Border.all(
-                  color: isSelected ? const Color(0xFF7C4DFF) : Colors.grey.withOpacity(0.15),
+                  color: isSelected
+                      ? const Color(0xFFC27AFF)
+                      : Colors.grey.withOpacity(0.15),
                   width: isSelected ? 2.5 : 1,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: isSelected 
-                        ? const Color(0xFF7C4DFF).withOpacity(0.2) 
+                    color: isSelected
+                        ? const Color(0xFF7C4DFF).withOpacity(0.2)
                         : Colors.black.withOpacity(hovered ? 0.08 : 0.03),
                     blurRadius: active ? 15 : 8,
                     offset: Offset(0, active ? 8 : 4),
@@ -58,30 +60,33 @@ class ColorSchemeCard extends StatelessWidget {
                       children: [
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: colors.map((color) => Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 4),
-                            width: 25,
-                            height: 25,
-                            decoration: BoxDecoration(
-                              color: color,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: color.withOpacity(0.3),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                          )).toList(),
+                          children: colors
+                              .map((color) => Container(
+                                    margin: const EdgeInsets.symmetric(
+                                        horizontal: 4),
+                                    width: 25,
+                                    height: 25,
+                                    decoration: BoxDecoration(
+                                      color: color,
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: color.withOpacity(0.3),
+                                          blurRadius: 4,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                  ))
+                              .toList(),
                         ),
                         const SizedBox(height: 12),
                         Text(
                           name,
                           textAlign: TextAlign.center,
                           style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
                             color: Color(0xFF4A4A6A),
                           ),
                         ),
@@ -95,10 +100,13 @@ class ColorSchemeCard extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.all(4),
                         decoration: const BoxDecoration(
-                          color: Color(0xFF7C4DFF),
+                          gradient: LinearGradient(
+                              colors: [Color(0xFFE12AFB), Color(0xFF9810FA)]),
+                          // color: Color(0xFF7C4DFF),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.check, color: Colors.white, size: 12),
+                        child: const Icon(Icons.check,
+                            color: Colors.white, size: 12),
                       ),
                     ),
                 ],

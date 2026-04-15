@@ -147,8 +147,9 @@ class _LogoGenerationScreenState extends State<LogoGenerationScreen>
                         height: 10,
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
-                            colors: [Color(0xFFFF5252), Color(0xFF7C4DFF)],
-                          ),
+                              // colors: [Colors.black, Colors.white]
+                              colors: [Color(0xFFFF5252), Color(0xFF7C4DFF)],
+                              ),
                           borderRadius: BorderRadius.circular(5),
                         ),
                       ),
