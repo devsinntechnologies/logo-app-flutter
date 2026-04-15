@@ -40,8 +40,8 @@ class BusinessPreviewCard extends StatelessWidget {
             child: Stack(
               children: [
                 Positioned(
-                  right: -10,
-                  top: -10,
+                  right: -20,
+                  top: -20,
                   child: Container(
                     width: 60,
                     height: 60,
@@ -52,8 +52,8 @@ class BusinessPreviewCard extends StatelessWidget {
                   ),
                 ),
                 Positioned(
-                  left: -15,
-                  bottom: -15,
+                  left: -25,
+                  bottom: -30,
                   child: Container(
                     padding: EdgeInsets.only(left: 20),
                     width: 80,
@@ -72,10 +72,14 @@ class BusinessPreviewCard extends StatelessWidget {
                       children: [
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: const [
-                            Icon(Icons.auto_awesome,
-                                color: Colors.white, size: 24),
-                            SizedBox(width: 12),
+                          children: [
+                            Image.asset(
+                              "assets/images/ds_star.png",
+                              width: 25,
+                            ),
+                            // Icon(Icons.auto_awesome,
+                            //     color: Colors.white, size: 24),
+                            SizedBox(width: 5),
                             Text(
                               'Preview',
                               style: TextStyle(
@@ -85,8 +89,10 @@ class BusinessPreviewCard extends StatelessWidget {
                               ),
                             ),
                             SizedBox(width: 12),
-                            Icon(Icons.auto_awesome,
-                                color: Colors.white, size: 24),
+                            Image.asset(
+                              "assets/images/ds_star.png",
+                              width: 25,
+                            ),
                           ],
                         ),
                         const SizedBox(height: 12),

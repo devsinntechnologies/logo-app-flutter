@@ -39,7 +39,7 @@ class BusinessContinueButton extends StatelessWidget {
             children: [
               // Glossy Bubble Top-Right
               Positioned(
-                right: -10,
+                right: -20,
                 top: -10,
                 child: Container(
                   width: 50,
@@ -52,8 +52,8 @@ class BusinessContinueButton extends StatelessWidget {
               ),
               // Glossy Bubble Bottom-Left
               Positioned(
-                left: -15,
-                bottom: -15,
+                left: -20,
+                bottom: -20,
                 child: Container(
                   width: 60,
                   height: 60,
@@ -69,7 +69,7 @@ class BusinessContinueButton extends StatelessWidget {
                   style: TextStyle(
                     color: isEnabled ? Colors.white : const Color(0xFF9CA3AF),
                     fontSize: 16,
-                    fontWeight: FontWeight.w400 ,
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
               ),

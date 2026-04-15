@@ -15,22 +15,27 @@ class DesignStyleScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFFDF2F5),
       appBar: AppBar(
+        toolbarHeight: 80,
+        // toolbarHeight: 70,
         backgroundColor: Colors.white,
         elevation: 0,
-        centerTitle: true,
         leading: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
           child: GestureDetector(
             onTap: () => Navigator.pop(context),
             child: Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFFF4F5F9),
-                // shape: BoxShape.circle,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(Icons.arrow_back,
-                  color: Color(0xFF1F1F39), size: 25),
-            ),
+                // height: 10,
+                width: 30,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF3F4F6),
+                  // shape: BoxShape.circle,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Image.asset("assets/images/backarrow.png")
+                // const
+                //  Icon(Icons.arrow_back,
+                //     color: Color(0xFF1F1F39), size: 25),
+                ),
           ),
         ),
         title: const Text(
@@ -41,10 +46,21 @@ class DesignStyleScreen extends StatelessWidget {
             fontWeight: FontWeight.w400,
           ),
         ),
+
+        // con.st SizedBox(height: 12),
+
+        centerTitle: true,
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(2),
-          child: DividerContainer(),
-        ),
+            preferredSize: const Size.fromHeight(1), child: DividerContainer()
+            //  Container(
+            //   height: 1,
+            //   decoration: const BoxDecoration(
+            //     gradient: LinearGradient(
+            //       colors: [Color(0xFFFF2E94), Color(0xFFC32BAC)],
+            //     ),
+            //   ),
+            // ),
+            ),
       ),
       body: Consumer<LogoDesignProvider>(
         builder: (context, provider, child) {
@@ -81,7 +97,7 @@ class DesignStyleScreen extends StatelessWidget {
                           crossAxisCount: 2,
                           crossAxisSpacing: 12,
                           mainAxisSpacing: 12,
-                          childAspectRatio: 0.99,
+                          childAspectRatio: 1.0,
                         ),
                         itemCount: provider.fontStyles.length,
                         itemBuilder: (context, index) {

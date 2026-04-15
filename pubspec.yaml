@@ -103,6 +103,8 @@ flutter:
      - assets/bg_images/
      - assets/effects_images/
      - assets/videos/
+     - assets/gallery_images/
+
     # # asset/image
     # - assets/images/image.png
     # - assets/images/restaurant.png

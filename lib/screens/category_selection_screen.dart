@@ -36,7 +36,7 @@ class CategorySelectionScreen extends StatelessWidget {
       },
       {
         'title': 'Technology',
-        'image': 'assets/images/code.png',
+        'image': 'assets/images/arror.png',
         'gradient': ThemeColors.technologyGradient,
       },
       {
@@ -98,15 +98,19 @@ class CategorySelectionScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Color(0xffF3F4F6),
-      appBar: AppBar(
+      appBar: 
+      AppBar(
+        toolbarHeight: 80,
         // toolbarHeight: 70,
         backgroundColor: Colors.white,
         elevation: 0,
         leading: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
           child: GestureDetector(
             onTap: () => Navigator.pop(context),
             child: Container(
+                // height: 10,
+                width: 30,
                 decoration: BoxDecoration(
                   color: const Color(0xFFF3F4F6),
                   // shape: BoxShape.circle,
@@ -143,6 +147,8 @@ class CategorySelectionScreen extends StatelessWidget {
             // ),
             ),
       ),
+     
+     
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
