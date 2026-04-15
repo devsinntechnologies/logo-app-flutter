@@ -34,7 +34,7 @@ class _LogoBottomNavBarState extends State<LogoBottomNavBar> {
           //   Container(height: 60, color: Colors.grey.shade200),
           Container(
             height: 60,
-            color: ThemeColors.darkPrimaryColor,
+            color: Colors.white,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: List.generate(6, (index) {
@@ -86,12 +86,7 @@ class _LogoBottomNavBarState extends State<LogoBottomNavBar> {
                   child: Container(
                     width: MediaQuery.of(context).size.width / 6,
                     height: 60,
-                    color:
-                        (isSelected &&
-                                widget.hasTapped &&
-                                widget.selectedIndex != -1)
-                            ? Colors.white
-                            : ThemeColors.darkPrimaryColor,
+                    color: Colors.white,
                     padding: const EdgeInsets.all(4),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -103,7 +98,7 @@ class _LogoBottomNavBarState extends State<LogoBottomNavBar> {
                                       widget.hasTapped &&
                                       widget.selectedIndex != -1)
                                   ? Colors.black
-                                  : Colors.white,
+                                  : Colors.grey.shade600,
                           size: 20,
                         ),
                         const SizedBox(height: 2),
@@ -117,7 +112,7 @@ class _LogoBottomNavBarState extends State<LogoBottomNavBar> {
                               color:
                                   isSelected && widget.hasTapped
                                       ? Colors.black
-                                      : Colors.white,
+                                      : Colors.grey.shade600,
                             ),
                             scroll:
                                 isSelected &&

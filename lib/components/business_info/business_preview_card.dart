@@ -55,6 +55,7 @@ class BusinessPreviewCard extends StatelessWidget {
                   left: -15,
                   bottom: -15,
                   child: Container(
+                    padding: EdgeInsets.only(left: 20),
                     width: 80,
                     height: 80,
                     decoration: BoxDecoration(

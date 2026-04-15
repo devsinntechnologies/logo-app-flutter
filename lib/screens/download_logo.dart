@@ -595,169 +595,192 @@ class _DownloadLogoState extends State<DownloadLogo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => _showBackSaveConfirmationDialog(context, _canvasKey),
-        ),
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Expanded(
-              child: const Text(
-                'Logo Maker',
-                style: TextStyle(
-                  color: Color(0xFF1F1F39),
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            const SizedBox(width: 15),
-            // IconButton(
-            //   icon: const Icon(Icons.undo, color: Colors.black, size: 20),
-            //   onPressed: _undo,
-            //   tooltip: 'Undo',
-            // ),
-            // IconButton(
-            //   icon: const Icon(Icons.redo, color: Colors.black, size: 20),
-            //   onPressed: _redo,
-            //   tooltip: 'Redo',
-            // ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.zoom_in, color: Colors.black, size: 22),
-            onPressed: () =>
-                setState(() => _zoomLevel = (_zoomLevel + 0.1).clamp(0.5, 3.0)),
-          ),
-          IconButton(
-            icon: const Icon(Icons.zoom_out, color: Colors.black, size: 22),
-            onPressed: () =>
-                setState(() => _zoomLevel = (_zoomLevel - 0.1).clamp(0.5, 3.0)),
-          ),
-          const SizedBox(width: 8),
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: Center(
-              child: GestureDetector(
-                onTap: () {
-                  final user = Supabase.instance.client.auth.currentUser;
-                  if (user != null) {
-                    _showSaveConfirmationDialog(context, _canvasKey);
-                  } else {
-                    showCustomGoogleDialog(context);
-                  }
-                },
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFFF8A65), Color(0xFFE91E63)],
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFFE91E63).withOpacity(0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Icon(Icons.save, color: Colors.white, size: 18),
-                      SizedBox(width: 4),
-                      Text(
-                        'Save',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-      body: Stack(
-        alignment: Alignment.center,
-        children: [
+      backgroundColor: const Color(0xFFF3F4F6),
+      body: SafeArea(
+        child: Stack(alignment: Alignment.center, children: [
           Center(
             child: Column(
               // crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
+                // Floating Toolbar
+                Padding(
+                  padding: const EdgeInsets.only(top: 10, bottom: 20),
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 10,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.arrow_back,
+                                color: Colors.black54),
+                            onPressed: () => _showBackSaveConfirmationDialog(
+                                context, _canvasKey),
+                          ),
+                          IconButton(
+                            icon:
+                                const Icon(Icons.replay, color: Colors.black54),
+                            onPressed: _undoStack.length > 1 ? _undo : null,
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.refresh,
+                                color: Colors.black54),
+                            onPressed: _redoStack.isNotEmpty ? _redo : null,
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.zoom_in,
+                                color: Colors.black54),
+                            onPressed: () => setState(() => _zoomLevel =
+                                (_zoomLevel + 0.1).clamp(0.5, 3.0)),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.zoom_out,
+                                color: Colors.black54),
+                            onPressed: () => setState(() => _zoomLevel =
+                                (_zoomLevel - 0.1).clamp(0.5, 3.0)),
+                          ),
+                          IconButton(
+                            icon:
+                                const Icon(Icons.search, color: Colors.black54),
+                            onPressed: () {},
+                          ),
+                          const SizedBox(width: 10),
+                          GestureDetector(
+                            onTap: () {
+                              final user =
+                                  Supabase.instance.client.auth.currentUser;
+                              if (user != null) {
+                                _showSaveConfirmationDialog(
+                                    context, _canvasKey);
+                              } else {
+                                showCustomGoogleDialog(context);
+                              }
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(
+                                gradient: ThemeColors.mainCardGradient,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: const [
+                                  Icon(Icons.save_alt,
+                                      color: Colors.white, size: 18),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    'Save',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
                 Expanded(
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
                       Center(
-                        child: ClipRect(
-                          child: RepaintBoundary(
-                            key: _canvasKey,
-                            child: Transform.scale(
-                              scale: _zoomLevel,
-                              child: SizedBox(
-                                width: MediaQuery.of(context).size.width,
-                                child: LogoCanvas(
-                                  selectedShapeName: selectedShapeName,
-                                  isExportingNotifier: isExportingNotifier,
-                                  logoState: _currentLogoState,
-                                  svgLogo: widget.svgLogo,
-                                  companyName: widget.companyName,
-                                  sloganName: widget.sloganName,
-                                  // Show grid when toggled ON or while moving elements
-                                  showGrid: (_showGrid || _isMoving),
-                                  isEditingMode: true,
-                                  selectedElementId: selectedElement,
-                                  highlightedHorizontalGridLineIndex:
-                                      _highlightedHorizontalGridLineIndex,
-                                  highlightedVerticalGridLineIndex:
-                                      _highlightedVerticalGridLineIndex,
-                                  isLayersRibbonExtended: _isLayersPanelVisible,
-                                  onToggleGrid: () =>
-                                      setState(() => _showGrid = !_showGrid),
-                                  onToggleLayersRibbon: () => setState(
-                                    () => _isLayersPanelVisible =
-                                        !_isLayersPanelVisible,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.08),
+                                blurRadius: 20,
+                                spreadRadius: 5,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(20),
+                            child: RepaintBoundary(
+                              key: _canvasKey,
+                              child: Transform.scale(
+                                scale: _zoomLevel,
+                                child: SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.85,
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.6,
+                                  child: LogoCanvas(
+                                    selectedShapeName: selectedShapeName,
+                                    isExportingNotifier: isExportingNotifier,
+                                    logoState: _currentLogoState,
+                                    svgLogo: widget.svgLogo,
+                                    companyName: widget.companyName,
+                                    sloganName: widget.sloganName,
+                                    // Show grid when toggled ON or while moving elements
+                                    showGrid: (_showGrid || _isMoving),
+                                    isEditingMode: true,
+                                    selectedElementId: selectedElement,
+                                    highlightedHorizontalGridLineIndex:
+                                        _highlightedHorizontalGridLineIndex,
+                                    highlightedVerticalGridLineIndex:
+                                        _highlightedVerticalGridLineIndex,
+                                    isLayersRibbonExtended:
+                                        _isLayersPanelVisible,
+                                    onToggleGrid: () =>
+                                        setState(() => _showGrid = !_showGrid),
+                                    onToggleLayersRibbon: () => setState(
+                                      () => _isLayersPanelVisible =
+                                          !_isLayersPanelVisible,
+                                    ),
+                                    onCanvasTap: () {
+                                      setState(() {
+                                        selectedElement = null;
+                                      });
+                                    },
+                                    onElementPanStart: _onPanStart,
+                                    onElementPanUpdate: _updateElementPosition,
+                                    onElementPanEnd: _onPanEnd,
+                                    onElementTap: _elementSelect,
+                                    onElementDelete: _deleteElement,
+                                    onElementSplit: _splitElement,
+                                    onElementRotateTap: _rotateElementByTap,
+                                    onElementRotatePanStart: _onRotatePanStart,
+                                    onElementRotatePanUpdate:
+                                        _onRotatePanUpdate,
+                                    onElementRotatePanEnd: _onPanEnd,
+                                    onElementResizeTap: _resizeElementByTap,
+                                    onElementResizePanStart: _onResizePanStart,
+                                    onElementResizePanUpdate:
+                                        _onResizePanUpdate,
+                                    onElementResizePanEnd: _onPanEnd,
+                                    isCheckerboardActive: true,
+                                    checkerboardOpacity: checkerboardOpacity,
+                                    isCheckerboardVisible:
+                                        isCheckerboardVisible,
+                                    lockedElements:
+                                        _currentLogoState.lockedElements,
+                                    elementOrder:
+                                        _currentLogoState.elementOrder,
                                   ),
-                                  onCanvasTap: () {
-                                    setState(() {
-                                      selectedElement = null;
-                                    });
-                                  },
-                                  onElementPanStart: _onPanStart,
-                                  onElementPanUpdate: _updateElementPosition,
-                                  onElementPanEnd: _onPanEnd,
-                                  onElementTap: _elementSelect,
-                                  onElementDelete: _deleteElement,
-                                  onElementSplit: _splitElement,
-                                  onElementRotateTap: _rotateElementByTap,
-                                  onElementRotatePanStart: _onRotatePanStart,
-                                  onElementRotatePanUpdate: _onRotatePanUpdate,
-                                  onElementRotatePanEnd: _onPanEnd,
-                                  onElementResizeTap: _resizeElementByTap,
-                                  onElementResizePanStart: _onResizePanStart,
-                                  onElementResizePanUpdate: _onResizePanUpdate,
-                                  onElementResizePanEnd: _onPanEnd,
-                                  isCheckerboardActive: true,
-                                  checkerboardOpacity: checkerboardOpacity,
-                                  isCheckerboardVisible: isCheckerboardVisible,
-                                  lockedElements:
-                                      _currentLogoState.lockedElements,
-                                  elementOrder: _currentLogoState.elementOrder,
                                 ),
                               ),
                             ),
@@ -889,61 +912,6 @@ class _DownloadLogoState extends State<DownloadLogo> {
                       ),
                     ],
                   ),
-                ),
-                Column(
-                  children: [
-                    Container(
-                      height:
-                          (MediaQuery.of(context).size.height > 500) ? 220 : 30,
-                      color: Theme.of(context).colorScheme.surfaceVariant,
-                      child: Padding(
-                        padding: const EdgeInsets.all(5.0),
-                        child: Align(
-                          alignment: Alignment.topRight,
-                          child: Row(
-                            children: [
-                              SizedBox(width: 4),
-                              Tooltip(
-                                message: "undo last change",
-                                child: InkWell(
-                                  onTap: _undo,
-                                  child: CircleAvatar(
-                                    radius: 18,
-                                    backgroundColor:
-                                        Theme.of(context).cardColor,
-                                    child: Icon(
-                                      Icons.replay,
-                                      color: _undoStack.length > 1
-                                          ? Theme.of(context).iconTheme.color
-                                          : Theme.of(context).disabledColor,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: 6),
-                              Tooltip(
-                                message: "redo last change",
-                                child: InkWell(
-                                  onTap: _redo,
-                                  child: CircleAvatar(
-                                    radius: 18,
-                                    backgroundColor:
-                                        Theme.of(context).cardColor,
-                                    child: Icon(
-                                      Icons.refresh,
-                                      color: _redoStack.isNotEmpty
-                                          ? Theme.of(context).iconTheme.color
-                                          : Theme.of(context).disabledColor,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
                 ),
               ],
             ),
@@ -1293,7 +1261,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
               ),
             ),
           ),
-        ],
+        ]),
       ),
       bottomNavigationBar: LogoBottomNavBar(
         selectedIndex: selectedIndex,
