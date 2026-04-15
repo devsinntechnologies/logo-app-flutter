@@ -1293,6 +1293,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
     showDialog(
       context: parentContext,
+      useRootNavigator: true,
       barrierDismissible: true,
       builder: (BuildContext dialogContext) {
         return StatefulBuilder(
@@ -1400,7 +1401,9 @@ class _DownloadLogoState extends State<DownloadLogo> {
 
                                 // 5. Dismiss loading overlay
                                 if (parentContext.mounted) {
-                                  Navigator.of(parentContext).pop();
+                                  if (Navigator.of(parentContext).canPop()) {
+                                    Navigator.of(parentContext).pop();
+                                  }
                                 }
 
                                 // 6. Navigate to Dashboard, clearing the back-stack
@@ -1411,11 +1414,12 @@ class _DownloadLogoState extends State<DownloadLogo> {
                                   // the context is invalidated by pushAndRemoveUntil.
                                   final messenger =
                                       ScaffoldMessenger.of(parentContext);
+
                                   Navigator.of(parentContext)
                                       .pushAndRemoveUntil(
                                     MaterialPageRoute(
-                                      builder: (_) => const DashboardScreen(),
-                                    ),
+                                        builder: (_) =>
+                                            const DashboardScreen()),
                                     (route) => false,
                                   );
                                   // Show snackbar — called synchronously before the
@@ -1426,21 +1430,20 @@ class _DownloadLogoState extends State<DownloadLogo> {
                                       backgroundColor: Colors.white,
                                       behavior: SnackBarBehavior.floating,
                                       shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(12),
+                                        borderRadius: BorderRadius.circular(12),
                                       ),
                                       margin: const EdgeInsets.all(16),
-                                      content: const Row(
+                                      content: Row(
                                         children: [
-                                          Icon(
+                                          const Icon(
                                             Icons.cloud_done,
                                             color: ThemeColors.purple,
                                           ),
-                                          SizedBox(width: 12),
+                                          const SizedBox(width: 12),
                                           Expanded(
                                             child: Text(
-                                              'Logo saved to My Designs!',
-                                              style: TextStyle(
+                                              S.of(context).saveLogo,
+                                              style: const TextStyle(
                                                 color: ThemeColors.purple,
                                                 fontSize: 16,
                                               ),
@@ -1452,28 +1455,16 @@ class _DownloadLogoState extends State<DownloadLogo> {
                                   );
                                 }
                               } catch (e) {
-                                // Dismiss loading on error
-                                if (parentContext.mounted) {
-                                  Navigator.of(parentContext).pop();
+                                final navigator = Navigator.of(parentContext);
+
+                                if (navigator.canPop()) {
+                                  navigator.pop();
                                 }
-                                if (parentContext.mounted) {
-                                  ScaffoldMessenger.of(parentContext)
-                                      .showSnackBar(
-                                    SnackBar(
-                                      backgroundColor: Colors.white,
-                                      behavior: SnackBarBehavior.floating,
-                                      content: Row(
-                                        children: [
-                                          const Icon(Icons.error,
-                                              color: ThemeColors.purple),
-                                          const SizedBox(width: 12),
-                                          Expanded(
-                                              child: Text('Error saving: $e')),
-                                        ],
-                                      ),
-                                    ),
-                                  );
+
+                                if (navigator.canPop()) {
+                                  navigator.pop();
                                 }
+                                print("e $e");
                               }
                             }
                           : null,

@@ -147,10 +147,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       if (value == null || value.isEmpty) {
                         return 'Please enter email';
                       }
-                      // if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                      //     .hasMatch(value)) {
-                      //   return 'Please enter a valid email';
-                      // }
+                      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                          .hasMatch(value)) {
+                        return 'Please enter a valid email';
+                      }
                       return null;
                     },
                   ),
@@ -246,7 +246,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (_) => VerifyEmailScreen(email: email),
+                                        builder: (_) =>
+                                            VerifyEmailScreen(email: email),
                                       ),
                                     );
                                   } else {
@@ -256,12 +257,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                           content: Text(
                                               "Account created successfully!")),
                                     );
-                                    // AuthWrapper will handle the transition, 
+                                    // AuthWrapper will handle the transition,
                                     // but we can also pop or navigate to Dashboard
                                     Navigator.pushAndRemoveUntil(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (_) => const DashboardScreen()),
+                                          builder: (_) =>
+                                              const DashboardScreen()),
                                       (route) => false,
                                     );
                                   }
