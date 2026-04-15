@@ -160,7 +160,11 @@ class DashboardScreen extends StatelessWidget {
                                   DashboardCard(
                                     title: 'Customize',
                                     subtitle: 'Make it yours',
-                                    icon: const Icon(Icons.palette),
+                                    icon: Image.asset(
+                                      "assets/images/palette1.png",
+                                      height: 35,
+                                      width: 35,
+                                    ),
                                     gradient: ThemeColors.customizeGradient,
                                     backgroundDecorations: [
                                       Positioned(
@@ -194,8 +198,8 @@ class DashboardScreen extends StatelessWidget {
                                     subtitle: 'Your collection',
                                     icon: Image.asset(
                                       "assets/icons/pick.png",
-                                      height: 30,
-                                      width: 38,
+                                      height: 26,
+                                      width: 30,
                                       color: Colors.white,
                                     ),
                                     gradient: ThemeColors.myLogosGradient,
@@ -227,7 +231,11 @@ class DashboardScreen extends StatelessWidget {
                                   DashboardCard(
                                     title: 'History',
                                     subtitle: 'Recent designs',
-                                    icon: const Icon(Icons.history),
+                                    icon: Image.asset(
+                                      "assets/images/history.png",
+                                      height: 35,
+                                      width: 39,
+                                    ),
                                     gradient: ThemeColors.historyGradient,
                                     backgroundDecorations: [
                                       Positioned(
@@ -257,7 +265,8 @@ class DashboardScreen extends StatelessWidget {
                           // Bottom Section: AI-Powered Features
                           Container(
                             width: double.infinity,
-                            padding: const EdgeInsets.symmetric(vertical: 20),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 20, horizontal: 20),
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(15),
@@ -296,8 +305,12 @@ class DashboardScreen extends StatelessWidget {
                                     Color(0xff00CD84)
                                   ]),
                                 ),
-                                const FeatureListItem(
-                                  icon: Icon(Icons.auto_awesome),
+                                FeatureListItem(
+                                  icon: Image.asset(
+                                    "assets/images/ds_star.png",
+                                    height: 30,
+                                    width: 29,
+                                  ),
                                   text: 'Professional quality designs',
                                   iconBgColor: LinearGradient(colors: [
                                     Color(0xFFCD28FB),

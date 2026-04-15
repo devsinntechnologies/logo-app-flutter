@@ -59,16 +59,16 @@ class CategoryCard extends StatelessWidget {
                   // Glossy Bubble Top-Right
                   Positioned(
                     right: -30,
-                    top: -25,
+                    top: -30,
                     child: AnimatedOpacity(
                       duration: const Duration(milliseconds: 200),
                       opacity: hovered ? 0.3 : 0.15,
                       child: Container(
                         width: 70,
                         height: 70,
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.white,
+                          color: Colors.white.withOpacity(0.5),
                         ),
                       ),
                     ),

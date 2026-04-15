@@ -21,17 +21,17 @@ class CategorySelectionScreen extends StatelessWidget {
       },
       {
         'title': 'Food & Beverage',
-        'image': 'assets/images/restaurant.png',
+        'image': 'assets/images/fock.png',
         'gradient': ThemeColors.foodGradient,
       },
       {
         'title': 'Health & Wellness',
-        'image': 'assets/images/favorite.png',
+        'image': 'assets/images/love.png',
         'gradient': ThemeColors.healthGradient,
       },
       {
         'title': 'Creative & Design',
-        'image': 'assets/images/palette.png',
+        'image': 'assets/images/palette1.png',
         'gradient': ThemeColors.creativeGradient,
       },
       {
@@ -41,12 +41,12 @@ class CategorySelectionScreen extends StatelessWidget {
       },
       {
         'title': 'Professional Services',
-        'image': 'assets/images/briefcase.png',
+        'image': 'assets/images/bag.png',
         'gradient': ThemeColors.professionalGradient,
       },
       {
         'title': 'Fitness & Sports',
-        'image': 'assets/images/fitness.png',
+        'image': 'assets/images/weight.png',
         'gradient': ThemeColors.fitnessGradient,
       },
       {
@@ -56,32 +56,32 @@ class CategorySelectionScreen extends StatelessWidget {
       },
       {
         'title': 'Photography',
-        'image': 'assets/images/camera.png',
+        'image': 'assets/images/camera1.png',
         'gradient': ThemeColors.photographyGradient,
       },
       {
         'title': 'Travel & Tourism',
-        'image': 'assets/images/explore.png',
+        'image': 'assets/images/travel.png',
         'gradient': ThemeColors.travelGradient,
       },
       {
         'title': 'Fashion & Beauty',
-        'image': 'assets/icons/bags.png',
+        'image': 'assets/images/shoper.png',
         'gradient': ThemeColors.fashionGradient,
       },
       {
         'title': 'Cafe & Bakery',
-        'image': 'assets/images/coffee.png',
+        'image': 'assets/images/cup.png',
         'gradient': ThemeColors.cafeGradient,
       },
       {
         'title': 'Real Estate',
-        'image': 'assets/images/house.png',
+        'image': 'assets/images/home.png',
         'gradient': ThemeColors.realGradient,
       },
       {
         'title': 'Gaming',
-        'image': 'assets/images/gamepad.png',
+        'image': 'assets/images/game.png',
         'gradient': ThemeColors.gameGradient,
       },
       {
@@ -91,7 +91,7 @@ class CategorySelectionScreen extends StatelessWidget {
       },
       {
         'title': 'Eco & Nature',
-        'image': 'assets/icons/eco.png',
+        'image': 'assets/images/leave.png',
         'gradient': ThemeColors.ecoGradient,
       },
     ];
@@ -99,21 +99,24 @@ class CategorySelectionScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Color(0xffF3F4F6),
       appBar: AppBar(
+        // toolbarHeight: 70,
         backgroundColor: Colors.white,
         elevation: 0,
         leading: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+          padding: EdgeInsets.symmetric(horizontal: 7, vertical: 4),
           child: GestureDetector(
             onTap: () => Navigator.pop(context),
             child: Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFFF3F4F6),
-                // shape: BoxShape.circle,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(Icons.arrow_back,
-                  color: Color(0xFF1F1F39), size: 25),
-            ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF3F4F6),
+                  // shape: BoxShape.circle,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Image.asset("assets/images/backarrow.png")
+                // const
+                //  Icon(Icons.arrow_back,
+                //     color: Color(0xFF1F1F39), size: 25),
+                ),
           ),
         ),
         title: const Text(

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class BusinessInputCard extends StatelessWidget {
   final String title;
   final String hint;
-  final IconData icon;
+  final Widget icon;
   final Color iconBgColor;
   final Color borderBgColor;
 
@@ -45,13 +45,14 @@ class BusinessInputCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: iconBgColor,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(icon, color: Colors.white, size: 22),
-              ),
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: iconBgColor,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: icon
+                  // Icon(icon, color: Colors.white, size: 22),
+                  ),
               const SizedBox(width: 12),
               Text(
                 title,
