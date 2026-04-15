@@ -32,6 +32,7 @@ import '../components/logoBottomNavbarItems/drop_up_panel.dart';
 import '../components/logo_canvas.dart';
 import '../utils/text_size_util.dart';
 import 'text_screen.dart';
+import 'package:logo_app_flutter/screens/dashboard_screen.dart';
 
 class DownloadLogo extends StatefulWidget {
   final String svgLogo;
@@ -235,21 +236,21 @@ class _DownloadLogoState extends State<DownloadLogo> {
                         listen: false);
                     int? previousSelection = provider.selectedElementId;
                     bool hadSelection = previousSelection != null;
-                    if (hadSelection) provider.clearSelection();
-                    // Wait for UI to clear selection box
-                    if (hadSelection) {
-                      await Future.delayed(const Duration(milliseconds: 50));
-                      await WidgetsBinding.instance.endOfFrame;
-                    }
-                    // Show loading dialog
-                    showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (context) => const Center(
-                        child: CircularProgressIndicator(
-                            color: ThemeColors.purple),
-                      ),
-                    );
+                    // if (hadSelection) provider.clearSelection();
+                    // // Wait for UI to clear selection box
+                    // if (hadSelection) {
+                    //   await Future.delayed(const Duration(milliseconds: 50));
+                    //   await WidgetsBinding.instance.endOfFrame;
+                    // }
+                    // // Show loading dialog
+                    // showDialog(
+                    //   context: context,
+                    //   barrierDismissible: false,
+                    //   builder: (context) => const Center(
+                    //     child: CircularProgressIndicator(
+                    //         color: ThemeColors.purple),
+                    //   ),
+                    // );
 
                     try {
                       // Ensure current provider font selections are written into the state before saving
@@ -283,6 +284,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
                       }
 
                       // Close confirmation dialog
+                      Navigator.of(context).pop();
                       Navigator.of(context).pop();
 
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -1294,7 +1296,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
       barrierDismissible: true,
       builder: (BuildContext dialogContext) {
         return StatefulBuilder(
-          builder: (context, setState) {
+          builder: (context, setDialogState) {
             return AlertDialog(
               backgroundColor: Colors.white,
               title: Text(
@@ -1314,7 +1316,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
                     child: Checkbox(
                       value: saveLogoChecked,
                       onChanged: (value) {
-                        setState(() {
+                        setDialogState(() {
                           saveLogoChecked = value!;
                         });
                       },
@@ -1331,6 +1333,7 @@ class _DownloadLogoState extends State<DownloadLogo> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    // ── Exit Without Saving ──
                     TextButton(
                       onPressed: () {
                         Navigator.of(dialogContext).pop();
@@ -1344,53 +1347,99 @@ class _DownloadLogoState extends State<DownloadLogo> {
                         ),
                       ),
                     ),
+
+                    // ── Save to My Designs → navigate to Dashboard ──
                     TextButton(
                       onPressed: saveLogoChecked
                           ? () async {
-                              final provider =
-                                  Provider.of<SelectedColorProvider>(
-                                parentContext,
-                                listen: false,
-                              );
-
-                              int? previousSelection =
-                                  provider.selectedElementId;
-                              provider.clearSelection();
-                              await WidgetsBinding.instance.endOfFrame;
-                              await saveCanvasToGallery(
-                                canvasKey,
-                                isExportingNotifier,
-                              );
-                              if (previousSelection != null) {
-                                provider.setSelectedElement(
-                                  previousSelection,
-                                );
-                              }
-
+                              // 1. Close the confirmation dialog
                               Navigator.of(dialogContext).pop();
 
-                              ScaffoldMessenger.of(parentContext)
-                                  .showSnackBar(
+                              // 2. Show full-screen loading overlay
+                              showDialog(
+                                context: parentContext,
+                                barrierDismissible: false,
+                                builder: (_) => const Center(
+                                  child: CircularProgressIndicator(
+                                    color: ThemeColors.purple,
+                                  ),
+                                ),
+                              );
+
+                              try {
+                                // 3. Clear selection so thumbnail is clean
+                                final provider =
+                                    Provider.of<SelectedColorProvider>(
+                                  parentContext,
+                                  listen: false,
+                                );
+                                int? previousSelection =
+                                    provider.selectedElementId;
+                                if (previousSelection != null) {
+                                  provider.clearSelection();
+                                }
+                                await Future.delayed(
+                                    const Duration(milliseconds: 50));
+                                await WidgetsBinding.instance.endOfFrame;
+
+                                // 4. Save or update design in Supabase
+                                final svc = UserDesignService();
+                                if (widget.designId != null) {
+                                  await svc.updateDesign(
+                                    designId: widget.designId!,
+                                    updatedJson: _currentLogoState.toJson(),
+                                    canvasKey: canvasKey,
+                                    updateImage: true,
+                                  );
+                                } else {
+                                  await svc.saveNewDesign(
+                                    canvasKey: canvasKey,
+                                    designJson: _currentLogoState.toJson(),
+                                  );
+                                }
+
+                                // 5. Dismiss loading overlay
+                                if (parentContext.mounted) {
+                                  Navigator.of(parentContext).pop();
+                                }
+
+                                // 6. Navigate to Dashboard, clearing the back-stack
+                                //    We navigate first, then use a root-level messenger
+                                //    so parentContext is still valid when we call it.
+                                if (parentContext.mounted) {
+                                  // Show snackbar on the root navigator level BEFORE
+                                  // the context is invalidated by pushAndRemoveUntil.
+                                  final messenger =
+                                      ScaffoldMessenger.of(parentContext);
+                                  Navigator.of(parentContext)
+                                      .pushAndRemoveUntil(
+                                    MaterialPageRoute(
+                                      builder: (_) => const DashboardScreen(),
+                                    ),
+                                    (route) => false,
+                                  );
+                                  // Show snackbar — called synchronously before the
+                                  // widget is fully disposed.
+                                  messenger.showSnackBar(
                                     SnackBar(
-                                      duration: const Duration(seconds: 2),
+                                      duration: const Duration(seconds: 3),
                                       backgroundColor: Colors.white,
                                       behavior: SnackBarBehavior.floating,
                                       shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(
-                                          12,
-                                        ),
+                                        borderRadius:
+                                            BorderRadius.circular(12),
                                       ),
-                                      margin: EdgeInsets.all(16),
-                                      content: Row(
+                                      margin: const EdgeInsets.all(16),
+                                      content: const Row(
                                         children: [
                                           Icon(
-                                            Icons.check_circle,
+                                            Icons.cloud_done,
                                             color: ThemeColors.purple,
                                           ),
                                           SizedBox(width: 12),
                                           Expanded(
                                             child: Text(
-                                              S.of(context).saveLogo,
+                                              'Logo saved to My Designs!',
                                               style: TextStyle(
                                                 color: ThemeColors.purple,
                                                 fontSize: 16,
@@ -1400,25 +1449,48 @@ class _DownloadLogoState extends State<DownloadLogo> {
                                         ],
                                       ),
                                     ),
-                                  )
-                                  .closed
-                                  .then((_) {
-                                Navigator.of(parentContext).pop();
-                              });
+                                  );
+                                }
+                              } catch (e) {
+                                // Dismiss loading on error
+                                if (parentContext.mounted) {
+                                  Navigator.of(parentContext).pop();
+                                }
+                                if (parentContext.mounted) {
+                                  ScaffoldMessenger.of(parentContext)
+                                      .showSnackBar(
+                                    SnackBar(
+                                      backgroundColor: Colors.white,
+                                      behavior: SnackBarBehavior.floating,
+                                      content: Row(
+                                        children: [
+                                          const Icon(Icons.error,
+                                              color: ThemeColors.purple),
+                                          const SizedBox(width: 12),
+                                          Expanded(
+                                              child: Text('Error saving: $e')),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                }
+                              }
                             }
                           : null,
                       style: ButtonStyle(
-                        foregroundColor: MaterialStateProperty.resolveWith((
-                          states,
-                        ) {
-                          if (states.contains(MaterialState.disabled)) {
-                            return Colors.grey;
-                          }
-                          return ThemeColors.purple;
-                        }),
+                        foregroundColor: MaterialStateProperty.resolveWith(
+                          (states) {
+                            if (states.contains(MaterialState.disabled)) {
+                              return Colors.grey;
+                            }
+                            return ThemeColors.purple;
+                          },
+                        ),
                       ),
-                      child: Text(S.of(context).saveLogo,
-                          style: TextStyle(fontSize: 16)),
+                      child: Text(
+                        S.of(context).saveLogo,
+                        style: const TextStyle(fontSize: 16),
+                      ),
                     ),
                   ],
                 ),

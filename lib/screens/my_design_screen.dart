@@ -31,11 +31,14 @@ class _MyDesignScreenState extends State<MyDesignScreen> {
 
   /// Fetch all logos for the current user
   Future<void> fetchLogos() async {
+    if (!mounted) return;
     setState(() => isLoading = true); // start loading
     try {
       final uid = supabase.auth.currentUser!.id;
       final response =
           await supabase.storage.from('logos').list(path: 'logos/$uid');
+
+      if (!mounted) return;
 
       if (response.isEmpty) {
         setState(() {
@@ -53,12 +56,14 @@ class _MyDesignScreenState extends State<MyDesignScreen> {
         return '$base?t=$now'; // cache-busting
       }).toList();
 
+      if (!mounted) return;
       setState(() {
         imageUrls = urls;
         isLoading = false; // done loading
       });
     } catch (e) {
       AppLogger.error('Error fetching logos', tag: 'MyDesignScreen', error: e);
+      if (!mounted) return;
       setState(() {
         imageUrls = [];
         isLoading = false; // done loading
@@ -76,16 +81,19 @@ class _MyDesignScreenState extends State<MyDesignScreen> {
   }
 
   Future<void> fetchDesigns() async {
+    if (!mounted) return;
     setState(() => isLoading = true);
     try {
       final svc = UserDesignService();
       final list = await svc.fetchUserDesigns();
+      if (!mounted) return;
       setState(() {
         userDesigns = list;
         isLoading = false;
       });
     } catch (e) {
       print('❌ Error fetching designs: $e');
+      if (!mounted) return;
       setState(() {
         userDesigns = [];
         isLoading = false;
