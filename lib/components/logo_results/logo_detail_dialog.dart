@@ -1,12 +1,22 @@
+import 'dart:io';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:logo_app_flutter/provider/business_info_provider.dart';
 import 'package:logo_app_flutter/provider/logo_design_provider.dart';
 import 'package:logo_app_flutter/screens/download_logo.dart';
+import 'package:logo_app_flutter/models/logo_state_data.dart';
+import 'package:logo_app_flutter/services/user_design_service.dart';
+import 'package:logo_app_flutter/screens/canvas_exporter.dart';
+import 'package:logo_app_flutter/components/google_alert.dart';
 
-class LogoDetailDialog extends StatelessWidget {
+class LogoDetailDialog extends StatefulWidget {
   final String name;
   final String svg;
   final List<Color> colors;
@@ -17,6 +27,13 @@ class LogoDetailDialog extends StatelessWidget {
     required this.svg,
     required this.colors,
   });
+
+  @override
+  State<LogoDetailDialog> createState() => _LogoDetailDialogState();
+}
+
+class _LogoDetailDialogState extends State<LogoDetailDialog> {
+  final GlobalKey _previewKey = GlobalKey();
 
   TextStyle _getFontStyle(BuildContext context, int index, Color color,
       {double fontSize = 14}) {
@@ -48,6 +65,146 @@ class LogoDetailDialog extends StatelessWidget {
     }
   }
 
+  Future<void> _saveLogo() async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) {
+      showCustomGoogleDialog(context);
+      return;
+    }
+
+    try {
+      // Show loading
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(child: CircularProgressIndicator()),
+      );
+
+      final info = context.read<BusinessInfoProvider>();
+      final design = context.read<LogoDesignProvider>();
+
+      final logoState = LogoStateData(
+        logoPosition: const Offset(150, 100),
+        logoSize: 100,
+        logoRotation: 0,
+        isLogoVisible: true,
+        svgLogo: widget.svg,
+        companyNamePosition: const Offset(160, 200),
+        companyNameSize: 20,
+        companyNameRotation: 0,
+        isCompanyNameVisible: true,
+        companyName: info.businessName,
+        sloganPosition: const Offset(150, 240),
+        sloganSize: 18,
+        sloganRotation: 0,
+        isSloganVisible: true,
+        sloganName: info.slogan,
+        isLogo2Visible: false,
+        isCompanyName2Visible: false,
+        isSlogan2Visible: false,
+        companyFontIndex: design.selectedFontIndex,
+        sloganFontIndex: design.selectedFontIndex,
+      );
+
+      final svc = UserDesignService();
+      await svc.saveNewDesign(
+        canvasKey: _previewKey,
+        designJson: logoState.toJson(),
+      );
+
+      if (mounted) Navigator.pop(context); // Close loading
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Logo saved to My Designs!')),
+        );
+      }
+    } catch (e) {
+      if (mounted) Navigator.pop(context); // Close loading
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error saving logo: $e')),
+        );
+      }
+    }
+  }
+
+  void _editLogo() {
+    final info = context.read<BusinessInfoProvider>();
+    final design = context.read<LogoDesignProvider>();
+    Navigator.pop(context); // Close dialog
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DownloadLogo(
+          svgLogo: widget.svg,
+          companyName: info.businessName,
+          sloganName: info.slogan,
+          selectedFontIndex: design.selectedFontIndex,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _downloadLogo() async {
+    final info = context.read<BusinessInfoProvider>();
+    final design = context.read<LogoDesignProvider>();
+
+    final logoState = LogoStateData(
+      logoPosition: const Offset(150, 100),
+      logoSize: 100,
+      logoRotation: 0,
+      isLogoVisible: true,
+      svgLogo: widget.svg,
+      companyNamePosition: const Offset(160, 200),
+      companyNameSize: 20,
+      companyNameRotation: 0,
+      isCompanyNameVisible: true,
+      companyName: info.businessName,
+      sloganPosition: const Offset(150, 240),
+      sloganSize: 18,
+      sloganRotation: 0,
+      isSloganVisible: true,
+      sloganName: info.slogan,
+      isLogo2Visible: false,
+      isCompanyName2Visible: false,
+      isSlogan2Visible: false,
+      companyFontIndex: design.selectedFontIndex,
+      sloganFontIndex: design.selectedFontIndex,
+    );
+
+    await exportCanvas(
+      context: context,
+      repaintKey: _previewKey,
+      logoState: logoState,
+    );
+  }
+
+  Future<void> _shareLogo() async {
+    try {
+      final boundary =
+          _previewKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      final image = await boundary.toImage(pixelRatio: 3.0);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      final pngBytes = byteData!.buffer.asUint8List();
+
+      final directory = await getTemporaryDirectory();
+      final imagePath = '${directory.path}/shared_logo.png';
+      final imageFile = File(imagePath);
+      await imageFile.writeAsBytes(pngBytes);
+
+      await Share.shareXFiles(
+        [XFile(imagePath)],
+        text: 'Check out my new logo designed with LogoMaker!',
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error sharing logo: $e')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -74,7 +231,7 @@ class LogoDetailDialog extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  name,
+                  widget.name,
                   style: const TextStyle(
                     color: Color(0xFF1F1F39),
                     fontSize: 16,
@@ -98,48 +255,51 @@ class LogoDetailDialog extends StatelessWidget {
             const SizedBox(height: 24),
 
             // Large Logo Preview
-            Container(
-              width: double.infinity,
-              height: 200,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: colors,
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(30),
-                boxShadow: [
-                  BoxShadow(
-                    color: colors.first.withOpacity(0.3),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
+            RepaintBoundary(
+              key: _previewKey,
+              child: Container(
+                width: double.infinity,
+                height: 200,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: widget.colors,
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                ],
-              ),
-              child: Consumer2<BusinessInfoProvider, LogoDesignProvider>(
-                builder: (context, info, design, child) {
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SvgPicture.string(
-                        svg,
-                        height: 80,
-                        width: 80,
-                      ),
-                      const SizedBox(height: 15),
-                      Text(
-                        info.businessName,
-                        textAlign: TextAlign.center,
-                        style: _getFontStyle(
-                          context,
-                          design.selectedFontIndex,
-                          Colors.white,
-                          fontSize: 20,
+                  borderRadius: BorderRadius.circular(30),
+                  boxShadow: [
+                    BoxShadow(
+                      color: widget.colors.first.withOpacity(0.3),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: Consumer2<BusinessInfoProvider, LogoDesignProvider>(
+                  builder: (context, info, design, child) {
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SvgPicture.string(
+                          widget.svg,
+                          height: 80,
+                          width: 80,
                         ),
-                      ),
-                    ],
-                  );
-                },
+                        const SizedBox(height: 15),
+                        Text(
+                          info.businessName,
+                          textAlign: TextAlign.center,
+                          style: _getFontStyle(
+                            context,
+                            design.selectedFontIndex,
+                            Colors.white,
+                            fontSize: 20,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
               ),
             ),
             const SizedBox(height: 24),
@@ -157,10 +317,7 @@ class LogoDetailDialog extends StatelessWidget {
                     label: 'Save',
                     textcolor: Colors.white,
                     color: const Color(0xFFFFFFFF),
-                    onTap: () {
-                      Navigator.pop(context);
-                      // Future: Navigate to Editor
-                    },
+                    onTap: _saveLogo,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -174,20 +331,7 @@ class LogoDetailDialog extends StatelessWidget {
                     label: 'Edit',
                     textcolor: Colors.white,
                     color: const Color(0xFFFFFFFF),
-                    onTap: () {
-                      Navigator.pop(context); // Close dialog
-                      final info = context.read<BusinessInfoProvider>();
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DownloadLogo(
-                            svgLogo: svg, // Passing path as requested
-                            companyName: info.businessName,
-                            sloganName: info.slogan,
-                          ),
-                        ),
-                      );
-                    },
+                    onTap: _editLogo,
                   ),
                 ),
               ],
@@ -205,10 +349,7 @@ class LogoDetailDialog extends StatelessWidget {
                     label: 'Download',
                     color: const Color(0xFF7C4DFF),
                     textcolor: Color(0xff9810FA),
-                    onTap: () {
-                      Navigator.pop(context);
-                      // Future: Trigger Download
-                    },
+                    onTap: _downloadLogo,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -222,10 +363,7 @@ class LogoDetailDialog extends StatelessWidget {
                     label: 'Share',
                     textcolor: Color(0xffE8117F),
                     color: const Color(0xFFFF6D00),
-                    onTap: () {
-                      Navigator.pop(context);
-                      // Future: Share Logo
-                    },
+                    onTap: _shareLogo,
                   ),
                 ),
               ],
