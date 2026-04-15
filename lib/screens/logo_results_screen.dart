@@ -15,74 +15,152 @@ class LogoResultsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFDF2F8),
+      // appBar: AppBar(
+      //   backgroundColor: Colors.white,
+      //   elevation: 0,
+      //   centerTitle: true,
+      //   leading: Padding(
+      //     padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+      //     child: GestureDetector(
+      //       onTap: () => Navigator.pop(context),
+      //       child: Container(
+      //         decoration: BoxDecoration(
+      //           color: const Color(0xFFF4F5F9),
+      //           // shape: BoxShape.circle,
+      //           borderRadius: BorderRadius.circular(10),
+      //         ),
+      //         child: const Icon(Icons.arrow_back,
+      //             color: Color(0xFF1F1F39), size: 20),
+      //       ),
+      //     ),
+      //   ),
+      //   title: const Text(
+      //     'Your Logos',
+      //     style: TextStyle(
+      //       color: Color(0xFF1F1F39),
+      //       fontSize: 16,
+      //       fontWeight: FontWeight.w400,
+      //     ),
+      //   ),
+      //   actions: [
+      //     Padding(
+      //       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      //       child: Consumer<BusinessInfoProvider>(
+      //         builder: (context, info, child) {
+      //           return GestureDetector(
+      //             onTap: () => context.read<LogoResultsProvider>().fetchLogos(
+      //                   info.businessName,
+      //                   info.slogan,
+      //                 ),
+      //             child: Container(
+      //               padding: const EdgeInsets.all(8),
+      //               decoration: BoxDecoration(
+      //                 color: const Color(0xFFF4F5F9),
+      //                 shape: BoxShape.circle,
+      //               ),
+      //               child: const Icon(Icons.refresh_outlined,
+      //                   color: Color(0xFF1F1F39), size: 20),
+      //             ),
+      //           );
+      //         },
+      //       ),
+      //     ),
+      //   ],
+      //   bottom: PreferredSize(
+      //       preferredSize: const Size.fromHeight(2), child: DividerContainer()
+      //       //  Container(
+      //       //   height: 2,
+      //       //   decoration: const BoxDecoration(
+      //       //     gradient: LinearGradient(
+      //       //       colors: [
+      //       //         Color(0xFFFF8A65),
+      //       //         Color(0xFFE91E63),
+      //       //         Color(0xFF9C27B0)
+      //       //       ],
+      //       //     ),
+      //       //   ),
+      //       // ),
+
+      //       ),
+      // ),
       appBar: AppBar(
+        toolbarHeight: 80,
+        // toolbarHeight: 70,
         backgroundColor: Colors.white,
         elevation: 0,
-        centerTitle: true,
         leading: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
           child: GestureDetector(
             onTap: () => Navigator.pop(context),
             child: Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFFF4F5F9),
-                // shape: BoxShape.circle,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(Icons.arrow_back,
-                  color: Color(0xFF1F1F39), size: 20),
-            ),
+                // height: 10,
+                width: 30,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF3F4F6),
+                  // shape: BoxShape.circle,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Image.asset("assets/images/backarrow.png")
+                // const
+                //  Icon(Icons.arrow_back,
+                //     color: Color(0xFF1F1F39), size: 25),
+                ),
           ),
         ),
+
         title: const Text(
-          'Your Logos',
+          'your logos',
           style: TextStyle(
-            color: Color(0xFF1F1F39),
+            color: Colors.black,
             fontSize: 16,
             fontWeight: FontWeight.w400,
           ),
         ),
+
         actions: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: Consumer<BusinessInfoProvider>(
-              builder: (context, info, child) {
-                return GestureDetector(
-                  onTap: () => context.read<LogoResultsProvider>().fetchLogos(
-                        info.businessName,
-                        info.slogan,
-                      ),
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF4F5F9),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.refresh_outlined,
-                        color: Color(0xFF1F1F39), size: 20),
-                  ),
-                );
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => DashboardScreen()));
               },
+              child: Container(
+                  // height: 10,
+                  width: 30,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF3F4F6),
+                    // shape: BoxShape.circle,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Image.asset("assets/images/refresh.png")
+                  // const
+                  //  Icon(Icons.arrow_back,
+                  //     color: Color(0xFF1F1F39), size: 25),
+                  ),
             ),
           ),
+          SizedBox(
+            width: 10,
+          ),
         ],
+
+        // con.st SizedBox(height: 12),
+
+        centerTitle: true,
         bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(2), child: DividerContainer()
+            preferredSize: const Size.fromHeight(1), child: DividerContainer()
             //  Container(
-            //   height: 2,
+            //   height: 1,
             //   decoration: const BoxDecoration(
             //     gradient: LinearGradient(
-            //       colors: [
-            //         Color(0xFFFF8A65),
-            //         Color(0xFFE91E63),
-            //         Color(0xFF9C27B0)
-            //       ],
+            //       colors: [Color(0xFFFF2E94), Color(0xFFC32BAC)],
             //     ),
             //   ),
             // ),
-
             ),
       ),
+
       body: Consumer<LogoResultsProvider>(
         builder: (context, provider, child) {
           if (provider.isLoading) {
@@ -164,7 +242,7 @@ class LogoResultsScreen extends StatelessWidget {
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     crossAxisSpacing: 20,
-                    mainAxisSpacing: 25,
+                    // mainAxisSpacing: 25,
                     childAspectRatio: 0.75,
                   ),
                   itemCount: provider.generatedLogos.length,

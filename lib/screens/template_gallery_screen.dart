@@ -45,8 +45,6 @@ class _TemplateGalleryScreenState extends State<TemplateGalleryScreen> {
                 // Search and Tabs Section
                 _buildSearchAndFilters(context, provider),
 
-                const Divider(height: 1),
-
                 // Main Content Area
                 Expanded(
                   child: isSearching || provider.selectedCategory != 'All'
@@ -140,7 +138,7 @@ class _TemplateGalleryScreenState extends State<TemplateGalleryScreen> {
                         ? null
                         : Border.all(
                             color: Color(0xFFC32BAC).withOpacity(0.3),
-                            width: 2),
+                            width: 1),
                     boxShadow: provider.isSearchExpanded
                         ? [
                             BoxShadow(
@@ -148,7 +146,13 @@ class _TemplateGalleryScreenState extends State<TemplateGalleryScreen> {
                                 blurRadius: 10,
                                 offset: const Offset(0, 4))
                           ]
-                        : null,
+                        : [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.04),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                   ),
                   child: Icon(
                     provider.isSearchExpanded ? Icons.search : Icons.search,
@@ -226,8 +230,8 @@ class _TemplateGalleryScreenState extends State<TemplateGalleryScreen> {
               onSeeAll: () => provider.selectCategory(entry.key),
               items: entry.value.map((item) {
                 return TemplateRowItem(
-                  icon: Icon(item['icon'] as IconData,
-                      color: item['color'] as Color),
+                  icon: Image.asset(item['image'] as String,
+                      width: 80, height: 80, fit: BoxFit.contain),
                   isAd: item['isAd'] as bool,
                   onTap: () {
                     Navigator.push(
@@ -368,8 +372,8 @@ class _TemplateGalleryScreenState extends State<TemplateGalleryScreen> {
                 itemBuilder: (context, index) {
                   final item = items[index];
                   return TemplateRowItem(
-                    icon: Icon(item['icon'] as IconData,
-                        color: item['color'] as Color),
+                    icon: Image.asset(item['image'] as String,
+                        width: 80, height: 80, fit: BoxFit.contain),
                     isAd: item['isAd'] as bool,
                     onTap: () {
                       Navigator.push(

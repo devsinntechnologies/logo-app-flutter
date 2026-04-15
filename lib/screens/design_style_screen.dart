@@ -51,9 +51,9 @@ class DesignStyleScreen extends StatelessWidget {
 
         centerTitle: true,
         bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(1), child: DividerContainer()
+            preferredSize: const Size.fromHeight(2), child: DividerContainer()
             //  Container(
-            //   height: 1,
+            //   height: 2,
             //   decoration: const BoxDecoration(
             //     gradient: LinearGradient(
             //       colors: [Color(0xFFFF2E94), Color(0xFFC32BAC)],
@@ -86,7 +86,8 @@ class DesignStyleScreen extends StatelessWidget {
                       // Font Style Section
                       _buildSectionTitle(
                           'Font Style',
-                          Icons.text_fields_rounded,
+                          // Icons.text_fields_rounded,
+                          Image.asset("assets/images/text.png"),
                           [const Color(0xFFFF8904), const Color(0xFFF6339A)]),
                       const SizedBox(height: 20),
                       GridView.builder(
@@ -97,7 +98,7 @@ class DesignStyleScreen extends StatelessWidget {
                           crossAxisCount: 2,
                           crossAxisSpacing: 12,
                           mainAxisSpacing: 12,
-                          childAspectRatio: 1.0,
+                          childAspectRatio: 1.5,
                         ),
                         itemCount: provider.fontStyles.length,
                         itemBuilder: (context, index) {
@@ -116,7 +117,11 @@ class DesignStyleScreen extends StatelessWidget {
                       // Color Scheme Section
                       _buildSectionTitle(
                           'Color Scheme',
-                          Icons.color_lens_rounded,
+                          Image.asset(
+                            "assets/images/palette.png",
+                            height: 30,
+                          ),
+                          // Icons.color_lens_rounded,
                           [const Color(0xFFE12AFB), const Color(0xFF9810FA)]),
                       const SizedBox(height: 20),
                       GridView.builder(
@@ -127,7 +132,7 @@ class DesignStyleScreen extends StatelessWidget {
                           crossAxisCount: 2,
                           crossAxisSpacing: 16,
                           mainAxisSpacing: 16,
-                          childAspectRatio: 1.2,
+                          childAspectRatio: 1.5,
                         ),
                         itemCount: provider.colorPalettes.length,
                         itemBuilder: (context, index) {
@@ -177,27 +182,27 @@ class DesignStyleScreen extends StatelessWidget {
                       children: [
                         // Glossy Bubble Top-Right
                         Positioned(
-                          right: -10,
+                          right: -20,
                           top: -10,
                           child: Container(
                             width: 50,
                             height: 50,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Colors.white.withOpacity(0.1),
+                              color: Colors.white.withOpacity(0.2),
                             ),
                           ),
                         ),
                         // Glossy Bubble Bottom-Left
                         Positioned(
-                          left: -15,
-                          bottom: -15,
+                          left: -20,
+                          bottom: -20,
                           child: Container(
                             width: 60,
                             height: 60,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Colors.white.withOpacity(0.1),
+                              color: Colors.white.withOpacity(0.2),
                             ),
                           ),
                         ),
@@ -223,21 +228,22 @@ class DesignStyleScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionTitle(String title, IconData icon, List<Color> colors) {
+  Widget _buildSectionTitle(String title, Widget icon, List<Color> colors) {
     return Row(
       children: [
         Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: colors,
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: colors,
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(15),
             ),
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: Icon(icon, color: Colors.white, size: 22),
-        ),
+            child: icon
+            // Icon(icon, color: Colors.white, size: 22),
+            ),
         const SizedBox(width: 12),
         Text(
           title,

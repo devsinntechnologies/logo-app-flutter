@@ -181,8 +181,8 @@ class _LogoDetailDialogState extends State<LogoDetailDialog> {
 
   Future<void> _shareLogo() async {
     try {
-      final boundary =
-          _previewKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      final boundary = _previewKey.currentContext!.findRenderObject()
+          as RenderRepaintBoundary;
       final image = await boundary.toImage(pixelRatio: 3.0);
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       final pngBytes = byteData!.buffer.asUint8List();
@@ -298,8 +298,6 @@ class _LogoDetailDialogState extends State<LogoDetailDialog> {
                               fontSize: 20,
                             ),
                           ),
-                      
-                      
                         ],
                       ),
                     );
@@ -407,7 +405,7 @@ class _LogoActionTile extends StatelessWidget {
           gradient: LinearGradient(colors: colors),
           // color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey.withOpacity(0.1)),
+          border: Border.all(color: Colors.grey.withOpacity(0.5)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.02),

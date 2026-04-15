@@ -24,34 +24,126 @@ class GalleryProvider extends ChangeNotifier {
 
   final Map<String, List<Map<String, dynamic>>> templateData = {
     'Free': [
-      {'name': 'Color Palette', 'icon': Iconsax.color_swatch, 'color': Colors.orange, 'isAd': false},
-      {'name': 'Briefcase Logo', 'icon': Iconsax.briefcase, 'color': Colors.brown, 'isAd': false},
-      {'name': 'ID Card Design', 'icon': Iconsax.personalcard, 'color': Colors.blue, 'isAd': false},
+      {
+        'name': 'Color Palette',
+        'image': 'assets/gallery_images/Text (5).png',
+        'isAd': false
+      },
+      {
+        'name': 'Briefcase Logo',
+        'image': 'assets/gallery_images/💼.png',
+        'isAd': false
+      },
+      {
+        'name': 'Rocket Logo',
+        'image': 'assets/gallery_images/🚀.png',
+        'isAd': false
+      },
+      {
+        'name': 'Bulb Logo',
+        'image': 'assets/gallery_images/💡.png',
+        'isAd': false
+      },
+      {
+        'name': 'Target Logo',
+        'image': 'assets/gallery_images/🎯.png',
+        'isAd': false
+      },
+      {
+        'name': 'Crown Logo',
+        'image': 'assets/gallery_images/👑.png',
+        'isAd': false
+      },
     ],
     'Thanks Giving': [
-      {'name': 'Dinner Logo', 'icon': Icons.restaurant, 'color': Colors.orange, 'isAd': false},
-      {'name': 'Autumn Leaf', 'icon': Icons.grass, 'color': Colors.orangeAccent, 'isAd': false},
-      {'name': 'Grill Master', 'icon': Icons.outdoor_grill, 'color': Colors.deepOrange, 'isAd': false},
+      {
+        'name': 'Turkey Logo',
+        'image': 'assets/gallery_images/🦃.png',
+        'isAd': false
+      },
+      {
+        'name': 'Meat Leg',
+        'image': 'assets/gallery_images/Text (4).png',
+        'isAd': false
+      },
+      {'name': 'Pie', 'image': 'assets/gallery_images/🥧.png', 'isAd': false},
+      {'name': 'Corn', 'image': 'assets/gallery_images/🌽.png', 'isAd': false},
+      {
+        'name': 'Leaves',
+        'image': 'assets/gallery_images/🍂.png',
+        'isAd': false
+      },
     ],
     'Christmas': [
-      {'name': 'Xmas Tree', 'icon': Icons.park, 'color': Colors.green, 'isAd': true},
-      {'name': 'Santa Claus', 'icon': Icons.face, 'color': Colors.red, 'isAd': false},
-      {'name': 'Gift Box', 'icon': Icons.card_giftcard, 'color': Colors.redAccent, 'isAd': false},
+      {
+        'name': 'Xmas Tree',
+        'image': 'assets/gallery_images/Text (3).png',
+        'isAd': true
+      },
+      {
+        'name': 'Santa Claus',
+        'image': 'assets/gallery_images/🎅.png',
+        'isAd': false
+      },
+      {
+        'name': 'Gift Box',
+        'image': 'assets/gallery_images/🎁.png',
+        'isAd': false
+      },
+      {
+        'name': 'Snowman',
+        'image': 'assets/gallery_images/⛄.png',
+        'isAd': false
+      },
+      {'name': 'Bell', 'image': 'assets/gallery_images/🔔.png', 'isAd': false},
+      {'name': 'Star', 'image': 'assets/gallery_images/⭐.png', 'isAd': false},
     ],
     'Business': [
-      {'name': 'Growth Chart', 'icon': Iconsax.graph, 'color': Colors.blue, 'isAd': false},
-      {'name': 'Achievement Award', 'icon': Iconsax.award, 'color': Colors.amber, 'isAd': false},
-      {'name': 'Market Status', 'icon': Iconsax.status_up, 'color': Colors.indigo, 'isAd': false},
+      {
+        'name': 'Bar Chart',
+        'image': 'assets/gallery_images/📊.png',
+        'isAd': false
+      },
+      {
+        'name': 'Achievement',
+        'image': 'assets/gallery_images/🏆.png',
+        'isAd': false
+      },
+      {
+        'name': 'Growth Chart',
+        'image': 'assets/gallery_images/📈.png',
+        'isAd': false
+      },
+      {
+        'name': 'Certificate',
+        'image': 'assets/gallery_images/Text.png',
+        'isAd': false
+      },
     ],
     'Food': [
-      {'name': 'Pizza Paradise', 'icon': Icons.local_pizza, 'color': Colors.orange, 'isAd': false},
-      {'name': 'Burger King', 'icon': Icons.lunch_dining, 'color': Colors.brown, 'isAd': false},
-      {'name': 'Pastry Chef', 'icon': Icons.bakery_dining, 'color': Colors.amber, 'isAd': false},
+      {
+        'name': 'Pizza Paradise',
+        'image': 'assets/gallery_images/🍕.png',
+        'isAd': false
+      },
+      {
+        'name': 'Burger King',
+        'image': 'assets/gallery_images/🍔.png',
+        'isAd': false
+      },
     ],
     'Nature': [
-      {'name': 'Eco Green', 'icon': Icons.eco, 'color': Colors.green, 'isAd': false},
-      {'name': 'Pink Flower', 'icon': Icons.filter_vintage, 'color': Colors.pink, 'isAd': false},
-      {'name': 'Morning Sun', 'icon': Icons.wb_sunny, 'color': Colors.orange, 'isAd': false},
+      {
+        'name': 'Eco Green',
+        'image': 'assets/gallery_images/Text (1).png',
+        'isAd': false
+      },
+      {
+        'name': 'Pink Flower',
+        'image': 'assets/gallery_images/Text (2).png',
+        'isAd': false
+      },
+      {'name': 'Wave', 'image': 'assets/gallery_images/🌊.png', 'isAd': false},
     ],
   };
 

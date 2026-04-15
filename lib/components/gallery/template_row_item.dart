@@ -41,11 +41,11 @@ class _TemplateRowItemState extends State<TemplateRowItem> {
             ..translate(0.0, isHovered ? -10.0 : 0.0)
             ..scale(isHovered ? 1.05 : 1.0),
           child: Container(
-            width: 180, // Adjusted to match mockup
-            height: 100,
+            width: 160,
+            height: 160,
             margin: const EdgeInsets.only(right: 16),
             decoration: BoxDecoration(
-              color: const Color(0xFFFAF2FF), // Pale pinkish/purple background
+              color: const Color(0xFFFDF2F8),
               borderRadius: BorderRadius.circular(25),
             ),
             child: Stack(
@@ -57,9 +57,9 @@ class _TemplateRowItemState extends State<TemplateRowItem> {
                   child: Container(
                     width: 70,
                     height: 70,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.white.withOpacity(0.6),
+                      color: Color(0x4DFCCEE8),
                     ),
                   ),
                 ),
@@ -72,11 +72,11 @@ class _TemplateRowItemState extends State<TemplateRowItem> {
                   ),
                 ),
 
-                // Ad Badge (Ignored for now)
+                // Ad Badge
                 if (widget.isAd)
                   Positioned(
                     left: 12,
-                    top: 12,
+                    bottom: 12,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10, vertical: 5),

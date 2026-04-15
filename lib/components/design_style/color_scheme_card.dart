@@ -64,8 +64,8 @@ class ColorSchemeCard extends StatelessWidget {
                               .map((color) => Container(
                                     margin: const EdgeInsets.symmetric(
                                         horizontal: 4),
-                                    width: 25,
-                                    height: 25,
+                                    width: 32,
+                                    height: 37,
                                     decoration: BoxDecoration(
                                       color: color,
                                       shape: BoxShape.circle,

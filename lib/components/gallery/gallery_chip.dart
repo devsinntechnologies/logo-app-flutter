@@ -38,7 +38,7 @@ class GalleryChip extends StatelessWidget {
             border: isSelected
                 ? null
                 : Border.all(
-                    color: Color(0xFFC32BAC).withOpacity(0.3), width: 2),
+                    color: Color(0xFFC32BAC).withOpacity(0.3), width: 1),
             boxShadow: isSelected
                 ? [
                     BoxShadow(
@@ -47,7 +47,13 @@ class GalleryChip extends StatelessWidget {
                       offset: const Offset(0, 4),
                     ),
                   ]
-                : null,
+                : [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
           ),
           child: Center(
             child: Text(
