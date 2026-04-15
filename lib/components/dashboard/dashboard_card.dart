@@ -7,6 +7,7 @@ class DashboardCard extends StatelessWidget {
   final Gradient gradient;
   final VoidCallback onTap;
   final bool isMain;
+  final List<Widget>? backgroundDecorations;
 
   const DashboardCard({
     super.key,
@@ -16,6 +17,7 @@ class DashboardCard extends StatelessWidget {
     required this.gradient,
     required this.onTap,
     this.isMain = false,
+    this.backgroundDecorations,
   });
 
   @override
@@ -57,38 +59,43 @@ class DashboardCard extends StatelessWidget {
                 ),
                 child: Stack(
                   children: [
-                    // Glossy Arc Highlight (Top Left)
-                    Positioned(
-                      left: -20,
-                      top: -20,
-                      child: Container(
-                        width: 120,
-                        height: 120,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white.withOpacity(0.12),
-                        ),
-                      ),
-                    ),
+                    if (backgroundDecorations != null)
+                      ...backgroundDecorations!,
 
-                    // Decorative Bubble (Bottom Right)
-                    Positioned(
-                      right: -10,
-                      bottom: -10,
-                      child: Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white.withOpacity(0.08),
+                    // Fallback generic decorations
+                    if (backgroundDecorations == null) ...[
+                      // Glossy Arc Highlight (Top Left)
+                      Positioned(
+                        left: -20,
+                        top: -20,
+                        child: Container(
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withOpacity(0.12),
+                          ),
                         ),
                       ),
-                    ),
+                      // Decorative Bubble (Bottom Right)
+                      Positioned(
+                        right: -10,
+                        bottom: -10,
+                        child: Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withOpacity(0.08),
+                          ),
+                        ),
+                      ),
+                    ],
 
                     // Content Layer
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 22, vertical: 26),
+                          horizontal: 22, vertical: 24),
                       child:
                           isMain ? _buildMainLayout() : _buildSecondaryLayout(),
                     ),
@@ -106,17 +113,17 @@ class DashboardCard extends StatelessWidget {
     return Row(
       children: [
         Container(
-          padding: const EdgeInsets.all(15),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(20),
+            color: Colors.white.withOpacity(0.25),
+            borderRadius: BorderRadius.circular(18),
           ),
           child: IconTheme(
-            data: const IconThemeData(color: Colors.white, size: 36),
+            data: const IconThemeData(color: Colors.white, size: 34),
             child: icon,
           ),
         ),
-        const SizedBox(width: 20),
+        const SizedBox(width: 18),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -127,24 +134,25 @@ class DashboardCard extends StatelessWidget {
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 16,
-                  fontWeight: FontWeight.w400,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.3,
                 ),
               ),
-              SizedBox(height: 4),
+              const SizedBox(height: 4),
               Text(
                 subtitle,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.8),
+                  color: Colors.white.withOpacity(0.9),
                   fontWeight: FontWeight.w400,
-                  fontSize: 12,
+                  fontSize: 13,
                 ),
               ),
             ],
           ),
         ),
         const Icon(Icons.arrow_forward_ios_rounded,
-            color: Colors.white, size: 24),
+            color: Colors.white, size: 22),
       ],
     );
   }
@@ -154,7 +162,7 @@ class DashboardCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         IconTheme(
-          data: const IconThemeData(color: Colors.white, size: 36),
+          data: const IconThemeData(color: Colors.white, size: 38),
           child: icon,
         ),
         const Spacer(),
@@ -162,21 +170,23 @@ class DashboardCard extends StatelessWidget {
           title,
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 14,
+            fontSize: 15,
             fontWeight: FontWeight.w600,
+            letterSpacing: 0.2,
           ),
         ),
-        SizedBox(height: 4),
+        const SizedBox(height: 4),
         Text(
           subtitle,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.9),
             fontSize: 12,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w400,
           ),
         ),
-        const SizedBox(height: 7),
-        Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 16),
+        const SizedBox(height: 12),
+        const Icon(Icons.arrow_forward_ios_rounded,
+            color: Colors.white, size: 16),
       ],
     );
   }

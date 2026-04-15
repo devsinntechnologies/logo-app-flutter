@@ -168,7 +168,7 @@ class _LogoGenerationScreenState extends State<LogoGenerationScreen>
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                             color: Color(0xFFF06292),
-                            fontSize: 14,
+                            fontSize: 18,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -215,7 +215,7 @@ class _LogoGenerationScreenState extends State<LogoGenerationScreen>
                         '${(provider.progress * 100).toInt()}%',
                         style: const TextStyle(
                           color: Color(0xFF4A4A6A),
-                          fontSize: 14,
+                          fontSize: 18,
                           fontWeight: FontWeight.w500,
                         ),
                       ),

@@ -97,7 +97,7 @@ class CategorySelectionScreen extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Color(0xffF3F4F6),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -107,7 +107,7 @@ class CategorySelectionScreen extends StatelessWidget {
             onTap: () => Navigator.pop(context),
             child: Container(
               decoration: BoxDecoration(
-                color: const Color(0xFFF4F5F9),
+                color: const Color(0xFFF3F4F6),
                 // shape: BoxShape.circle,
                 borderRadius: BorderRadius.circular(10),
               ),
@@ -124,6 +124,9 @@ class CategorySelectionScreen extends StatelessWidget {
             fontWeight: FontWeight.w400,
           ),
         ),
+
+        // con.st SizedBox(height: 12),
+
         centerTitle: true,
         bottom: PreferredSize(
             preferredSize: const Size.fromHeight(1), child: DividerContainer()
@@ -146,7 +149,7 @@ class CategorySelectionScreen extends StatelessWidget {
               'Choose the category that best fits your business',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.black,
+                color: Color(0xff101828),
                 fontSize: 16,
                 fontWeight: FontWeight.w400,
               ),

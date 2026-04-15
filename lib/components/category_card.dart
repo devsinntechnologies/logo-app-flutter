@@ -58,8 +58,8 @@ class CategoryCard extends StatelessWidget {
                 children: [
                   // Glossy Bubble Top-Right
                   Positioned(
-                    right: -10,
-                    top: -10,
+                    right: -30,
+                    top: -25,
                     child: AnimatedOpacity(
                       duration: const Duration(milliseconds: 200),
                       opacity: hovered ? 0.3 : 0.15,
@@ -75,22 +75,22 @@ class CategoryCard extends StatelessWidget {
                   ),
 
                   // Glossy Bubble Bottom-Left
-                  Positioned(
-                    left: -5,
-                    bottom: -15,
-                    child: AnimatedOpacity(
-                      duration: const Duration(milliseconds: 200),
-                      opacity: hovered ? 0.2 : 0.1,
-                      child: Container(
-                        width: 50,
-                        height: 50,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
+                  // Positioned(
+                  //   left: -5,
+                  //   bottom: -15,
+                  //   child: AnimatedOpacity(
+                  //     duration: const Duration(milliseconds: 200),
+                  //     opacity: hovered ? 0.2 : 0.1,
+                  //     child: Container(
+                  //       width: 50,
+                  //       height: 50,
+                  //       decoration: const BoxDecoration(
+                  //         shape: BoxShape.circle,
+                  //         color: Colors.white,
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
 
                   // Content
                   Center(

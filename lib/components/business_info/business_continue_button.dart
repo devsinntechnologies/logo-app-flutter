@@ -68,8 +68,8 @@ class BusinessContinueButton extends StatelessWidget {
                   'Continue',
                   style: TextStyle(
                     color: isEnabled ? Colors.white : const Color(0xFF9CA3AF),
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
               ),

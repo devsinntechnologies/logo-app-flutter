@@ -62,7 +62,7 @@ class FontStyleCard extends StatelessWidget {
                           'Aa',
                           textAlign: TextAlign.center,
                           style: textStyle.copyWith(
-                            fontSize: 34,
+                            fontSize: 36,
                             color: const Color(0xFF1F1F39),
                           ),
                         ),
@@ -86,9 +86,8 @@ class FontStyleCard extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.all(4),
                         decoration: const BoxDecoration(
-                          gradient: LinearGradient(colors: [
-                           Color(0xFFFF6900),Color(0xFFF6339A) 
-                          ]),
+                          gradient: LinearGradient(
+                              colors: [Color(0xFFFF6900), Color(0xFFF6339A)]),
                           // color: Color(0xFFFF4081),
                           shape: BoxShape.circle,
                         ),

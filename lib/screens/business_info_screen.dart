@@ -62,7 +62,7 @@ class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
         title: const Text(
           'Business Info',
           style: TextStyle(
-            color: Colors.black,
+            color: Color(0xff364153),
             fontSize: 16,
             fontWeight: FontWeight.w400,
           ),

@@ -60,7 +60,7 @@ class DesignStyleScreen extends StatelessWidget {
                       const Text(
                         'Customize your logo style',
                         style: TextStyle(
-                          color: Color(0xFF4A4A6A),
+                          color: Color(0xFF364153),
                           fontSize: 16,
                           fontWeight: FontWeight.w400,
                         ),
@@ -190,8 +190,8 @@ class DesignStyleScreen extends StatelessWidget {
                             'Generate Logos',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
@@ -226,7 +226,7 @@ class DesignStyleScreen extends StatelessWidget {
         Text(
           title,
           style: const TextStyle(
-            color: Color(0xFF4A4A6A),
+            color: Color(0xFF1E2939),
             fontSize: 16,
             fontWeight: FontWeight.w400,
           ),
