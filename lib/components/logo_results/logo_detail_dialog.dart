@@ -277,26 +277,31 @@ class _LogoDetailDialogState extends State<LogoDetailDialog> {
                 ),
                 child: Consumer2<BusinessInfoProvider, LogoDesignProvider>(
                   builder: (context, info, design, child) {
-                    return Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SvgPicture.string(
-                          widget.svg,
-                          height: 80,
-                          width: 80,
-                        ),
-                        const SizedBox(height: 15),
-                        Text(
-                          info.businessName,
-                          textAlign: TextAlign.center,
-                          style: _getFontStyle(
-                            context,
-                            design.selectedFontIndex,
-                            Colors.white,
-                            fontSize: 20,
+                    return Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SvgPicture.string(
+                            widget.svg,
+                            height: 80,
+                            width: 80,
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 15),
+                          Text(
+                            info.businessName,
+                            textAlign: TextAlign.center,
+                            style: _getFontStyle(
+                              context,
+                              design.selectedFontIndex,
+                              Colors.white,
+                              fontSize: 20,
+                            ),
+                          ),
+                      
+                      
+                        ],
+                      ),
                     );
                   },
                 ),

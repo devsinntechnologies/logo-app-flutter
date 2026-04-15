@@ -162,14 +162,25 @@ class _LogoGenerationScreenState extends State<LogoGenerationScreen>
                       // Status Text
                       AnimatedSwitcher(
                         duration: const Duration(milliseconds: 500),
-                        child: Text(
-                          step['title'],
+                        child: ShaderMask(
                           key: ValueKey(step['title']),
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Color(0xFFF06292),
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
+                          shaderCallback: (bounds) => const LinearGradient(
+                            colors: [
+                              Color(0xFFFE8035),
+                              Color(0xFFF5428F),
+                              Color(0xFFAA2BE9),
+                            ],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                          ).createShader(bounds),
+                          child: Text(
+                            step['title'],
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ),
                       ),

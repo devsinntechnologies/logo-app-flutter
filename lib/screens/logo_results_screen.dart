@@ -19,8 +19,7 @@ class LogoResultsScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
-        leading: 
-        Padding(
+        leading: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
           child: GestureDetector(
             onTap: () => Navigator.pop(context),
@@ -35,7 +34,6 @@ class LogoResultsScreen extends StatelessWidget {
             ),
           ),
         ),
-
         title: const Text(
           'Your Logos',
           style: TextStyle(
@@ -123,15 +121,40 @@ class LogoResultsScreen extends StatelessWidget {
                 const SizedBox(height: 5),
                 Consumer<BusinessInfoProvider>(
                   builder: (context, info, child) {
-                    return Text(
-                      'We generated ${provider.generatedLogos.length} unique logos for ${info.businessName}',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Color(0xFF4A4A6A),
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    );
+                    return Wrap(
+                        // direction: Alignment(x, y),
+                        alignment: WrapAlignment.center,
+                        children: [
+                          Text(
+                            'We generated ${provider.generatedLogos.length} unique logos for ',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Color(0xFF4A4A6A),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                          ShaderMask(
+                            shaderCallback: (bounds) => const LinearGradient(
+                              colors: [
+                                Color(0xFFFE8035),
+                                Color(0xFFF5428F),
+                                Color(0xFFAA2BE9),
+                              ],
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                            ).createShader(bounds),
+                            child: Text(
+                              '${info.businessName}',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ),
+                        ]);
                   },
                 ),
                 const SizedBox(height: 35),

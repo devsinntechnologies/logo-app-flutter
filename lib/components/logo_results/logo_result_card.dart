@@ -125,30 +125,35 @@ class _LogoResultCardState extends State<LogoResultCard> {
                           ),
                           borderRadius: BorderRadius.circular(15),
                         ),
-                        child: Consumer2<BusinessInfoProvider, LogoDesignProvider>(
+                        child:
+                            Consumer2<BusinessInfoProvider, LogoDesignProvider>(
                           builder: (context, info, design, child) {
-                            return Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                SvgPicture.string(
-                                  widget.svg,
-                                  height: 40,
-                                  width: 40,
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  info.businessName,
-                                  textAlign: TextAlign.center,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: _getFontStyle(
-                                    context,
-                                    design.selectedFontIndex,
-                                    Colors.white,
-                                    fontSize: 12,
+                            return Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 15),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  SvgPicture.string(
+                                    widget.svg,
+                                    height: 40,
+                                    width: 40,
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    info.businessName,
+                                    textAlign: TextAlign.center,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: _getFontStyle(
+                                      context,
+                                      design.selectedFontIndex,
+                                      Colors.white,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             );
                           },
                         ),
