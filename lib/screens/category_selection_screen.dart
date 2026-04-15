@@ -99,17 +99,17 @@ class CategorySelectionScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
           child: GestureDetector(
             onTap: () => Navigator.pop(context),
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(10),
+                color: const Color(0xFFF4F5F9),
                 // shape: BoxShape.circle,
+                borderRadius: BorderRadius.circular(10),
               ),
-              child:
-                  const Icon(Icons.arrow_back, color: Colors.black, size: 20),
+              child: const Icon(Icons.arrow_back,
+                  color: Color(0xFF1F1F39), size: 25),
             ),
           ),
         ),
@@ -118,7 +118,7 @@ class CategorySelectionScreen extends StatelessWidget {
           style: TextStyle(
             color: Colors.black,
             fontSize: 16,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w400,
           ),
         ),
         centerTitle: true,
@@ -144,8 +144,8 @@ class CategorySelectionScreen extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.black,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
+                fontSize: 16,
+                fontWeight: FontWeight.w400,
               ),
             ),
             const SizedBox(height: 24),

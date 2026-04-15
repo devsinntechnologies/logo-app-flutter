@@ -15,11 +15,11 @@ class FeatureListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 10),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               gradient: iconBgColor,
               borderRadius: BorderRadius.circular(16),
@@ -29,13 +29,13 @@ class FeatureListItem extends StatelessWidget {
               child: icon,
             ),
           ),
-          const SizedBox(width: 18),
+          const SizedBox(width: 10),
           Expanded(
             child: Text(
               text,
               style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
+                fontSize: 16,
+                fontWeight: FontWeight.w400,
                 color: Colors.black87,
               ),
             ),

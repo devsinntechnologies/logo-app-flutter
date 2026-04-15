@@ -19,17 +19,17 @@ class DesignStyleScreen extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         leading: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
           child: GestureDetector(
             onTap: () => Navigator.pop(context),
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.1),
+                color: const Color(0xFFF4F5F9),
                 // shape: BoxShape.circle,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child:
-                  const Icon(Icons.arrow_back, color: Colors.black, size: 20),
+              child: const Icon(Icons.arrow_back,
+                  color: Color(0xFF1F1F39), size: 25),
             ),
           ),
         ),
@@ -68,8 +68,10 @@ class DesignStyleScreen extends StatelessWidget {
                       const SizedBox(height: 30),
 
                       // Font Style Section
-                      _buildSectionTitle('Font Style',
-                          Icons.text_fields_rounded, const Color(0xFFFF5252)),
+                      _buildSectionTitle(
+                          'Font Style',
+                          Icons.text_fields_rounded,
+                          [const Color(0xFFFF8904), const Color(0xFFF6339A)]),
                       const SizedBox(height: 20),
                       GridView.builder(
                         shrinkWrap: true,
@@ -96,8 +98,10 @@ class DesignStyleScreen extends StatelessWidget {
                       const SizedBox(height: 40),
 
                       // Color Scheme Section
-                      _buildSectionTitle('Color Scheme',
-                          Icons.color_lens_rounded, const Color(0xFF7C4DFF)),
+                      _buildSectionTitle(
+                          'Color Scheme',
+                          Icons.color_lens_rounded,
+                          [const Color(0xFFE12AFB), const Color(0xFF9810FA)]),
                       const SizedBox(height: 20),
                       GridView.builder(
                         shrinkWrap: true,
@@ -203,13 +207,17 @@ class DesignStyleScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionTitle(String title, IconData icon, Color color) {
+  Widget _buildSectionTitle(String title, IconData icon, List<Color> colors) {
     return Row(
       children: [
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.8),
+            gradient: LinearGradient(
+              colors: colors,
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
             borderRadius: BorderRadius.circular(15),
           ),
           child: Icon(icon, color: Colors.white, size: 22),

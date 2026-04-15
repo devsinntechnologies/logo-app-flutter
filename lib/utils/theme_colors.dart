@@ -12,8 +12,10 @@ class ThemeColors {
 
   static const LinearGradient textGradient = LinearGradient(
     colors: [
-      Color(0xFFCB3E74), // Start color
-      Color(0xFFA744A2), // End color
+      Color(0xFFFF6900), // Start color
+      Color(0xFFF6339A),
+      Color(0xFF9810FA), // End color
+      // End color
     ],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,

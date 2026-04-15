@@ -13,17 +13,25 @@ class LogoGenerationProvider extends ChangeNotifier {
     {
       'title': 'Analyzing your preferences...',
       'icon': Icons.auto_fix_high_outlined,
-      'colors': [const Color(0xFFFB6859), const Color(0xFFC834C6)],
+      'colors': [
+        const Color(0xFFFE8035),
+        const Color(0xFFF54092),
+        Color(0xFFAA2BE9)
+      ],
     },
     {
       'title': 'Selecting color palettes...',
       'icon': Icons.palette_outlined,
-      'colors': [const Color(0xFFFC2E75), const Color(0xFFEA35CE)],
+      'colors': [
+        const Color(0xFFFF2566),
+        const Color(0xFFF54092),
+        Color(0xFFE530E5)
+      ],
     },
     {
       'title': 'Generating logo concepts...',
       'icon': Icons.auto_awesome_outlined,
-      'colors': [const Color(0xFF01C774), const Color(0xFF01CDCD)],
+      'colors': [const Color(0xFF01C65E), const Color(0xFF00CEE5),],
     },
   ];
 

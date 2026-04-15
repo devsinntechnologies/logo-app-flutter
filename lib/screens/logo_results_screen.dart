@@ -19,7 +19,8 @@ class LogoResultsScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
-        leading: Padding(
+        leading: 
+        Padding(
           padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
           child: GestureDetector(
             onTap: () => Navigator.pop(context),
@@ -34,6 +35,7 @@ class LogoResultsScreen extends StatelessWidget {
             ),
           ),
         ),
+       
         title: const Text(
           'Your Logos',
           style: TextStyle(

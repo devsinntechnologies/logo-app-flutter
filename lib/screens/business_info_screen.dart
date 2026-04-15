@@ -45,17 +45,17 @@ class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
         elevation: 0,
         centerTitle: true,
         leading: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
           child: GestureDetector(
             onTap: () => Navigator.pop(context),
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(10),
+                color: const Color(0xFFF4F5F9),
                 // shape: BoxShape.circle,
+                borderRadius: BorderRadius.circular(10),
               ),
-              child:
-                  const Icon(Icons.arrow_back, color: Colors.black, size: 20),
+              child: const Icon(Icons.arrow_back,
+                  color: Color(0xFF1F1F39), size: 25),
             ),
           ),
         ),
@@ -64,7 +64,7 @@ class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
           style: TextStyle(
             color: Colors.black,
             fontSize: 16,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w400,
           ),
         ),
         bottom: PreferredSize(
@@ -94,8 +94,8 @@ class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
                   'Tell us about your business',
                   style: TextStyle(
                     color: Color(0xFF171717),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
                 const SizedBox(height: 30),

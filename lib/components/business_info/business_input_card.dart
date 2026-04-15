@@ -55,7 +55,7 @@ class BusinessInputCard extends StatelessWidget {
                 style: const TextStyle(
                     color: Color(0xFF4A4A6A),
                     fontSize: 16,
-                    fontWeight: FontWeight.w500),
+                    fontWeight: FontWeight.w400),
               ),
             ],
           ),
@@ -72,14 +72,17 @@ class BusinessInputCard extends StatelessWidget {
                 maxLength: maxLength,
                 decoration: InputDecoration(
                   hintText: hint,
-                  hintStyle: TextStyle(color: Colors.grey.withOpacity(0.5)),
+                  hintStyle: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400),
                   counterText: "", // Standard counter removed
                   filled: true,
                   fillColor: Colors.white,
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
                     // borderSide: BorderSide.none,
-                    borderSide: BorderSide(color: Color(0xffFA83B2)),
+                    borderSide: BorderSide(color: Color(0xffFA83B2), width: 1),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
@@ -104,7 +107,7 @@ class BusinessInputCard extends StatelessWidget {
                   style: const TextStyle(
                       color: Colors.grey,
                       fontSize: 14,
-                      fontWeight: FontWeight.w500),
+                      fontWeight: FontWeight.w400),
                 ),
               ),
             ],
