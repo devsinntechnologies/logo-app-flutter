@@ -61,115 +61,215 @@ class _LogoGenerationScreenState extends State<LogoGenerationScreen>
         builder: (context, provider, child) {
           final step = provider.steps[provider.currentStepIndex];
 
-          return Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 40),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Diamond Rotating Container
-                AnimatedBuilder(
+          return Stack(
+            children: [
+              // Bubbles Layer
+              Positioned.fill(
+                child: AnimatedBuilder(
                   animation: _rotationController,
                   builder: (context, child) {
-                    return Transform.rotate(
-                      angle: _rotationController.value * 2 * math.pi,
-                      child: Container(
-                        width: 180,
-                        height: 180,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: step['colors'],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(45),
-                          boxShadow: [
-                            BoxShadow(
-                              color: (step['colors'] as List<Color>)
-                                  .first
-                                  .withOpacity(0.4),
-                              blurRadius: 30,
-                              offset: const Offset(0, 15),
-                            ),
-                          ],
-                        ),
-                        child: Center(
-                          // Use a counter-rotation to keep the icon upright
-                          child: Transform.rotate(
-                            angle: -_rotationController.value * 2 * math.pi,
-                            child: Icon(
-                              step['icon'],
-                              color: Colors.white,
-                              size: 70,
-                            ),
+                    final h = MediaQuery.of(context).size.height;
+                    final w = MediaQuery.of(context).size.width;
+
+                    Widget buildBubble(double xOffset, double size, Color c,
+                        double speed, double delay) {
+                      double t =
+                          (_rotationController.value * speed + delay) % 1.0;
+                      double y = h - (t * h * 0.8);
+                      double opacity = math.sin(t * math.pi);
+                      return Positioned(
+                        left: (w / 2) + xOffset - (size / 2),
+                        top: y,
+                        child: Opacity(
+                          opacity: opacity.clamp(0.0, 1.0),
+                          child: Container(
+                            width: size,
+                            height: size,
+                            decoration:
+                                BoxDecoration(shape: BoxShape.circle, color: c),
                           ),
                         ),
-                      ),
+                      );
+                    }
+
+                    return Stack(
+                      children: [
+                        buildBubble(-50, 10,
+                            Colors.purpleAccent.withOpacity(0.5), 0.7, 0.1),
+                        buildBubble(40, 12, Colors.pinkAccent.withOpacity(0.6),
+                            1.0, 0.4),
+                        buildBubble(10, 8, Colors.orangeAccent.withOpacity(0.6),
+                            1.2, 0.7),
+                        buildBubble(-30, 14,
+                            Colors.deepPurpleAccent.withOpacity(0.5), 0.8, 0.2),
+                        buildBubble(
+                            60, 9, Colors.pink.withOpacity(0.5), 1.1, 0.6),
+                        buildBubble(-10, 11,
+                            Colors.amberAccent.withOpacity(0.5), 0.9, 0.9),
+                      ],
                     );
                   },
                 ),
+              ),
 
-                const SizedBox(height: 100),
-
-                // Status Text
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 500),
-                  child: Text(
-                    step['title'],
-                    key: ValueKey(step['title']),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Color(0xFFF06292),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 30),
-
-                // Progress Bar Container
-                Stack(
-                  children: [
-                    // Background track
-                    Container(
-                      width: double.infinity,
-                      height: 10,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                    ),
-                    // Animated Fill
-                    FractionallySizedBox(
-                      widthFactor: provider.progress,
-                      child: Container(
-                        height: 10,
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                              // colors: [Colors.black, Colors.white]
-                              colors: [Color(0xFFFF5252), Color(0xFF7C4DFF)],
+              Positioned.fill(
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 40),
+                  child: Column(
+                    children: [
+                      const Spacer(),
+                      // Diamond Rotating Container
+                      AnimatedBuilder(
+                        animation: _rotationController,
+                        builder: (context, child) {
+                          return Transform.rotate(
+                            angle: _rotationController.value * 2 * math.pi,
+                            child: Container(
+                              width: 180,
+                              height: 180,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: step['colors'],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(45),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: (step['colors'] as List<Color>)
+                                        .first
+                                        .withOpacity(0.4),
+                                    blurRadius: 30,
+                                    offset: const Offset(0, 15),
+                                  ),
+                                ],
                               ),
-                          borderRadius: BorderRadius.circular(5),
+                              child: Center(
+                                child: Icon(
+                                  step['icon'],
+                                  color: Colors.white,
+                                  size: 70,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+
+                      const SizedBox(height: 50),
+
+                      // Status Text
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 500),
+                        child: Text(
+                          step['title'],
+                          key: ValueKey(step['title']),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Color(0xFFF06292),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
 
-                const SizedBox(height: 15),
+                      const SizedBox(height: 30),
 
-                // Percentage Text
-                Text(
-                  '${(provider.progress * 100).toInt()}%',
-                  style: const TextStyle(
-                    color: Color(0xFFF06292),
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
+                      // Progress Bar Container
+                      Stack(
+                        children: [
+                          // Background track
+                          Container(
+                            width: double.infinity,
+                            height: 10,
+                            decoration: BoxDecoration(
+                              color: Colors.grey.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                          ),
+                          // Animated Fill
+                          FractionallySizedBox(
+                            widthFactor: provider.progress,
+                            child: Container(
+                              height: 10,
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  // colors: [Colors.black, Colors.white]
+                                  colors: [
+                                    Color(0xFFFF5252),
+                                    Color(0xFF7C4DFF)
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 15),
+
+                      // Percentage Text
+                      Text(
+                        '${(provider.progress * 100).toInt()}%',
+                        style: const TextStyle(
+                          color: Color(0xFF4A4A6A),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+
+                      const Spacer(),
+
+                      // Bottom Indicator (3 pill/dots)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 25,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFFFF5252), Color(0xFF7C4DFF)],
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            width: 25,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFFFF5252), Color(0xFF7C4DFF)],
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                      color: Colors.black12,
+                                      blurRadius: 4,
+                                      offset: Offset(0, 2))
+                                ]),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 50),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              )
+            ],
           );
         },
       ),

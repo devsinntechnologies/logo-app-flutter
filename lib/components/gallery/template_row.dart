@@ -44,7 +44,7 @@ class TemplateRow extends StatelessWidget {
                 title,
                 style: const TextStyle(
                   fontSize: 24,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w700,
                   color: Color(0xFF1A1A1A),
                 ),
               ),

@@ -41,8 +41,8 @@ class _TemplateRowItemState extends State<TemplateRowItem> {
             ..translate(0.0, isHovered ? -10.0 : 0.0)
             ..scale(isHovered ? 1.05 : 1.0),
           child: Container(
-            width: 140, // Adjusted to match mockup
-            height: 140, 
+            width: 180, // Adjusted to match mockup
+            height: 100,
             margin: const EdgeInsets.only(right: 16),
             decoration: BoxDecoration(
               color: const Color(0xFFFAF2FF), // Pale pinkish/purple background
@@ -78,12 +78,17 @@ class _TemplateRowItemState extends State<TemplateRowItem> {
                     left: 12,
                     top: 12,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 5),
                       decoration: BoxDecoration(
                         color: const Color(0xFF00A3FF),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Text('Ad', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                      child: const Text('Ad',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold)),
                     ),
                   ),
               ],

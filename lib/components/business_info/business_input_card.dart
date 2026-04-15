@@ -5,6 +5,8 @@ class BusinessInputCard extends StatelessWidget {
   final String hint;
   final IconData icon;
   final Color iconBgColor;
+  final Color borderBgColor;
+
   final TextEditingController controller;
   final int maxLength;
   final Function(String) onChanged;
@@ -15,6 +17,7 @@ class BusinessInputCard extends StatelessWidget {
     required this.hint,
     required this.icon,
     required this.iconBgColor,
+    required this.borderBgColor,
     required this.controller,
     required this.maxLength,
     required this.onChanged,
@@ -30,7 +33,7 @@ class BusinessInputCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withOpacity(0.1),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -73,7 +76,7 @@ class BusinessInputCard extends StatelessWidget {
                 decoration: InputDecoration(
                   hintText: hint,
                   hintStyle: TextStyle(
-                      color: Colors.grey,
+                      color: Colors.grey.shade500,
                       fontSize: 16,
                       fontWeight: FontWeight.w400),
                   counterText: "", // Standard counter removed
@@ -82,7 +85,7 @@ class BusinessInputCard extends StatelessWidget {
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
                     // borderSide: BorderSide.none,
-                    borderSide: BorderSide(color: Color(0xffFA83B2), width: 1),
+                    borderSide: BorderSide(color: borderBgColor, width: 2),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
@@ -104,8 +107,8 @@ class BusinessInputCard extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 5, top: 10),
                 child: Text(
                   '${controller.text.length}/$maxLength characters',
-                  style: const TextStyle(
-                      color: Colors.grey,
+                  style: TextStyle(
+                      color: Colors.grey.shade700,
                       fontSize: 14,
                       fontWeight: FontWeight.w400),
                 ),

@@ -102,6 +102,7 @@ class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
 
                 // Business Name Card
                 BusinessInputCard(
+                  borderBgColor: Color(0xffFF8904),
                   title: 'Business Name *',
                   hint: 'Enter your business name',
                   icon: Icons.business,
@@ -115,6 +116,7 @@ class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
 
                 // Slogan Card
                 BusinessInputCard(
+                  borderBgColor: Color(0xffE12AFB),
                   title: 'Slogan (Optional)',
                   hint: 'Your business tagline',
                   icon: Icons.chat_bubble_outline_rounded,
@@ -126,27 +128,53 @@ class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
 
                 const SizedBox(height: 30),
 
+                // If preview is NOT shown, show Continue button upper
+                if (!provider.showPreview)
+                  BusinessContinueButton(
+                    isEnabled: provider.canContinue,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const DesignStyleScreen(),
+                        ),
+                      );
+                    },
+                  ),
+
+                if (!provider.showPreview) const SizedBox(height: 30),
+
                 // Preview Card
-                BusinessPreviewCard(
-                  showPreview: provider.showPreview,
-                  businessName: provider.businessName,
-                  slogan: provider.slogan,
+                // AnimatedSize could be added here if you want the space to shrink,
+                // but since the original request is just swapping positions, we do this:
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 300),
+                  child: provider.showPreview
+                      ? BusinessPreviewCard(
+                          showPreview: provider.showPreview,
+                          businessName: provider.businessName,
+                          slogan: provider.slogan,
+                        )
+                      : const SizedBox
+                          .shrink(), // completely hide the space so Continue button sits exactly below
                 ),
 
-                // const SizedBox(height: 30),
+                if (provider.showPreview)
+                  // const SizedBox(height: 30),
 
-                // Continue Button
-                BusinessContinueButton(
-                  isEnabled: provider.canContinue,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const DesignStyleScreen(),
-                      ),
-                    );
-                  },
-                ),
+                  // If preview IS shown, show Continue button down here
+                  if (provider.showPreview)
+                    BusinessContinueButton(
+                      isEnabled: provider.canContinue,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const DesignStyleScreen(),
+                          ),
+                        );
+                      },
+                    ),
 
                 const SizedBox(height: 40),
               ],

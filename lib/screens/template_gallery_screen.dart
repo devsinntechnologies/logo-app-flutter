@@ -93,13 +93,14 @@ class _TemplateGalleryScreenState extends State<TemplateGalleryScreen> {
                   style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w400,
-                      color: Colors.black87),
+                      color: Color(0xff101828)),
                 ),
                 Text(
                   '2,500+ premium templates',
-                  style: TextStyle(fontSize: 12, color: Colors.grey,
-                      fontWeight: FontWeight.w400,
-                  
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Color(0xff6A7282),
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
               ],
@@ -113,6 +114,8 @@ class _TemplateGalleryScreenState extends State<TemplateGalleryScreen> {
   Widget _buildSearchAndFilters(
       BuildContext context, GalleryProvider provider) {
     return Container(
+      decoration: BoxDecoration(
+          border: Border(bottom: BorderSide(color: Colors.white))),
       padding: const EdgeInsets.only(left: 16, bottom: 12, right: 16),
       child: Column(
         children: [
@@ -135,7 +138,9 @@ class _TemplateGalleryScreenState extends State<TemplateGalleryScreen> {
                     shape: BoxShape.circle,
                     border: provider.isSearchExpanded
                         ? null
-                        : Border.all(color: Colors.black.withOpacity(0.08)),
+                        : Border.all(
+                            color: Color(0xFFC32BAC).withOpacity(0.3),
+                            width: 2),
                     boxShadow: provider.isSearchExpanded
                         ? [
                             BoxShadow(
@@ -146,9 +151,7 @@ class _TemplateGalleryScreenState extends State<TemplateGalleryScreen> {
                         : null,
                   ),
                   child: Icon(
-                    provider.isSearchExpanded
-                        ? Icons.search
-                        : Iconsax.search_normal,
+                    provider.isSearchExpanded ? Icons.search : Icons.search,
                     size: 22,
                     color:
                         provider.isSearchExpanded ? Colors.white : Colors.grey,
@@ -249,7 +252,7 @@ class _TemplateGalleryScreenState extends State<TemplateGalleryScreen> {
   Widget _buildPremiumBanner() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 25),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [Color(0xFFFF6516), Color(0xFFD73ABA), Color(0xFFA628EB)],
@@ -270,12 +273,12 @@ class _TemplateGalleryScreenState extends State<TemplateGalleryScreen> {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(12)),
                 child: const Icon(Icons.workspace_premium,
-                    color: Colors.yellow, size: 24),
+                    color: Colors.yellow, size: 30),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -286,15 +289,19 @@ class _TemplateGalleryScreenState extends State<TemplateGalleryScreen> {
                         style: TextStyle(
                             color: Colors.white,
                             fontSize: 16,
-                            fontWeight: FontWeight.bold)),
-                    Text('Unlock full access today!',
-                        style: TextStyle(color: Colors.white, fontSize: 12)),
+                            fontWeight: FontWeight.w400)),
+                    const SizedBox(height: 7),
+                    Text('Unlock 500+ exclusive designs',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400)),
                   ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 25),
           Container(
             width: double.infinity,
             alignment: Alignment.center,
@@ -304,8 +311,8 @@ class _TemplateGalleryScreenState extends State<TemplateGalleryScreen> {
             child: const Text('UPGRADE NOW',
                 style: TextStyle(
                     color: Color(0xFFD73ABA),
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold)),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700)),
           ),
         ],
       ),
