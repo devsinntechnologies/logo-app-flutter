@@ -35,7 +35,7 @@ class LogoResultsScreen extends StatelessWidget {
             ),
           ),
         ),
-       
+
         title: const Text(
           'Your Logos',
           style: TextStyle(
