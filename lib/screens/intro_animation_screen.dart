@@ -105,42 +105,45 @@ class _IntroAnimationScreenState extends State<IntroAnimationScreen>
                     ),
                     child: Stack(
                       children: [
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Spacer(flex: 2),
-                            // Sliding Bulb Icon with Bounce (FROM LEFT)
-                            SlideTransition(
-                              position: _slideAnimation,
-                              child: FadeTransition(
-                                opacity: _opacityAnimation,
-                                child: Image.asset(
-                                  'assets/logo_images/bulb.png',
-                                  width: 300,
-                                  height: 300,
+                        Padding(
+                          padding: const EdgeInsets.only(top: 300),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Spacer(flex: 2),
+                              // Sliding Bulb Icon with Bounce (FROM LEFT)
+                              SlideTransition(
+                                position: _slideAnimation,
+                                child: FadeTransition(
+                                  opacity: _opacityAnimation,
+                                  child: Image.asset(
+                                    'assets/logo_images/bulb.png',
+                                    width: 400,
+                                    height: 400,
+                                  ),
                                 ),
                               ),
-                            ),
-                            const Spacer(flex: 2),
-                            // AI Footer Text
-                            FadeTransition(
-                              opacity: _textOpacityAnimation,
-                              child: const Padding(
-                                padding: EdgeInsets.only(bottom: 60.0),
-                                child: Center(
-                                  child: Text(
-                                    'AI Powered Design Studio',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      letterSpacing: 1.2,
+                              const Spacer(flex: 2),
+                              // AI Footer Text
+                              FadeTransition(
+                                opacity: _textOpacityAnimation,
+                                child: const Padding(
+                                  padding: EdgeInsets.only(bottom: 60.0),
+                                  child: Center(
+                                    child: Text(
+                                      'AI Powered Design Studio',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        letterSpacing: 1.2,
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ],
                     ),

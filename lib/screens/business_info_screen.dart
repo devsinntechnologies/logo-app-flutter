@@ -39,6 +39,7 @@ class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xffFDF2F8),
       appBar: AppBar(
         toolbarHeight: 80,
         // toolbarHeight: 70,
@@ -87,7 +88,7 @@ class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
             // ),
             ),
       ),
-      backgroundColor: const Color(0xFFFDF2F8),
+      // backgroundColor: const Color(0xFFFDF2F8),
       body: Consumer<BusinessInfoProvider>(
         builder: (context, provider, child) {
           return SingleChildScrollView(

@@ -97,9 +97,8 @@ class CategorySelectionScreen extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: Color(0xffF3F4F6),
-      appBar: 
-      AppBar(
+      backgroundColor: Color(0xffFDF2F8),
+      appBar: AppBar(
         toolbarHeight: 80,
         // toolbarHeight: 70,
         backgroundColor: Colors.white,
@@ -147,8 +146,6 @@ class CategorySelectionScreen extends StatelessWidget {
             // ),
             ),
       ),
-     
-     
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(

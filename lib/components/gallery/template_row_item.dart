@@ -22,56 +22,48 @@ class TemplateRowItem extends StatelessWidget {
         margin: const EdgeInsets.only(right: 14),
         // ── Outer container bg: #FDF2F8 (light pink)
         decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-                color: Colors.grey.shade100, blurRadius: 0.2, spreadRadius: 0.2)
-          ],
           color: const Color(0xffFCE7F3),
           borderRadius: BorderRadius.circular(22),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withValues(alpha: 0.1),
+              blurRadius: 4,
+              offset: const Offset(0, 1),
+            ),
+          ],
         ),
         // Clips children (circles) inside the rounded corners
         clipBehavior: Clip.hardEdge,
         child: Stack(
           children: [
-            // ── Top-right highlight circle: #FCCEE8 at ~30% opacity
+            // ── Top-right highlight circle
             Positioned(
-              right: -45,
-              top: -25,
+              right: -30,
+              top: -30,
               child: Container(
-                width: 80,
-                height: 80,
+                width: 75,
+                height: 75,
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Color.fromARGB(255, 247, 219, 235), // #FCCEE84D
+                  color: Color.fromARGB(255, 249, 217, 235),
                 ),
               ),
             ),
-            // Positioned(
-            //   left: -45,
-            //   bottom: -40,
-            //   child: Container(
-            //     width: 80,
-            //     height: 80,
-            //     decoration: const BoxDecoration(
-            //       shape: BoxShape.circle,
-            //       color: Color.fromARGB(255, 245, 211, 231), // #FCCEE84D
-            //     ),
-            //   ),
-            // ),
 
             // ── Bottom-left soft accent bubble
             Positioned(
-              left: -45,
-              bottom: -40,
+              left: -35,
+              bottom: -35,
               child: Container(
                 width: 80,
                 height: 80,
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Color.fromARGB(255, 247, 219, 235), // #FCCEE84D
+                  color: Color.fromARGB(255, 249, 217, 235),
                 ),
               ),
             ),
+
             // ── Template image centered
             Center(
               child: SizedBox(

@@ -17,7 +17,7 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFCF6ED), // Match figma background
+      backgroundColor: const Color(0xffFDF2F8), // Match figma background
       body: SafeArea(
         child: Column(
           children: [

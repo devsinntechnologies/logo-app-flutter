@@ -53,7 +53,7 @@ class _TemplateGalleryScreenState extends State<TemplateGalleryScreen>
         final isSearching = provider.searchQuery.isNotEmpty;
 
         return Scaffold(
-          backgroundColor: Color(0xffFEF4F3),
+          backgroundColor: Color(0xffFDF3F5),
           body: FadeTransition(
             opacity: _fadeAnimation,
             child: Column(
@@ -193,7 +193,16 @@ class _TemplateGalleryScreenState extends State<TemplateGalleryScreen>
   Widget _buildSearchAndFilters(
       BuildContext context, GalleryProvider provider) {
     return Container(
-      color: Colors.white,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Column(
         children: [
           Padding(
@@ -245,7 +254,7 @@ class _TemplateGalleryScreenState extends State<TemplateGalleryScreen>
                     ),
                     child: Image.asset(
                       "assets/images/search.png",
-                      height: 22,
+                      height: 20,
                       color: provider.isSearchExpanded
                           ? Colors.white
                           : Colors.grey,
@@ -278,47 +287,50 @@ class _TemplateGalleryScreenState extends State<TemplateGalleryScreen>
           ),
 
           // Expandable search field
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            height: provider.isSearchExpanded ? 60 : 0,
-            curve: Curves.easeInOut,
-            margin: EdgeInsets.only(top: provider.isSearchExpanded ? 12 : 0),
-            child: provider.isSearchExpanded
-                ? TextField(
-                    controller: provider.searchController,
-                    autofocus: true,
-                    style: const TextStyle(fontSize: 14),
-                    decoration: InputDecoration(
-                      hintText: 'Search templates...',
-                      hintStyle: TextStyle(color: Colors.black, fontSize: 14),
-                      suffixIcon:
-                          Image.asset("assets/images/search.png", height: 20),
-                      filled: true,
-                      fillColor: const Color(0xFFFDF2F8),
-                      contentPadding: const EdgeInsets.symmetric(
-                          vertical: 14, horizontal: 10),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide.none,
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(
-                          color: const Color(0xFFD73ABA).withOpacity(0.25),
-                          width: 1,
+          Padding(
+            padding: const EdgeInsets.only(left: 19, right: 10),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              height: provider.isSearchExpanded ? 60 : 0,
+              curve: Curves.easeInOut,
+              margin: EdgeInsets.only(top: provider.isSearchExpanded ? 12 : 0),
+              child: provider.isSearchExpanded
+                  ? TextField(
+                      controller: provider.searchController,
+                      autofocus: true,
+                      style: const TextStyle(fontSize: 14),
+                      decoration: InputDecoration(
+                        hintText: 'Search templates...',
+                        hintStyle: TextStyle(color: Colors.black, fontSize: 14),
+                        suffixIcon:
+                            Image.asset("assets/images/search.png", height: 20),
+                        filled: true,
+                        fillColor: const Color(0xFFFDF2F8),
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 14, horizontal: 10),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide.none,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(
+                            color: const Color(0xFFD73ABA).withOpacity(0.25),
+                            width: 1,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFD73ABA),
+                            width: 1.5,
+                          ),
                         ),
                       ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(
-                          color: Color(0xFFD73ABA),
-                          width: 1.5,
-                        ),
-                      ),
-                    ),
-                    onChanged: (val) => provider.updateSearchQuery(val),
-                  )
-                : const SizedBox.shrink(),
+                      onChanged: (val) => provider.updateSearchQuery(val),
+                    )
+                  : const SizedBox.shrink(),
+            ),
           ),
 
           //  Divider()
@@ -577,6 +589,7 @@ class _TemplateGalleryScreenState extends State<TemplateGalleryScreen>
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: GridView.builder(
+                padding: EdgeInsets.zero,
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -614,38 +627,44 @@ class _TemplateGalleryScreenState extends State<TemplateGalleryScreen>
       },
       child: Container(
         decoration: BoxDecoration(
-          // ── Outer container: #FDF2F8
-          color: const Color(0xFFFDF2F8),
+          color: const Color(0xffFCE7F3),
           borderRadius: BorderRadius.circular(22),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withValues(alpha: 0.1),
+              blurRadius: 4,
+              offset: const Offset(0, 1),
+            ),
+          ],
         ),
         clipBehavior: Clip.hardEdge,
         child: Stack(
           clipBehavior: Clip.hardEdge,
           children: [
-            // ── Inner highlight circle: #FCCEE84D
+            // ── Top-right highlight circle
             Positioned(
-              right: -10,
-              top: -10,
+              right: -30,
+              top: -30,
               child: Container(
                 width: 75,
                 height: 75,
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Color(0x4DFCCEE8), // #FCCEE84D
+                  color: Color.fromARGB(255, 249, 217, 235),
                 ),
               ),
             ),
 
-            // ── Bottom-left accent bubble
+            // ── Bottom-left darkly tinted softly bubble
             Positioned(
-              left: -8,
-              bottom: -8,
+              left: -35,
+              bottom: -35,
               child: Container(
-                width: 45,
-                height: 45,
-                decoration: BoxDecoration(
+                width: 80,
+                height: 80,
+                decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  color: const Color(0xFFFCCEE8).withOpacity(0.2),
+                  color: Color.fromARGB(255, 249, 217, 235),
                 ),
               ),
             ),
