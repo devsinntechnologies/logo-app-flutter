@@ -26,39 +26,111 @@ class GalleryProvider extends ChangeNotifier {
     'Free': [
       {
         'name': 'Color Palette',
-        'image': 'assets/gallery_images/Text (5).png',
+        'image': 'assets/gallery_images/Text.png',
         'isAd': false
       },
       {
         'name': 'Briefcase Logo',
-        'image': 'assets/gallery_images/💼.png',
+        'image': 'assets/gallery_images/bag.png',
         'isAd': false
       },
       {
         'name': 'Rocket Logo',
-        'image': 'assets/gallery_images/🚀.png',
+        'image': 'assets/gallery_images/airoplain.png',
         'isAd': false
       },
       {
         'name': 'Bulb Logo',
-        'image': 'assets/gallery_images/💡.png',
+        'image': 'assets/gallery_images/bulb.png',
         'isAd': false
       },
       {
         'name': 'Target Logo',
-        'image': 'assets/gallery_images/🎯.png',
+        'image': 'assets/gallery_images/dart.png',
         'isAd': false
       },
       {
         'name': 'Crown Logo',
-        'image': 'assets/gallery_images/👑.png',
+        'image': 'assets/gallery_images/king.png',
         'isAd': false
       },
     ],
     'Thanks Giving': [
       {
         'name': 'Turkey Logo',
-        'image': 'assets/gallery_images/🦃.png',
+        'image': 'assets/gallery_images/hen.png',
+        'isAd': false
+      },
+      {
+        'name': 'Pie',
+        'image': 'assets/gallery_images/coock.png',
+        'isAd': false
+      },
+      {
+        'name': 'Corn',
+        'image': 'assets/gallery_images/cons.png',
+        'isAd': false
+      },
+      {
+        'name': 'Leaves',
+        'image': 'assets/gallery_images/leaf.png',
+        'isAd': false
+      },
+    ],
+    'Christmas': [
+      {
+        'name': 'Eco Green',
+        'image': 'assets/gallery_images/Text (1).png',
+        'isAd': false
+      },
+      {
+        'name': 'Santa Claus',
+        'image': 'assets/gallery_images/baba.png',
+        'isAd': false
+      },
+      {
+        'name': 'Gift Box',
+        'image': 'assets/gallery_images/gift.png',
+        'isAd': false
+      },
+      {
+        'name': 'Snowman',
+        'image': 'assets/gallery_images/c.png',
+        'isAd': false
+      },
+      {'name': 'Bell', 'image': 'assets/gallery_images/bul.png', 'isAd': false},
+      {
+        'name': 'Star',
+        'image': 'assets/gallery_images/atars.png',
+        'isAd': false
+      },
+    ],
+    'Business': [
+      {
+        'name': 'Bar Chart',
+        'image': 'assets/gallery_images/graph.png',
+        'isAd': false
+      },
+      {
+        'name': 'Achievement',
+        'image': 'assets/gallery_images/cup.png',
+        'isAd': false
+      },
+      {
+        'name': 'Growth Chart',
+        'image': 'assets/gallery_images/line.png',
+        'isAd': false
+      },
+    ],
+    'Food': [
+      {
+        'name': 'Pizza Paradise',
+        'image': 'assets/gallery_images/piza.png',
+        'isAd': false
+      },
+      {
+        'name': 'Burger King',
+        'image': 'assets/gallery_images/berger.png',
         'isAd': false
       },
       {
@@ -66,84 +138,23 @@ class GalleryProvider extends ChangeNotifier {
         'image': 'assets/gallery_images/Text (4).png',
         'isAd': false
       },
-      {'name': 'Pie', 'image': 'assets/gallery_images/🥧.png', 'isAd': false},
-      {'name': 'Corn', 'image': 'assets/gallery_images/🌽.png', 'isAd': false},
+    ],
+    'Nature': [
       {
-        'name': 'Leaves',
-        'image': 'assets/gallery_images/🍂.png',
+        'name': 'Pink Flower',
+        'image': 'assets/gallery_images/Text (2).png',
         'isAd': false
       },
-    ],
-    'Christmas': [
       {
         'name': 'Xmas Tree',
         'image': 'assets/gallery_images/Text (3).png',
         'isAd': true
       },
       {
-        'name': 'Santa Claus',
-        'image': 'assets/gallery_images/🎅.png',
+        'name': 'Wave',
+        'image': 'assets/gallery_images/water.png',
         'isAd': false
       },
-      {
-        'name': 'Gift Box',
-        'image': 'assets/gallery_images/🎁.png',
-        'isAd': false
-      },
-      {
-        'name': 'Snowman',
-        'image': 'assets/gallery_images/⛄.png',
-        'isAd': false
-      },
-      {'name': 'Bell', 'image': 'assets/gallery_images/🔔.png', 'isAd': false},
-      {'name': 'Star', 'image': 'assets/gallery_images/⭐.png', 'isAd': false},
-    ],
-    'Business': [
-      {
-        'name': 'Bar Chart',
-        'image': 'assets/gallery_images/📊.png',
-        'isAd': false
-      },
-      {
-        'name': 'Achievement',
-        'image': 'assets/gallery_images/🏆.png',
-        'isAd': false
-      },
-      {
-        'name': 'Growth Chart',
-        'image': 'assets/gallery_images/📈.png',
-        'isAd': false
-      },
-      {
-        'name': 'Certificate',
-        'image': 'assets/gallery_images/Text.png',
-        'isAd': false
-      },
-    ],
-    'Food': [
-      {
-        'name': 'Pizza Paradise',
-        'image': 'assets/gallery_images/🍕.png',
-        'isAd': false
-      },
-      {
-        'name': 'Burger King',
-        'image': 'assets/gallery_images/🍔.png',
-        'isAd': false
-      },
-    ],
-    'Nature': [
-      {
-        'name': 'Eco Green',
-        'image': 'assets/gallery_images/Text (1).png',
-        'isAd': false
-      },
-      {
-        'name': 'Pink Flower',
-        'image': 'assets/gallery_images/Text (2).png',
-        'isAd': false
-      },
-      {'name': 'Wave', 'image': 'assets/gallery_images/🌊.png', 'isAd': false},
     ],
   };
 

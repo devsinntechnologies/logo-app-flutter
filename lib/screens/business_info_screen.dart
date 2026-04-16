@@ -126,7 +126,7 @@ class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
                   title: 'Slogan (Optional)',
                   hint: 'Your business tagline',
                   icon: Icon(Icons.chat_bubble_outline_rounded),
-                  iconBgColor: const Color(0xFF9C27B0).withOpacity(0.8),
+                  iconBgColor:  Colors.white,
                   controller: _sloganController,
                   maxLength: 50,
                   onChanged: (val) => provider.updateSlogan(val),

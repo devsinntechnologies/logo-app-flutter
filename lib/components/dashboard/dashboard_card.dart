@@ -175,7 +175,7 @@ class DashboardCard extends StatelessWidget {
             letterSpacing: 0.2,
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 2),
         Text(
           subtitle,
           style: TextStyle(
@@ -184,7 +184,7 @@ class DashboardCard extends StatelessWidget {
             fontWeight: FontWeight.w400,
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
         const Icon(Icons.arrow_forward_ios_rounded,
             color: Colors.white, size: 16),
       ],

@@ -257,7 +257,7 @@ class _TemplateGalleryScreenState extends State<TemplateGalleryScreen>
                       height: 20,
                       color: provider.isSearchExpanded
                           ? Colors.white
-                          : Colors.grey,
+                          : Colors.black,
                     ),
                   ),
                 ),
