@@ -130,41 +130,51 @@ void showCustomGoogleDialog(BuildContext context) {
             SizedBox(
               height: 20,
             ),
-            GestureDetector(
-              onTap: () async {
-                Navigator.pop(context);
-                try {
-                  await context.read<AuthProvider>().signInWithGoogle();
-                } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text("Google Sign-In failed: $e"),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                  // boxShadow: [
+                  //   BoxShadow(
+                  //       color: Colors.grey, spreadRadius: 0.3, blurRadius: 0.3)
+                  // ],
+                  borderRadius: BorderRadius.circular(5),
+                  border: Border.all(color: Colors.grey)),
+              child: GestureDetector(
+                onTap: () async {
+                  Navigator.pop(context);
+                  try {
+                    await context.read<AuthProvider>().signInWithGoogle();
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("Google Sign-In failed: $e"),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
                   }
-                }
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    "assets/icons/google.png",
-                    height: 20,
-                  ),
-                  SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      S.of(context).SignInWithGoogle,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.black,
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      "assets/icons/google.png",
+                      height: 20,
+                    ),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        S.of(context).SignInWithGoogle,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],

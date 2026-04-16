@@ -35,7 +35,10 @@ class _LoginScreenState extends State<LoginScreen> {
         appBar: AppBar(
           backgroundColor: Colors.white,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
+            icon: const Icon(
+              Icons.arrow_back,
+              color: Colors.black,
+            ),
             onPressed: () => Navigator.pop(context),
           ),
         ),
@@ -230,9 +233,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        S.of(context).noAccount,
+                        S.of(context).noAccount ,
                         style: const TextStyle(color: Colors.black),
                       ),
+                      SizedBox(width: 5
+                      ,),
                       GestureDetector(
                         onTap: () {
                           Navigator.pushReplacement(

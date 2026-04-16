@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:logo_app_flutter/provider/gallery_provider.dart';
-import 'package:logo_app_flutter/provider/business_info_provider.dart';
 import 'package:logo_app_flutter/screens/category_selection_screen.dart';
-import 'package:logo_app_flutter/screens/business_info_screen.dart';
 import 'package:logo_app_flutter/components/gallery/gallery_chip.dart';
 import 'package:logo_app_flutter/components/gallery/template_row.dart';
 import 'package:logo_app_flutter/components/gallery/template_row_item.dart';
@@ -16,15 +14,35 @@ class TemplateGalleryScreen extends StatefulWidget {
   State<TemplateGalleryScreen> createState() => _TemplateGalleryScreenState();
 }
 
-class _TemplateGalleryScreenState extends State<TemplateGalleryScreen> {
+class _TemplateGalleryScreenState extends State<TemplateGalleryScreen>
+    with TickerProviderStateMixin {
+  late AnimationController _fadeController;
+  late Animation<double> _fadeAnimation;
+
   @override
   void initState() {
     super.initState();
+    _fadeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeOut,
+    );
+    _fadeController.forward();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         context.read<GalleryProvider>().selectCategory('All');
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _fadeController.dispose();
+    super.dispose();
   }
 
   @override
@@ -35,17 +53,18 @@ class _TemplateGalleryScreenState extends State<TemplateGalleryScreen> {
         final isSearching = provider.searchQuery.isNotEmpty;
 
         return Scaffold(
-          backgroundColor: Colors.white,
-          body: SafeArea(
+          backgroundColor: Color(0xffFEF4F3),
+          body: FadeTransition(
+            opacity: _fadeAnimation,
             child: Column(
               children: [
-                // Header
+                // ── Header ──────────────────────────────────────────────
                 _buildHeader(context),
 
-                // Search and Tabs Section
+                // ── Search + Category Filters ────────────────────────────
                 _buildSearchAndFilters(context, provider),
 
-                // Main Content Area
+                // ── Content ──────────────────────────────────────────────
                 Expanded(
                   child: isSearching || provider.selectedCategory != 'All'
                       ? _buildGridView(context, provider, filteredTemplates)
@@ -59,129 +78,206 @@ class _TemplateGalleryScreenState extends State<TemplateGalleryScreen> {
     );
   }
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // HEADER
+  // ─────────────────────────────────────────────────────────────────────────
   Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(colors: [
-                  Color(0xFFFF6516),
-                  Color(0xFFD73ABA),
-                  Color(0xFFA628EB)
-                ]),
-                // color: Colors.grey.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child:
-                  const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+    return Container(
+      padding: EdgeInsets.only(top: 50, bottom: 20),
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 16,
+        ),
+        child: Row(
+          children: [
+            SizedBox(
+              height: 20,
             ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text(
-                  'Template Gallery',
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xff101828)),
+            // Back button — gradient rounded square
+            GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [
+                      Color(0xFFFF6516),
+                      Color(0xFFD73ABA),
+                      Color(0xFFA628EB),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFD73ABA).withOpacity(0.35),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
-                Text(
-                  '2,500+ premium templates',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Color(0xff6A7282),
-                    fontWeight: FontWeight.w400,
+                child: Image.asset("assets/images/backarrow.png",
+                    color: Colors.white, height: 18),
+              ),
+            ),
+
+            const SizedBox(width: 14),
+
+            // Title + subtitle
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text(
+                    'Template Gallery',
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF101828),
+                      letterSpacing: -0.2,
+                    ),
+                  ),
+                  SizedBox(height: 2),
+                  Text(
+                    'Choose your design style',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF6A7282),
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // // Decorative badge
+            // Container(
+            //   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            //   decoration: BoxDecoration(
+            //     color: const Color(0xFFFDF2F8),
+            //     borderRadius: BorderRadius.circular(20),
+            //     border: Border.all(
+            //       color: const Color(0xFFD73ABA).withOpacity(0.25),
+            //       width: 1,
+            //     ),
+            //   ),
+            //   child: Row(
+            //     mainAxisSize: MainAxisSize.min,
+            //     children: const [
+            //       Icon(Icons.auto_awesome_rounded,
+            //           size: 13, color: Color(0xFFD73ABA)),
+            //       SizedBox(width: 4),
+            //       Text(
+            //         'Premium',
+            //         style: TextStyle(
+            //           fontSize: 11,
+            //           fontWeight: FontWeight.w600,
+            //           color: Color(0xFFD73ABA),
+            //         ),
+            //       ),
+            //     ],
+            //   ),
+            // ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // SEARCH + CATEGORY FILTERS
+  // ─────────────────────────────────────────────────────────────────────────
+  Widget _buildSearchAndFilters(
+      BuildContext context, GalleryProvider provider) {
+    return Container(
+      color: Colors.white,
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 16, right: 16),
+            child: Row(
+              children: [
+                // Search icon toggle
+                GestureDetector(
+                  onTap: () => provider.toggleSearchExpanded(),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 220),
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      gradient: provider.isSearchExpanded
+                          ? const LinearGradient(
+                              colors: [
+                                Color(0xFFFF6516),
+                                Color(0xFFD73ABA),
+                                Color(0xFFA628EB),
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            )
+                          : null,
+                      color: provider.isSearchExpanded ? null : Colors.white,
+                      shape: BoxShape.circle,
+                      border: provider.isSearchExpanded
+                          ? null
+                          : Border.all(
+                              color: const Color(0xFFC32BAC).withOpacity(0.3),
+                              width: 1,
+                            ),
+                      boxShadow: provider.isSearchExpanded
+                          ? [
+                              BoxShadow(
+                                color: const Color(0xFFD73ABA).withOpacity(0.4),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ]
+                          : [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.04),
+                                blurRadius: 10,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                    ),
+                    child: Image.asset(
+                      "assets/images/search.png",
+                      height: 22,
+                      color: provider.isSearchExpanded
+                          ? Colors.white
+                          : Colors.grey,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(width: 12),
+
+                // Category chips
+                Expanded(
+                  child: SizedBox(
+                    height: 50,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: provider.categories.length,
+                      itemBuilder: (context, index) {
+                        final cat = provider.categories[index];
+                        return GalleryChip(
+                          label: cat,
+                          isSelected: provider.selectedCategory == cat,
+                          onTap: () => provider.selectCategory(cat),
+                        );
+                      },
+                    ),
                   ),
                 ),
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildSearchAndFilters(
-      BuildContext context, GalleryProvider provider) {
-    return Container(
-      decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(color: Colors.white))),
-      padding: const EdgeInsets.only(left: 16, bottom: 12, right: 16),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              GestureDetector(
-                onTap: () => provider.toggleSearchExpanded(),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    gradient: provider.isSearchExpanded
-                        ? const LinearGradient(colors: [
-                            Color(0xFFFF6516),
-                            Color(0xFFD73ABA),
-                            Color(0xFFA628EB)
-                          ])
-                        : null,
-                    color: provider.isSearchExpanded ? null : Colors.white,
-                    shape: BoxShape.circle,
-                    border: provider.isSearchExpanded
-                        ? null
-                        : Border.all(
-                            color: Color(0xFFC32BAC).withOpacity(0.3),
-                            width: 1),
-                    boxShadow: provider.isSearchExpanded
-                        ? [
-                            BoxShadow(
-                                color: const Color(0xFFD73ABA).withOpacity(0.4),
-                                blurRadius: 10,
-                                offset: const Offset(0, 4))
-                          ]
-                        : [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.04),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                  ),
-                  child: Icon(
-                    provider.isSearchExpanded ? Icons.search : Icons.search,
-                    size: 22,
-                    color:
-                        provider.isSearchExpanded ? Colors.white : Colors.grey,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: SizedBox(
-                  height: 50,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: provider.categories.length,
-                    itemBuilder: (context, index) {
-                      final cat = provider.categories[index];
-                      return GalleryChip(
-                        label: cat,
-                        isSelected: provider.selectedCategory == cat,
-                        onTap: () => provider.selectCategory(cat),
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ],
-          ),
+          // Expandable search field
           AnimatedContainer(
             duration: const Duration(milliseconds: 300),
             height: provider.isSearchExpanded ? 60 : 0,
@@ -191,37 +287,70 @@ class _TemplateGalleryScreenState extends State<TemplateGalleryScreen> {
                 ? TextField(
                     controller: provider.searchController,
                     autofocus: true,
+                    style: const TextStyle(fontSize: 14),
                     decoration: InputDecoration(
                       hintText: 'Search templates...',
+                      hintStyle: TextStyle(color: Colors.black, fontSize: 14),
                       suffixIcon:
-                          const Icon(Iconsax.search_status, color: Colors.grey),
+                          Image.asset("assets/images/search.png", height: 20),
+                      filled: true,
+                      fillColor: const Color(0xFFFDF2F8),
+                      contentPadding: const EdgeInsets.symmetric(
+                          vertical: 14, horizontal: 10),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: const BorderSide(color: Color(0xFFD73ABA)),
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide.none,
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
+                        borderRadius: BorderRadius.circular(16),
                         borderSide: BorderSide(
-                            color: const Color(0xFFD73ABA).withOpacity(0.3)),
+                          color: const Color(0xFFD73ABA).withOpacity(0.25),
+                          width: 1,
+                        ),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
+                        borderRadius: BorderRadius.circular(16),
                         borderSide: const BorderSide(
-                            color: Color(0xFFD73ABA), width: 1.5),
+                          color: Color(0xFFD73ABA),
+                          width: 1.5,
+                        ),
                       ),
                     ),
                     onChanged: (val) => provider.updateSearchQuery(val),
                   )
                 : const SizedBox.shrink(),
           ),
+
+          //  Divider()
+          SizedBox(
+            height: 20,
+          ),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.grey.shade200,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey,
+                  blurRadius: 4,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            width: double.infinity,
+            height: 1,
+          )
         ],
       ),
     );
   }
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // ALL VIEW (horizontal rows per category)
+  // ─────────────────────────────────────────────────────────────────────────
   Widget _buildAllView(BuildContext context, GalleryProvider provider) {
     return SingleChildScrollView(
       controller: provider.scrollController,
+      physics: const BouncingScrollPhysics(),
       child: Column(
         children: [
           ...provider.templateData.entries.map((entry) {
@@ -230,8 +359,12 @@ class _TemplateGalleryScreenState extends State<TemplateGalleryScreen> {
               onSeeAll: () => provider.selectCategory(entry.key),
               items: entry.value.map((item) {
                 return TemplateRowItem(
-                  icon: Image.asset(item['image'] as String,
-                      width: 80, height: 80, fit: BoxFit.contain),
+                  icon: Image.asset(
+                    item['image'] as String,
+                    width: 80,
+                    height: 80,
+                    fit: BoxFit.contain,
+                  ),
                   isAd: item['isAd'] as bool,
                   onTap: () {
                     Navigator.push(
@@ -253,107 +386,191 @@ class _TemplateGalleryScreenState extends State<TemplateGalleryScreen> {
     );
   }
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // PREMIUM BANNER
+  // ─────────────────────────────────────────────────────────────────────────
   Widget _buildPremiumBanner() {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 25),
+      padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [Color(0xFFFF6516), Color(0xFFD73ABA), Color(0xFFA628EB)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(22),
         boxShadow: [
           BoxShadow(
-              color: const Color(0xFFD73ABA).withOpacity(0.4),
-              blurRadius: 15,
-              offset: const Offset(0, 8)),
+            color: const Color(0xFFD73ABA).withOpacity(0.4),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
+        clipBehavior: Clip.none,
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12)),
-                child: const Icon(Icons.workspace_premium,
-                    color: Colors.yellow, size: 30),
+          // Decorative circles inside banner
+          Positioned(
+            right: -50,
+            top: -60,
+            child: Container(
+              width: 90,
+              height: 90,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withOpacity(0.09),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text('Premium Template',
-                        style: TextStyle(
+            ),
+          ),
+          Positioned(
+            left: -30,
+            bottom: -50,
+            child: Container(
+              width: 55,
+              height: 55,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withOpacity(0.07),
+              ),
+            ),
+          ),
+
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  // Icon box
+                  Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Image.asset(
+                        "assets/gallery_images/👑.png",
+                        height: 40,
+                        width: 40,
+                      )
+                      // const Icon(
+                      //   Icons.workspace_premium_rounded,
+                      //   color: Colors.yellow,
+                      //   size: 28,
+                      // ),
+                      ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Text(
+                          'Premium Template',
+                          style: TextStyle(
                             color: Colors.white,
                             fontSize: 16,
-                            fontWeight: FontWeight.w400)),
-                    const SizedBox(height: 7),
-                    Text('Unlock 500+ exclusive designs',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400)),
-                  ],
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.2,
+                          ),
+                        ),
+                        SizedBox(height: 5),
+                        Text(
+                          'Unlock 500+ exclusive designs',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 20),
+
+              // Upgrade button
+              GestureDetector(
+                onTap: () {},
+                child: Container(
+                  width: double.infinity,
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.symmetric(vertical: 13),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Text(
+                    'UPGRADE NOW',
+                    style: TextStyle(
+                      color: Color(0xFFD73ABA),
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.6,
+                    ),
+                  ),
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 25),
-          Container(
-            width: double.infinity,
-            alignment: Alignment.center,
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            decoration: BoxDecoration(
-                color: Colors.white, borderRadius: BorderRadius.circular(12)),
-            child: const Text('UPGRADE NOW',
-                style: TextStyle(
-                    color: Color(0xFFD73ABA),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700)),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildGridView(BuildContext context, GalleryProvider provider,
-      List<Map<String, dynamic>> items) {
+  // ─────────────────────────────────────────────────────────────────────────
+  // GRID VIEW (filtered / category / search results)
+  // ─────────────────────────────────────────────────────────────────────────
+  Widget _buildGridView(
+    BuildContext context,
+    GalleryProvider provider,
+    List<Map<String, dynamic>> items,
+  ) {
     return SingleChildScrollView(
       controller: provider.scrollController,
+      physics: const BouncingScrollPhysics(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Results count header
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             child: Row(
               children: [
                 Container(
-                  width: 6,
-                  height: 22,
+                  width: 5,
+                  height: 20,
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                        colors: [Color(0xFFFF2E94), Color(0xFFC32BAC)]),
+                      colors: [Color(0xFFFF6516), Color(0xFFA628EB)],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
                     borderRadius: BorderRadius.circular(3),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
                 Text(
                   '${items.length} templates found',
                   style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black87),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF1A1A2E),
+                  ),
                 ),
               ],
             ),
           ),
+
           if (items.isEmpty)
             _buildNoResults()
           else
@@ -364,72 +581,164 @@ class _TemplateGalleryScreenState extends State<TemplateGalleryScreen> {
                 physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 14,
+                  mainAxisSpacing: 14,
                   childAspectRatio: 1.0,
                 ),
                 itemCount: items.length,
                 itemBuilder: (context, index) {
                   final item = items[index];
-                  return TemplateRowItem(
-                    icon: Image.asset(item['image'] as String,
-                        width: 80, height: 80, fit: BoxFit.contain),
-                    isAd: item['isAd'] as bool,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const CategorySelectionScreen(),
-                        ),
-                      );
-                    },
-                  );
+                  return _buildGridCard(context, item);
                 },
               ),
             ),
+
           const SizedBox(height: 40),
         ],
       ),
     );
   }
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // GRID CARD — same dual-layer design as TemplateRowItem
+  // ─────────────────────────────────────────────────────────────────────────
+  Widget _buildGridCard(BuildContext context, Map<String, dynamic> item) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const CategorySelectionScreen(),
+          ),
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          // ── Outer container: #FDF2F8
+          color: const Color(0xFFFDF2F8),
+          borderRadius: BorderRadius.circular(22),
+        ),
+        clipBehavior: Clip.hardEdge,
+        child: Stack(
+          clipBehavior: Clip.hardEdge,
+          children: [
+            // ── Inner highlight circle: #FCCEE84D
+            Positioned(
+              right: -10,
+              top: -10,
+              child: Container(
+                width: 75,
+                height: 75,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Color(0x4DFCCEE8), // #FCCEE84D
+                ),
+              ),
+            ),
+
+            // ── Bottom-left accent bubble
+            Positioned(
+              left: -8,
+              bottom: -8,
+              child: Container(
+                width: 45,
+                height: 45,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: const Color(0xFFFCCEE8).withOpacity(0.2),
+                ),
+              ),
+            ),
+
+            // ── Template image centered
+            Center(
+              child: Image.asset(
+                item['image'] as String,
+                width: 80,
+                height: 80,
+                fit: BoxFit.contain,
+              ),
+            ),
+
+            // ── Ad badge
+            if (item['isAd'] == true)
+              Positioned(
+                left: 10,
+                bottom: 10,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF00A3FF),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Text(
+                    'Ad',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // NO RESULTS
+  // ─────────────────────────────────────────────────────────────────────────
   Widget _buildNoResults() {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.only(top: 100, left: 20, right: 20),
+        padding: const EdgeInsets.only(top: 80, left: 20, right: 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(26),
               decoration: BoxDecoration(
-                color: const Color(0xFFF9F7FF),
+                color: const Color(0xFFFDF2F8),
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 4),
+                border: Border.all(
+                  color: const Color(0xFFD73ABA).withOpacity(0.15),
+                  width: 3,
+                ),
                 boxShadow: [
                   BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10))
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
                 ],
               ),
-              child: const Icon(Iconsax.search_status,
-                  size: 80, color: Color(0xFF1A1C1E)),
+              child: const Icon(
+                Iconsax.search_status,
+                size: 72,
+                color: Color(0xFFD73ABA),
+              ),
             ),
             const SizedBox(height: 24),
             const Text(
               'No templates found',
               style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF1A1C1E)),
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF101828),
+              ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Try adjusting your search or filters',
+              'Try adjusting your search or\nchoose a different category',
               textAlign: TextAlign.center,
               style: TextStyle(
-                  fontSize: 14, color: Colors.grey.shade600, height: 1.5),
+                fontSize: 14,
+                color: Colors.grey.shade500,
+                height: 1.6,
+              ),
             ),
           ],
         ),

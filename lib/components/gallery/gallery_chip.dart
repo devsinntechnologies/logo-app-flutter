@@ -15,43 +15,50 @@ class GalleryChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(right: 12),
+      padding: const EdgeInsets.only(right: 10),
       child: GestureDetector(
         onTap: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 9),
           decoration: BoxDecoration(
+            // ── Selected: gradient fill, pink glow shadow
             gradient: isSelected
                 ? const LinearGradient(
                     colors: [
                       Color(0xFFFF6928),
                       Color(0xFFD73ABA),
-                      Color(0xFFA628EB)
+                      Color(0xFFA628EB),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   )
                 : null,
+            // ── Unselected: white bg, subtle pink border, NO shadow
             color: isSelected ? null : Colors.white,
-            borderRadius: BorderRadius.circular(100),
+            borderRadius: BorderRadius.circular(50),
             border: isSelected
                 ? null
                 : Border.all(
-                    color: Color(0xFFC32BAC).withOpacity(0.3), width: 1),
+                    color: const Color(0xFFC32BAC).withValues(alpha: 0.28),
+                    width: 1,
+                  ),
+            // Shadow only on selected chip (matches Figma)
             boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: const Color(0xFFC32BAC).withOpacity(0.3),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ]
+                ? null
+                // [
+                //     BoxShadow(
+                //       color: const Color(0xFFC32BAC).withValues(alpha: 0.35),
+                //       blurRadius: 10,
+                //       offset: const Offset(0, 4),
+                //     ),
+                //   ]
                 : [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
+                      color: Colors.grey,
+                      blurRadius: 1,
+                      spreadRadius: 0.1,
+                      // offset: const Offset(0, 4),
                     ),
                   ],
           ),
@@ -59,9 +66,9 @@ class GalleryChip extends StatelessWidget {
             child: Text(
               label,
               style: TextStyle(
-                color: isSelected ? Colors.white : Colors.black87,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w400,
-                fontSize: 14,
+                color: isSelected ? Colors.white : const Color(0xFF555566),
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
+                fontSize: 13,
               ),
             ),
           ),

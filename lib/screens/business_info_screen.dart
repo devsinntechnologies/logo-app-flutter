@@ -87,7 +87,6 @@ class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
             // ),
             ),
       ),
-     
       backgroundColor: const Color(0xFFFDF2F8),
       body: Consumer<BusinessInfoProvider>(
         builder: (context, provider, child) {
@@ -107,7 +106,7 @@ class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
 
                 // Business Name Card
                 BusinessInputCard(
-                  borderBgColor: Color(0xffFF8904),
+                  borderBgColor: Color(0xffF73A92),
                   title: 'Business Name *',
                   hint: 'Enter your business name',
                   icon: Image.asset("assets/images/business.png"),

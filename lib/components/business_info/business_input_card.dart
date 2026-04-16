@@ -91,7 +91,7 @@ class BusinessInputCard extends StatelessWidget {
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
                     // borderSide: BorderSide.none,
-                    borderSide: BorderSide(color: Colors.grey.withOpacity(0.5)),
+                    borderSide: BorderSide(color: Colors.grey.withOpacity(0.4)),
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),

@@ -43,7 +43,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
           backgroundColor: Colors.white,
           scrolledUnderElevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
+            icon: const Icon(
+              Icons.arrow_back,
+              color: Colors.black,
+            ),
             onPressed: () => Navigator.pop(context),
           ),
         ),

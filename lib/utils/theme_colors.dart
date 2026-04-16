@@ -31,9 +31,11 @@ class ThemeColors {
   );
   static const LinearGradient orangePinkPurple = LinearGradient(
     colors: [
-      Color(0xFFF29E74), // Start color
-      Color(0xFFDF6C87),
-      Color(0xFFA744A2), // End color
+      Color(0xffC059FD), // Start color
+      Color(0xffF96FB2),
+      Color(0xffFF65AB), // End color
+      Color(0xffFF9A5D), // End color
+
       // End color
     ],
     begin: Alignment.topLeft,
@@ -50,9 +52,11 @@ class ThemeColors {
   );
   static const LinearGradient yellowOrangePink = LinearGradient(
     colors: [
-      Color(0xFFF6BF76), // Start color
-      Color(0xFFED8667),
-      Color(0xFFCB3E74), // End color
+      Color(0xffC059FD), // Start color
+      Color(0xffF96FB2),
+      Color(0xffFF65AB),
+      Color(0xffFF9A5D), // End color
+      // End color
     ],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,

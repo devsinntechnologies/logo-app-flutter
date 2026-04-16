@@ -291,7 +291,7 @@ class DashboardScreen extends StatelessWidget {
                                 const SizedBox(height: 20),
                                 const FeatureListItem(
                                   icon: Icon(Iconsax.magicpen),
-                                  text: 'Instant Generation with AI',
+                                  text: 'Instant logo generation with AI',
                                   iconBgColor: LinearGradient(colors: [
                                     Color(0xFFFE7359),
                                     Color(0xffF84490)
