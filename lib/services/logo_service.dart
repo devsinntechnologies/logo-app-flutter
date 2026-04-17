@@ -58,4 +58,5 @@ Future<List<String>> fetchLogoSVGs(String companyName, String slogan) async {
   }
 }
 
+
 }

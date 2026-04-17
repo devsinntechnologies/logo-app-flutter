@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:logo_app_flutter/config/environment.dart';
 import 'package:logo_app_flutter/provider/business_info_provider.dart';
+import 'package:logo_app_flutter/provider/category_selection_provider.dart';
 import 'package:logo_app_flutter/provider/gallery_provider.dart';
 import 'package:logo_app_flutter/provider/logo_design_provider.dart';
 import 'package:logo_app_flutter/provider/logo_generation_provider.dart';
@@ -104,6 +105,7 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (_) => LogoResultsProvider()),
         ChangeNotifierProvider(create: (_) => IntroProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => CategorySelectionProvider()),
       ],
       child: Builder(builder: (context) {
         return MaterialApp(
