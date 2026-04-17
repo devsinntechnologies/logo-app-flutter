@@ -118,26 +118,31 @@ class LogoResultsScreen extends StatelessWidget {
         ),
 
         actions: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-            child: GestureDetector(
-              onTap: () {
-                
-              },
-              child: Container(
-                  // height: 10,
-                  width: 30,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF3F4F6),
-                    // shape: BoxShape.circle,
-                    borderRadius: BorderRadius.circular(10),
+          Consumer<BusinessInfoProvider>(
+            builder: (context, info, child) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+                child: GestureDetector(
+                  onTap: () {
+                    context.read<LogoResultsProvider>().fetchLogos(
+                          info.businessName,
+                          info.slogan,
+                          industryId: info.categoryId,
+                          fontId: info.selectedFontId,
+                          colorId: info.selectedColorId,
+                        );
+                  },
+                  child: Container(
+                    width: 30,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF3F4F6),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Image.asset("assets/images/refresh.png"),
                   ),
-                  child: Image.asset("assets/images/refresh.png")
-                  // const
-                  //  Icon(Icons.arrow_back,
-                  //     color: Color(0xFF1F1F39), size: 25),
-                  ),
-            ),
+                ),
+              );
+            },
           ),
           SizedBox(
             width: 10,

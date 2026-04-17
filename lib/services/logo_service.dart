@@ -47,7 +47,6 @@ class LogoService {
     body: jsonEncode(requestData),
   );
 
-
    if (response.statusCode == 200) {
     final decoded = jsonDecode(response.body);
     final List logos = decoded["data"];
