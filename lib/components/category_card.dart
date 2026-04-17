@@ -2,18 +2,18 @@ import 'package:flutter/material.dart';
 
 class CategoryCard extends StatelessWidget {
   final String title;
-  final String image;
-  // IconData icon;
-
+  final Widget icon;
   final Gradient gradient;
   final VoidCallback onTap;
+  final String heroTag; // Added unique hero tag support
 
   const CategoryCard({
     super.key,
     required this.title,
-    required this.image,
+    required this.icon,
     required this.gradient,
     required this.onTap,
+    required this.heroTag,
   });
 
   @override
@@ -74,44 +74,15 @@ class CategoryCard extends StatelessWidget {
                     ),
                   ),
 
-                  // Glossy Bubble Bottom-Left
-                  // Positioned(
-                  //   left: -5,
-                  //   bottom: -15,
-                  //   child: AnimatedOpacity(
-                  //     duration: const Duration(milliseconds: 200),
-                  //     opacity: hovered ? 0.2 : 0.1,
-                  //     child: Container(
-                  //       width: 50,
-                  //       height: 50,
-                  //       decoration: const BoxDecoration(
-                  //         shape: BoxShape.circle,
-                  //         color: Colors.white,
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ),
-
                   // Content
                   Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Hero(
-                            tag: 'cat_icon_$title',
-                            child: Image.asset(
-                              image,
-                              height: 50,
-                              // filterQuality: FilterQuality.medium,
-                              // cacheWidth: 100,
-                              width: 60,
-                            )
-                            //  Icon(
-                            //   icon,
-                            //   size: 45,
-                            //   color: Colors.white,
-                            // ),
-                            ),
+                          tag: heroTag,
+                          child: icon,
+                        ),
                         const SizedBox(height: 12),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),

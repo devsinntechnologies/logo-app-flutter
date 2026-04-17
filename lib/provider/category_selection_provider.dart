@@ -12,7 +12,7 @@ class CategorySelectionProvider with ChangeNotifier {
   IndustryModel? get industryModel => _industryModel;
   bool get isLoading => _isLoading;
   String? get error => _error;
-
+  int visibleCount = 20; 
   // Fetch Industries
   Future<void> fetchIndustries() async {
     _isLoading = true;
@@ -28,5 +28,12 @@ class CategorySelectionProvider with ChangeNotifier {
 
     _isLoading = false;
     notifyListeners();
+  }
+
+    loadMore() {
+    
+      visibleCount += 20;
+      notifyListeners();
+
   }
 }

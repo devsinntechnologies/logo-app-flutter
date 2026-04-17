@@ -118,7 +118,7 @@ class ThemeColors {
 
   // Category Gradients
   static const LinearGradient retailGradient = LinearGradient(
-    colors: [Color(0xFFFFF7B00), Color(0xFFFF6200), Color(0xFFFD402A)],
+    colors: [Color(0xFFFF7B00), Color(0xFFFF6200), Color(0xFFFD402A)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -128,7 +128,7 @@ class ThemeColors {
     end: Alignment.bottomRight,
   );
   static const LinearGradient healthGradient = LinearGradient(
-    colors: [Color(0xFFFFA55AC), Color(0xFFF73298), Color(0xFFFD296E)],
+    colors: [Color(0xFFFA55AC), Color(0xFFF73298), Color(0xFFFD296E)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -198,4 +198,23 @@ class ThemeColors {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
+
+  static const List<LinearGradient> categoryGradients = [
+    retailGradient,
+    foodGradient,
+    healthGradient,
+    creativeGradient,
+    technologyGradient,
+    professionalGradient,
+    fitnessGradient,
+    musicGradient,
+    photographyGradient,
+    travelGradient,
+    fashionGradient,
+    cafeGradient,
+    realGradient,
+    gameGradient,
+    educationGradient,
+    ecoGradient,
+  ];
 }

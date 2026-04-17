@@ -1,5 +1,3 @@
-import 'package:http/http.dart' as http;
-
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:logo_app_flutter/models/industry_model.dart';
