@@ -30,6 +30,9 @@ class _LogoGenerationScreenState extends State<LogoGenerationScreen>
       context.read<LogoResultsProvider>().fetchLogos(
             businessInfo.businessName,
             businessInfo.slogan,
+            industryId: businessInfo.categoryId,
+            fontId: businessInfo.selectedFontId,
+            colorId: businessInfo.selectedColorId,
           );
 
       context.read<LogoGenerationProvider>().startSimulation(

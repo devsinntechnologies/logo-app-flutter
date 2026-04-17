@@ -156,7 +156,7 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
                       onTap: () {
                         context
                             .read<BusinessInfoProvider>()
-                            .updateCategory(industry.cateName);
+                            .updateCategory(industry.cateName, id: industry.catId);
                         Navigator.push(
                           context,
                           MaterialPageRoute(

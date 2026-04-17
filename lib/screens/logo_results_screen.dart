@@ -122,8 +122,7 @@ class LogoResultsScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
             child: GestureDetector(
               onTap: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => DashboardScreen()));
+                
               },
               child: Container(
                   // height: 10,

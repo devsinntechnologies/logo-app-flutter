@@ -29,13 +29,25 @@ class LogoResultsProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> fetchLogos(String name, String slogan) async {
+  Future<void> fetchLogos(
+    String name,
+    String slogan, {
+    int? industryId,
+    String? fontId,
+    String? colorId,
+  }) async {
     _isLoading = true;
     // Defer notification to avoid 'setState() called during build' errors
     Future.microtask(() => notifyListeners());
 
     try {
-      final svgs = await LogoService().fetchLogoSVGs(name, slogan);
+      final svgs = await LogoService().fetchLogoSVGs(
+        name,
+        slogan,
+        industryId: industryId,
+        fontId: fontId,
+        colorId: colorId,
+      );
       _generatedLogos = svgs.asMap().entries.map((entry) {
         int idx = entry.key;
         String svg = entry.value;
@@ -76,7 +88,19 @@ class LogoResultsProvider extends ChangeNotifier {
     }
   }
 
-  void regenerateVariations(String name, String slogan) {
-    fetchLogos(name, slogan);
+  void regenerateVariations(
+    String name,
+    String slogan, {
+    int? industryId,
+    String? fontId,
+    String? colorId,
+  }) {
+    fetchLogos(
+      name,
+      slogan,
+      industryId: industryId,
+      fontId: fontId,
+      colorId: colorId,
+    );
   }
 }

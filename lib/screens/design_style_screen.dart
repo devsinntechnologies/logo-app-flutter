@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:logo_app_flutter/components/divider_container.dart';
 import 'package:provider/provider.dart';
+import '../provider/business_info_provider.dart';
 import '../provider/logo_design_provider.dart';
 import 'package:logo_app_flutter/screens/logo_generation_screen.dart';
 import '../components/design_style/font_style_card.dart';
@@ -107,7 +108,14 @@ class DesignStyleScreen extends StatelessWidget {
                             name: item['name'],
                             textStyle: item['style'],
                             isSelected: provider.selectedFontIndex == index,
-                            onTap: () => provider.setFont(index),
+                            onTap: () {
+                              provider.setFont(index);
+                              // Sync to session provider
+                              context.read<BusinessInfoProvider>().updateDesign(
+                                (index + 1).toString(), 
+                                context.read<BusinessInfoProvider>().selectedColorId
+                              );
+                            },
                           );
                         },
                       ),
@@ -141,7 +149,14 @@ class DesignStyleScreen extends StatelessWidget {
                             name: item['name'],
                             colors: item['colors'],
                             isSelected: provider.selectedPaletteIndex == index,
-                            onTap: () => provider.setPalette(index),
+                            onTap: () {
+                                provider.setPalette(index);
+                                // Sync to session provider
+                                context.read<BusinessInfoProvider>().updateDesign(
+                                  context.read<BusinessInfoProvider>().selectedFontId,
+                                  (index + 1).toString()
+                                );
+                            },
                           );
                         },
                       ),

@@ -1,17 +1,24 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:http/http.dart' as http;
 import 'package:logo_app_flutter/utils/app_logger.dart';
 
 class LogoService {
   
-Future<List<String>> fetchLogoSVGs(String companyName, String slogan) async {
-  final url = Uri.parse('https://www.logoai.com/api/getAllInfo');
+  Future<List<String>> fetchLogoSVGs(
+    String companyName,
+    String slogan, {
+    int? industryId,
+    String? fontId,
+    String? colorId,
+  }) async {
+    final url = Uri.parse('https://www.smart-logomaker.com/api/generate');
 
-  final requestData = {
-    "color": "1",
-    "font": "1",
-    "industry": 23,
-    "name": "$companyName $slogan",
+    final requestData = {
+      "color": colorId ?? "1",
+      "font": fontId ?? "1",
+      "industry": industryId ?? 23,
+      "name": "$companyName $slogan",
     "icon_lists": [],
     "vDesigners": [1],
     "gtoken": "",
@@ -39,6 +46,7 @@ Future<List<String>> fetchLogoSVGs(String companyName, String slogan) async {
     headers: {'Content-Type': 'application/json'},
     body: jsonEncode(requestData),
   );
+
 
    if (response.statusCode == 200) {
     final decoded = jsonDecode(response.body);

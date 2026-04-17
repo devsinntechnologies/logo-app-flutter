@@ -1,10 +1,9 @@
-import 'dart:async';
-import 'dart:developer';
+
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+
+
 import 'package:logo_app_flutter/screens/log_in_screen.dart';
-import 'package:logo_app_flutter/provider/auth_provider.dart';
+
 import 'package:logo_app_flutter/utils/theme_colors.dart';
 
 class VerifyEmailScreen extends StatefulWidget {
@@ -19,7 +18,7 @@ class VerifyEmailScreen extends StatefulWidget {
 class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
   @override
   Widget build(BuildContext context) {
-    final authProvider = context.watch<AuthProvider>();
+    // final authProvider = context.watch<AuthProvider>();
 
     return Scaffold(
       backgroundColor: Colors.white,
