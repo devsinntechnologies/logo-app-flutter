@@ -220,13 +220,13 @@ class DashboardScreen extends StatelessWidget {
                                       ),
                                     ],
                                     onTap: () {
-                                      // Navigator.push(
-                                      //   context,
-                                      //   MaterialPageRoute(
-                                      //       builder: (context) =>
-                                      //           MyDesignScreen(
-                                      //               canvasKey: GlobalKey())),
-                                      // );
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                MyDesignScreen(
+                                                    canvasKey: GlobalKey())),
+                                      );
                                     },
                                   ),
                                   // DashboardCard(

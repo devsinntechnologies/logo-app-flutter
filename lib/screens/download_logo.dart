@@ -558,24 +558,24 @@ class _DownloadLogoState extends State<DownloadLogo> {
     //   background: _currentBackgroundState.clone(),
     // );
 
-    // Clear provider states immediately to prevent old backgrounds from persisting
-    final colorProvider = Provider.of<SelectedColorProvider>(
-      context,
-      listen: false,
-    );
-    colorProvider.resetAllOutlines();
-    colorProvider.resetAllColors(defaultColors: {});
-    colorProvider.clearOverrides();
-
-    // Set the selected font index for company name and slogan (prefer initial state)
-    final startCompanyFont =
-        widget.initialLogoState?.companyFontIndex ?? widget.selectedFontIndex;
-    final startSloganFont =
-        widget.initialLogoState?.sloganFontIndex ?? widget.selectedFontIndex;
-    colorProvider.setCompanyFontIndex(startCompanyFont);
-    colorProvider.setSloganFontIndex(startSloganFont);
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Clear provider states to prevent old backgrounds from persisting
+      final colorProvider = Provider.of<SelectedColorProvider>(
+        context,
+        listen: false,
+      );
+      colorProvider.resetAllOutlines();
+      colorProvider.resetAllColors(defaultColors: {});
+      colorProvider.clearOverrides();
+
+      // Set the selected font index for company name and slogan (prefer initial state)
+      final startCompanyFont =
+          widget.initialLogoState?.companyFontIndex ?? widget.selectedFontIndex;
+      final startSloganFont =
+          widget.initialLogoState?.sloganFontIndex ?? widget.selectedFontIndex;
+      colorProvider.setCompanyFontIndex(startCompanyFont);
+      colorProvider.setSloganFontIndex(startSloganFont);
+
       // Clear undo/redo stacks and initialize with clean state
       _undoStack.clear();
       _redoStack.clear();
@@ -1877,9 +1877,16 @@ class _DownloadLogoState extends State<DownloadLogo> {
     _undoStack.add(_currentLogoState.clone());
 
     // Force rebuild to update undo/redo button states
-    setState(() {
-      // Trigger rebuild to update button states based on stack lengths
-    });
+    // Safely schedule setState to avoid 'setState() called during build' errors
+    if (mounted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            // Trigger rebuild to update button states based on stack lengths
+          });
+        }
+      });
+    }
   }
 
   void _pushCurrentStateToUndoStack({bool clearRedo = false}) {
@@ -1894,6 +1901,14 @@ class _DownloadLogoState extends State<DownloadLogo> {
     _currentLogoState = newState;
     if (_undoStack.length >= _maxUndoHistory) _undoStack.removeAt(0);
     _undoStack.add(_currentLogoState.clone());
+    
+    // Safety: trigger a rebuild if we're not already building, 
+    // but usually this is called from within other methods that will rebuild.
+    if (mounted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() {});
+      });
+    }
   }
 
   void _undo() {

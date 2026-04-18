@@ -429,7 +429,7 @@ class _LogoCanvasState extends State<LogoCanvas> {
     Size canvasSize, {
     required bool isExporting,
   }) {
-    final provider = Provider.of<SelectedColorProvider>(context, listen: true);
+    final provider = Provider.of<SelectedColorProvider>(context, listen: false);
     final bool isSelected = widget.selectedElementId == id;
     final outlineColor = provider.getOutlineColor(id);
     final outlineWidth = provider.getOutlineWidth(id);
