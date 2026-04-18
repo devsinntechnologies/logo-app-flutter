@@ -462,7 +462,7 @@ class _TemplateGalleryScreenState extends State<TemplateGalleryScreen>
                         borderRadius: BorderRadius.circular(14),
                       ),
                       child: Image.asset(
-                        "assets/gallery_images/👑.png",
+                        "assets/gallery_images/king.png",
                         height: 40,
                         width: 40,
                       )

@@ -18,6 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  bool _isObscured = true;
 
   @override
   void dispose() {
@@ -118,8 +119,19 @@ class _LoginScreenState extends State<LoginScreen> {
                       hintText: S.of(context).enterPasswords,
                       filled: true,
                       fillColor: Colors.white,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _isObscured ? Icons.visibility_off : Icons.visibility,
+                          color: Colors.grey,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _isObscured = !_isObscured;
+                          });
+                        },
+                      ),
                     ),
-                    obscureText: true,
+                    obscureText: _isObscured,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your password';

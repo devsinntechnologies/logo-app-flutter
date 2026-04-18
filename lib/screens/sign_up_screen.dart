@@ -22,6 +22,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
+  bool _isPasswordObscured = true;
+  bool _isConfirmPasswordObscured = true;
 
   @override
   void dispose() {
@@ -179,8 +181,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       ),
                       filled: true,
                       fillColor: Colors.white,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _isPasswordObscured
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          color: Colors.grey,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _isPasswordObscured = !_isPasswordObscured;
+                          });
+                        },
+                      ),
                     ),
-                    obscureText: true,
+                    obscureText: _isPasswordObscured,
                     validator: (value) {
                       if (value == null || value.isEmpty)
                         return 'Please enter password';
@@ -212,8 +227,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       ),
                       filled: true,
                       fillColor: Colors.white,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _isConfirmPasswordObscured
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          color: Colors.grey,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _isConfirmPasswordObscured =
+                                !_isConfirmPasswordObscured;
+                          });
+                        },
+                      ),
                     ),
-                    obscureText: true,
+                    obscureText: _isConfirmPasswordObscured,
                     validator: (value) {
                       if (value == null || value.isEmpty)
                         return 'Please confirm password';

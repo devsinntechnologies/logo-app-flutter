@@ -65,11 +65,12 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
                 _signInWithGoogle();
               },
               child: Container(
+                
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
                   color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(5),
+                  borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
                       color: Theme.of(context).shadowColor.withOpacity(0.2),
