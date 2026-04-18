@@ -124,39 +124,40 @@ class DashboardScreen extends StatelessWidget {
                                 mainAxisSpacing: 15,
                                 childAspectRatio: 0.99,
                                 children: [
-                                  DashboardCard(
-                                    title: 'Templates',
-                                    subtitle: 'Browse designs',
-                                    icon: Image.asset(
-                                      "assets/icons/d_star.png",
-                                      height: 38,
-                                      width: 38,
-                                    ),
-                                    gradient: ThemeColors.templatesGradient,
-                                    backgroundDecorations: [
-                                      Positioned(
-                                        right: -50,
-                                        bottom: -70,
-                                        child: Container(
-                                          width: 100,
-                                          height: 100,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color:
-                                                Colors.white.withOpacity(0.12),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                const TemplateGalleryScreen()),
-                                      );
-                                    },
-                                  ),
+                                  // DashboardCard(
+                                  //   title: 'Templates',
+                                  //   subtitle: 'Browse designs',
+                                  //   icon: Image.asset(
+                                  //     "assets/icons/d_star.png",
+                                  //     height: 38,
+                                  //     width: 38,
+                                  //   ),
+                                  //   gradient: ThemeColors.templatesGradient,
+                                  //   backgroundDecorations: [
+                                  //     Positioned(
+                                  //       right: -50,
+                                  //       bottom: -70,
+                                  //       child: Container(
+                                  //         width: 100,
+                                  //         height: 100,
+                                  //         decoration: BoxDecoration(
+                                  //           shape: BoxShape.circle,
+                                  //           color:
+                                  //               Colors.white.withOpacity(0.12),
+                                  //         ),
+                                  //       ),
+                                  //     ),
+                                  //   ],
+                                  //   onTap: () {
+                                  //     Navigator.push(
+                                  //       context,
+                                  //       MaterialPageRoute(
+                                  //           builder: (context) =>
+                                  //               const TemplateGalleryScreen()),
+                                  //     );
+                                  //   },
+                                  // ),
+                               
                                   DashboardCard(
                                     title: 'Customize',
                                     subtitle: 'Make it yours',
@@ -228,34 +229,35 @@ class DashboardScreen extends StatelessWidget {
                                       // );
                                     },
                                   ),
-                                  DashboardCard(
-                                    title: 'History',
-                                    subtitle: 'Recent designs',
-                                    icon: Image.asset(
-                                      "assets/images/history.png",
-                                      height: 35,
-                                      width: 39,
-                                    ),
-                                    gradient: ThemeColors.historyGradient,
-                                    backgroundDecorations: [
-                                      Positioned(
-                                        left: -50,
-                                        bottom: -75,
-                                        child: Container(
-                                          width: 100,
-                                          height: 100,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color:
-                                                Colors.white.withOpacity(0.12),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                    onTap: () {
-                                      // Same as existing
-                                    },
-                                  ),
+                                  // DashboardCard(
+                                  //   title: 'History',
+                                  //   subtitle: 'Recent designs',
+                                  //   icon: Image.asset(
+                                  //     "assets/images/history.png",
+                                  //     height: 35,
+                                  //     width: 39,
+                                  //   ),
+                                  //   gradient: ThemeColors.historyGradient,
+                                  //   backgroundDecorations: [
+                                  //     Positioned(
+                                  //       left: -50,
+                                  //       bottom: -75,
+                                  //       child: Container(
+                                  //         width: 100,
+                                  //         height: 100,
+                                  //         decoration: BoxDecoration(
+                                  //           shape: BoxShape.circle,
+                                  //           color:
+                                  //               Colors.white.withOpacity(0.12),
+                                  //         ),
+                                  //       ),
+                                  //     ),
+                                  //   ],
+                                  //   onTap: () {
+                                  //     // Same as existing
+                                  //   },
+                                  // ),
+                               
                                 ],
                               );
                             },
