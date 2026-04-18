@@ -236,21 +236,24 @@ class _DownloadLogoState extends State<DownloadLogo> {
                         listen: false);
                     int? previousSelection = provider.selectedElementId;
                     bool hadSelection = previousSelection != null;
-                    // if (hadSelection) provider.clearSelection();
-                    // // Wait for UI to clear selection box
-                    // if (hadSelection) {
-                    //   await Future.delayed(const Duration(milliseconds: 50));
-                    //   await WidgetsBinding.instance.endOfFrame;
-                    // }
-                    // // Show loading dialog
-                    // showDialog(
-                    //   context: context,
-                    //   barrierDismissible: false,
-                    //   builder: (context) => const Center(
-                    //     child: CircularProgressIndicator(
-                    //         color: ThemeColors.purple),
-                    //   ),
-                    // );
+
+                    if (hadSelection) provider.clearSelection();
+
+                    // Wait for UI to clear selection box
+                    if (hadSelection) {
+                      await Future.delayed(const Duration(milliseconds: 50));
+                      await WidgetsBinding.instance.endOfFrame;
+                    }
+
+                    // Show loading dialog
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (loadingContext) => const Center(
+                        child: CircularProgressIndicator(
+                            color: ThemeColors.purple),
+                      ),
+                    );
 
                     try {
                       // Ensure current provider font selections are written into the state before saving
@@ -276,7 +279,9 @@ class _DownloadLogoState extends State<DownloadLogo> {
                       }
 
                       // Close loading dialog
-                      Navigator.of(context).pop();
+                      if (context.mounted && Navigator.of(context).canPop()) {
+                        Navigator.of(context).pop();
+                      }
 
                       // Restore selection after save
                       if (hadSelection && previousSelection != null) {
@@ -284,51 +289,60 @@ class _DownloadLogoState extends State<DownloadLogo> {
                       }
 
                       // Close confirmation dialog
-                      Navigator.of(context).pop();
-                      Navigator.of(context).pop();
+                      if (context.mounted && Navigator.of(context).canPop()) {
+                        Navigator.of(context).pop();
+                      }
 
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          behavior: SnackBarBehavior.floating,
-                          content: Row(
-                            children: [
-                              Icon(Icons.cloud_done),
-                              SizedBox(width: 12),
-                              Text(
-                                'Logo saved successfully!',
-                                style: TextStyle(
-                                  fontSize: 16,
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            behavior: SnackBarBehavior.floating,
+                            content: Row(
+                              children: [
+                                Icon(Icons.cloud_done),
+                                SizedBox(width: 12),
+                                Text(
+                                  'Logo saved successfully!',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      );
+                        );
+                      }
                     } catch (e) {
                       // Close loading dialog
-                      Navigator.of(context).pop();
+                      if (context.mounted && Navigator.of(context).canPop()) {
+                        Navigator.of(context).pop();
+                      }
 
                       if (hadSelection && previousSelection != null) {
                         provider.setSelectedElement(previousSelection);
                       }
 
                       // Close confirmation dialog
-                      Navigator.of(context).pop();
+                      if (context.mounted && Navigator.of(context).canPop()) {
+                        Navigator.of(context).pop();
+                      }
 
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          backgroundColor: Colors.white,
-                          behavior: SnackBarBehavior.floating,
-                          content: Row(
-                            children: [
-                              const Icon(Icons.error,
-                                  color: ThemeColors.purple),
-                              const SizedBox(width: 12),
-                              Expanded(child: Text('Error: $e')),
-                            ],
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            backgroundColor: Colors.white,
+                            behavior: SnackBarBehavior.floating,
+                            content: Row(
+                              children: [
+                                const Icon(Icons.error,
+                                    color: ThemeColors.purple),
+                                const SizedBox(width: 12),
+                                Expanded(child: Text('Error: $e')),
+                              ],
+                            ),
                           ),
-                        ),
-                      );
+                        );
+                      }
                     }
                   },
                   child: Text(
