@@ -95,7 +95,7 @@ class DashboardCard extends StatelessWidget {
                     // Content Layer
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 22, vertical: 24),
+                          horizontal: 22, vertical: 20),
                       child:
                           isMain ? _buildMainLayout() : _buildSecondaryLayout(),
                     ),
@@ -166,6 +166,7 @@ class DashboardCard extends StatelessWidget {
           child: icon,
         ),
         const Spacer(),
+        // SizedBox(height: 10,),
         Text(
           title,
           style: const TextStyle(
