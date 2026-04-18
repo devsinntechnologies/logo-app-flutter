@@ -65,7 +65,6 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
                 _signInWithGoogle();
               },
               child: Container(
-                
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
@@ -131,12 +130,14 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) { 
     if (_isLoading) return const CircularProgressIndicator();
 
     // When logged out: show Login button. When logged in: show account icon.
     if (_isLoggedIn) {
       final user = _supabase.auth.currentUser;
+      final avatarUrl =
+          user?.userMetadata?['avatar_url'] ?? user?.userMetadata?['picture'];
       final avatarLabel = (user?.email != null && user!.email!.isNotEmpty)
           ? user.email![0].toUpperCase()
           : '';
@@ -150,8 +151,11 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
         },
         icon: CircleAvatar(
           radius: 16,
-          child: Text(avatarLabel, style: const TextStyle(color: Colors.white)),
           backgroundColor: ThemeColors.purple,
+          backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl) : null,
+          child: avatarUrl == null
+              ? Text(avatarLabel, style: const TextStyle(color: Colors.white))
+              : null,
         ),
       );
     }
