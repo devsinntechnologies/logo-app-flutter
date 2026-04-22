@@ -207,212 +207,189 @@ class _DownloadLogoState extends State<DownloadLogo> {
     return true; // iOS will handle internally
   }
 
-void _showSaveConfirmationDialog(
-    BuildContext context, GlobalKey canvasKey) {
-  showDialog(
-    barrierDismissible: true,
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-
-        title: const Text(
-          'Save Logo',
-          style: TextStyle(
-            fontWeight: FontWeight.w500,
+  void _showSaveConfirmationDialog(BuildContext context, GlobalKey canvasKey) {
+    showDialog(
+      barrierDismissible: true,
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
           ),
-        ),
 
-        content: const Text(
-          'Do you want to save the logo to your storage or to My Design?',
-          style: TextStyle(fontSize: 16),
-        ),
-
-        /// 🔥 FIX: Wrap instead of Row
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              alignment: WrapAlignment.end,
-              children: [
-                /// 👉 SAVE / UPDATE TO SUPABASE
-                TextButton(
-                  onPressed: () async {
-                    final provider =
-                        Provider.of<SelectedColorProvider>(
-                      context,
-                      listen: false,
-                    );
-
-                    int? previousSelection =
-                        provider.selectedElementId;
-                    bool hadSelection = previousSelection != null;
-
-                    if (hadSelection) provider.clearSelection();
-
-                    if (hadSelection) {
-                      await Future.delayed(
-                          const Duration(milliseconds: 50));
-                      await WidgetsBinding.instance.endOfFrame;
-                    }
-
-                    showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (_) => const Center(
-                        child: CircularProgressIndicator(
-                          color: ThemeColors.purple,
-                        ),
-                      ),
-                    );
-
-                    try {
-                      _currentLogoState =
-                          _currentLogoState.copyWith(
-                        companyFontIndex:
-                            provider.companyFontIndex,
-                        sloganFontIndex:
-                            provider.sloganFontIndex,
-                      );
-
-                      final designJson =
-                          _currentLogoState.toJson();
-
-                      final svc = UserDesignService();
-
-                      if (widget.designId != null) {
-                        await svc.updateDesign(
-                          designId: widget.designId!,
-                          updatedJson: designJson,
-                          canvasKey: canvasKey,
-                          updateImage: true,
-                        );
-                      } else {
-                        await svc.saveNewDesign(
-                          canvasKey: canvasKey,
-                          designJson: designJson,
-                        );
-                      }
-
-                      if (context.mounted &&
-                          Navigator.of(context).canPop()) {
-                        Navigator.of(context).pop();
-                      }
-
-                      if (hadSelection &&
-                          previousSelection != null) {
-                        provider.setSelectedElement(
-                            previousSelection);
-                      }
-
-                      if (context.mounted &&
-                          Navigator.of(context).canPop()) {
-                        Navigator.of(context).pop();
-                      }
-
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context)
-                            .showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                                'Logo saved successfully!'),
-                          ),
-                        );
-                      }
-                    } catch (e) {
-                      if (context.mounted &&
-                          Navigator.of(context).canPop()) {
-                        Navigator.of(context).pop();
-                      }
-
-                      if (hadSelection &&
-                          previousSelection != null) {
-                        provider.setSelectedElement(
-                            previousSelection);
-                      }
-
-                      if (context.mounted &&
-                          Navigator.of(context).canPop()) {
-                        Navigator.of(context).pop();
-                      }
-
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context)
-                            .showSnackBar(
-                          SnackBar(content: Text('Error: $e')),
-                        );
-                      }
-                    }
-                  },
-                  child: Text(
-                    widget.designId != null
-                        ? 'Update'
-                        : 'My Design',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: ThemeColors.purple,
-                    ),
-                  ),
-                ),
-
-                /// 👉 SAVE TO DEVICE
-                TextButton(
-                  onPressed: () async {
-                    final provider =
-                        Provider.of<SelectedColorProvider>(
-                      context,
-                      listen: false,
-                    );
-
-                    int? previousSelection =
-                        provider.selectedElementId;
-                    provider.clearSelection();
-
-                    await WidgetsBinding.instance.endOfFrame;
-
-                    await exportCanvas(
-                      context: context,
-                      repaintKey: canvasKey,
-                      logoState: _currentLogoState,
-                    );
-
-                    if (previousSelection != null) {
-                      provider.setSelectedElement(
-                          previousSelection);
-                    }
-
-                    Navigator.of(context).pop();
-
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                            'Logo saved successfully!'),
-                      ),
-                    );
-                  },
-                  child: const Text(
-                    'Storage',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: ThemeColors.purple,
-                    ),
-                  ),
-                ),
-              
-              ],
+          title: const Text(
+            'Save Logo',
+            style: TextStyle(
+              fontWeight: FontWeight.w500,
             ),
           ),
-        ],
-      );
-    },
-  );
-}
-  
+
+          content: const Text(
+            'Do you want to save the logo to your storage or to My Design?',
+            style: TextStyle(fontSize: 16),
+          ),
+
+          /// 🔥 FIX: Wrap instead of Row
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                alignment: WrapAlignment.end,
+                children: [
+                  /// 👉 SAVE / UPDATE TO SUPABASE
+                  TextButton(
+                    onPressed: () async {
+                      if (Supabase.instance.client.auth.currentUser == null) {
+                        showCustomGoogleDialog(context);
+                        return;
+                      }
+                      final provider = Provider.of<SelectedColorProvider>(
+                        context,
+                        listen: false,
+                      );
+
+                      int? previousSelection = provider.selectedElementId;
+                      bool hadSelection = previousSelection != null;
+
+                      if (hadSelection) provider.clearSelection();
+
+                      if (hadSelection) {
+                        await Future.delayed(const Duration(milliseconds: 50));
+                        await WidgetsBinding.instance.endOfFrame;
+                      }
+
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (_) => const Center(
+                          child: CircularProgressIndicator(
+                            color: ThemeColors.purple,
+                          ),
+                        ),
+                      );
+
+                      try {
+                        _currentLogoState = _currentLogoState.copyWith(
+                          companyFontIndex: provider.companyFontIndex,
+                          sloganFontIndex: provider.sloganFontIndex,
+                        );
+
+                        final designJson = _currentLogoState.toJson();
+
+                        final svc = UserDesignService();
+
+                        if (widget.designId != null) {
+                          await svc.updateDesign(
+                            designId: widget.designId!,
+                            updatedJson: designJson,
+                            canvasKey: canvasKey,
+                            updateImage: true,
+                          );
+                        } else {
+                          await svc.saveNewDesign(
+                            canvasKey: canvasKey,
+                            designJson: designJson,
+                          );
+                        }
+
+                        if (context.mounted && Navigator.of(context).canPop()) {
+                          Navigator.of(context).pop();
+                        }
+
+                        if (hadSelection && previousSelection != null) {
+                          provider.setSelectedElement(previousSelection);
+                        }
+
+                        if (context.mounted && Navigator.of(context).canPop()) {
+                          Navigator.of(context).pop();
+                        }
+
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Logo saved successfully!'),
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted && Navigator.of(context).canPop()) {
+                          Navigator.of(context).pop();
+                        }
+
+                        if (hadSelection && previousSelection != null) {
+                          provider.setSelectedElement(previousSelection);
+                        }
+
+                        if (context.mounted && Navigator.of(context).canPop()) {
+                          Navigator.of(context).pop();
+                        }
+
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Error: $e')),
+                          );
+                        }
+                      }
+                    },
+                    child: Text(
+                      widget.designId != null ? 'Update' : 'My Design',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: ThemeColors.purple,
+                      ),
+                    ),
+                  ),
+
+                  /// 👉 SAVE TO DEVICE
+                  TextButton(
+                    onPressed: () async {
+                      final provider = Provider.of<SelectedColorProvider>(
+                        context,
+                        listen: false,
+                      );
+
+                      int? previousSelection = provider.selectedElementId;
+                      provider.clearSelection();
+
+                      await WidgetsBinding.instance.endOfFrame;
+
+                      await exportCanvas(
+                        context: context,
+                        repaintKey: canvasKey,
+                        logoState: _currentLogoState,
+                      );
+
+                      if (previousSelection != null) {
+                        provider.setSelectedElement(previousSelection);
+                      }
+
+                      Navigator.of(context).pop();
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Logo saved successfully!'),
+                        ),
+                      );
+                    },
+                    child: const Text(
+                      'Storage',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: ThemeColors.purple,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -1268,7 +1245,7 @@ void _showSaveConfirmationDialog(
                       value: saveLogoChecked,
                       onChanged: (value) {
                         setDialogState(() {
-                          saveLogoChecked = value!;
+                          saveLogoChecked = value ?? false;
                         });
                       },
                       fillColor: MaterialStateProperty.all(ThemeColors.purple),
@@ -1316,6 +1293,14 @@ void _showSaveConfirmationDialog(
                                   ),
                                 ),
                               );
+
+                              if (Supabase.instance.client.auth.currentUser ==
+                                  null) {
+                                Navigator.of(parentContext)
+                                    .pop(); // Dismiss loading
+                                showCustomGoogleDialog(parentContext);
+                                return;
+                              }
 
                               try {
                                 // 3. Clear selection so thumbnail is clean
@@ -1435,7 +1420,6 @@ void _showSaveConfirmationDialog(
                     ),
                   ],
                 ),
-              
               ],
             );
           },
@@ -1443,7 +1427,6 @@ void _showSaveConfirmationDialog(
       },
     );
   }
-
 
   void _setOutlineColor(String elementKey, Color color) {
     _saveState(); // save current state before change
@@ -1839,8 +1822,8 @@ void _showSaveConfirmationDialog(
     _currentLogoState = newState;
     if (_undoStack.length >= _maxUndoHistory) _undoStack.removeAt(0);
     _undoStack.add(_currentLogoState.clone());
-    
-    // Safety: trigger a rebuild if we're not already building, 
+
+    // Safety: trigger a rebuild if we're not already building,
     // but usually this is called from within other methods that will rebuild.
     if (mounted) {
       WidgetsBinding.instance.addPostFrameCallback((_) {

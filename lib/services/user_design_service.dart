@@ -11,7 +11,9 @@ class UserDesignService {
 
   /// Fetch all designs for the current logged-in user
   Future<List<Map<String, dynamic>>> fetchUserDesigns() async {
-    final uid = supabase.auth.currentUser!.id;
+    final user = supabase.auth.currentUser;
+    if (user == null) return [];
+    final uid = user.id;
     try {
       final response =
           await supabase.from('designs').select().eq('user_id', uid);
@@ -61,8 +63,13 @@ class UserDesignService {
       await Future.delayed(const Duration(milliseconds: 50));
       await WidgetsBinding.instance.endOfFrame;
 
+      final context = canvasKey.currentContext;
+      if (context == null) {
+        throw Exception('Canvas context not found. Make sure the canvas is visible.');
+      }
+
       final boundary =
-          canvasKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+          context.findRenderObject() as RenderRepaintBoundary;
       final ui.Image image = await boundary.toImage(pixelRatio: 3);
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       if (byteData == null) {
@@ -70,7 +77,12 @@ class UserDesignService {
       }
       final Uint8List pngBytes = byteData.buffer.asUint8List();
 
-      final uid = supabase.auth.currentUser!.id;
+      final user = supabase.auth.currentUser;
+      if (user == null) {
+        throw Exception('User must be logged in to upload images');
+      }
+      final uid = user.id;
+
       final filePath = targetPath ??
           'logos/$uid/logo_${DateTime.now().millisecondsSinceEpoch}.png';
 
@@ -105,7 +117,9 @@ class UserDesignService {
     required GlobalKey canvasKey,
     required Map<String, dynamic> designJson,
   }) async {
-    final uid = supabase.auth.currentUser!.id;
+    final user = supabase.auth.currentUser;
+    if (user == null) throw Exception('Authentication required');
+    final uid = user.id;
 
     try {
       final uploadResult = await uploadCanvasImage(canvasKey: canvasKey);
@@ -133,7 +147,9 @@ class UserDesignService {
     String? imagePath, // 👈 SAME path pass karne ke liye
     bool updateImage = false,
   }) async {
-    final uid = supabase.auth.currentUser!.id;
+    final user = supabase.auth.currentUser;
+    if (user == null) throw Exception('Authentication required');
+    final uid = user.id;
 
     try {
       String? finalPath = imagePath;
@@ -185,7 +201,9 @@ class UserDesignService {
 
   /// Fetch a single design by ID
   Future<Map<String, dynamic>?> fetchDesignById(String designId) async {
-    final uid = supabase.auth.currentUser!.id;
+    final user = supabase.auth.currentUser;
+    if (user == null) return null;
+    final uid = user.id;
 
     try {
       final response = await supabase
@@ -227,7 +245,9 @@ class UserDesignService {
 
   /// Delete a design and its storage image
   Future<bool> deleteDesign(String designId) async {
-    final uid = supabase.auth.currentUser!.id;
+    final user = supabase.auth.currentUser;
+    if (user == null) return false;
+    final uid = user.id;
     try {
       // fetch design to get image_path
       final design = await fetchDesignById(designId);

@@ -68,6 +68,7 @@ class _CategorySelectionScreenState extends State<CategorySelectionScreen> {
           child: DividerContainer(),
         ),
       ),
+     
       body: Consumer<CategorySelectionProvider>(
         builder: (context, provider, child) {
           if (provider.isLoading) {

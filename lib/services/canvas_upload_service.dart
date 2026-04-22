@@ -14,14 +14,29 @@ class CanvasUploadService {
       await Future.delayed(const Duration(milliseconds: 50));
       await WidgetsBinding.instance.endOfFrame;
 
+      final context = canvasKey.currentContext;
+      if (context == null) {
+        print('❌ Canvas context is null');
+        return null;
+      }
+
       final boundary =
-          canvasKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+          context.findRenderObject() as RenderRepaintBoundary;
       final ui.Image image = await boundary.toImage(pixelRatio: 3);
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-      final Uint8List pngBytes = byteData!.buffer.asUint8List();
+      if (byteData == null) {
+        print('❌ byteData is null');
+        return null;
+      }
+      final Uint8List pngBytes = byteData.buffer.asUint8List();
 
       final supabase = Supabase.instance.client;
-      final uid = supabase.auth.currentUser!.id;
+      final user = supabase.auth.currentUser;
+      if (user == null) {
+        print('❌ User not found');
+        return null;
+      }
+      final uid = user.id;
       final fileName = 'logo_${DateTime.now().millisecondsSinceEpoch}.png';
       final filePath = 'logos/$uid/$fileName';
 

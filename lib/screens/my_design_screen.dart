@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:logo_app_flutter/components/divider_container.dart';
 import 'dart:convert';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/canvas_upload_service.dart'; // import the upload service
@@ -106,11 +107,38 @@ class _MyDesignScreenState extends State<MyDesignScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        // scrolledUnderElevation: 0,
+        toolbarHeight: 80,
         backgroundColor: Colors.white,
-        title: const Text('All Logos'),
-        actions: [],
+        elevation: 0,
+        leading: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+          child: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              width: 30,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF3F4F6),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Image.asset("assets/images/backarrow.png"),
+            ),
+          ),
+        ),
+        title: const Text(
+          'My Logos',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 16,
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+        centerTitle: true,
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(1),
+          child: DividerContainer(),
+        ),
       ),
+     
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : (imageUrls.isEmpty
