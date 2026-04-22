@@ -164,25 +164,19 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
       onTap: () => showCustomGoogleDialog(context),
       child: Padding(
         padding: const EdgeInsets.only(right: 6.0),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth:
-                MediaQuery.of(context).size.width * 0.3, // max 60% of screen
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: ThemeColors.textGradient,
+            borderRadius: BorderRadius.circular(8),
           ),
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: ThemeColors.textGradient,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Padding(
-              padding: EdgeInsets.all(6.0),
-              child: Text(
-                S.of(context).login,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
+          child: Padding(
+            padding: EdgeInsets.all(6.0),
+            child: Text(
+              S.of(context).login,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),

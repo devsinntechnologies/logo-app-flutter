@@ -29,31 +29,33 @@ class DashboardScreen extends StatelessWidget {
               color: Colors.transparent,
               child: Column(
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  Stack(
+                    alignment: Alignment.center,
                     children: [
-                      const SizedBox(
-                          width:
-                              48), // To balance the center text if login button is roughly 48-60w
-                      Expanded(
-                        child: Center(
-                          child: Text(
-                            'SMART LOGO MAKER',
-                            style: GoogleFonts.poppins(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black87,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
+                      // Row for left & right widgets
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: const [
+                          SizedBox(
+                              width: 40), // left spacing or back button later
+                          GoogleSignInButton(),
+                        ],
+                      ),
+
+                      // Centered Title
+                      Text(
+                        'SMART LOGO MAKER',
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black87,
+                          letterSpacing: 0.5,
                         ),
                       ),
-                      const GoogleSignInButton(),
-                      const SizedBox(width: 18),
                     ],
                   ),
-                  const SizedBox(height: 18),
-                  // Gradient Separator Line
+                  const SizedBox(height: 14),
+                 
                   const DividerContainer(),
                 ],
               ),
@@ -157,7 +159,7 @@ class DashboardScreen extends StatelessWidget {
                                   //     );
                                   //   },
                                   // ),
-                               
+
                                   DashboardCard(
                                     title: 'Customize',
                                     subtitle: 'Make it yours',
@@ -257,11 +259,11 @@ class DashboardScreen extends StatelessWidget {
                                   //     // Same as existing
                                   //   },
                                   // ),
-                               
                                 ],
                               );
                             },
                           ),
+                          
                           const SizedBox(height: 36),
 
                           // Bottom Section: AI-Powered Features
@@ -322,6 +324,7 @@ class DashboardScreen extends StatelessWidget {
                               ],
                             ),
                           ),
+                       
                           const SizedBox(height: 30),
                         ],
                       ),

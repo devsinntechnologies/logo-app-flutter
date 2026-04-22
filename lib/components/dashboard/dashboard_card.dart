@@ -24,171 +24,188 @@ class DashboardCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final ValueNotifier<bool> isHovered = ValueNotifier<bool>(false);
 
-    return ValueListenableBuilder<bool>(
-      valueListenable: isHovered,
-      builder: (context, hovered, child) {
-        return MouseRegion(
-          onEnter: (_) => isHovered.value = true,
-          onExit: (_) => isHovered.value = false,
-          child: GestureDetector(
-            onTapDown: (_) => isHovered.value = true,
-            onTapUp: (_) => isHovered.value = false,
-            onTapCancel: () => isHovered.value = false,
-            onTap: onTap,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              transform: Matrix4.identity()
-                ..translate(0.0, hovered ? -10.0 : 0.0)
-                ..scale(hovered ? 1.04 : 1.0),
-              child: Container(
-                width: double.infinity,
-                clipBehavior: Clip.antiAlias,
-                decoration: BoxDecoration(
-                  gradient: gradient,
-                  borderRadius: BorderRadius.circular(15),
-                  boxShadow: [
-                    BoxShadow(
-                      color: (gradient as LinearGradient)
-                          .colors
-                          .first
-                          .withOpacity(hovered ? 0.4 : 0.25),
-                      blurRadius: hovered ? 25 : 18,
-                      offset: Offset(0, hovered ? 12 : 8),
-                    ),
-                  ],
-                ),
-                child: Stack(
-                  children: [
-                    if (backgroundDecorations != null)
-                      ...backgroundDecorations!,
+    return LayoutBuilder(
+    builder: (context, constraints) {
+      final width = constraints.maxWidth;
 
-                    // Fallback generic decorations
-                    if (backgroundDecorations == null) ...[
-                      // Glossy Arc Highlight (Top Left)
-                      Positioned(
-                        left: -20,
-                        top: -20,
-                        child: Container(
-                          width: 120,
-                          height: 120,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withOpacity(0.12),
-                          ),
-                        ),
-                      ),
-                      // Decorative Bubble (Bottom Right)
-                      Positioned(
-                        right: -10,
-                        bottom: -10,
-                        child: Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withOpacity(0.08),
-                          ),
-                        ),
+      // 🔥 Breakpoints
+      final isSmall = width < 350;
+      final isTablet = width > 600;
+
+      // 🎯 Dynamic values
+      final padding = isSmall ? 14.0 : 20.0;
+      final iconSize = isSmall ? 26.0 : 34.0;
+      final titleSize = isSmall ? 13.0 : 16.0;
+      final subtitleSize = isSmall ? 11.0 : 13.0;
+
+      return ValueListenableBuilder<bool>(
+        valueListenable: isHovered,
+        builder: (context, hovered, child) {
+          return MouseRegion(
+            onEnter: (_) => isHovered.value = true,
+            onExit: (_) => isHovered.value = false,
+            child: GestureDetector(
+              onTap: onTap,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                transform: Matrix4.identity()
+                  ..translate(0.0, hovered ? -8.0 : 0.0)
+                  ..scale(hovered ? 1.03 : 1.0),
+                child: Container(
+                  width: double.infinity,
+                  clipBehavior: Clip.antiAlias,
+                  decoration: BoxDecoration(
+                    gradient: gradient,
+                    borderRadius: BorderRadius.circular(isSmall ? 12 : 16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: (gradient as LinearGradient)
+                            .colors
+                            .first
+                            .withOpacity(hovered ? 0.4 : 0.25),
+                        blurRadius: hovered ? 22 : 16,
+                        offset: Offset(0, hovered ? 10 : 6),
                       ),
                     ],
+                  ),
+                  child: Stack(
+                    children: [
+                      if (backgroundDecorations != null)
+                        ...backgroundDecorations!,
 
-                    // Content Layer
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 22, vertical: 20),
-                      child:
-                          isMain ? _buildMainLayout() : _buildSecondaryLayout(),
-                    ),
-                  ],
+                      Padding(
+                        padding: EdgeInsets.all(padding),
+                        child:isMain
+  ? _buildMainLayoutResponsive(
+      iconSize, titleSize, subtitleSize, isSmall)
+  : _buildSecondaryLayoutResponsive(
+      iconSize, titleSize, subtitleSize),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        );
-      },
-    );
+          );
+        },
+      );
+    },
+  );
   }
 
-  Widget _buildMainLayout() {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.25),
-            borderRadius: BorderRadius.circular(18),
-          ),
-          child: IconTheme(
-            data: const IconThemeData(color: Colors.white, size: 34),
-            child: icon,
-          ),
+Widget _buildMainLayoutResponsive(
+    double iconSize, double titleSize, double subtitleSize, bool isSmall) {
+  return Row(
+    children: [
+      Container(
+        padding: EdgeInsets.all(isSmall ? 16 : 16),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.25),
+          borderRadius: BorderRadius.circular(14),
         ),
-        const SizedBox(width: 18),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.3,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.9),
-                  fontWeight: FontWeight.w400,
-                  fontSize: 13,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const Icon(Icons.arrow_forward_ios_rounded,
-            color: Colors.white, size: 22),
-      ],
-    );
-  }
-
-  Widget _buildSecondaryLayout() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        IconTheme(
-          data: const IconThemeData(color: Colors.white, size: 38),
+        child: IconTheme(
+          data: IconThemeData(color: Colors.white, size: iconSize),
           child: icon,
         ),
-        const Spacer(),
-        // SizedBox(height: 10,),
-        Text(
-          title,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.2,
-          ),
+      ),
+      SizedBox(width: isSmall ? 10 : 18),
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              title,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: titleSize,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.9),
+                fontSize: subtitleSize,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 2),
-        Text(
-          subtitle,
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.9),
-            fontSize: 12,
-            fontWeight: FontWeight.w400,
-          ),
-        ),
-        const SizedBox(height: 10),
-        const Icon(Icons.arrow_forward_ios_rounded,
-            color: Colors.white, size: 16),
-      ],
-    );
-  }
+      ),
+      Icon(
+        Icons.arrow_forward_ios_rounded,
+        color: Colors.white,
+        size: isSmall ? 16 : 22,
+      ),
+    ],
+  );
 }
+Widget _buildSecondaryLayoutResponsive(
+    double iconSize, double titleSize, double subtitleSize) {
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      final isSmall = constraints.maxHeight < 120;
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // 👈 KEY FIX
+        children: [
+          IconTheme(
+            data: IconThemeData(
+              color: Colors.white,
+              size: isSmall ? iconSize * 0.85 : iconSize,
+            ),
+            child: icon,
+          ),
+
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    title,
+                    maxLines: 1,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: titleSize,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+
+                SizedBox(height: isSmall ? 2 : 4),
+
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    subtitle,
+                    maxLines: 1,
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.9),
+                      fontSize: subtitleSize,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          Icon(
+            Icons.arrow_forward_ios_rounded,
+            color: Colors.white,
+            size: iconSize * 0.45,
+          ),
+        ],
+      );
+    },
+  );
+}}
+

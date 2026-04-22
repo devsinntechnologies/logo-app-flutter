@@ -14,27 +14,37 @@ class FeatureListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isSmall = MediaQuery.of(context).size.width < 460;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 10),
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.all(10),
+            padding: EdgeInsets.all(isSmall ? 8 : 10),
             decoration: BoxDecoration(
               gradient: iconBgColor,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(14),
             ),
             child: IconTheme(
-              data: const IconThemeData(color: Colors.white, size: 30),
+              data: IconThemeData(
+                color: Colors.white,
+                size: isSmall ? 24 : 30, // 👈 responsive icon size
+              ),
               child: icon,
             ),
           ),
-          const SizedBox(width: 10),
+
+          SizedBox(width: isSmall ? 8 : 10),
+
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(
-                fontSize: 16,
+              maxLines: 2, // 👈 prevents overflow
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: isSmall ? 13 : 16, // 👈 responsive text
                 fontWeight: FontWeight.w400,
                 color: Colors.black87,
               ),
