@@ -48,7 +48,7 @@ void showCustomGoogleDialog(BuildContext context) {
                   child: Text(
                     S.of(context).login,
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 18,
                       color: Colors.white,
                       fontWeight: FontWeight.w500,
                     ),
@@ -89,7 +89,7 @@ void showCustomGoogleDialog(BuildContext context) {
                   child: Text(
                     S.of(context).signup,
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 18,
                       color: Colors.white,
                       fontWeight: FontWeight.w500,
                     ),
@@ -167,7 +167,7 @@ void showCustomGoogleDialog(BuildContext context) {
                       child: Text(
                         S.of(context).SignInWithGoogle,
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 14,
                           fontWeight: FontWeight.w500,
                           color: Colors.black,
                         ),
