@@ -179,6 +179,7 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
                 fontWeight: FontWeight.bold,
               ),
             ),
+         
           ),
         ),
       ),

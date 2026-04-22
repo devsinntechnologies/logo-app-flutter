@@ -14,172 +14,164 @@ void showCustomGoogleDialog(BuildContext context) {
       return AlertDialog(
         backgroundColor: Colors.grey[100],
         title: Column(
-          children: [
-            SizedBox(height: 10),
-            InkWell(
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const LoginScreen()));
-              },
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  gradient: ThemeColors.yellowOrangePink,
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.shade400,
-                      offset: const Offset(4, 4),
-                      blurRadius: 6,
-                    ),
-                    BoxShadow(
-                      color: Colors.white,
-                      offset: const Offset(-4, -4),
-                      blurRadius: 6,
-                    ),
-                  ],
-                ),
-                child: Center(
-                  child: Text(
-                    S.of(context).login,
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ),
+  children: [
+    const SizedBox(height: 10),
+
+    /// 🔵 LOGIN BUTTON
+    _authButton(
+      context,
+      text: S.of(context).login,
+      onTap: () {
+        Navigator.pop(context);
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+        );
+      },
+    ),
+
+    const SizedBox(height: 16),
+
+    /// 🟢 SIGNUP BUTTON
+    _authButton(
+      context,
+      text: S.of(context).signup,
+      onTap: () {
+        Navigator.pop(context);
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const SignUpScreen()),
+        );
+      },
+    ),
+
+    const SizedBox(height: 20),
+
+    /// DIVIDER
+    Row(
+      children: [
+        const Expanded(child: Divider(thickness: 1)),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Text(
+            S.of(context).or,
+            style: TextStyle(
+              fontSize: _responsiveFont(context, 14),
+              color: Colors.grey[600],
             ),
-            SizedBox(height: 20),
-            InkWell(
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const SignUpScreen()));
-              },
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  gradient: ThemeColors.yellowOrangePink,
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.shade400,
-                      offset: const Offset(4, 4),
-                      blurRadius: 6,
-                    ),
-                    BoxShadow(
-                      color: Colors.white,
-                      offset: const Offset(-4, -4),
-                      blurRadius: 6,
-                    ),
-                  ],
-                ),
-                child: Center(
-                  child: Text(
-                    S.of(context).signup,
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(
-              height: 20,
-            ),
-            Row(
-              children: [
-                Expanded(
-                  child: Divider(
-                    thickness: 1,
-                    color: Colors.grey,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Text(
-                    S.of(context).or,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey[600],
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Divider(
-                    thickness: 1,
-                    color: Colors.grey,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(
-              height: 20,
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                  // boxShadow: [
-                  //   BoxShadow(
-                  //       color: Colors.grey, spreadRadius: 0.3, blurRadius: 0.3)
-                  // ],
-                  borderRadius: BorderRadius.circular(5),
-                  border: Border.all(color: Colors.grey)),
-              child: GestureDetector(
-                onTap: () async {
-                  Navigator.pop(context);
-                  try {
-                    await context.read<AuthProvider>().signInWithGoogle();
-                  } catch (e) {
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text("Google Sign-In failed: $e"),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
-                    }
-                  }
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.asset(
-                      "assets/icons/google.png",
-                      height: 20,
-                    ),
-                    SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        S.of(context).SignInWithGoogle,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
+        const Expanded(child: Divider(thickness: 1)),
+      ],
+    ),
+
+    const SizedBox(height: 20),
+
+    /// GOOGLE BUTTON
+    _googleButton(context),
+  ],
+)
       );
     },
   );
+}
+Widget _authButton(
+  BuildContext context, {
+  required String text,
+  required VoidCallback onTap,
+}) {
+  final isSmall = MediaQuery.of(context).size.width < 360;
+
+  return InkWell(
+    onTap: onTap,
+    child: Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: isSmall ? 10 : 14,
+      ),
+      decoration: BoxDecoration(
+        gradient: ThemeColors.yellowOrangePink,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.shade400,
+            offset: const Offset(3, 3),
+            blurRadius: 6,
+          ),
+        ],
+      ),
+      child: Center(
+        child: Text(
+          text,
+          style: TextStyle(
+            fontSize: _responsiveFont(context, 16),
+            color: Colors.white,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+    ),
+  );
+}
+Widget _googleButton(BuildContext context) {
+  final isSmall = MediaQuery.of(context).size.width < 360;
+
+  return Container(
+    width: double.infinity,
+    padding: EdgeInsets.symmetric(
+      horizontal: 16,
+      vertical: isSmall ? 10 : 12,
+    ),
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(6),
+      border: Border.all(color: Colors.grey),
+    ),
+    child: GestureDetector(
+      onTap: () async {
+        Navigator.pop(context);
+        try {
+          await context.read<AuthProvider>().signInWithGoogle();
+        } catch (e) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text("Google Sign-In failed: $e"),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        }
+      },
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            "assets/icons/google.png",
+            height: isSmall ? 18 : 20,
+          ),
+          const SizedBox(width: 10),
+
+          Flexible(
+            child: Text(
+              S.of(context).SignInWithGoogle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: _responsiveFont(context, 12),
+                fontWeight: FontWeight.w500,
+                color: Colors.black,
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+double _responsiveFont(BuildContext context, double size) {
+  final width = MediaQuery.of(context).size.width;
+  if (width < 360) return size - 2;
+  if (width < 400) return size - 1;
+  return size;
 }
