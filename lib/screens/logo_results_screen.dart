@@ -240,37 +240,38 @@ class LogoResultsScreen extends StatelessWidget {
                   },
                 ),
                 const SizedBox(height: 35),
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 20,
-                    // mainAxisSpacing: 25,
-                    childAspectRatio: 0.75,
-                  ),
-                  itemCount: provider.generatedLogos.length,
-                  itemBuilder: (context, index) {
-                    final logo = provider.generatedLogos[index];
-                    return LogoResultCard(
-                      name: logo.name,
-                      svg: logo.svg,
-                      colors: logo.colors,
-                      isFavorite: logo.isFavorite,
-                      onFavoriteTap: () => provider.toggleFavorite(index),
-                      onTap: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => LogoDetailDialog(
-                            name: logo.name,
-                            svg: logo.svg,
-                            colors: logo.colors,
-                          ),
-                        );
-                      },
-                    );
-                  },
-                ),
+               GridView.builder(
+  shrinkWrap: true,
+  physics: const NeverScrollableScrollPhysics(),
+  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+    crossAxisCount: 2,
+    crossAxisSpacing: 20,
+    mainAxisSpacing: 16,
+    childAspectRatio:
+        MediaQuery.of(context).size.width < 360 ? 0.82 : 0.75,
+  ),
+  itemCount: provider.generatedLogos.length,
+  itemBuilder: (context, index) {
+    final logo = provider.generatedLogos[index];
+    return LogoResultCard(
+      name: logo.name,
+      svg: logo.svg,
+      colors: logo.colors,
+      isFavorite: logo.isFavorite,
+      onFavoriteTap: () => provider.toggleFavorite(index),
+      onTap: () {
+        showDialog(
+          context: context,
+          builder: (context) => LogoDetailDialog(
+            name: logo.name,
+            svg: logo.svg,
+            colors: logo.colors,
+          ),
+        );
+      },
+    );
+  },
+),
                 const SizedBox(height: 20),
               ],
             ),

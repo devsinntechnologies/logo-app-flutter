@@ -68,147 +68,122 @@ class _LogoResultCardState extends State<LogoResultCard> {
 
   @override
   Widget build(BuildContext context) {
+      final isSmall = MediaQuery.of(context).size.width < 360;
     return ValueListenableBuilder<bool>(
       valueListenable: isInteracting,
       builder: (context, interacting, child) {
         return MouseRegion(
           onEnter: (_) => isInteracting.value = true,
           onExit: (_) => isInteracting.value = false,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              GestureDetector(
-                onTapDown: (_) => isInteracting.value = true,
-                onTapUp: (_) => isInteracting.value = false,
-                onTapCancel: () => isInteracting.value = false,
-                onTap: widget.onTap,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  transform: Matrix4.identity()
-                    ..translate(0.0, interacting ? -12.0 : 0.0)
-                    ..scale(interacting ? 1.02 : 1.0),
-                  width: double.infinity,
-                  height: 152,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color:
-                          //  interacting
-                          //     ? const Color(0xFFFF4081).withOpacity(0.5)
-                          //     :
-                          Colors.transparent,
-                      width: 2,
+          child: GestureDetector(
+            onTap: widget.onTap,
+            onTapDown: (_) => isInteracting.value = true,
+            onTapUp: (_) => isInteracting.value = false,
+            onTapCancel: () => isInteracting.value = false,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+
+              transform: Matrix4.identity()
+                ..translate(0.0, interacting ? (isSmall ? -6.0 : -10.0) : 0.0)
+                ..scale(interacting ? (isSmall ? 1.01 : 1.02) : 1.0),
+
+              width: double.infinity,
+              height: isSmall ? 135 : 152, // 👈 responsive height
+
+              padding: const EdgeInsets.all(14),
+
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: interacting
+                        ? const Color(0xFFFF4081).withOpacity(0.12)
+                        : Colors.black.withOpacity(0.03),
+                    blurRadius: interacting ? 20 : 14,
+                    offset: Offset(0, interacting ? 10 : 6),
+                  ),
+                ],
+              ),
+
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  /// GRADIENT BOX
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: widget.colors,
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(15),
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: interacting
-                            ? const Color(0xFFFF4081).withOpacity(0.15)
-                            : Colors.black.withOpacity(0.03),
-                        blurRadius: interacting ? 30 : 20,
-                        offset: Offset(0, interacting ? 18 : 10),
-                      ),
-                    ],
-                  ),
-                  padding: const EdgeInsets.all(16),
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      Container(
-                        width: double.infinity,
-                        height: double.infinity,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: widget.colors,
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          /// SVG RESPONSIVE
+                          SvgPicture.string(
+                            widget.svg,
+                            height: isSmall ? 32 : 40,
+                            width: isSmall ? 32 : 40,
                           ),
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child:
-                            Consumer2<BusinessInfoProvider, LogoDesignProvider>(
-                          builder: (context, info, design, child) {
-                            return Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 15),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  SvgPicture.string(
-                                    widget.svg,
-                                    height: 40,
-                                    width: 40,
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    info.businessName,
-                                    textAlign: TextAlign.center,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: _getFontStyle(
-                                      context,
-                                      design.selectedFontIndex,
-                                      Colors.white,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      // Favorite Button
-                      Positioned(
-                        top: -6,
-                        right: -6,
-                        child: GestureDetector(
-                          onTap: widget.onFavoriteTap,
-                          child: Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 4),
+
+                          const SizedBox(height: 6),
+
+                          Consumer2<BusinessInfoProvider, LogoDesignProvider>(
+                            builder: (context, info, design, child) {
+                              return Text(
+                                info.businessName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                                style: _getFontStyle(
+                                  context,
+                                  design.selectedFontIndex,
+                                  Colors.white,
+                                  fontSize: isSmall ? 10 : 12,
                                 ),
-                              ],
-                            ),
-                            child: Icon(
-                              widget.isFavorite
-                                  ? Icons.favorite
-                                  : Icons.favorite_border,
-                              color: widget.isFavorite
-                                  ? Colors.red
-                                  : Colors.grey.shade400,
-                              size: 18,
-                            ),
+                              );
+                            },
                           ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  /// FAVORITE BUTTON
+                  Positioned(
+                    top: -4,
+                    right: -4,
+                    child: GestureDetector(
+                      onTap: widget.onFavoriteTap,
+                      child: Container(
+                        padding: const EdgeInsets.all(5),
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          widget.isFavorite
+                              ? Icons.favorite
+                              : Icons.favorite_border,
+                          color: widget.isFavorite
+                              ? Colors.red
+                              : Colors.grey,
+                          size: isSmall ? 14 : 18,
                         ),
                       ),
-                    ],
+                    ),
                   ),
-                ),
+                ],
               ),
-              const SizedBox(height: 10),
-              Text(
-                widget.name,
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: const Color(0xFF1F1F39),
-                  fontSize: 16,
-                  fontWeight: interacting ? FontWeight.bold : FontWeight.w400,
-                ),
-              ),
-            ],
+            ),
           ),
         );
       },
     );
   }
 }
+

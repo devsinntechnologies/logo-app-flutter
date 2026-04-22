@@ -691,7 +691,7 @@ class S {
 
   /// `Save Logo`
   String get saveLogo {
-    return Intl.message('Save Logo', name: 'saveLogo', desc: '', args: []);
+    return Intl.message('Save', name: 'save', desc: '', args: []);
   }
 
   /// `Save`

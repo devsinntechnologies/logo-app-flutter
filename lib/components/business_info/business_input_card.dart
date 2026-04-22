@@ -59,7 +59,7 @@ class BusinessInputCard extends StatelessWidget {
                 title,
                 style: const TextStyle(
                     color: Color(0xFF4A4A6A),
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: FontWeight.w400),
               ),
             ],
@@ -122,3 +122,4 @@ class BusinessInputCard extends StatelessWidget {
     );
   }
 }
+

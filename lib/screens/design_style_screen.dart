@@ -91,34 +91,34 @@ class DesignStyleScreen extends StatelessWidget {
                           Image.asset("assets/images/text.png"),
                           [const Color(0xFFFF8904), const Color(0xFFF6339A)]),
                       const SizedBox(height: 20),
-                      GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
-                          childAspectRatio: 1.5,
-                        ),
-                        itemCount: provider.fontStyles.length,
-                        itemBuilder: (context, index) {
-                          final item = provider.fontStyles[index];
-                          return FontStyleCard(
-                            name: item['name'],
-                            textStyle: item['style'],
-                            isSelected: provider.selectedFontIndex == index,
-                            onTap: () {
-                              provider.setFont(index);
-                              // Sync to session provider
-                              context.read<BusinessInfoProvider>().updateDesign(
-                                (index + 1).toString(), 
-                                context.read<BusinessInfoProvider>().selectedColorId
-                              );
-                            },
-                          );
-                        },
-                      ),
+GridView.builder(
+  shrinkWrap: true,
+  physics: const NeverScrollableScrollPhysics(),
+  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+    crossAxisCount: 2,
+    crossAxisSpacing: 12,
+    mainAxisSpacing: 12,
+    childAspectRatio: MediaQuery.of(context).size.width < 360
+        ? 1.25
+        : 1.5,
+  ),
+  itemCount: provider.fontStyles.length,
+  itemBuilder: (context, index) {
+    final item = provider.fontStyles[index];
+    return FontStyleCard(
+      name: item['name'],
+      textStyle: item['style'],
+      isSelected: provider.selectedFontIndex == index,
+      onTap: () {
+        provider.setFont(index);
+        context.read<BusinessInfoProvider>().updateDesign(
+              (index + 1).toString(),
+              context.read<BusinessInfoProvider>().selectedColorId,
+            );
+      },
+    );
+  },
+),
 
                       const SizedBox(height: 40),
 
@@ -132,34 +132,33 @@ class DesignStyleScreen extends StatelessWidget {
                           // Icons.color_lens_rounded,
                           [const Color(0xFFE12AFB), const Color(0xFF9810FA)]),
                       const SizedBox(height: 20),
-                      GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 16,
-                          mainAxisSpacing: 16,
-                          childAspectRatio: 1.5,
-                        ),
-                        itemCount: provider.colorPalettes.length,
-                        itemBuilder: (context, index) {
-                          final item = provider.colorPalettes[index];
-                          return ColorSchemeCard(
-                            name: item['name'],
-                            colors: item['colors'],
-                            isSelected: provider.selectedPaletteIndex == index,
-                            onTap: () {
-                                provider.setPalette(index);
-                                // Sync to session provider
-                                context.read<BusinessInfoProvider>().updateDesign(
-                                  context.read<BusinessInfoProvider>().selectedFontId,
-                                  (index + 1).toString()
-                                );
-                            },
-                          );
-                        },
-                      ),
+GridView.builder(
+  shrinkWrap: true,
+  physics: const NeverScrollableScrollPhysics(),
+  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+    crossAxisCount: 2,
+    crossAxisSpacing: 16,
+    mainAxisSpacing: 16,
+    childAspectRatio:
+        MediaQuery.of(context).size.width < 360 ? 1.25 : 1.5,
+  ),
+  itemCount: provider.colorPalettes.length,
+  itemBuilder: (context, index) {
+    final item = provider.colorPalettes[index];
+    return ColorSchemeCard(
+      name: item['name'],
+      colors: item['colors'],
+      isSelected: provider.selectedPaletteIndex == index,
+      onTap: () {
+        provider.setPalette(index);
+        context.read<BusinessInfoProvider>().updateDesign(
+              context.read<BusinessInfoProvider>().selectedFontId,
+              (index + 1).toString(),
+            );
+      },
+    );
+  },
+),
 
                       const SizedBox(height: 50),
                     ],

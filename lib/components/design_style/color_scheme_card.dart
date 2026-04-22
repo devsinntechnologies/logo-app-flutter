@@ -16,6 +16,8 @@ class ColorSchemeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isSmall = MediaQuery.of(context).size.width < 360;
+
     final ValueNotifier<bool> isHovered = ValueNotifier<bool>(false);
 
     return ValueListenableBuilder<bool>(
@@ -29,9 +31,12 @@ class ColorSchemeCard extends StatelessWidget {
           child: GestureDetector(
             onTap: onTap,
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
+              duration: const Duration(milliseconds: 200),
+
               transform: Matrix4.identity()
-                ..translate(0.0, active ? -8.0 : 0.0),
+                ..translate(0.0, active ? (isSmall ? -4.0 : -6.0) : 0.0)
+                ..scale(active ? (isSmall ? 1.02 : 1.04) : 1.0),
+
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(25),
@@ -46,67 +51,81 @@ class ColorSchemeCard extends StatelessWidget {
                     color: isSelected
                         ? const Color(0xFF7C4DFF).withOpacity(0.2)
                         : Colors.black.withOpacity(hovered ? 0.08 : 0.03),
-                    blurRadius: active ? 15 : 8,
-                    offset: Offset(0, active ? 8 : 4),
+                    blurRadius: active ? 12 : 8,
+                    offset: Offset(0, active ? 6 : 4),
                   ),
                 ],
               ),
+
               child: Stack(
-                clipBehavior: Clip.none,
                 children: [
                   Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: colors
-                              .map((color) => Container(
-                                    margin: const EdgeInsets.symmetric(
-                                        horizontal: 4),
-                                    width: 32,
-                                    height: 37,
-                                    decoration: BoxDecoration(
-                                      color: color,
-                                      shape: BoxShape.circle,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: color.withOpacity(0.3),
-                                          blurRadius: 4,
-                                          offset: const Offset(0, 2),
-                                        ),
-                                      ],
-                                    ),
-                                  ))
-                              .toList(),
+                        /// 🌈 COLORS ROW (RESPONSIVE)
+                        Wrap(
+                          alignment: WrapAlignment.center,
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: colors.map((color) {
+                            return Container(
+                              width: isSmall ? 22 : 28,
+                              height: isSmall ? 22 : 28,
+                              decoration: BoxDecoration(
+                                color: color,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: color.withOpacity(0.25),
+                                    blurRadius: 3,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
                         ),
-                        const SizedBox(height: 12),
+
+                        SizedBox(height: isSmall ? 8 : 12),
+
+                        /// NAME
                         Text(
                           name,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 14,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: isSmall ? 12 : 14,
                             fontWeight: FontWeight.w400,
-                            color: Color(0xFF4A4A6A),
+                            color: const Color(0xFF4A4A6A),
                           ),
                         ),
                       ],
                     ),
                   ),
+
+                  /// SELECTED CHECK
                   if (isSelected)
                     Positioned(
-                      top: 10,
-                      right: 10,
+                      top: 8,
+                      right: 8,
                       child: Container(
                         padding: const EdgeInsets.all(4),
                         decoration: const BoxDecoration(
                           gradient: LinearGradient(
-                              colors: [Color(0xFFE12AFB), Color(0xFF9810FA)]),
-                          // color: Color(0xFF7C4DFF),
+                            colors: [
+                              Color(0xFFE12AFB),
+                              Color(0xFF9810FA),
+                            ],
+                          ),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.check,
-                            color: Colors.white, size: 12),
+                        child: const Icon(
+                          Icons.check,
+                          color: Colors.white,
+                          size: 12,
+                        ),
                       ),
                     ),
                 ],
