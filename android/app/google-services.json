@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "269788762489",
+    "project_id": "app-7ebf9",
+    "storage_bucket": "app-7ebf9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:269788762489:android:ac995f867244e05f2e5fa8",
+        "android_client_info": {
+          "package_name": "com.devsinntechnologies.smartlogomaker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDOuxGA-2Ulbhx2jv0yOFbH9RIGyMojhTM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

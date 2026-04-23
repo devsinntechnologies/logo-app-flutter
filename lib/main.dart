@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_fonts/google_fonts.dart';
@@ -45,6 +47,21 @@ void main() async {
   //     MobileAds.instance.updateRequestConfiguration(requestConfig);
   //   }
   // }
+
+  // Initialize Firebase
+  await Firebase.initializeApp();
+
+  // 🔥 TEST: Log event to verify Firebase Analytics is working
+  // Remove this after confirming in Firebase DebugView
+  // await FirebaseAnalytics.instance.logEvent(
+  //   name: 'analytics_test_init',
+  //   parameters: {
+  //     'platform': 'android',
+  //     'app': 'SmartLogoMaker',
+  //     'status': 'firebase_ok',
+  //   },
+  // );
+  // debugPrint('✅ Firebase Analytics test event logged: analytics_test_init');
 
   // Initialize Supabase with environment configuration
   await Supabase.initialize(
